@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/ahwhy/myGolang/week1/compile/pkg"
 	"fmt"
+
+	"github.com/ahwhy/myGolang/week1/compile/pkg"
 )
 
 func main() {

@@ -1605,8 +1605,8 @@ PS：
 			return
 		}
 		p := &Person{}
-		//err = yaml.Unmarshal(content, p)
-		err = yaml.UnmarshalStrict(content, p)
+		//err = yaml.Unmarshal(content, p)                         // func yaml.Unmarshal(in []byte, out interface{}) (err error)
+		err = yaml.UnmarshalStrict(content, p)                     // func yaml.UnmarshalStrict(in []byte, out interface{}) (err error)
 		if err != nil {
 			log.Printf("[yaml.UnmarshalStrict.err][err:%v]", err)
 			return
@@ -2862,7 +2862,7 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 	flag.Parse()           // 解析命令行参数
 	flag.IntVar()          // 设置int类型参数
 	flag.BoolVar()		   // 设置bool类型参数
-	flag.StringVar()       // 设置string类型参数
+	flag.StringVar()       // 设置string类型参数    func flag.StringVar(p *string, name string, value string, usage string)
 	flag.PrintDefaults()   // 获取自动生成的参数信息
 9).crypto
 	a、crypto/md5
@@ -2890,5 +2890,9 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 14).io 
 	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
 15).io/ioutil
-
+16).gopkg.in/yaml.v2
+	yaml.Unmarshal()
+17).net/http
+	http.StatusOK
+18).github.com/gin-gonic/gin
 	

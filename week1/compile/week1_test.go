@@ -5,9 +5,12 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/ahwhy/myGolang/week1/compile/pkg"
 )
 
 func Test_holle(t *testing.T) {
+	pkg.Demo()
 	fmt.Println("Holle World!\nThis is my first golang program!")
 }
 
