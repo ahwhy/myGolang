@@ -8,6 +8,7 @@
     - 域名的ip
     - status_code
     - http各阶段的耗时
+    - https://brantou.github.io/2017/05/24/go-http-trace/
 - 需要一个yaml解析的配置
     - http的listen的地址
     - 探测超时时间
