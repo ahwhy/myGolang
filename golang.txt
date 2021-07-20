@@ -1,11 +1,5 @@
-一、vscode测试用例
-文件名命名要求: {pkg_name}_test.go
-package variable
-import "testing"
-函数命名要求: 大写Test开头
-函数参数: (t *testing.T)
-
-二、基础语法
+##Golang基础
+一、基础语法
 1、
 决定语法正确的是:  底层编译器
 编译的基础单位:    Lexical Token(词法标记)  // go/token 包
@@ -90,7 +84,7 @@ func main() {
         fmt.Println("hello world, this is my first golang program!")
 }
 
-三、输入输出
+二、输入输出
 1、标准输入
 Print:   输出到控制台,不接受任何格式化操作
 Println: 输出到控制台并换行
@@ -185,7 +179,7 @@ int转string ->   strconv.FormatInt(255, 10)
 uint转string ->  strconv.FormatUint(255, 16) 
 
 
-四、流程控制
+三、流程控制
 1、条件语句 - if语句
 对于条件语句必须有if 语句，可以有 0 个或多个 else if 语句 ，最多有 1 个 else 语句
 if嵌套
@@ -338,7 +332,7 @@ func main() {
         fmt.Println(sum)
 }
 
-五、复合数据类型
+四、复合数据类型
 1、数组 array    // 占用内存空间 = length * 数据类型的字节大小
 当在Go中声明一个数组之后，会在内存中开辟一段固定长度的、连续的空间存放数组中的各个元素，这些元素的数据类型完全相同，可以是内置的简单数据类型(int、string等)，也可以是自定义的struct类型。
 	固定长度：这意味着数组不可增长、不可缩减。想要扩展数组，只能创建新数组，将原数组的元素复制到新数组
@@ -656,7 +650,7 @@ b、带过期时间的map
 		select {} // 阻塞main
 c、带过期时间的缓存 github.com/patrickmn/go-cache 
 
-六、函数
+五、函数
 1、定义
 函数用于对代码块的逻辑封装，提供代码复用的最基本方式, Go中有3种函数:
 	普通函数
@@ -936,7 +930,7 @@ recover
 	rand.Seed(time.Now().Unix())
 	genFunc()
 
-七、包
+六、包
 1、定义
  - 包是函数和数据的集合，将有相关特性的函数和数据放在统一的文件目录进行管理，每个包都可以作为独立的单元维护并提供给其他项目进行使用。
  - 声明所在包，包名告知编译器哪些是包的源代码用于编译库文件，其次包名用于限制包内成员对外的可见性，最后包名用于在包外对公开成员的访问。
@@ -965,7 +959,7 @@ recover
  	- Multiple packages in directory: pk2, pk3 
  - 文件名不限制，但不能有中文
 8、设置 go mod 和 go proxy
- - 设置两个环境变量
+ - 设置两个环境变量 // go env -w 
 	- GO111MODULE=on
 	- GOPROXY=https://goproxy.io,direct
 9、创建git，发布到github
@@ -979,7 +973,7 @@ recover
 	git branch -M main
 	git push -u origin main
 	
-八、结构体
+七、结构体
 1、定义
 结构体是由一些列属性组成的复合数据类型，每个属性都具有名称、类型和值，结构体将属性组合在一起由程序进行处理
 结构体定义使用 struct 标识，需要指定其包含的属性（名和类型），在定义结构体时可以为 结构体指定结构体名（命名结构体），用于后续声明结构体变量使用
@@ -1120,7 +1114,7 @@ func (a A) say(){
 	a. func(a A) say() {} 表示结构体A有一个方法,名称为say
 	b. (a A) 体现say 方法与A 类型绑定  
 
-九、方法
+八、方法
 方法是为特定类型定义的，只能由该类型调用的函数
 1、定义
 方法是添加了接收者的函数，接收者必须是自定义的类型
@@ -1175,7 +1169,7 @@ PS：
 为什么根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
 使用反射获取 User 对象和 *User 对象结构
 
-十、接口
+九、接口
 接口是自定义类型，是对是其他类型行为的抽象
 1. 定义
 接口定义使用interface标识，声明了一系列的函数签名(函数名、函数参数、函数返回值)，在定义接口时可以指定接口名称，在后续声明接口变量时使用。
@@ -1255,7 +1249,7 @@ PS：
 			}
 		}
 	}
-十一、反射
+十、反射
 1、定义
  - 反射是指在运行时动态的访问和修改任意类型对象的结构和成员
  - 为什么使用反射
@@ -1869,24 +1863,44 @@ PS：
 
 工具和类型
 一、日期与时间
-Go 语言通过标准库 time 包处理日期和时间相关的问题
+ - Go 语言通过标准库 time 包处理日期和时间相关的问题
 1、打印当前时间
-	now := time.Now()
-	fmt.Println(now) // 2021-06-17 13:29:40.801445 +0800 CST m=+0.001636524
-	fmt.Println(now.Unix()) // 1624190925
-	fmt.Println(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()) // 2021 June 17 13 29 40
+ - now := time.Now()
+	log.Printf("[当前时间对象为：%v]", now)
+	log.Printf("[当前时间戳 秒级：%v][位数:%v]", now.Unix(), numLen(now.Unix()))
+	log.Printf("[当前时间戳 毫秒级：%v][位数:%v]", now.UnixNano()/1e6, numLen(now.UnixNano()/1e6))
+	log.Printf("[当前时间戳 纳秒级：%v][位数:%v]", now.UnixNano(), numLen(now.UnixNano()))
+	log.Printf("[当前时间戳 纳秒小数部分：%v]", now.Nanosecond())
+	func numLen(n int64) int {
+		return len(strconv.Itoa(int(n)))
+	}
+	2021/07/17 16:34:10 [当前时间对象为：2021-07-17 16:34:10.2999431 +0800 CST m=+0.007295301]
+	2021/07/17 16:34:10 [当前时间戳 秒级：1626510850][位数:10]
+	2021/07/17 16:34:10 [当前时间戳 毫秒级：1626510850299][位数:13]
+	2021/07/17 16:34:10 [当前时间戳 纳秒级：1626510850299943100][位数:19]
+	2021/07/17 16:34:10 [当前时间戳 纳秒小数部分：299943100]
+	- 结论
+		时间戳返回 int64
+		10位数时间戳 是秒单位
+		13位数时间戳 是毫秒单位  // 毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
+		19位数时间戳 是纳秒单位
+ - fmt.Println(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())   // 2021 June 17 13 29 40
+	- log.Printf("[今天是 %d年 中的第 %d天]", now.Year(), now.YearDay())                     // 2021/07/17 16:44:57 [今天是 2021年 中的第 198天]
+ - log.Printf("[直接获取星期几 %d]", now.Weekday())
+ - zone, offset := now.Zone()
+   log.Printf("[直接获取时区  %v ，和东utc时区差 %d 个小时]", zone, offset/3600)             // 2021/07/17 16:44:57 [直接获取时区  CST ，和东utc时区差 8 个小时]
 2、Time结构体
-Now()返回的是个Time结构体, 这也是Go内部表示时间的数据结构
-	a、Time 代表一个纳秒精度的时间点
-	b、程序中应使用 Time 类型值来保存和传递时间，而不是指针。就是说，表示时间的变量和字段，应为 time.Time 类型，而不是 *time.Time. 类型
-	c、时间点可以使用 Before、After 和 Equal 方法进行比较
-	d、Sub 方法让两个时间点相减，生成一个 Duration 类型值（代表时间段）
-	e、Add 方法给一个时间点加上一个时间段，生成一个新的 Time 类型时间点
-	f、Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC。因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
-	g、Time是有时区的s通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
-now() 的具体实现在 runtime 包中, 由汇编实现的, 和平台有关, 一般在sys_{os_platform}_amd64.s 中
+ - Now()返回的是个Time结构体, 这也是Go内部表示时间的数据结构
+	- Time 代表一个纳秒精度的时间点
+	- 程序中应使用 Time 类型值来保存和传递时间，而不是指针。就是说，表示时间的变量和字段，应为 time.Time 类型，而不是 *time.Time. 类型
+	- 时间点可以使用 Before、After 和 Equal 方法进行比较
+	- Sub 方法让两个时间点相减，生成一个 Duration 类型值（代表时间段）
+	- Add 方法给一个时间点加上一个时间段，生成一个新的 Time 类型时间点
+	- Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC。因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
+	- Time是有时区的s通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
+ - now() 的具体实现在 runtime 包中, 由汇编实现的, 和平台有关, 一般在sys_{os_platform}_amd64.s 中
 3、时间的格式化
-方法：time.Now().Format()
+ - 方法：time.Now().Format()
     模板   占位
 	年  ->  2006
 	月  ->  01
@@ -1894,92 +1908,194 @@ now() 的具体实现在 runtime 包中, 由汇编实现的, 和平台有关, �
 	时  ->  03(12h) / 15(24h)
 	分  ->  04
 	秒  ->  05
-	format := "2006-01-02 15:04:05" // 
-	fmt.Printf("%T %#v\n", now.Format(format), now.Format(format))
-	// string "2021-06-20 20:08:45"
-4、时间的解析
-方法：time.Parse()，返回转换后的时间格式和一个判断信息（err)
+	format := "2006-01-02 15:04:05"   // string
+	fmt.Printf("%T %#v\n", now.Format(format), now.Format(format))   // string "2021-06-20 20:08:45"
+4、时间戳转换
+ - Unix时间戳（Unix timestamp）定义为从1970年01月01日00时00分00秒(UTC)起至现在经过的总秒数
+ - 不论东西南北、在地球的每一个角落都是相同
+ - Go语言中的转换
+			-> time.Unix函数				-> Time.Format()
+	时间戳(Timestamp)			time.Time  						日期格式
+			<- Time.Unix()					<- time.ParselnLocation()
+	- 要先将时间戳转成 time.Time 类型再格式化成日期格式
+		- Time -> Timestamp  方法：time.Now().Unix()
+			ts := time.Now().Unix()             // 时间戳
+			layout := "2006-01-02 15:04:05"
+		- Timestamp -> Time 方法: time.Unix()	
+			t := time.Unix(ts, 0)               // 构造时间对象
+			log.Printf(t.Format(layout))
+5、时间的解析  // 日期字符串转时间戳
+ - time.Parse()               // func Parse(layout, value string) (Time, error)  返回转换后的时间格式和判断信息（err)     
 	d1, err := time.Parse("2006-01-02 15:04:05", "2021-06-18 12:12:12")
-5、时间戳转换
-Time -> Timestamp 方法：time.Now().Unix()
-	ts := time.Now().Unix()
-Timestamp -> Time 方法: time.Unix()
-	fmt.Println(time.Unix(ts, 0))
+ - time.ParseInLocation()     // func ParseInLocation(layout, value string, loc *Location) (Time, error) 可以指定时区
+	tStr := "2021-07-17 16:52:59"
+	layout := "2006-01-02 15:04:05"
+	t1, _ := time.ParseInLocation(layout, tStr, time.Local)
+	t2, _ := time.ParseInLocation(layout, tStr, time.UTC)
+	log.Printf("[ %s的 CST时区的时间戳为 ：%d]", tStr, t1.Unix())
+	log.Printf("[ %s的 UTC时区的时间戳为 ：%d]", tStr, t2.Unix())
+	log.Printf("[UTC - CST =%d 小时]", (t2.Unix()-t1.Unix())/3600)
 6、时间的比较   // Before、After 和 Equal
+	var layout = "2006-01-02 15:04:05"
+	func tTostr(t time.Time) string {
+		return time.Unix(t.Unix(), 0).Format(layout)
+	}
 	now := time.Now()
-	now.After(d1)
-	now.Before(d1)
-	now.Equal(d1)
+	t1, _ := time.ParseDuration("1h")
+	m1 := now.Add(t1)
+	log.Printf("[a.after(b) a在b之后: %v]", m1.After(now))      // func After(d Duration) <-chan Time
+	log.Printf("[a.Before(b) a在b之前: %v]", now.Before(m1))    // func (t Time) Before(u Time) bool
+	log.Printf("[a.Equal(b) a=b: %v]", m1.Equal(now))           // func (t Time) Equal(u Time) bool
 7、时间长度 Duration
-time.Duration表示时间长度
-	以纳秒为基数
-	底层数据类型为int64
-	int64 类型的变量不能直接和time.Duration类型相乘，需要显示转换，常量除外
-		不行： num * time.Second
-		可以： time.Duration(num) * time.Second
-		可以： 5 * time.Second
-时长计算
-1).Add: Add 方法给一个时间点加上一个时间段，生成一个新的 Time 类型时间点
+ - time.Duration表示时间长度
+	- 以纳秒为基数
+	- 底层数据类型为int64
+	- int64 类型的变量不能直接和time.Duration类型相乘，需要显示转换，常量除外
+		- 不行： num * time.Second
+		- 可以： time.Duration(num) * time.Second
+		- 可以： 5 * time.Second
+8、时长计算
+1).Add  让一个时间点加上一个时间段，生成一个新的 Time 类型时间点  // func (t Time) Add(d Duration) Time
 	now := time.Now()
-	after1 := now.Add(time.Hour * 24)
-	fmt.Println(after1)
-2).Sub: 方法让两个时间点相减，生成一个 Duration 类型值（代表时间段）
+	after := now.Add(time.Hour * 24)
+	fmt.Println(after)             // 2021/07/19 17:33:21 2021-07-20 17:33:21.12884928 +0800 CST m=+86400.000024700
+2).Sub  让两个时间点相减，生成一个 Duration 类型值（代表时间段）      // func (t Time) Sub(u Time) Duration
+	fmt.Println(now.Sub(after))    // 2021/07/19 17:33:21 -24h0m0s
+3).ParseDuration  时间差           // func ParseDuration(s string) (Duration, error)
 	now := time.Now()
-	after1 := now.Add(time.Hour * 24)
-	fmt.Println(now.Sub(after1))
-8、Sleep
-方法：time.Sleep()
-9、定时器
-定时器是进程规划自己在未来某一时刻接获通知的一种机制。
-定时器有2种:
-	单次触发: Timer
-	周期性触发: Ticker
-1).Timer
-a、通过 time.AfterFunc中断循环，触发自定义函数
-	stop := false
-	time.AfterFunc(5*time.Second, func() {
-		stop = true
-	})
-	for {
-		if stop {
+	t1, _ := time.ParseDuration("1h1m1s")  // 1小时1分1秒后
+	m1 := now.Add(t1)
+	log.Printf("[ 1小时1分1秒后时间为: %v]", tTostr(m1))
+	
+	t2, _ := time.ParseDuration("-1h1m1s") // 1小时1分1秒前
+	m2 := now.Add(t2)
+	log.Printf("[ 1小时1分1秒前时间为: %v]", tTostr(m2))
+
+	sub1 := now.Sub(m2)                    // sub计算两个时间差
+	log.Printf("[ 时间差: %s 、相差小时数: %v 、相差分钟数: %v ]", sub1.String(), sub1.Hours(), sub1.Minutes())
+
+	t3, _ := time.ParseDuration("-3h3m3s")
+	m3 := now.Add(t3)
+	log.Printf("[time.since 当前时间与t的时间差: %v]", time.Since(m3))    // func Since(t Time) Duration
+	log.Printf("[time.until t与当前时间的时间差: %v]", time.Until(m3))    // func Until(t Time) Duration
+	m4 := now.AddDate(0, 0, 5)                                            // func (t Time) AddDate(years int, months int, days int) Time
+	log.Printf("[5天后的时间: %v]", m4)
+9、Sleep
+ - 方法：time.Sleep()
+10、定时器
+ - 定时器是进程规划自己在未来某一时刻接获通知的一种机制。
+ - 定时器有2种:
+	- 单次触发: Timer
+	- 周期性触发: Ticker
+		1).Timer
+		a、通过 time.AfterFunc中断循环，触发自定义函数
+			stop := false
+			time.AfterFunc(5*time.Second, func() {
+				stop = true
+			})
+			for {
+				if stop {
+					fmt.Println("exit")
+					break
+				}
+				time.Sleep(1 * time.Second)
+			}
+		b、通过time.After实现同步等待
+			m := time.NewTimer(5 * time.Second)
+			fmt.Println(<-m.C)
 			fmt.Println("exit")
-			break
+		c、Timer的stop
+		如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false；后续再对该 Timer 调用 Stop，直接返回 false。
+		d、Timer的Reset
+		Reset 会先调用 stopTimer 再调用 startTimer，类似于废弃之前的定时器，重新启动一个定时器。返回值和 Stop 一样
+		e、Timer数据结构
+			type Timer struct {
+				C <-chan Time
+				r runtimeTimer
+			}
+			PS:
+			C:一个存放Time对象的Channel
+			runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
+		2).Ticker
+		a、通过time.NewTicker实现同步等待
+			tk := time.NewTicker(2 * time.Second)
+			count := 1
+			for {
+				if count > 2 {
+					tk.Stop()
+					break
+				}
+				fmt.Println(<-tk.C)
+				count++
+			}
+		b、Ticker数据结构
+			type Ticker struct {
+				C <-chan Time // The channel on which the ticks are delivered.
+				r runtimeTimer
+			}
+
+二、日志处理
+1、log包 
+1).简介
+ - 内置日志库
+ - 提供基本的日志功能，但是没有提供日志级别（比如: debug、warning、error）
+2).简单使用
+ - 输出文件
+	- 只要实现接口io.Writer的类型都可以作为文件的输出
+	- 示例
+		func logPrinta(baseStr string) {
+			for i := 0; i < 10; i++ {
+				msg := fmt.Sprintf("%s_%d", baseStr, i)
+				log.Println(msg)
+			}
 		}
-		time.Sleep(1 * time.Second)
-	}
-b、通过time.After实现同步等待
-	m := time.NewTimer(5 * time.Second)
-	fmt.Println(<-m.C)
-	fmt.Println("exit")
-c、Timer的stop
-如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false；后续再对该 Timer 调用 Stop，直接返回 false。
-d、Timer的Reset
-Reset 会先调用 stopTimer 再调用 startTimer，类似于废弃之前的定时器，重新启动一个定时器。返回值和 Stop 一样
-e、Timer数据结构
-	type Timer struct {
-		C <-chan Time
-		r runtimeTimer
-	}
-	PS:
-	C:一个存放Time对象的Channel
-	runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
-2).Ticker
-a、通过time.NewTicker实现同步等待
-	tk := time.NewTicker(2 * time.Second)
-	count := 1
-	for {
-		if count > 2 {
-			tk.Stop()
-			break
+		// 创建文件对象
+		file, err := os.OpenFile("my.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatal(err)       // func Fatal(v ...interface{}) - Fatal is equivalent to Print() followed by a call to os.Exit(1).
 		}
-		fmt.Println(<-tk.C)
-		count++
+		// 设置log输出到文件
+		log.SetOutput(file)      // func SetOutput(w io.Writer)
+		go logPrint("aaaaa")
+		time.Sleep(1 * time.Hour)
+ - 自定义的logger
+	var (
+			WarningLogger *log.Logger          // type Logger struct { // Has unexported fields. }
+			InfoLogger    *log.Logger
+			ErrorLogger   *log.Logger
+	)
+	
+	func init() {
+			file, err := os.OpenFile("c.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+			if err != nil {
+					log.Fatal(err)
+			}
+			InfoLogger = log.New(file, "[INFO]", log.Ldate|log.Ltime|log.Lshortfile)
+			WarningLogger = log.New(file, "[WARNING]", log.LstdFlags|log.Lshortfile)
+			ErrorLogger = log.New(file, "[ERROR]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 	}
-b、Ticker数据结构
-	type Ticker struct {
-		C <-chan Time // The channel on which the ticks are delivered.
-		r runtimeTimer
-	}
+	
+    // 创建文件对象
+    InfoLogger.Println("[常见写法]启动服务....")
+    InfoLogger.Println("[日期简写]正常上报....")
+    WarningLogger.Println("[文件长路径]不严重的错误，报个warining....")
+    ErrorLogger.Println("[微秒时间戳]严重的错误，报个error....")
+ - log.flag && iota
+	- itoa枚举依次是 1，2，4，8，16，32
+		const (
+			Ldate         = 1 << iota     // the date in the local time zone: 2009/01/23
+			Ltime                         // the time in the local time zone: 01:23:23
+			Lmicroseconds                 // microsecond resolution: 01:23:23.123123.  assumes Ltime.
+			Llongfile                     // full file name and line number: /a/b/c/d.go:23
+			Lshortfile                    // final file name element and line number: d.go:23. overrides Llongfile
+			LUTC                          // if Ldate or Ltime is set, use UTC rather than the local time zone
+			Lmsgprefix                    // move the "prefix" from the beginning of the line to before the message
+			LstdFlags     = Ldate | Ltime // initial values for the standard logger
+		)
+	 - 因为可以组由组合标志位，后端进行 &判断
+		- if l.flag&(Ldate|Ltime|Lmicroseconds) != 0 {}  //  代表原来的flag中有Ldate|Ltime|Lmicroseconds
+	 - logger不能决定字段输出顺序。 a|b = b|a
+2、github.com/sirupsen/logrus
 
 二、非类型安全指针
 1、类型安全指针
@@ -2245,8 +2361,150 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 		m.LoadOrstore(k,v)   // 若没有key，则添加
 		m.LoadAndDelete("key")  // 加载并删除
 
-
-五、文件
+五、单元测试和基准测试
+1、单元测试
+1).定义
+ - 单元是应用中最小的可测试部件，如函数和对象的方法
+ - 单元测试是软件开发中对最小单位进行正确性检验的测试工作
+ - Go语言原生支持了单元测试，使用上非常简单
+2).意义
+ - 保证变更/重构的正确性，特别是在一些频繁变动和多人合作开发的项目中
+ - 简化调试过程：可以轻松的测试出哪一部分代码出现问题
+ - 单元测试是最好的文档 -> 在单测中直接给出具体接口的使用方法，是最好的实例代码
+3).单元测试用例编写的原则
+ - 单一原则：一个测试用例只负责一个场景
+ - 原子性：结果只有两种情况：PASS/FAIL
+ - 优先要核心组件和逻辑的测试用例
+ - 对于高频使用库，如：util，需要重点覆盖
+4).单元测试用例使用要求
+ - 文件名命名要求: {pkg_name}_test.go
+ - 测试方法/函数命名要求: 大写Test开头
+ - 函数参数: (t *testing.T)
+ - 测试文件和被测试文件必须在一个包中
+5).Go语言的测试框架
+ - testing 测试框架
+	- 基本使用
+	- 子测试 t.Run
+		func TestMul(t *testing.T) {
+			t.Run("正数", func(t *testing.T) {
+				if Mul(4, 5) != 20 {
+					t.Fatal("muli.zhengshu.error")
+				}
+			})
+		
+			t.Run("负数", func(t *testing.T) {
+				if Mul(2, -3) != -6 {
+					t.Fatal("muli.fusshu.error")
+				}
+			})
+		}
+	- table-driven tests
+		- 所有用例的数据组织在切片 cases 中，看起来就像一张表，借助循环创建子测试。这样写的好处有：
+			- 新增用例非常简单，只需给 cases 新增一条测试数据即可。
+			- 测试代码可读性好，直观地能够看到每个子测试的参数和期待的返回值。
+			- 用例失败时，报错信息的格式比较统一，测试报告易于阅读。
+			- 如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取。
+        - 举例 https://github.com/prometheus/prometheus/blob/main/web/api/v1/api_test.go
+	- 执行
+		- go test -v .
+		- -cover测试覆盖率 go test -v -cover .
+		- 只执行某个函数 go test -run=TestAdd -v .
+		- 正则过滤函数名 go test -run=TestM.* -v .
+		- 指定func/sub跑子测试 go test -run=TestMul/正数 -v
+ - GoConvey 测试框架
+	- go get github.com/smartystreets/goconvey
+ - testify 测试框架
+	- go get github.com/stretchr/testify/assert
+ - 单元测试覆盖率应用实例
+	- https://github.com/m3db/m3/pull/3525
+2、基准测试
+1).目的
+ - 检测代码中方法性能问题
+2).用法
+ - 示例
+ 	func fib(n int) int {                   // fib.go
+ 		if n == 0 || n == 1 {
+ 			return n
+ 		}
+ 		return fib(n-2) + fib(n-1)
+ 	}
+ 	func BenchmarkFib(b *testing.B) {       // fib_test.go
+ 		for n := 0; n < b.N; n++ {
+ 			fib(30)
+ 		}
+ 	}
+	- ResetTimer   // 如果基准测试在循环前需要一些耗时的配置，则可以先重置定时器
+		func BenchmarkFib(b *testing.B) {
+			time.Sleep(3 * time.Second)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				fib(30)
+			}
+		}
+ - 运行
+	- go test -bench=. -run=none
+		- go test 会在运行基准测试之前执行包里所有的单元测试，所有如果包里有很多单元测试，或者它们会运行很长时间，可以通过 go test 的-run 标识排除这些单元测试
+	- 内存消耗情况 go test -bench=. -benchmem -run=none
+	- CPU消耗情况  go test -bench=. -cpu=1,2,4 -benchmem -run=none
+	- count多次运行基准测试  go test -bench=. -count=10 -benchmem -run=none   // 因为热缩放、内存局部性、后台处理、gc活动等等会导致单次的误差
+	- benchtime 指定运行秒数 go test -bench=. -benchtime=5s -benchmem -run=none // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次。
+	- bench的工作原理
+		- 基准测试函数会被一直调用直到b.N无效，它是基准测试循环的次数
+		- b.N 从 1 开始，如果基准测试函数在1秒内就完成 (默认值)，则 b.N 增加，并再次运行基准测试函数。
+		- b.N 的值会按照序列 1,2,5,10,20,50,... 增加，同时再次运行基准测测试函数。
+		- 上述结果解读代表 1秒内运行了168次 每次 6566836 ns
+		- -8 后缀和用于运行次测试的 GOMAXPROCS 值有关。 与GOMAXPROCS一样，此数字默认为启动时Go
+ - 案例
+	- benchmem 展示内存消耗情况
+		- go test -bench=. -benchtime=5s -benchmem -run=none
+		- 测试大cap的切片，直接用cap初始化，然后动态扩容
+		- 结论: 用cap初始化好的性能可以高一个数据量级
+		// 制定大的cap的切片
+		func generateWithCap(n int) []int {
+			rand.Seed(time.Now().UnixNano())
+			nums := make([]int, 0, n)
+			for i := 0; i < n; i++ {
+				nums = append(nums, rand.Int())
+			}
+			return nums
+		}
+		
+		// 动态扩容的slice
+		func generateDynamic(n int) []int {
+			rand.Seed(time.Now().UnixNano())
+			nums := make([]int, 0)
+			for i := 0; i < n; i++ {
+				nums = append(nums, rand.Int())
+			}
+			return nums
+		}
+		
+		func BenchmarkGenerateWithCap(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				generateWithCap(100000)
+			}
+		}
+		func BenchmarkGenerateDynamic(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				generateDynamic(100000)
+			}
+		}
+	- 测试函数复杂度 不带cap的slice 动态扩容
+		- 结论: 输入变为原来的10倍，单次耗时也差不多是上一级的10倍。说明这个函数的复杂度是线性的。
+		func benchmarkGenerate(i int, b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				generateDynamic(i)
+			}
+		}
+		func BenchmarkGenerateDynamic1000(b *testing.B)     { benchmarkGenerate(1000, b) }
+		func BenchmarkGenerateDynamic10000(b *testing.B)    { benchmarkGenerate(10000, b) }
+		func BenchmarkGenerateDynamic100000(b *testing.B)   { benchmarkGenerate(100000, b) }
+		func BenchmarkGenerateDynamic1000000(b *testing.B)  { benchmarkGenerate(1000000, b) }
+		func BenchmarkGenerateDynamic10000000(b *testing.B) { benchmarkGenerate(10000000, b) }
+	- string拼接的 bench
+		- const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	
+六、文件
 1、基本概念
  - 绝对路径
 	文件路径字符串从根路径(盘符)开始
@@ -2823,7 +3081,7 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 	0x08048000		只读区			 <-- 存放程序和常量等
 			0		未使用
 				     
-2、常用包与函数
+2、常用包与函数  // 标准库 https://studygolang.com/pkgdoc
 1).time
 	time.Now()          // 获取当前时间
 	time.Now().Unix()
@@ -2832,9 +3090,10 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 	time.Parse()        // 返回转换后的时间格式和一个判断信息（err)
 	time.Sleep(1 * time.Second)
 	time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
-2).math/rand
-	rand.Seed(time.Now(),Unix())  // 使用当前时间设置随机数种子
-	rand.Intn(100)    // 生产[0, 100)的随机数
+2).math包
+ - math/rand
+	- rand.Seed(time.Now().Unix())  // 使用当前时间设置随机数种子
+	- rand.Intn(100)    // 生产[0, 100)的随机数
 3).reflect
 	reflect.TypeOf() 获取数据类型 // 同Printf("%T")
 	reflect.ValueOf()
