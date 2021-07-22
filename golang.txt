@@ -1,297 +1,311 @@
 ##Golang基础
 一、基础语法
-1、
-决定语法正确的是:  底层编译器
-编译的基础单位:    Lexical Token(词法标记)  // go/token 包
-标识符:            标识符是编程时所使用的名字，用于给变量、常量、函数、类型、接口、包名等进行命名，以建立名称和使用之间的关系
-注释:              // 单行注释  /*多行注释*/  
-                   特定场景注释：构建注释，如：windows，linux  
-				   包注释，包文件开头注释
+1、底层语法
+ - 决定语法正确的是:  底层编译器
+ - 编译的基础单位:    Lexical Token(词法标记)      // go/token 包
+ - 标识符:            标识符是编程时所使用的名字，用于给变量、常量、函数、类型、接口、包名等进行命名，以建立名称和使用之间的关系
+ - 注释:              // 单行注释  /*多行注释*/  
+					  特定场景注释：构建注释，如：windows，linux  
+					  包注释，包文件开头注释
 
-2、
-内置常量：true、false、nil、iota
-内置类型：bool、byte、rune、int、int8、int16、int32、int64、uint、uint8、unit16、
-unit32、unit64、uintptr、float32、float64、complex64、complex128、string、error
-空白标识符:_    // 使用空白标识符，则无需引用
-内置函数：make、len、cap、new、append、copy、close、delete、complex、real、
-imag、panic、recover
-new() 函数根据数据类型申请内存空间并使用零值填充，并返回申请空间地址
+2、基础类型
+ - 内置常量：true、false、nil、iota
+ - 内置类型：bool、byte、rune、int、int8、int16、int32、int64、uint、uint8、unit16、unit32、unit64、uintptr、float32、float64、complex64、complex128、string、error
+ - 空白标识符: _  // 使用空白标识符，则无需引用
+ - 内置函数：make、len、cap、new、append、copy、close、delete、complex、real、imag、panic、recover
+ - 其他
+	- in8			: 1byte
+	  int64/uint64  : 8bytes 2^64
+	  rune   		: 4bytes
+	  string 		: 16bytes（4 * 4） // string = 2*int64 = 2*8bytes  []byte(string)
+	  slice  		: 24bytes          // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
+	- 数据单位
+	1Word(字) = 2Byte(字节)
+	1Byte = 8bit(位)  // 2^8
+	1KB   = 1024B
+	1MB   = 1024KB
+	1GB   = 1024Mb
+	1TB   = 1024GB
+	- new和make对比
+		new 开辟一个类型对应的内存空间，返回一个内存空间的地址；且只能分配地址，一般用于基础类型的初始化；
+		make{makeslice,makemap,makechannel} make返回创建对象的内存地址 // 以slice为例，unsafe.Pointer --> slince struct --- {member: pointer ---> array}  表现为: []int
+		对比表格
+			函数类型   适用范围                                返回值         填充类型
+			new        new可以对所有类型进行分配               new返回指针    new填充零值 
+			make       make只能创建类型(slice、map、channel)   make返回引用   make填充非零值
 
-PS：
-1).
-	in8: 1byte
-	int64/uint64  : 8bytes 2^64
-	rune   : 4bytes
-	string : 16bytes（4 * 4） // string = 2*int64 = 2*8bytes  []byte(string)
-	slice  : 24bytes    // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
-2).数据单位
-1Word(字) = 2Byte(字节)
-1Byte = 8bit(位)  // 2^8
-1KB   = 1024B
-1MB   = 1024KB
-1GB   = 1024Mb
-1TB   = 1024GB
-3).new和make对比
-	new 开辟一个类宽带型对应的内存空间，返回一个内存空间的地址；且只能分配地址，一般用于基础类型的初始化；
-	make{makeslice,makemap,makechannel} make返回创建对象的内存地址 // 以slice为例，unsafe.Pointer --> slince struct --- {member: pointer ---> array}  表现为: []int
-对比表格
-	函数类型   适用范围                                返回值         填充类型
-	new        new可以对所有类型进行分配               new返回指针    new填充零值 
-	make       make只能创建类型(slice、map、channel)   make返回引用   make填充非零值
+3、25 关键字：
+ - 声明：import、package
+ - 实体声明和定义：chan、const、func、interface、map、struct、type、var
+ - 流程控制：break、case、continue、default、defer、else、fallthrough、for、go、goto、
+ - if、range、return、select、switch
 
-3、
-25 关键字：
-声明：import、package
-实体声明和定义：chan、const、func、interface、map、struct、type、var
-流程控制：break、case、continue、default、defer、else、fallthrough、for、go、goto、
-if、range、return、select、switch
+4、操作符
+ - 算术运算符：+、-、*、/、%、++、--
+ - 关系运算符：>、>=、<、<=、==、!=         // 判断A 与 B的关系，结构: 布尔值，函数不可以比较
+ - 逻辑运算符：&&、||、!
+ - 位运算符：&、|、^、<<、>>、&^
+ - 赋值运算符：=、+=、-=、*=、/=、%=、&=、|=、^=、<<=、>>=   // 值可能是数据，也可能是地址
+ - 其他运算符：&(单目)、*(单目)、.(点)、-(单目)、…、<-    // 单目运算符优先级最高
+ - 占位符：_   //    /dev/null 1B<>,_ 就是丢弃值
 
-4、
-操作符
-算术运算符：+、-、*、/、%、++、--
-关系运算符：>、>=、<、<=、==、!=         // 判断A 与 B的关系，结构: 布尔值，函数不可以比较
-逻辑运算符：&&、||、!
-位运算符：&、|、^、<<、>>、&^
-赋值运算符：=、+=、-=、*=、/=、%=、&=、|=、^=、<<=、>>=   // 值可能是数据，也可能是地址
-其他运算符：&(单目)、*(单目)、.(点)、-(单目)、…、<-    // 单目运算符优先级最高
-占位符：_   // /dev/null 1B<>,_ 就是丢弃值
+5、分割符
+ - 小括号()  中括号[]  大括号{}  分号;  逗号,
 
-5、
-分割符
-小括号(), 中括号[]，大括号{}，分号;，逗号,
-
-6、
-// 当前程序的包名, main包表示入口包, 是编译构建的入口
-package main
-// 导入其他包
-import "fmt"
-// 常量定义
-const PI = 3.1415
-// 全局变量声明和赋值       变量本质: 内存地址; 值: 数据; 变量赋值: 修改值空间里存储的数据; 变量的声明: 强类型 -> 变量指向的值空间，存储的数据，受到类型的限制; 作用: 复用、配置、简洁易读
- var name = "fly"
-// 定义"别名" ，counter类型实际还是int，比如 rune 为 int32； byte 为 uint8
-type counter = int
-// 一般类型声明
-type newType int
-// 函数声明
-type myFun func(x, y int) int
-// 结构体声明
-type student struct{}
-// 接口声明
-type reader interface{}
-// 程序入口
-func main() {
-        fmt.Println("hello world, this is my first golang program!")
-}
+6、指针
+ - 指针与变量
+	- 变量是一种使用方便的占位符，用于引用计算机内存地址。
+	- 可以通过&运算符获取变量在内存中的存储位置, 指针是用来存储变量地址的变量
+	- 本质 -> 内存地址，没有数据类型
+ - 声明初始化与赋值
+	- 指针声明需要指定存储地址中对应数据的类型，并使用*作为类型前缀。 
+		- var ip *int        // 指向整型
+		- var fp *float32    // 指向浮点型
+	- 指针变量声明后会被初始化为 nil，表示空指针
+	- 使用 new 函数初始化: new 函数根据数据类型申请内存空间并使用零值填充，并返回申请空间地址 
+		var a *int = new(int)
+		fmt.Println(a)       // 0xc000014330
+		fmt.Println(*a)      // 0
+	- 指针赋值
+		var a *int = new(int)
+		*a = 10 
+		fmt.Println(a, *a)   // 0xc000014330, 10
+	- 指针运算
+		- & 获取变量的指针              // b := &a 获取变量a在内存中的存储位置，即 取引用-取地址
+		- * 获取指针指向的值            // *b 指针变量存储地址中的值，即 解引用-返回内存地址中对应的对象-取值 
+ - 多维指针
+	- 用来存储指针变量地址的变量叫做指针的指针
+		var a ****int
+		v := 10
+		p1 := &v                        // *int
+		p2 := &p1                       // **int    &p1，即指针变量本身的内存地址
+		p3 := &p2                       // ***int
+		a = &p3                         // ****int
+		fmt.Println(v, p1, p2, p3, a)
+		
+7、基本注解
+	// 当前程序的包名, main包表示入口包, 是编译构建的入口
+	package main
+	// 导入其他包
+	import "fmt"
+	// 常量定义
+	const PI = 3.1415
+	// 全局变量声明和赋值       变量本质: 内存地址; 值: 数据; 变量赋值: 修改值空间里存储的数据; 变量的声明: 强类型 -> 变量指向的值空间，存储的数据，受到类型的限制; 作用: 复用、配置、简洁易读
+	var name = "fly"
+	// 定义"别名"，counter类型实际还是int，比如 rune 为 int32； byte 为 uint8
+	type counter = int
+	// 一般类型声明
+	type newType int
+	// 函数声明
+	type myFun func(x, y int) int
+	// 结构体声明
+	type student struct{}
+	// 接口声明
+	type reader interface{}
+	// 程序入口
+	func main() {
+			fmt.Println("hello world, this is my first golang program!")
+	}
 
 二、输入输出
 1、标准输入
-Print:   输出到控制台,不接受任何格式化操作
-Println: 输出到控制台并换行
-Printf : 只可以打印出格式化的字符串。只可以直接输出字符串类型的变量（不可以输出别的类型）
-Sprintf：格式化并返回一个字符串而不带任何输出
-Fprintf：来格式化并输出到 io.Writers 而不是 os.Stdout     // func fmt.Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
+1).函数种类
+	Print:   输出到控制台,不接受任何格式化操作
+	Println: 输出到控制台并换行
+	Printf : 只可以打印出格式化的字符串。只可以直接输出字符串类型的变量（不可以输出别的类型）
+	Sprintf：格式化并返回一个字符串而不带任何输出
+	Fprintf：来格式化并输出到 io.Writers 而不是 os.Stdout     // func fmt.Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
+2).占位符
+ - 类型
+	%v ：值的默认格式。
+		%+v ：类似%v，但输出结构体时会添加字段名  // 类型+值对象
+		%#v ：相应值的Go语法表示                  // 输出字段名和字段值形式
+	%T ：相应值的类型的Go语法表示
+	%% ：百分号,字面上的%,非占位符含义
+ - 字符串
+	%s : 字符串类型   // %ns  打印字符前空n个宽度,  默认+， 右对齐 ，若- ，左对齐
+	%q : 双引号围绕的字符串
+	%x : 十六进制，小写字母，每字节两个字符
+	%X : 十六进制，大写字母，每字节两个字符
+ - 整型
+	%t ：bool类型
+	%c ：相应Unicode码点所表示的字符   // rune：Unico de co de point
+	%q ：带单引号 的字符
+	%b ：二进制
+	%o ：八进制 //  %#o 带 0 的前缀
+	%d ：十进制               
+	%x 、 %X ：十六进制   //  %#x(%# 带 0x(0X) 的前缀
+	%U : Unicode 字符, Unicode格式：123，等同于 "U+007B"     //  %#U 带字符的 Unicode 码点
+		%d ：十进制 
+			%+d   表示 对正整数 带 符号
+			%nd   表示 最小 占位 n 个宽度且右对齐
+			%-nd    表示 最小 占位 n 个宽度且左对齐
+			%0nd  表示 最小 占位 n 个宽度且右对齐 空字符使用 0 填充
+			"%d|%+d|%10d|%-10d|%010d|%+-10d|%+010d"
+ - 浮点型
+	%f 、 %F ：十进制表示法            //%n.mf 表示最小 占 n 个宽度并且保留 m 位小数
+	%e 、 %E ：科学记数法表示
+	%g 、 %G ：自动选择 最 紧凑的表示 方法 %e(E%) 或 %f(F%)  
+ - 指针
+	%t ：指针变量的具体内容
+	%v ：指针变量访问位置中存储的值     //  %#v接口的类型
+	%q ：指针变量访问位置中存储的值（unicode 中文）
+	%p ：十六进制表示，前缀 0x           // 默认情况下，指针是已16进制存在的
+ - 特殊字符：
+	\：反斜线
+	'：单引号   // '' 只可以定义单一字符
+	"：双引号   // "" 可解析的字符串
+	``: 原始字符串/多行字符串
+	\a：响铃
+	\b：退格
+	\f：换页
+	\n：换行
+	\r：回车
+	\t：制表符
+	\v：垂直制表符
+	\ooo：3 个 8 位数字给定的八进制码点的 Unicode 字符（不能超过\377
+	\uhhhh：4 个 16 位数字给定的十六进制码点的 Unicode 字符
+	\Uhhhhhhhh：8 个 32 位数字给定的十六进制码点的 Unicode 字符
+	\xhh：2 个 8 位数字给定的十六进制码点的 Unicode 字符
 
-fmt.Printf占位符
-%v ：值的默认格式。
-	%+v ：类似%v，但输出结构体时会添加字段名  // 类型+值对象
-	%#v ：相应值的Go语法表示                  // 输出字段名和字段值形式
-%T ：相应值的类型的Go语法表示
-%% ：百分号,字面上的%,非占位符含义
-字符串
-%s : 字符串类型   // %ns  打印字符前空n个宽度,  默认+， 右对齐 ，若- ，左对齐
-%q : 双引号围绕的字符串
-%x : 十六进制，小写字母，每字节两个字符
-%X : 十六进制，大写字母，每字节两个字符
-整型
-%t ：bool类型
-%c ：相应Unicode码点所表示的字符   // rune：Unico de co de point
-%q ：带单引号 的字符
-%b ：二进制
-%o ：八进制 //  %#o 带 0 的前缀
-%d ：十进制               
-%x 、 %X ：十六进制   //  %#x(%# 带 0x(0X) 的前缀
-%U : Unicode 字符, Unicode格式：123，等同于 "U+007B"     //  %#U 带字符的 Unicode 码点
-	%d ：十进制 
-		%+d   表示 对正整数 带 符号
-		%nd   表示 最小 占位 n 个宽度且右对齐
-		%-nd    表示 最小 占位 n 个宽度且左对齐
-		%0nd  表示 最小 占位 n 个宽度且右对齐 空字符使用 0 填充
-		"%d|%+d|%10d|%-10d|%010d|%+-10d|%+010d"
-浮点型
-%f 、 %F ：十进制表示法            //%n.mf 表示最小 占 n 个宽度并且保留 m 位小数
-%e 、 %E ：科学记数法表示
-%g 、 %G ：自动选择 最 紧凑的表示 方法 %e(E%) 或 %f(F%)  
-指针  // 本质 -> 内存地址; &a 获取变量a在内存中的存储位置; 指针b := &a (取引用-取地址); *b 指针变量存储地址中的值(解引用-返回内存地址中对应的对象-取值); b 指针变量指向的内存地址; &b 指针变量本身的内存地址  // 用来存储指针变量地址的变量叫做指针的指针 **b
-%t ：指针变量的具体内容
-%v ：指针变量访问位置中存储的值     //  %#v接口的类型
-%q ：指针变量访问位置中存储的值（unicode 中文）
-%p ：十六进制表示，前缀 0x           // 默认情况下，指针是已16进制存在的
-
-特殊字符：
-\：反斜线
-'：单引号   // '' 只可以定义单一字符
-"：双引号   // "" 可解析的字符串
-``: 原始字符串/多行字符串
-\a：响铃
-\b：退格
-\f：换页
-\n：换行
-\r：回车
-\t：制表符
-\v：垂直制表符
-\ooo：3 个 8 位数字给定的八进制码点的 Unicode 字符（不能超过\377
-\uhhhh：4 个 16 位数字给定的十六进制码点的 Unicode 字符
-\Uhhhhhhhh：8 个 32 位数字给定的十六进制码点的 Unicode 字符
-\xhh：2 个 8 位数字给定的十六进制码点的 Unicode 字符
-
-2、标准输出  
-go doc fmt | grep -Ei "func [FS]*Scan"   // 指针只是一个内存地址，没有数据类型
-Scan家族：从标准输入os.Stdin中读取数据，包括Scan()、Scanf()、Scanln()   // 需要使用指针 Scan(&name) scan会直接将输入的值存入指针所指的内存地址的值
-SScan家族：从字符串中读取数据，包括Sscan()、Sscanf()、Sscanln()         // 即从字符串扫描到变量 func fmt.Sscan(str string, a ...interface{}) (n int, err error) 
-Fscan家族：从io.Reader中读取数据，包括Fscan()、Fscanf()、Fscanln()      // 即从文件扫描到变量 func fmt.Fscan(r io.Reader, a ...interface{}) (n int, err error)
-ps： 
-Scanln、Sscanln、Fscanln在遇到换行符的时候停止
-Scan、Sscan、Fscan将换行符当作空格处理
-Scanf、Sscanf、Fscanf根据给定的format格式读取，就像Printf一样
-Scan家族函数从标准输入读取数据时，以空格做为分隔符分隔标准输入的内容，并将分隔后的各个记录保存到给定的变量中。
+2、标准输出 
+1).函数种类 
+	go doc fmt | grep -Ei "func [FS]*Scan"   
+	Scan家族：从标准输入os.Stdin中读取数据，包括Scan()、Scanf()、Scanln()   // 需要使用指针 Scan(&name) scan会直接将输入的值存入指针所指的内存地址的值
+	SScan家族：从字符串中读取数据，包括Sscan()、Sscanf()、Sscanln()         // 即从字符串扫描到变量 func fmt.Sscan(str string, a ...interface{}) (n int, err error) 
+	Fscan家族：从io.Reader中读取数据，包括Fscan()、Fscanf()、Fscanln()      // 即从文件扫描到变量 func fmt.Fscan(r io.Reader, a ...interface{}) (n int, err error)
+2).注意事项
+	Scanln、Sscanln、Fscanln在遇到换行符的时候停止
+	Scan、Sscan、Fscan将换行符当作空格处理
+	Scanf、Sscanf、Fscanf根据给定的format格式读取，就像Printf一样
+	Scan家族函数从标准输入读取数据时，以空格做为分隔符分隔标准输入的内容，并将分隔后的各个记录保存到给定的变量中。
 
 3、格式转换
-strconv
-strconv包提供了字符串与简单数据类型之间的类型转换功能，可以将简单类型转换为字符串，也可以将字符串转换为其它简单类型  // import "strconv"
-int转string ->   strconv.Itoa()
- str := strconv.Itoa(100)
- fmt.Printf("type %v, value: %s\n", reflect.TypeOf(str), str)
-string转int ->   strconv.Atoi()
- i, err := strconv.Atoi("100x")
- fmt.Printf("type %v, value: %d, err: %v\n", reflect.TypeOf(i), i, err)
-string转bool ->  strconv.ParseBool()
- b, err := strconv.ParseBool("true")
-string转float -> strconv.ParseFloat()
- f, err := strconv.ParseFloat("3.1", 64)
-string转int ->   func ParseInt(s string, base int, bitSize int) (i int64, err error)
- i, err := strconv.ParseInt("11111111", 2, 16)
-string转uint ->  func ParseUint(s string, base int, bitSize int) (uint64, error)
- u, err = strconv.ParseUint("4E2D", 16, 16)
-bool转string ->  strconv.FormatBool(true)
-float转string -> strconv.FormatFloat(3.1415, 'E', -1, 64)  // func FormatFloat(f float64, fmt byte, prec, bitSize int) string
-int转string ->   strconv.FormatInt(255, 10)
-uint转string ->  strconv.FormatUint(255, 16) 
+ - strconv包
+	- 提供了字符串与简单数据类型之间的类型转换功能，可以将简单类型转换为字符串，也可以将字符串转换为其它简单类型  // import "strconv"
+	- int转string   ->   strconv.Itoa()
+		str := strconv.Itoa(100)
+		fmt.Printf("type %v, value: %s\n", reflect.TypeOf(str), str)
+	- string转int   ->   strconv.Atoi()
+		i, err := strconv.Atoi("100x")
+		fmt.Printf("type %v, value: %d, err: %v\n", reflect.TypeOf(i), i, err)
+	- string转bool  ->  strconv.ParseBool()
+		b, err := strconv.ParseBool("true")
+	- string转float ->  strconv.ParseFloat()
+		f, err := strconv.ParseFloat("3.1", 64)
+	- string转int   ->  func ParseInt(s string, base int, bitSize int) (i int64, err error)
+		i, err := strconv.ParseInt("11111111", 2, 16)
+	- string转uint  ->  func ParseUint(s string, base int, bitSize int) (uint64, error)
+		u, err = strconv.ParseUint("4E2D", 16, 16)
+	- bool转string  ->  strconv.FormatBool(true)
+	- float转string ->  strconv.FormatFloat(3.1415, 'E', -1, 64)  // func FormatFloat(f float64, fmt byte, prec, bitSize int) string
+	- int转string   ->  strconv.FormatInt(255, 10)
+	- uint转string  ->  strconv.FormatUint(255, 16) 
 
 
 三、流程控制
 1、条件语句 - if语句
-对于条件语句必须有if 语句，可以有 0 个或多个 else if 语句 ，最多有 1 个 else 语句
-if嵌套
-if bool1 {
-	/* bool1 = true */
-} else {
-	if bool2 {
-		/* bool2 = true */
+ - 对于条件语句必须有if 语句，可以有 0 个或多个 else if 语句 ，最多有 1 个 else 语句
+ - if嵌套
+	if bool1 {
+		/* bool1 = true */
 	} else {
-		if bool3 {
-		/* bool3 = true */
+		if bool2 {
+			/* bool2 = true */
 		} else {
-			/* bool3 = false */
+			if bool3 {
+			/* bool3 = true */
+			} else {
+				/* bool3 = false */
+				}
 			}
 		}
+ - 多重判断
+	if bool1 {
+		/* bool1 = true */
+	} else if bool表达式2 {
+		/* bool2 = true */
+	} else if bool表达式3 {
+		/* bool3 = true */
+	} else {
+		/* bool = false */
 	}
-多重判断
-if bool1 {
-	/* bool1 = true */
-} else if bool表达式2 {
-	/* bool2 = true */
-} else if bool表达式3 {
-	/* bool3 = true */
-} else {
-	/* bool = false */
-}
 
 2、选择语句 - switch
-对于选择语句可以有0个或多个case语句，最多有1个default语句选择条件为true的case语句块开始执行并退出，若所有条件为false，则执行default语句块并退出。可以通过fallthrough修改执行退出行为，继续执行下一条的case或default语句块。
-switch var1 {
-case var2 :
-	...
-	fallthrough  // 只要执行成功，就无视case2的条件，强制执行下一个语句
-case var3 :
-	...
-case var4,var5 :
-	...
-	if(...){
-		break
-    }
-    fallthrough // 此时switch会执行case3和case4，但是如果满足if条件，则只执行case3
-case var6 :
-	...
-default:
-	...
-}
+ - 对于选择语句可以有0个或多个case语句，最多有1个default语句选择条件为true的case语句块开始执行并退出，若所有条件为false，则执行default语句块并退出。可以通过fallthrough修改执行退出行为，继续执行下一条的case或default语句块。
+	switch var1 {
+	case var2 :
+		...
+		fallthrough  // 只要执行成功，就无视case2的条件，强制执行下一个语句
+	case var3 :
+		...
+	case var4,var5 :
+		...
+		if(...){
+			break
+		}
+		fallthrough // 此时switch会执行case3和case4，但是如果满足if条件，则只执行case3
+	case var6 :
+		...
+	default:
+		...
+	}
 
 3、循环语句 - for
-1).初始用法
-for init; condition; post { 
-	...
-}
-	init： 一般为赋值表达式，给控制变量赋初值；
-	condition： 关系表达式或逻辑表达式，循环控制条件；
-	post： 一般为赋值表达式，给控制变量增量或减量。
-	执行顺序为
-		a) 初始化子语句 init
-		b) 条件子语句   condition
-		c) 语句块
-		d) 后置子语句   post
-		e) b -->c -->d
-		f)
-		g) 直到条件子语句为 false 结束循环
-break     // 用于跳出循环，当条件满足则结束循环
-continue  // 用于跳过循环，当条件满足这跳过本次循环进行后置或条件子语句执行
-2).类while
-for子语句可以只保留条件子语句，此时类似于其他语言中的 while 循环
-for condition { 
-	...
-}
-3).无限循环
-for子语句全部省略，则为无限循环（死循环） 常与 break 结合使用
-4).for-range 
-用于遍历 可迭代对象中的每个元素，例如字符串，数组，切片，映射，通道 等
-针对包含Unicode 字符的字符串遍历是需要使用 for range; range 返回两个元素分别为字节索引index 和 rune 字符， 可通过空白标识符_ 忽略需要接收的变量
-for index,value := range iterable {
-	...
-}
-
-5).label 与 goto
-通过 goto 语句任意跳转到当前函数指定的 label 位置
-6).嵌套循环:
-for [condition |  ( init; condition; increment ) | Range]
-{
-   for [condition |  ( init; condition; increment ) | Range]
-   {
-      statement(s);
-   }
-   statement(s);
-}
+ - 基本用法
+	- 基本表达式
+		for init; condition; post { 
+			...
+		}
+		- init： 一般为赋值表达式，给控制变量赋初值；
+		- condition： 关系表达式或逻辑表达式，循环控制条件；
+		- post： 一般为赋值表达式，给控制变量增量或减量。
+		- 执行顺序为
+			a) 初始化子语句 init
+			b) 条件子语句   condition
+			c) 语句块
+			d) 后置子语句   post
+			e) b -->c -->d
+			f) 直到条件子语句为 false 结束循环
+	- break     用于跳出循环，当条件满足则结束循环
+	- continue  用于跳过循环，当条件满足这跳过本次循环进行后置或条件子语句执行
+ - 类while
+	- for子语句可以只保留条件子语句，此时类似于其他语言中的 while 循环
+		for condition { 
+			...
+		}
+ - 无限循环
+	- for i := 0;;i++
+	- for ;; { }
+	- for true { }
+	- for { }
+	- for子语句全部省略，则为无限循环(死循环)，常与 break 结合使用
+ - for-range 
+	- 用于遍历 可迭代对象中的每个元素，例如字符串，数组，切片，映射，通道 等
+	- 针对包含Unicode 字符的字符串遍历是需要使用 for range；range 返回两个元素分别为字节索引index 和 rune 字符，可通过空白标识符_ 忽略需要接收的变量
+		for index,value := range iterable {
+			...
+		}
+ - label 与 goto
+	- 通过 goto 语句任意跳转到当前函数指定的 label 位置
+ - 嵌套循环:
+	for [condition |  ( init; condition; increment ) | Range] {
+		for [condition |  ( init; condition; increment ) | Range]{
+			statement(s);
+		}
+		statement(s);
+	}
 
 4、实例：
 1).乘法口诀表
-（1）正三角
-package main
-  
-import "fmt"
-
-func main() {
-        for i := 1; i < 10; i++ {
-                for j := 1; j <= i; j++ {
-                        fmt.Printf("%-2d * %-2d = %-2d\t", j, i, i*j)
-                }
-                fmt.Println()
-        }
-}
-（2）倒三角
-package main
-  
-import "fmt"
-
-func main() {
+ - 正三角
+	for i := 1; i < 10; i++ {
+			for j := 1; j <= i; j++ {
+					fmt.Printf("%-2d * %-2d = %-2d\t", j, i, i*j)
+			}
+			fmt.Println()
+	}
+ - 倒三角
 	for i := 1; i < 10; i++ {
 		for j := 1; j < i; j++ {
 			var n string
@@ -302,175 +316,172 @@ func main() {
 		}
 		fmt.Println()
 	}
-}
 2).求100以内素数的和
-package main
-  
-import "fmt"
-
-func main() {
-        var sum int
-        i := 2
-        var isP bool
-        for i < 101 {
-                isP = true
-                j := 2
-                for j <= (i / j) {
-                        if i%j == 0 {
-                                // fmt.Printf("%d不是素数\n",i)
-                                isP = false
-                                break
-                        }
-                        j++
-                }
-                if isP {
-                        fmt.Printf("%d是素数\n", i)
-                        sum += i
-                }
-                i++
-        }
-        fmt.Println(sum)
-}
-
+	var sum int
+	i := 2
+	var isP bool
+	for i < 101 {
+			isP = true
+			j := 2
+			for j <= (i / j) {
+					if i%j == 0 {
+							// fmt.Printf("%d不是素数\n",i)
+							isP = false
+							break
+					}
+					j++
+			}
+			if isP {
+					fmt.Printf("%d是素数\n", i)
+					sum += i
+			}
+			i++
+	}
+	fmt.Println(sum)
+	}
+	
 四、复合数据类型
 1、数组 array    // 占用内存空间 = length * 数据类型的字节大小
-当在Go中声明一个数组之后，会在内存中开辟一段固定长度的、连续的空间存放数组中的各个元素，这些元素的数据类型完全相同，可以是内置的简单数据类型(int、string等)，也可以是自定义的struct类型。
-	固定长度：这意味着数组不可增长、不可缩减。想要扩展数组，只能创建新数组，将原数组的元素复制到新数组
-	连续空间：这意味可以在缓存中保留的时间更长，搜索速度更快，是一种非常高效的数据结构，同时还意味着可以通过数值index的方式访问数组中的某个元素
-	数据类型：意味着限制了每个block中可以存放什么样的数据，以及每个block可以存放多少字节的数据
-1).声明
-	数组是具有相同数据类型的数据项组成的一组长度固定的序列，数据项叫做数组的元素，数组的长度必须是非负整数的常量，长度也是类型的一部分
-初始化
-	指定数组长度 var name [length]type = [length]type{v1, v2, …,vlength}
-	使用初始化元素数量推到数组长度 name := [...]type{v1, v2, …,vlength}
-	对指定位置元素进行初始化 var name [length]type = [length]type{im:vm, …, sin:in}
-2).指针数组
-	声明一个指针类型的数组，这样数组中就可以存放指针。PS：指针的默认初始化值为nil
+1).定义
+ - 数组是具有相同数据类型的数据项组成的一组长度固定的序列，数据项叫做数组的元素，数组的长度必须是非负整数的常量，长度也是类型的一部分
+ - 当在Go中声明一个数组之后，会在内存中开辟一段固定长度的、连续的空间存放数组中的各个元素，这些元素的数据类型完全相同，可以是内置的简单数据类型(int、string等)，也可以是自定义的struct类型
+	- 固定长度：这意味着数组不可增长、不可缩减。想要扩展数组，只能创建新数组，将原数组的元素复制到新数组
+	- 连续空间：这意味可以在缓存中保留的时间更长，搜索速度更快，是一种非常高效的数据结构，同时还意味着可以通过数值index的方式访问数组中的某个元素
+	- 数据类型：意味着限制了每个block中可以存放什么样的数据，以及每个block可以存放多少字节的数据
+2).声明&&初始化
+ - 指定数组长度 var name [length]type = [length]type{v1, v2, …,vlength}
+ - 使用初始化元素数量推到数组长度 name := [...]type{v1, v2, …,vlength}
+ - 对指定位置元素进行初始化 var name [length]type = [length]type{im:vm, …, sin:in}
+3).指针数组
+ - 声明一个指针类型的数组，这样数组中就可以存放指针
+ - 指针的默认初始化值为nil
 	a := [4]*int{0: new(int), 3: new(int)}   // [0xc00011a300 <nil> <nil> 0xc00011a308]
 	a[1] = new(int)                          // 空指针直接赋值会报错
 	*a[1] = 10                               // [0xc00011a300 0xc00011a310 <nil> 0xc00011a308]
 	b := a                                   // [0xc00011a300 0xc00011a310 <nil> 0xc00011a308]
-3).遍历数组
-        for i := 0; i < len(name); i++ {
-                fmt.Println(i, name[i])
-        }
-        for i, j := range name {
-                fmt.Printf("%d %q\n", i, j)
-        }
+4).遍历数组
+	for i := 0; i < len(name); i++ {
+			fmt.Println(i, name[i])
+	}
+	for i, j := range name {
+			fmt.Printf("%d %q\n", i, j)
+	}
 4).多维数组
-var name [vlength][vvlength]type = [vlength][vvlength]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}
-name := [...][vvlength]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}  // 多维数组只有第一维长度可使用变量数量推测
-name := [vlength][vvlength]type{0:{0:v1,3:v2},5:{2:v1,5:v2, …,m:v3}, …,n:{6:v1,m:vvlength}}
-遍历多维数组
-        for i := 0; i < len(name); i++ {
-                for j := 0; j < len(name[i]); j++ {
-                        fmt.Printf("[%d ,%d]: %q\n", i, j, name[i][j]) 
-                }
-        }
-        for i, line := range name {
-                for n, m := range line {
-                        fmt.Printf("[%d ,%d]: %q\n", i, n, m)
-                }
-        }
+ - 声明&&初始化
+	var name [vlength][vvlength]type = [vlength][vvlength]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}
+	name := [...][vvlength]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}  // 多维数组只有第一维长度可使用变量数量推测
+	name := [vlength][vvlength]type{0:{0:v1,3:v2},5:{2:v1,5:v2, …,m:v3}, …,n:{6:v1,m:vvlength}}
+ - 遍历
+	for i := 0; i < len(name); i++ {
+			for j := 0; j < len(name[i]); j++ {
+					fmt.Printf("[%d ,%d]: %q\n", i, j, name[i][j]) 
+			}
+	}
+	for i, line := range name {
+			for n, m := range line {
+					fmt.Printf("[%d ,%d]: %q\n", i, n, m)
+			}
+	}
 
 2、切片 slice
-1).声明
-切片是长度可变的数组(具有相同数据类型的数据项组成的一组长度可变的序列)，切片由三部分组成：
-	a、指针(array)：指向 切片第一个元素指向的数组元素的地址
-	b、长度(length)：切片元素的数量
-	c、容量(capacity)：切片开始到结束位置(可容纳)元素的数量
-Go中的slice依赖于数组，它的底层就是数组，所以数组具有的优点, slice都有。 
+1).定义
+ - 切片是长度可变的数组，即 具有相同数据类型的数据项组成的一组长度可变的序列 ，切片由三部分组成
+	- 指针(array)：指向 切片第一个元素指向的数组元素的地址
+	- 长度(length)：切片元素的数量
+	- 容量(capacity)：切片开始到结束位置(可容纳)元素的数量
+ - Go语言中的slice依赖于数组，它的底层就是数组，所以数组具有的优点，slice都有
 	// runtime/slice.go
 	type slice struct {
 		array unsafe.Pointer // 数组指针
 		len   int // 长度 
 		cap   int // 容量
 	}
-且slice支持可以通过append向slice中追加元素，长度不够时会动态扩展，通过再次slice切片，可以得到得到更小的slice结构，可以迭代、遍历等
-	PS：
-	1、切片共享底层数组，若某个切片元素发生变化，则数组和其他有共享元素的切片也会发生变化；
-	2、切片底层是一个长度和数据类型固定的数组，只有在切片的长度大于底层数组的长度后，该切片的底层才会在内存中更换新的数组。
-切片初始化
-	使用字面量初始化空切片 []type{}   // 初始化为零值 nil
-	使用字面量初始化 var name []type = []type{v1, v2, …,vn}
-	指定长度和容量字面量初始化 []type{im:vm, in:vn, ilength:vlength]
-	使用make函数初始化  make([]type, len)/make([]type, len, cap)通过 make 函数创建长度为 len ，容量为 cap 的切片 len 必须小于等于 cap
-	使用数组切片操作初始化 
-		array[start:end]     // end <= src_cap ; 新创建切片长度和容量计算：new_len: end-start, new_cap: src_cap-start ;
-		array[start:end:end_cap] // 用于限制新切片的容量值 (end<=cap<=src_cap) ; 新创建切片长度和容量计算 new_len: end-start, new_cap: end_cap-start
-2).遍历切片 // 同数组
-3).增加元素 
-使用append函数对切片增加一个或多个元素并返回修改后切片，当长度在容量范围内时只增加长度，容量和底层数组不变。
-当长度超过容量范围则会创建一个新的底层数组并对容量进行智能运算(元素数量<1024时，约按原容量1倍增加，>1024时约按原容量0.25倍增加)
-append(slice, 1, 2, ...,n)  // 移除元素 append(slince[:n-1], slince[n+1]...)
-4).复制切片
-copy(drc_slice, src_slice)  // 移除元素 copy(slice[3:], slice[4:])
-用切片实现队列
+ - Go语言中的slice支持通过append向slice中追加元素，长度不够时会动态扩展，通过再次slice切片，可以得到得到更小的slice结构，可以迭代、遍历等
+	- 切片共享底层数组，若某个切片元素发生变化，则数组和其他有共享元素的切片也会发生变化
+	- 切片底层是一个长度和数据类型固定的数组，只有在切片的长度大于底层数组的长度后，该切片的底层才会在内存中更换新的数组
+2).声明&&初始化
+ - 使用字面量初始化空切片       []type{}   // 初始化为零值 nil
+ - 使用字面量初始化             var name []type = []type{v1, v2, …,vn}
+ - 指定长度和容量字面量初始化   []type{im:vm, in:vn, ilength:vlength]
+ - 使用make函数初始化           make([]type, len)/make([]type, len, cap)    通过 make 函数创建长度为 len，容量为 cap 的切片，且 len 必须小于等于 cap
+ - 使用数组切片操作初始化 
+	array[start:end]            // end <= src_cap ; 新创建切片长度和容量计算：new_len: end-start, new_cap: src_cap-start ;
+	array[start:end:end_cap]    // 用于限制新切片的容量值(end<=cap<=src_cap)；新创建切片长度和容量计算 new_len: end-start, new_cap: end_cap-start
+3).遍历切片                     // 同数组
+4).增加元素 
+ - 使用append函数对切片增加一个或多个元素并返回修改后切片，当长度在容量范围内时只增加长度，容量和底层数组不变。
+ - 当长度超过容量范围则会创建一个新的底层数组并对容量进行智能运算(元素数量<1024时，约按原容量1倍增加，>1024时约按原容量0.25倍增加)
+	append(slice, 1, 2, ...,n)  // 移除元素 append(slince[:n-1], slince[n+1]...)
+5).复制切片
+	copy(drc_slice, src_slice)  // 移除元素 copy(slice[3:], slice[4:])
+6).应用
+ - 用切片实现队列
 	queue := []int{}
 	queue = append(queue, 1)
 	queue = append(queue, 2)
 	queue = queue[1:]
-用切片实现堆栈
+ - 用切片实现堆栈
 	stack := []int{}
 	stack = append(stack, 1)	
 	stack = append(stack, 2)
 	stack = stack[:len(stack)-1]
 5).多维切片
-var name [][]type = [][]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}
-name := [][]type{0:{0:v1,3:v2},5:{2:v1,5:v2, …,m:v3}, …,n:{6:v1,m:vvlength}}
-// append
-slice = append(slice, []int{1, 2, 3})
-slice[0] = append(point[0], 1)
-// copy
-slice2 := [][]int{{}, {}}
-copy(slice2, slice)
+ - 声明&&初始化
+	var name [][]type = [][]type{{v1,v2, …,vvlength}, {v1,v2, …,vvlength}, …,{vlength,vvlength}}
+	name := [][]type{0:{0:v1,3:v2},5:{2:v1,5:v2, …,m:v3}, …,n:{6:v1,m:vvlength}}
+ - append
+	slice = append(slice, []int{1, 2, 3})
+	slice[0] = append(point[0], 1)
+ - copy
+	slice2 := [][]int{{}, {}}
+	copy(slice2, slice)
 6).其他
-字节切片    // bytes包
+ - 字节切片    // bytes包
 	[]byte(string)
 	string([]byte{})
-rune切片
+ - rune切片
 	[]rune(string)
 	string([]rune{})
 
 3、映射map
-映射是存储一系列无序的 key/value 对，通过 key 来对 value 进行操作（增、删、改、查）。
-1).声明
-	map声明需要指定组成元素key和value的类型，在声明后，会被初始化为nil，表示暂不存在的映射  // nil map，它将不会做任何初始化，不会指向任何数据结构；而直接赋值会报空指针，map类型实际上就是一个指针, 具体为 *hmap
-初始化
-	使用字面量初始化 map[ktype]vtype{k1:v1, k2:v2, …, kn:vn} // key -> string、int、bool、array
-	使用字面量初始化空映射 map[ktype]vtype{}   // 若不加{}，则初始化为nil，即无法添加key
-	使用make函数初始化 make(map[ktype]vtype)，通过make函数创建映射，它会先创建好底层数据结构，然后再创建map，并让map指向底层数据结构。
-判断是否存在
-	通过key访问元素时可接收两个值，第一个值为value，第二个值为bool类型表示元素是否存在，若存在为true，否则为false
+1).定义
+ - 映射是存储一系列无序的 key/value 对，通过 key 来对 value 进行操作，即 增、删、改、查
+2).声明&&初始化
+ - map声明需要指定组成元素key和value的类型，在声明后，会被初始化为nil，表示暂不存在的映射 
+ - nil map，它将不会做任何初始化，不会指向任何数据结构；而直接赋值会报空指针，map类型实际上就是一个指针, 具体为 *hmap
+ - 初始化
+	- 使用字面量初始化 map[ktype]vtype{k1:v1, k2:v2, …, kn:vn}  // key -> string、int、bool、array
+	- 使用字面量初始化空映射 map[ktype]vtype{}                  // 若不加{}，则初始化为nil，即无法添加key
+	- 使用make函数初始化 make(map[ktype]vtype)，通过make函数创建映射，它会先创建好底层数据结构，然后再创建map，并让map指向底层数据结构。
+ - 判断是否存在
+	- 通过key访问元素时可接收两个值，第一个值为value，第二个值为bool类型表示元素是否存在，若存在为true，否则为false
 		map_01, ok := map[1]
 		fmt.Printf("%t, %v\n", ok, map_01)
-修改&增加
-	使用key对映射赋值时当key存在则修改key对应的value，若key不存在则增加key和value
-删除
-	使用delete函数删除映射中已经存在的key
+ - 修改&增加
+	- 使用key对映射赋值时当key存在则修改key对应的value，若key不存在则增加key和value
+ - 删除
+	- 使用delete函数删除映射中已经存在的key
 		delete(map, 3)
-        delete(map[2], "XX")
-2).多维映射
-map := map[int]map[string]string{1: map[string]string{"name": "aa", "tel": "123"}, 2: map[string]string{"name": "bb", "tel": "456"}}
-3).遍历映射
+		delete(map[2], "XX")
+3).多维映射
+	map := map[int]map[string]string{1: map[string]string{"name": "aa", "tel": "123"}, 2: map[string]string{"name": "bb", "tel": "456"}}
+4).遍历映射
 	for k, v := range map {
 		fmt.Printf("%v:%v\n", k, v)
 	}
-4).限制
-	Go 语言中只要是可比较的类型都可以作为 key。除开 slice，map，functions 这几种类型，其他类型都是 OK 的。 
-	具体包括：布尔值、数字、字符串、指针、通道、接口类型、结构体、只包含上述类型的数组。 
-	这些类型的共同特征是支持 == 和 != 操作符，k1 == k2 时，可认为 k1 和 k2 是同一个 key。 
-	如果是结构体，则需要它们的字段值都相等，才被认为是相同的 key.
-5).map作为函数参数
-map是一种指针，所以将map传递给函数，仅仅只是复制这个指针，所以函数内部对map的操作会直接修改外部的map
-	a := map[int]string{1: "a", 2: "b", 3: "c"}
-	
-	func(map[int]string) {
-		delete(a, 1)
-	}(a)
-	
-	fmt.Println(a)
-6).map值为函数
+5).限制
+ - Go语言中只要是可比较的类型都可以作为 key。除开 slice，map，functions 这几种类型，其他类型都是 OK 的 
+	- 具体包括：布尔值、数字、字符串、指针、通道、接口类型、结构体、只包含上述类型的数组。 
+	- 这些类型的共同特征是支持 == 和 != 操作符，k1 == k2 时，可认为 k1 和 k2 是同一个 key。 
+	- 如果是结构体，则需要它们的字段值都相等，才被认为是相同的 key.
+6).函数中的应用
+ - map作为函数参数
+	- map是一种指针，所以将map传递给函数，仅仅只是复制这个指针，所以函数内部对map的操作会直接修改外部的map
+		a := map[int]string{1: "a", 2: "b", 3: "c"}
+		func(map[int]string) {
+			delete(a, 1)
+		}(a)
+ - map值为函数
 	op := map[string]func(x, y int) int{
 		"+": func(x, y int) int {
 			return x + y
@@ -485,32 +496,24 @@ map是一种指针，所以将map传递给函数，仅仅只是复制这个指�
 			return x / y
 		},
 	}
-	
 	fmt.Println(op["+"](1, 2))
 	fmt.Println(op["-"](1, 2))
-7).实例
-package main
+7).示例 - 使用map统计 "I have a dream" 中，各字母出现次数
+    article := `
+		I have a dream
+		...
+		`
+    stats := map[rune]int{}
 
-import "fmt"
-
-func main() {
-        article := `
-　　I have a dream
-	...
-	`
-        stats := map[rune]int{}
-
-        for _, ch := range article {
-                if ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' {
-                        stats[ch]++
-                }
-        }
-        for ch, cnt := range stats {
-                fmt.Printf("%c, %v\n", ch, cnt)
-        }
-}
-8).引申
-a、Go原生的map线程不安全
+    for _, ch := range article {
+            if ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' {
+                    stats[ch]++
+            }
+    }
+    for ch, cnt := range stats {
+            fmt.Printf("%c, %v\n", ch, cnt)
+    }
+8).Go语言中原生的map线程不安全
  - 解决方案一: 加锁
 	type concurrentMap struct {
 		sync.RWMutex
@@ -535,7 +538,6 @@ a、Go原生的map线程不安全
 	// 写map的goroutine
 	go func() {
 		for i := 0; i < 10000; i++ {
-
 			c.Set(i, i)
 		}
 	}()
@@ -566,7 +568,7 @@ a、Go原生的map线程不安全
 			- 结构体复杂的case多不用sync.Map
 			
  - 解决方案三: 分片锁 并发map github.com/orcaman/concurrent-map
-b、带过期时间的map
+9).带过期时间的map
  - map做缓存用的 垃圾堆积k1、k2 
  - 希望缓存存活时间 5分钟，
  - 将加锁的时间控制在最低，
@@ -648,97 +650,101 @@ b、带过期时间的map
 			c.Set(key, im)
 		}
 		select {} // 阻塞main
-c、带过期时间的缓存 github.com/patrickmn/go-cache 
+10).带过期时间的缓存 github.com/patrickmn/go-cache 
 
 五、函数
 1、定义
-函数用于对代码块的逻辑封装，提供代码复用的最基本方式, Go中有3种函数:
-	普通函数
-	匿名函数(没有名称的函数)
-	方法(定义在struct上的函数)
-Go实现了一级函数(first-class functions)，Go中的函数是高阶函数(high-order functions)。这意味着：
-	函数是一个值，可以将函数赋值给变量，使得这个变量也成为函数
-	函数可以作为参数传递给另一个函数
-	函数的返回值可以是一个函数
-定义语句
-	func function_name( [parameter list] ) [return_types] {
-	函数体
-	}
-	func：函数由 func 开始声明
-	function_name：函数名称，函数名和参数列表一起构成了函数签名。
-	parameter list：参数列表，参数就像一个占位符，当函数被调用时，可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数。
-	return_types：返回类型，函数返回一列值。return_types 是该列值的数据类型。有些功能不需要返回值，这种情况下 return_types 不是必须的。
-	函数体：函数定义的代码集合。
-	函数的参数、返回值以及它们的类型，结合起来成为函数的签名(signature)
+ - 函数用于对代码块的逻辑封装，提供代码复用的最基本方式, Go中有3种函数:
+	- 普通函数
+	- 匿名函数(没有名称的函数)
+	- 方法(定义在struct上的函数)
+ - Go实现了一级函数(first-class functions)，Go中的函数是高阶函数(high-order functions)。这意味着：
+	- 函数是一个值，可以将函数赋值给变量，使得这个变量也成为函数
+	- 函数可以作为参数传递给另一个函数
+	- 函数的返回值可以是一个函数
+ - 定义语句
+	- 签名
+		func function_name( [parameter list] ) [return_types] {
+			函数体
+		}
+	- func：函数由 func 开始声明
+	- function_name：函数名称，函数名和参数列表一起构成了函数签名(signature)
+	- parameter list：参数列表，参数就像一个占位符，当函数被调用时，可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数
+	- return_types：返回类型，函数返回一列值。return_types 是该列值的数据类型；有些功能不需要返回值，这种情况下 return_types 不是必须的
+	- 函数体：函数定义的代码集合。
+	
 2、参数
-类型合并
-	在声明函数中若存在多个连续形参类型相同可只保留最后一个参数类型名
-	func sum(x, y int) int {}
-可变参数
-	某些情况下函数需要处理形参数量可变，需要运算符 ARGS...TYPE 的方式声明可变参数函数或在调用时传递可变参数
-	可变参数只能定义一个且只能在参数列表末端。在调用函数后，可变参数则被初始化为对应类型的切片(名为ARGS的slice,参数的数据类型都是TYPE)
-	func max(a, b int, args ...int) int {}
-	在调用函数时，也可以使用运算符 ... 将切片解包传递到可变参数函数中
-	max(1, 2, slice[3:]...)
-值传递
-	函数如果使用参数，该变量可称为函数的形参。形参就像定义在函数体内的局部变量。
-	值传递是指在调用函数时将实际参数复制一份传递到函数中，这样在函数中如果对参数进行修改，将不会影响到实际参数。
-	默认情况下，Go 语言使用的是值传递(则先拷贝参数的副本，再将副本传递给函数)，即在调用过程中不会影响到实际参数。
-引用传递
-	引用传递是指在调用函数时将实际参数的地址传递到函数中，那么在函数中对参数所进行的修改，将影响到实际参数。
-	由于引用类型(slice、map、interface、channel)自身就是指针，所以这些类型的值拷贝给函数参数，函数内部的参数仍然指向它们的底层数据结构。
-值类型&引用类型    // 
-	a、值类型和引用类型的差异在于赋值同类型新变量后，对新变量进行修改是否能够影响原来的变量，若不能影响则为值类型，若能影响则为引用类型
-	b、值类型：数值、布尔、字符串、指针、数组、结构体等
-       引用类型：切片、映射、接口等
-	c、针对值类型可以借助指针修改原值
-	d、针对值类型和引用类型在赋值后新旧变量的地址并不相同，只是引用类型在底层共享数据结构（ 其中包含 指针类型元素）
-	PS:
-	1、变量是一个地址，也是一个引用；
-	2、引用表达的是关系，指针表达的是类型；   
-	3、A --> B 是引用关系，而 A 是指针。
+ - 类型合并
+	- 在声明函数中若存在多个连续形参类型相同可只保留最后一个参数类型名
+		func sum(x, y int) int {}
+ - 可变参数
+	- 某些情况下函数需要处理形参数量可变，需要运算符 ARGS...TYPE 的方式声明可变参数函数或在调用时传递可变参数
+	- 可变参数只能定义一个且只能在参数列表末端。在调用函数后，可变参数则被初始化为对应类型的切片(名为ARGS的slice,参数的数据类型都是TYPE)
+		func max(a, b int, args ...int) int {}
+	- 在调用函数时，也可以使用运算符 ... 将切片解包传递到可变参数函数中
+		max(1, 2, slice[3:]...)
+ - 值传递
+	- 函数如果使用参数，该变量可称为函数的形参。形参就像定义在函数体内的局部变量
+	- 值传递是指在调用函数时将实际参数复制一份传递到函数中，这样在函数中如果对参数进行修改，将不会影响到实际参数
+	- 默认情况下，Go语言使用的是值传递(则先拷贝参数的副本，再将副本传递给函数)，即在调用过程中不会影响到实际参数
+ - 引用传递
+	- 引用传递是指在调用函数时将实际参数的地址传递到函数中，那么在函数中对参数进行的修改，将影响到实际参数
+	- 由于引用类型(slice、map、interface、channel)自身就是指针，所以这些类型的值拷贝给函数参数，函数内部的参数仍然指向它们的底层数据结构
+ - 值类型&引用类型     
+	- 值类型和引用类型的差异在于赋值同类型新变量后，对新变量进行修改是否能够影响原来的变量，若不能影响则为值类型，若能影响则为引用类型
+	- 值类型：数值、布尔、字符串、指针、数组、结构体等
+    - 引用类型：切片、映射、接口等
+	- 针对值类型可以借助指针修改原值
+	- 针对值类型和引用类型在赋值后新旧变量的地址并不相同，只是引用类型在底层共享数据结构(其中包含指针类型元素)
+ - 补充
+	- 变量是一个地址，也是一个引用
+	- 引用表达的是关系，指针表达的是类型；  
+	- A --> B 是引用关系，而 A 是指针
+	
 3、返回值
-多返回值  //
+ - 多返回值 
 	func calcReturn(x, y int) (int, int, int, int) {
 		return x + y, x - y, x * y, x / y
 	}
-命名返回值
+ - 命名返回值
 	func calcReturnNamecalc(x, y int) (sum, difference, product, quotient int) {
 		sum, difference, product, quotient = x + y, x - y, x * y, x / y
 		return
 	}
-PS:
-	return关键字中指定了参数时，返回值可以不用名称。如果return省略参数，则返回值部分必须带名称。
-	但即使返回值命名了，return中也可以强制指定其它返回值的名称，也就是说return的优先级更高。
-	return中可以有表达式，但不能出现赋值表达式，这和其它语言可能有所不同。例如return a+b是正确的，但return c=a+b是错误的。
+ - 补充
+	- return关键字中指定了参数时，返回值可以不用名称。如果return省略参数，则返回值部分必须带名称。
+	- 但即使返回值命名了，return中也可以强制指定其它返回值的名称，也就是说return的优先级更高。
+	- return中可以有表达式，但不能出现赋值表达式，这和其它语言可能有所不同。例如return a+b是正确的，但return c=a+b是错误的。
+
 4、递归
-函数内部调用函数自身的函数称为递归函数
-	退出条件: 退出条件基本上都使用退出点来定义，退出点常常也称为递归的基点，是递归函数的最后一次递归点，或者说没有东西可递归时就是退出点。
-	递归函数很可能会产生一大堆的goroutine(其它编程语言则是出现一大堆的线程、进程)，也很可能会出现栈空间内存溢出问题。
-	在其它编程语言可能只能设置最大递归深度或改写递归函数来解决这个问题，在Go中可以使用channel+goroutine设计的"lazy evaluation"来解决。
-1).阶乘  // n*(n-1)*...*3*2*1
+1).定义
+ - 函数内部调用函数自身的函数称为递归函数
+	- 退出条件: 退出条件基本上都使用退出点来定义，退出点常常也称为递归的基点，是递归函数的最后一次递归点，或者说没有东西可递归时就是退出点。
+	- 递归函数很可能会产生一大堆的goroutine(其它编程语言则是出现一大堆的线程、进程)，也很可能会出现栈空间内存溢出问题。
+	- 在其它编程语言可能只能设置最大递归深度或改写递归函数来解决这个问题，在Go中可以使用channel+goroutine设计的"lazy evaluation"来解决。
+2).阶乘          // n*(n-1)*...*3*2*1
 	func factorial(n int) int {
-        if n <= 0 {
-                return -1
-        } else if n == 1 { 
-                return 1   // 判断退出点
-        } else {
-                return n * factorial(n-1)   // 递归表达式
-        }
+		if n <= 0 {
+				return -1
+		} else if n == 1 { 
+				return 1                    // 判断退出点
+		} else {
+				return n * factorial(n-1)   // 递归表达式
+		}
 	}
-2).斐波那契数列  // f(n)=f(n-1)+f(n-2)且f(2)=f(1)=1
+3).斐波那契数列  // f(n)=f(n-1)+f(n-2)且f(2)=f(1)=1
 	func fib(n int) int {
-			if n == 1 || n == 2 {
-					return 1
-			}
-			return fib(n-1) + fib(n-2)
+		if n == 1 || n == 2 {
+				return 1
+		}
+		return fib(n-1) + fib(n-2)
 	}
-3).汉罗塔
-	将所有a柱上的圆盘借助b柱移动到c柱，在移动过程中保证每个柱子的上面圆盘比下面圆盘小
-	// a -> 开始 ; b -> 借助 ; c -> 终止 
-	// n: a -> c(b) ; 
-	// n = 1 ： a -> c ; 
-	// n > 1 : n - 1 (a -> b(c)) 、 a -> c ; n - 1 (b -> c(a))
+4).汉罗塔
+ - 将所有a柱上的圆盘借助b柱移动到c柱，在移动过程中保证每个柱子的上面圆盘比下面圆盘小
+ - a -> 开始 ; b -> 借助 ; c -> 终止 
+ - n: a -> c(b) ; 
+ - n = 1 ： a -> c ; 
+ - n > 1 : n - 1 (a -> b(c)) 、 a -> c ; n - 1 (b -> c(a))
 	func tower(a, b, c string, layer int) {
         if layer <= 0 {
                 return
@@ -752,30 +758,51 @@ PS:
         tower(b, a, c, layer-1)
 	}
 	tower("A", "B", "C", 3)
-4).递归一个目录
-	它的递归基点是文件，只要是文件就返回，只要是目录就进入
+5).递归一个目录
+ - 它的递归基点是文件，只要是文件就返回，只要是目录就进入
+ 
 5、函数类型
-	函数也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数返回值进行返回
-	声明&初始化&调用
-		var callback func(n1, n2 int) (r1, r2, r3, r4 int)  // 定义函数类型变量，并使用零指nil进行初始化
-		fmt.Printf("%T %v", callback, callback)
-		callback = calcReturn // 赋值为函数calcReturn
-		fmt.Println(callback(5, 2))  // 调用函数calcReturn
-	声明&调用参数类型为函数的函数
-		func printResult(pf func(...string), list ...string) {   // 定义接收函数类型作为参数的函数
-			pf(list...)
+ - 函数也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数返回值进行返回
+ - 声明&初始化&调用
+	var callback func(n1, n2 int) (r1, r2, r3, r4 int)  // 定义函数类型变量，并使用零指nil进行初始化
+	callback = calcReturn                               // 赋值为函数calcReturn
+	callback(5, 2)                                      // 调用函数calcReturn
+	- 声明函数类型变量f 为函数Add
+		var f func(int, int) int = Add
+		fmt.Println(f(4, 2)) // 6
+	- 声明函数切片
+		var fs []func(int, int) int
+		fs = append(fs, Add, Sub, Mul, Div)
+		fmt.Printf("%T;\n%#v\n", fs, fs)    // []func(int, int) int;
+											// []func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
+		for _, f := range fs{
+			fmt.Println(f(4,2))
 		}
-		func line(list ...string) {
-			fmt.Print("|")
-			for _, e := range list {
-				fmt.Print(e)
-				fmt.Print("\t|")
+	- 返回值为函数
+		func genFunc() func() {
+			if rand.Int()%2 == 0 {
+				return sayHi
+			} else {
+				return sayHolle
 			}
-			fmt.Println()
 		}
-		names := []string{"aa", "bb", "cc"}
-		printResult(line, names...)
-	自定义函数类型&调用参数类型为自定义函数类型的函数&赋值变量并调用
+		rand.Seed(time.Now().Unix())
+		genFunc()
+ - 声明&调用参数类型为函数的函数
+	func printResult(pf func(...string), list ...string) {   // 定义接收函数类型作为参数的函数
+		pf(list...)
+	}
+	func line(list ...string) {
+		fmt.Print("|")
+		for _, e := range list {
+			fmt.Print(e)
+			fmt.Print("\t|")
+		}
+		fmt.Println()
+	}
+	names := []string{"aa", "bb", "cc"}
+	printResult(line, names...)
+ - 自定义函数类型&调用参数类型为自定义函数类型的函数&赋值变量并调用
 	type addFunc func(x, y int) int                // 声明函数类型addFunc
 	func asArg(fn addFunc) int {                   // 创建函数asArg使用声明函数类型addFunc作为参数
 		return fn(2, 2) * 2
@@ -783,36 +810,39 @@ PS:
 	ret := asArg(func(x, y int) int {          // 调用函数asArg并使用匿名函数传参
 		return x + y
 	}
-	fmt.Println(ret)
+
 6、匿名函数与闭包
 1).匿名函数
-	不需要定义名字的函数叫做匿名函数，常用做帮助函数在局部代码块中使用或作为其他函数的参数
-	func(args){					 		           // 声明匿名函数并直接执行
-	// 
-	}(parameters)
-	
-	printResult(func(list ...string) {             // 使用匿名函数作为printResult的参数
-		for i, v := range list{
-			fmt.Printf("%d: %s", i, v)
+ - 不需要定义名字的函数叫做匿名函数，常用做帮助函数在局部代码块中使用或作为其他函数的参数
+	- 声明匿名函数并直接执行
+		func(args){
+		//
+		}(parameters)
+	- 使用匿名函数作为printResult的参数
+		printResult(func(list ...string) {
+			for i, v := range list{
+				fmt.Printf("%d: %s", i, v)
+			}
+		}, name...)
+	- 声明自定义匿名函数类型
+		type Callback func() error                      // 声明自定义匿名函数类型
+		callback := map[string]Callback{}               // 赋值给map类型变量
+		callback["add"] = func(int string) error {      // 初始化为具体的匿名函数
+			fmt.Println("add")
+			return nil
 		}
-	}, name...)
-	
-	type Callback func() error                      // 声明自定义匿名函数类型
-	callback := map[string]callback{}               // 赋值给map类型变量
-	callback["add"] = func(int string) error {      // 初始化为具体的匿名函数
-		fmt.Println("add")
-		return nil
-	}
-	callback["add"]()
+		callback["add"]()
 2).闭包
-	闭包，匿名函数的一种，是指在函数内定义的匿名函数引用外部函数的变量，只要匿名函数继续使用则外部函数赋值的变量不被自动销毁  //  变量生成周期(内存中存在的时间)发生了变化 ，闭包不仅仅包含函数，还包含函数定义域和函数变量
-	func addBase(base int) func(int) int {  // 定义闭包函数，返回一个匿名函数用于计算于base元素的和
-		return func (num int) int {
-			return base + num
+  - 闭包，匿名函数的一种，是指在函数内定义的匿名函数引用外部函数的变量，只要匿名函数继续使用则外部函数赋值的变量不被自动销毁
+	- 变量生成周期(内存中存在的时间)发生了变化 ，闭包不仅仅包含函数，还包含函数定义域和函数变量
+		func addBase(base int) func(int) int {  // 定义闭包函数，返回一个匿名函数用于计算于base元素的和
+			return func (num int) int {
+				return base + num
+			}
 		}
-	}
-	base2 := addBase(2)    // 使用闭包函数
-	fmt.Println(base2(3))
+		base2 := addBase(2)    // 使用闭包函数
+		fmt.Println(base2(3))
+		
 7、错误处理
 1).error 接口
  - error类型是个接口
@@ -820,27 +850,26 @@ PS:
 		Error() string
 	}
  - 函数调用时判断返回值
-	if err != nil {
-	}
- - Go语言通过 error 接口 实现错误处理的标准模式， 通过使用函数返回值列表中的最后一个值返回错误信息，将错误的处理交由程序员主动进行处理
-        func division(n1, n2 int) (int, error){          // 定义除法函数，若除数为0则使用error返回错误信息
-              if n2 == 0 {
-                      return 0, errors.New("除数为0")
-              }
-              return n1/n2 , nil
-        }
-        for _, v := range [...]int{0, 1, 2, 3} {         // 处理函数返回的错误
-                if r, err := division(6, v); err != nil {
-                        fmt.Println(err)
-                } else {
-                        fmt.Println(r)
-                }
-        }
-	error接口的初始化方法:
-	a、通过 errors 包的 New 方法创建 errors.New()
-	b、通过通过fmt.Errorf方法创建方法创建
+	- if err != nil { ... }
+		for _, v := range [...]int{0, 1, 2, 3} {           // 处理函数返回的错误
+				if r, err := division(6, v); err != nil {
+						fmt.Println(err)
+				} else {
+						fmt.Println(r)
+				}
+		}
+ - Go语言通过 error 接口 实现错误处理的标准模式，通过使用函数返回值列表中的最后一个值返回错误信息，将错误的处理交由程序员主动进行处理
+ - error接口的初始化方法:
+	- 通过 errors 包的 New 方法创建 errors.New()
+		func division(n1, n2 int) (int, error){            // 定义除法函数，若除数为0则使用error返回错误信息
+			if n2 == 0 {
+					return 0, errors.New("除数为0")
+			}
+			return n1/n2 , nil
+		}
+	- 通过通过fmt.Errorf方法创建方法创建
 		err1, err2 := errors.New("error: 1"), fmt.Errorf("error: %d", 2)
-		fmt.Printf("%T, %T, %v, %v", err1, err2, err1, err2) // *errors.errorString, *errors.errorString, error: 1, error: 2
+		fmt.Printf("%T, %T, %v, %v", err1, err2, err1, err2)                // *errors.errorString, *errors.errorString, error: 1, error: 2
 2).复杂的错误类型
  - 以os包举例，其提供了 LinkError、PathError、SyscallError 的错误类型
  - 上述error都是实现了error接口的错误类型
@@ -881,76 +910,57 @@ PS:
 	}
 	fmt.Println(newErr.Error())
 4).Error Wrapping 错误嵌套   // golang 1.13
-- 目的: 扩展error信息
-- 使用 fmt.ErrorF(newErrorStr %w,e)
-- 长处 不需要像上面一样定义结构体
-- 例如: 
+ - 目的: 扩展error信息
+ - 使用 fmt.ErrorF(newErrorStr %w,e)
+ - 长处 不需要像上面一样定义结构体
+ - 例如: 
 	e := errors.New("原始的错误")
 	w := fmt.Errorf("Wrap了一个新的错误: %w", e)
-	fmt.Println(w)
 5).defer
-	defer 用户声明函数，不论函数是否发生错误都在函数执行最后执行(return之前);若使用defer声明多个函数，则按照声明的顺序，先声明后执行（堆）常用来做资源释放，记录日志等工作.
-	defer的本质是，当在某个函数中使用了defer关键字，则创建一个独立的defer栈帧，并将该defer语句压入栈中，同时将其使用的相关变量也拷贝到该栈帧中（显然是按值拷贝的）。因为栈是LIFO方式，所以先压栈的后执行。因为是独立的栈帧，所以即使调用者函数已经返回或报错，也一样能在它们之后进入defer栈帧去执行
+ - defer 用户声明函数，不论函数是否发生错误都在函数执行最后执行(return之前);若使用defer声明多个函数，则按照声明的顺序，先声明后执行（堆）常用来做资源释放，记录日志等工作.
+ - defer的本质是，当在某个函数中使用了defer关键字，则创建一个独立的defer栈帧，并将该defer语句压入栈中，同时将其使用的相关变量也拷贝到该栈帧中（显然是按值拷贝的）。因为栈是LIFO方式，所以先压栈的后执行。因为是独立的栈帧，所以即使调用者函数已经返回或报错，也一样能在它们之后进入defer栈帧去执行
 6).panic与 recover 函数
-panic
-	panic和recover函数用于处理运行时错误，当调用panic抛出错误，可以中断原有的控制流程，常用于不可修复性错误。
-recover
-	recover函数用于终止错误处理流程，仅在defer语句的函数中有效，用于截取错误处理流程 recover 只能捕获到最后一个错误。
-	a、当未发生panic，且不存在panic，则recover函数得到的结果为nil
-	b、当未发生panic，且存在panic，则recover函数得到的结果为panic传递的参数
-	c、recover只能获取到最后一次的panic的信息
-	func main() {
-	defer func() {
-		fmt.Println(recover())
-	}()
-
-	var x, y *int
-	sum(x, y)
-	}
-8、实例
-1).声明函数类型变量f 为函数Add
-	var f func(int, int) int = Add
-	fmt.Println(f(4, 2)) // 6
-2).声明函数切片
-	var fs []func(int, int) int
-	fs = append(fs, Add, Sub, Mul, Div)
-	fmt.Printf("%T;\n%#v\n", fs, fs)    // []func(int, int) int;
-										// []func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
-	for _, f := range fs{
-		fmt.Println(f(4,2))
-	}
-3).返回值为函数
-	func genFunc() func() {
-		if rand.Int()%2 == 0 {
-			return sayHi
-		} else {
-			return sayHolle
-		}
-	}
-	rand.Seed(time.Now().Unix())
-	genFunc()
+ - panic
+	- panic和recover函数用于处理运行时错误，当调用panic抛出错误，可以中断原有的控制流程，常用于不可修复性错误。
+ - recover
+	- recover函数用于终止错误处理流程，仅在defer语句的函数中有效，用于截取错误处理流程 recover 只能捕获到最后一个错误。
+		- 当未发生panic，且不存在panic，则recover函数得到的结果为nil
+		- 当未发生panic，且存在panic，则recover函数得到的结果为panic传递的参数
+		- recover只能获取到最后一次的panic的信息
+			defer func() {
+				fmt.Println(recover())
+			}()
+			var x, y *int
+			sum(x, y)
+			}
 
 六、包
 1、定义
- - 包是函数和数据的集合，将有相关特性的函数和数据放在统一的文件目录进行管理，每个包都可以作为独立的单元维护并提供给其他项目进行使用。
- - 声明所在包，包名告知编译器哪些是包的源代码用于编译库文件，其次包名用于限制包内成员对外的可见性，最后包名用于在包外对公开成员的访问。
+ - 包是函数和数据的集合，将有相关特性的函数和数据放在统一的文件目录进行管理，每个包都可以作为独立的单元维护并提供给其他项目进行使用
+ - 声明所在包，包名告知编译器哪些是包的源代码用于编译库文件，其次包名用于限制包内成员对外的可见性，最后包名用于在包外对公开成员的访问
  - 在源文件中加上`package xxx`就可以声明xxx的包
+ 
 2、成员可见性
  - Go 语言使用名称首字母大小写来判断对象(常量、变量、函数、类型、结构体、方法等)的访问权限，首字母大写标识包外可见(公开的)，否者仅包内可访问(内部的);
+
 3、main 包与 main 函数
  - main包用于声明告知编译器 将包编译为二进制 可执行文件
  - main包中的 main 函数是程序的入口，无返回值，无参数
+
 4、init 函数
  - init函数是初始化包使用，无返回值，无参数。建议每个包只定义一个； 
  - init函数在import包时自动被调用(const -->var -->init)。
+
 5、标准包
  - Go提供了大量标准包，可查看 https://golang.google.cn/pkg/
 	- go list std 查看所有标准包
 	- go doc packagename 查看包的帮助信息
 	- go doc packagename.element 查看包内成员 帮助信息
+
 6、包的维护
  - 包的提供者 -> 打tag  -> git tag
  - 包的使用者 -> 改版本 -> go mods
+
 7、关系说明
  - import 导入的是路径，而非包名
  - 包名和目录名不强制一致，但推荐一致
@@ -958,10 +968,12 @@ recover
  - 在同一目录下，所有的源文件必须使用相同的包名
  	- Multiple packages in directory: pk2, pk3 
  - 文件名不限制，但不能有中文
+
 8、设置 go mod 和 go proxy
  - 设置两个环境变量 // go env -w 
 	- GO111MODULE=on
 	- GOPROXY=https://goproxy.io,direct
+
 9、创建git，发布到github
  - 项目目录下 go mod init github.com/ahwhy/myGolang
  - git init 
@@ -975,45 +987,52 @@ recover
 	
 七、结构体
 1、定义
-结构体是由一些列属性组成的复合数据类型，每个属性都具有名称、类型和值，结构体将属性组合在一起由程序进行处理
-结构体定义使用 struct 标识，需要指定其包含的属性（名和类型），在定义结构体时可以为 结构体指定结构体名（命名结构体），用于后续声明结构体变量使用
+ - 结构体是由一些列属性组成的复合数据类型，每个属性都具有名称、类型和值，结构体将属性组合在一起由程序进行处理
+ - 结构体定义使用 struct 标识，需要指定其包含的属性(名和类型)，在定义结构体时可以为 结构体指定结构体名(命名结构体)，用于后续声明结构体变量使用
 	type struct_variable_type struct {
-	member definition
-	...
+		member definition
+		...
 	}
+	
 2、声明
-声明结构体变量只需要定义变量类型为结构体名，变量中的每个属性被初始化为对应类型的零值。也可声明结构体指针变量，此时变量被初始化为 nil。
+ - 声明结构体变量只需要定义变量类型为结构体名，变量中的每个属性被初始化为对应类型的零值
 	var struct_name struct_variable_type
+ - 可以声明结构体指针变量，此时变量被初始化为 nil
 	var struct_name *struct_variable_type
+	
 3、初始化
-使用结构体创建的变量叫做对应结构体的实例或者对象
-1).使用结构体零值初始化结构体值对象
+ - 使用结构体创建的变量叫做对应结构体的实例或者对象
+ - 使用结构体零值初始化结构体值对象
 	var struct_name struct_variable_type = struct_variable_type{}
-2).使用结构体字面量初始化结构体值对象
+ - 使用结构体字面量初始化结构体值对象
 	var struct_name struct_variable_type = struct_variable_type{
-	...
+		...
 	}
 	struct_name := struct_variable_type{a: 123, c: 789...}    //初始化部分
-3).使用 new 函数进行初始化结构体指针对象
+ - 使用 new 函数进行初始化结构体指针对象
 	var struct_name *struct_variable_type = new(struct_variable_type)
-4).使用结构体字面量初始化结构体指针对象
+ - 使用结构体字面量初始化结构体指针对象
 	var struct_name *struct_variable_type = &struct_variable_type{
-	...
+		...
 	}
 	struct_name := &struct_variable_type{a: 123, c: 789...}
+	
 4、属性的访问和修改 
-通过结构体对象名/结构体指针对象.属性名的方式来访问和修改对象的属性值
+ - 通过结构体对象名/结构体指针对象.属性名的方式来访问和修改对象的属性值
 	struct_name.a
+	
 5、匿名结构体
-在定义变量时将类型指定为结构体的结构，此时叫匿名结构体。匿名结构体常用于初始化一次结构体变量的场景，例如项目配置
+ - 在定义变量时将类型指定为结构体的结构，此时叫匿名结构体
+ - 匿名结构体常用于初始化一次结构体变量的场景，例如项目配置
 	a := struct{
-	a1 int
-	a2 string
+		a1 int
+		a2 string
 		...
 	}{1, "aa"}
+	
 6、命名嵌入
-结构体命名嵌入是指结构体中的属性对应的类型也是结构体
 1).定义 
+ - 结构体命名嵌入是指结构体中的属性对应的类型也是结构体
 	type Address struct{
 		region string
 		street string
@@ -1024,7 +1043,7 @@ recover
 		tel  string
 		addr Address
 	}
-2).声明和初始化 
+2).声明&&初始化 
 	var u1 User
 	var a1 Address = Address{
 		"浙江省杭州市",
@@ -1043,21 +1062,24 @@ recover
 	}
 3).属性的访问和修改
 	u3.addr.num = "002"
+	
 7、匿名嵌入
-结构体匿名嵌入是指将已定义的结构体名直接声明在新的结构体中，从而实现对以后已有类型的扩展和修改
 1).定义
+ - 结构体匿名嵌入是指将已定义的结构体名直接声明在新的结构体中，从而实现对以后已有类型的扩展和修改
 	type Employee struct {
 		User
 		salary float64
 		title  string
 	}		
 2).声明和初始化
-在初始化匿名嵌入的结构体对象时需要遵循树状声明的结构，对于匿名嵌入的结构体可以使用结构体名来指定初始化参数
+ - 在初始化匿名嵌入的结构体对象时需要遵循树状声明的结构，对于匿名嵌入的结构体可以使用结构体名来指定初始化参数
 3).属性的访问和修改	
-在访问和修改嵌入结构体的属性值时，可以通过对象名.结构体名称.属性名的方式进行访问和修改，结构体名称可以省略（匿名成员有一个隐式的名称），因此不能嵌套两个相同名称的结构体。当被嵌入结构体和嵌入结构体有相同的属性名时，在访问和修改嵌入结构体成员的属性值时不能省略结构体名称
+ - 在访问和修改嵌入结构体的属性值时，可以通过对象名.结构体名称.属性名的方式进行访问和修改，结构体名称可以省略（匿名成员有一个隐式的名称），因此不能嵌套两个相同名称的结构体
+ - 当被嵌入结构体和嵌入结构体有相同的属性名时，在访问和修改嵌入结构体成员的属性值时不能省略结构体名称
+ 
 8、指针类型嵌入
-结构体嵌入(命名&匿名)类型也可以为结构体指针
 1).定义
+ - 结构体嵌入(命名&匿名)类型也可以为结构体指针
 	type PUser *struct{              // 命名嵌入结构体指针
 		name string
 		tel  string
@@ -1068,146 +1090,247 @@ recover
 		salary float64
 		title  string
 	}
-2).声明和初始化
+2).声明&&初始化
+	puser := PUser{"atlantis", "18100000000", &a1}
+	pemployee := PEmployee{
+		PUser:  &puser,
+		salary: 25000,
+		title:  "aa",
+	}
 3).属性的访问和修改	
-使用属性为指针类型底层共享数据结构，当底层数据发生变化，所有引用都会发生影响
+ - 使用属性为指针类型底层共享数据结构，当底层数据发生变化，所有引用都会发生影响
+ 
 9、空结构体
 1).struct{}
- - struct{} 是一个无元素的结构体类型，通常在没有信息存储时使用。优点是大小为0，不需要内存来存储struct {}类型的值。
+ - struct{} 是一个无元素的结构体类型，通常在没有信息存储时使用
+ - 优点是大小为0，不需要内存来存储struct {}类型的值
 2).struct{}{}
- - struct{}{} 是一个复合字面量，它构造了一个 struct{} 类型的值，该值也是空。
+ - struct{}{} 是一个复合字面量，它构造了一个 struct{} 类型的值，该值也是空
 	var empty = struct{}{}
+	
 10、可见性
-结构体首字母大写则包外可见(公开的)，否者仅包内可访问(内部的)
-结构体属性名首字母大写包外可见(公开的)，否者仅包内可访问(内部的)
-	组合：
-	a、结构体名首字母大写，属性名大写：结构体可在包外使用，且访问其大写的属性名
-	b、结构体名首字母大写，属性名小写：结构体可在包外使用，且不能访问其小写的属性名
-	c、结构体名首字母小写，属性名大写：结构体只能在包内使用，属性访问在结构体嵌入时由被嵌入结构体(外层)决定，被嵌入结构体名首字母大写时属性名包外可见，否者只能在包内使用
-	d、结构体名首字母小写，属性名小写：结构体只能在包内使用
-PS: 可以使用函数返回首字母小写的结构体，以达到控制访问的作用
+ - 结构体首字母大写则包外可见(公开的)，否者仅包内可访问(内部的)
+ - 结构体属性名首字母大写包外可见(公开的)，否者仅包内可访问(内部的)
+	- 组合
+		结构体名首字母大写，属性名大写：结构体可在包外使用，且访问其大写的属性名
+		结构体名首字母大写，属性名小写：结构体可在包外使用，且不能访问其小写的属性名
+		结构体名首字母小写，属性名大写：结构体只能在包内使用，属性访问在结构体嵌入时由被嵌入结构体(外层)决定，被嵌入结构体名首字母大写时属性名包外可见，否者只能在包内使用
+		结构体名首字母小写，属性名小写：结构体只能在包内使用
+		- 可以使用函数返回首字母小写的结构体，以达到控制访问的作用
+
 11、深浅拷贝
-1).区别
-深拷贝 copy的是数据本身
-	a、复制的时候会创建一个新的对象
-	b、指向完全不同的内存地址
-	c、修改互不影响
-浅拷贝 复制的是对象的指针，
-	a、新老对象指向同一块内存区域
-	b、a修改字段，b中的字段也一同被修改
-	c、内存消耗是一致的
+1).定义&&区别
+ - 深拷贝 copy的是数据本身
+	- 复制的时候会创建一个新的对象
+	- 指向完全不同的内存地址
+	- 修改互不影响
+ - 浅拷贝 复制的是对象的指针，
+	- 新老对象指向同一块内存区域
+	- a修改字段，b中的字段也一同被修改
+	- 内存消耗是一致的
 2).类型
-值类型的都是深拷贝
+ - 值类型的都是深拷贝
 	int、float、bool、array、struct
-引用类型都是浅拷贝
+ - 引用类型都是浅拷贝
 	slice、map、function
+	
 12、结构体方法
-结构体的行为,需要用方法才能完成; Go中的方法是作用在指定的数据类型上的(和指定的数据类型绑定),因此 ***自定义类型都可以有方法,不仅仅是结构体***;  
-方法的声明与调用:  
-type A struct {
-    Name string  
-}  
-func (a A) say(){  
-   fmt.Println(a.Name)   
-}
-说明:  
-	a. func(a A) say() {} 表示结构体A有一个方法,名称为say
-	b. (a A) 体现say 方法与A 类型绑定  
+ - 结构体的行为,需要用方法才能完成;
+ - Go中的方法是作用在指定的数据类型上的(和指定的数据类型绑定)
+ - 因此 ***自定义类型都可以有方法,不仅仅是结构体***; 
+ - 方法的声明与调用:  
+	type A struct {
+		Name string  
+	}  
+	func (a A) say(){  
+	fmt.Println(a.Name)   
+	}
+	- func(a A) say() {} 表示结构体A有一个方法,名称为say
+	- (a A) 体现say 方法与A 类型绑定  
 
 八、方法
-方法是为特定类型定义的，只能由该类型调用的函数
 1、定义
-方法是添加了接收者的函数，接收者必须是自定义的类型
+ - 方法是 为特定类型定义，只能由该类型调用的函数
+ - 方法是 添加了接收者的函数，接收者必须是自定义的类型
 	func (t Type) method(parameters) returns {
+		...
 	}
-例如:
+ - 示例
 	type User struct {
 		name string
 	}
 	// 为结构体User定义方法
 	func (user User) Call(){   
-			fmt.Println(user.name)
+		fmt.Println(user.name)
 	}		
 	func (user User) SetName(name string) {
 		user.name = name
 	}
+	
 2、调用
-调用方法通过自定义类型的 对象.方法名 进行调用，在调用过程中对象传递(赋值)给方法的接收者(值类型，拷贝)
+ - 调用方法通过自定义类型的 对象.方法名 进行调用，在调用过程中对象传递(赋值)给方法的接收者(值类型，拷贝)
 	user := User{"aa"}  // 初始化结构体对象
 	user.Call()         // 调用结构体对象Call方法
 	user.SetName("bb")
-	user.Call()         //  返回 aa，值传递
-3. 指针接收者
+	user.Call()         // 返回 aa，值传递
+	
+3、指针接收者
 1).声明
 	func (user *User) PSetName(name string) {
 		user.name = name
 	}
 2).调用
+ - 示例
 	(&user).PSetName("bb")  // 调用结构体指针对象的PSetName
 	
 	user2 := &User{"cc"}
 	(*user2).Call()
-当使用结构体指针对象调用值接收者的方法时，Go编译器会自动将指针对象"解引用"为值调用方法   // GO语法糖
-当使用结构体对象调用指针接收者的方法时，Go编译器会自动将值对象取引用为指针调用方法
-PS：
-	a、取引用和解引用发生在接收者中，对于函数方法的参数必须保持变量类型一一对应;
-	b、该使用值接收者还是指针接收者，取决于是否现需要修改原始结构体;
-		若不需要修改则使用值，若需要修改则使用指针;
-		若存在指针接收者，则所有方法使用指针接收者;
-	c、对于接收者为指针类型的方法，需要注意在运行时若接收者为nil用会发生错误;
-4. 匿名嵌入
-若结构体匿名嵌入带有方法的结构体时，则在外部结构体可以调用嵌入结构体的方法，并且在调用时只有嵌入的字段会传递给嵌入结构体方法的接收者。
-当被嵌入结构体与嵌入结构体具有相同名称的方法时，则使用 对象.方法名 调用被嵌入结构体方法。若想要调用嵌入结构体方法，则使用 对象.嵌入结构体名.方法
-5. 方法值&&方法表达式
-方法也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数
-返回值进行返回方法有两种，一种时使用对象/对象指针调用的(方法值)，另一种时有类型/类型指针调用的(方法表达式)
-1).方法值
-在方法值对象赋值时若方法接收者为值类型，则在赋值时会将值类型拷贝(若调用为指针则自动 解引用拷贝)
+	- 当使用结构体指针对象调用值接收者的方法时，Go编译器会自动将指针对象"解引用"为值调用方法   // GO语法糖
+	- 当使用结构体对象调用指针接收者的方法时，Go编译器会自动将值对象取引用为指针调用方法
+ - 补充
+	- 取引用和解引用发生在接收者中，对于函数方法的参数必须保持变量类型一一对应
+	- 该使用值接收者还是指针接收者，取决于是否现需要修改原始结构体
+		- 若不需要修改则使用值，若需要修改则使用指针
+		- 若存在指针接收者，则所有方法使用指针接收者
+	- 对于接收者为指针类型的方法，需要注意在运行时若接收者为nil时会发生错误
+	
+4、匿名嵌入
+ - 若结构体匿名嵌入带有方法的结构体时，则在外部结构体可以调用嵌入结构体的方法，并且在调用时只有嵌入的字段会传递给嵌入结构体方法的接收者
+ - 当被嵌入结构体与嵌入结构体具有相同名称的方法时，则使用 对象.方法名 调用被嵌入结构体方法
+	- 若想要调用嵌入结构体方法，则使用 对象.嵌入结构体名.方法
+	
+5、方法值&&方法表达式
+1).使用
+ - 方法也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数
+ - 返回值进行返回方法有两种，一种是使用 对象/对象指针 调用的(方法值)，另一种是使用 类型/类型指针 调用的(方法表达式)
+2).方法值
+ - 在方法值对象赋值时若方法接收者为值类型，则在赋值时会将值类型拷贝
+ - 若调用为指针则自动 解引用拷贝
+	method01 := user.Call
+	method02 := user.SetName
+	method03 := user2.Call
+	method04 := user2.PSetName
 2).方法表达式
-方法表达式在赋值时，针对接收者为值类型的方法使用类型名或类型指针 访问(go自动为指针变量生成隐式的指针类型接收者方法)，针对接收者为指针类型则使用类型指针访问。同时在调用时需要传递对应的值对象或指针对象。
-3) 自动生成指针接收者方法
-为什么根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
-使用反射获取 User 对象和 *User 对象结构
+ - 方法表达式在赋值时
+	- 针对接收者为 值类型的方法   使用 类型名或类型指针 访问，go自动为指针变量生成隐式的指针类型接收者方法
+		method05 := User.Call 
+			method05(&user)
+			method05(user2)
+	- 针对接收者为 指针类型的方法 使用 类型指针         访问，同时在调用时需要根据参数传递对应的值对象或指针对象
+		method06 := (*User).PSetName
+			method06(&user, "bb")  // (*User).PSetName(&user, "bb")
+			method06(user2, "bb")  // (*User).PSetName(user2, "bb")
+3).自动生成指针接收者方法  // 具体见课件
+ - 为何会根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
+	- 接收者为 值类型 的方法
+		func (user User) SetName(name string) {
+			user.name = name
+		}
+		/* 隐式
+		- func (user *User) SetName(name string) { user.name = name }
+		- (*user).SetName("bb")
+		- 获取user地址的值，并拷贝调用SetId；只影响拷贝(*user)的值，并不影响调用者的值
+		- 与(user User) SetName方法 行为一致
+		- 使用 值和指针都不改变调用者，行为一致
+		*/
+	- 接收者为 指针类型 的方法
+		func (user *User) PSetName(name string) {
+			user.name = name
+		}
+		/* 隐式
+		func (user User) PSetName(name string) { user.name = name }
+		- (&user).SetName("bb")
+		- user为值接收者，先拷贝值，再调用(&user).SetName只会影响接收者(user)的值，并不影响调用者的值
+		- 与(user *User) PSetName方法 行为不一致
+		- 使用 值 不改变调用者，使用指针改变调用者，行为不一致
+		*/
+ - 使用反射获取 User 对象和 *User 对象结构
+	type User struct{
+		Fields(1): 
+			name string,
+			
+		Methods(2):
+			func Call(objs.User) {},
+			func SetName(objs.User, string) {},
+	}
+	*{
+		type User struct{
+			Fields(1): 
+				name string,
+				
+			Methods(2):
+				func Call(objs.User) {},
+				func SetName(objs.User, string) {},
+		}
+		Methods(3)
+				func Call(*objs.User) {},
+				func SetName(*objs.User, string) {},
+				func PSetName(*objs.User, string) {},
+	}
 
 九、接口
-接口是自定义类型，是对是其他类型行为的抽象
-1. 定义
-接口定义使用interface标识，声明了一系列的函数签名(函数名、函数参数、函数返回值)，在定义接口时可以指定接口名称，在后续声明接口变量时使用。
+1、定义
+ - 接口是自定义类型，是对是其他类型行为的抽象
+ - 接口定义使用interface标识，声明了一系列的函数签名(函数名、函数参数、函数返回值)
+ - 在定义接口时可以指定接口名称，在后续声明接口变量时使用
 	type interfaceName interface {
 		方法签名                        // 方法名，参数(数量，顺序，类型)，返回值(数量，顺序，类型)匹配
 	}
+	- 示例
+		type Useritf interface{
+			Call()
+			SetName(name string)
+			PSetName(name string)
+		}	
+
 2、声明
-声明接口变量只需要定义变量类型为接口名，此时变量值被初始化为nil，类型也为nil
+ - 声明接口变量只需要定义变量类型为接口名，此时变量值被初始化为nil，类型也为nil
 	var name interfaceName 
-3、赋值                       // 接口无法实例化，即不能直接通过接口类型创建变量，只能由其他实现了接口的对象进行赋值
-1).类型对象
-当自定义类型实现了接口类型中声明的所有函数时，则该类型的对象可以赋值给接口变量，并使用接口变量调用实现的接口    // 由接口赋值的变量，无法调用结构体中的属性，也无法调用没有在接口中定义的其他方法，只能调用接口定义的方法行为
- - 方法接收者全为值类型的方法
- - 方法接收者全为指针类型的
- - 方法接收者既有值类型又有指针类型的
-2).接口对象
+
+3、赋值
+1).使用
+ - 接口无法实例化，即不能直接通过接口类型创建变量，只能由其他实现了接口的对象进行赋值
+	var useritf Useritf = &User{"aa"}
+	useritf.Call()
+	useritf.SetName("bb")
+	useritf.PSetName("bb")
+2).类型对象
+ - 当自定义类型实现了接口类型中声明的所有函数时，则该类型的对象可以赋值给接口变量，并使用接口变量调用实现的接口    // 由接口赋值的变量，无法调用结构体中的属性，也无法调用没有在接口中定义的其他方法，只能调用接口定义的方法行为
+	- 方法接收者全为值类型的方法
+	- 方法接收者全为指针类型的方法
+	- 方法接收者既有值类型又有指针类型的方法
+3).接口对象
  - 当接口(A)包含另外一个接口(B)中声明的所有函数时(A接口函数是B接口函数的父集，B是A的子集)，则接口(A)的对象也可以赋值给其子集的接口(B)变量
  - 若两个接口声明同样的函数签名，则者两个接口完全等价
  - 当类型和父集接口赋值给接口变量后，只能调用接口变量定义接口中声明的函数(方法)
+ 
 4、类型断言&&查询
-当父集接口或者类型对象赋值给接口变量后，需要将接口变量重新转换为原来的类型，需要使用类型断言/查询
-1).断言
-语法:接口变量.(Type)   // i.(T);  v, ok := i.(T)
-2).查询
-可以通过 switch-case + 接口变量.(type)查询变量类型，并选择对应的分支块
+ - 使用
+	- 当父集接口或者类型对象赋值给接口变量后，需要将接口变量重新转换为原来的类型，需要使用类型断言/查询
+ - 断言
+	- 语法: 接口变量.(Type) i.(T)
+	- v, ok := i.(T)
+ - 查询
+	- 通过 switch-case + 接口变量.(type)查询变量类型，并选择对应的分支块
+	
 5、接口匿名嵌入
-接口之中也可以嵌入已存在的接口，从而实现接口的扩展
+ - 接口之中也可以嵌入已存在的接口，从而实现接口的扩展
+	type Useritf2 interface{
+		Useritf
+	}
+	
 6、匿名接口
-在定义变量时将类型指定为接口的函数签名的接口，此时叫匿名接口。匿名接口常用于初始化一次接口变量的场景.
+ - 在定义变量时将类型指定为接口的函数签名的接口，此时叫匿名接口。匿名接口常用于初始化一次接口变量的场景
 	// 通过匿名接口声明接口变量
 	var closer interface {
 		Close() error
 	}
 	closer.Close()
+	
 7、空接口
-不包含任何函数签名的接口叫空接口，空接口声明的变量可以赋值为任何类型的变量任意接口
 1).定义
-语法: interface{}
+ - 不包含任何函数签名的接口叫空接口，空接口声明的变量可以赋值为任何类型的变量任意接口
+ - 语法: interface{}
 2).声明
  - 直接声明空接口并使用
 	type User struct {
@@ -1220,19 +1343,19 @@ PS：
 	empty = "aa"
 	empty = User{"aa", "123456"}
 	
-    if u, ok := empty.(User); ok {
-        fmt.Println(u.Name, u.Password)    // aa 123456
-    }
+	if u, ok := empty.(User); ok {
+		fmt.Println(u.Name, u.Password)    // aa 123456
+	}
 	fmt.Printf("%T %v\n", empty, empty)    // main.User {aa 123456}
 3).使用 场景
-常声明函数参数类型为 interface{} ，用于接收任意类型的变量
-例:
+ - 常声明函数参数类型为 interface{} ，用于接收任意类型的变量
+ - 示例
 	func printType(vs ...interface{}) {
 		for _, v := range vs {
 			switch v.(type) {                           // 类型查询
-			case nil:                                   //  - 使用switch时，若符合多个case项，则匹配最近的一个，因此勿将default放在最上方
-				fmt.Println("nil")                      //  - 语法: 接口变量.(Type) 只能用在switch语句中，是类型查询的特定语法，无法直接 Println 打印
-			case int:
+			case nil:                                   // - 使用switch时，若符合多个case项，则匹配最近的一个，因此勿将default放在最上方
+				fmt.Println("nil")                      // - 语法: 接口变量.(Type) 只能用在switch语句中，是类型查询的特定语法，无法直接 Println 打印
+			case int:                                   // - 或者在switch语句中直接赋值 data := v.(type)
 				fmt.Println("int")
 			case bool:
 				fmt.Println("bool")
@@ -1249,6 +1372,7 @@ PS：
 			}
 		}
 	}
+	
 十、反射
 1、定义
  - 反射是指在运行时动态的访问和修改任意类型对象的结构和成员
@@ -1407,7 +1531,7 @@ PS：
 		1. 先获取intereface的reflect.Type，然后遍历NumMethod
 		2. 再分别通过reflect.Type的 t.Method获取真实的方法
 		3. 最后通过Name和Type获取方法的类型和值
- - 例:
+ - 示例
 	type Person struct {
 			Name string
 			Age  int
@@ -2449,7 +2573,7 @@ UTF-8   a、目前互联网上使用最广泛的一种Unicode编码方式，它�
 	- count多次运行基准测试  go test -bench=. -count=10 -benchmem -run=none   // 因为热缩放、内存局部性、后台处理、gc活动等等会导致单次的误差
 	- benchtime 指定运行秒数 go test -bench=. -benchtime=5s -benchmem -run=none // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次。
 	- bench的工作原理
-		- 基准测试函数会被一直调用直到b.N无效，它是基准测试循环的次数
+			s- 基准测试函数会被一直调用直到b.N无效，它是基准测试循环的次数
 		- b.N 从 1 开始，如果基准测试函数在1秒内就完成 (默认值)，则 b.N 增加，并再次运行基准测试函数。
 		- b.N 的值会按照序列 1,2,5,10,20,50,... 增加，同时再次运行基准测测试函数。
 		- 上述结果解读代表 1秒内运行了168次 每次 6566836 ns
