@@ -2274,8 +2274,26 @@
 	 - logger不能决定字段输出顺序。 a|b = b|a
 
 2、github.com/sirupsen/logrus
- - https://github.com/sirupsen/logrus
- - https://github.com/rifflock/lfshook
+ - 实现利用logrus包，通过钉钉机器人发送日志
+	- 示例 -> logrus源码
+		type Hook interface {
+			Levels() []Level
+			Fire(*Entry) error
+		}
+		func AddHook(hook Hook) {
+			std.AddHook(hook)
+		}
+	- 首先定义相关结构体，然后实现Levels和Fire方法 --> 实现 Hook接口
+		- Levels中定义日志等级
+		- Fire中处理日志发送逻辑
+			- 比如发送到redis、es、钉钉、logstash
+	- 调用AddHook()，直接打印日志并发送
+
+3、github.com/rifflock/lfshook
+ - 结合logrotate github.com/lestrrat-go/file-rotatelogs
+	- 保留4个文件 rotatelogs.WithRotationCount(4)
+	- 切割时间 rotatelogs.WithRotationTime(1*time.Second)
+	- 删除时间 rotatelogs.WithMaxAge(2*time.Minute)
 
 三、非类型安全指针
 1、类型安全指针
