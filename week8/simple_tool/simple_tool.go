@@ -10,8 +10,8 @@ import (
 
 var (
 	endpint    = "oss-cn-chengdu.aliyuncs.com"
-	acessKey   = "LTAI5tMvG5NA51eiH3ENZDaa"
-	secretKey  = "vWOGbrPKQGmLVo4CKSgmAB62vdum10"
+	acessKey   = "LTAI5tPdJRm5driecxQFt6tK"
+	secretKey  = "edsFTXwFh4bkodhiTdBF4mPVGSJaPb"
 	bucketName = "cloud-station"
 	uploadFile = "test.txt"
 )
