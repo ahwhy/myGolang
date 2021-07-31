@@ -5,6 +5,9 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func printChars(prefix string, group *sync.WaitGroup) {
@@ -46,4 +49,12 @@ func TestCloser(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
+}
+
+func TestAdd(t *testing.T) {
+	bar := progressbar.Default(100)
+	for i := 0; i < 100; i++ {
+		bar.Add(1)
+		time.Sleep(40 * time.Millisecond)
+	}
 }

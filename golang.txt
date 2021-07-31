@@ -1825,7 +1825,7 @@
 			defer group.Done()                      // 通过信号量通知执行结束  等待信号量 -1
 			for ch := 'A'; ch <= 'Z'; ch++ {
 				fmt.Printf("%s:%c\n", prefix, ch)
-				runtime.Gosched()                   // 让出CPU使其调度 同time.Sleep(1 * time.Microsecond)
+				runtime.Gosched()                   // 让出CPU的调度 同time.Sleep(1 * time.Microsecond)
 			}
 		}
 		group := &sync.WaitGroup{}                  // 定义信号量  启动例程之前 +1，例程结束时 -1
@@ -1869,14 +1869,166 @@
  - 数据处理者处理完数据后将数据放入缓冲区中，数据接收者从缓冲区中获取数据，处理者不用等待接收者是否准备好处理数据
 
 5、共享数据
+1).定义
+ - 多个例程对同一个内存资源进行修改，未对资源进行同步限制，导致修改数据混乱
+2).sync包 -> 互斥锁&&读写锁
+ - sync.Mutex 互斥锁，用于对资源加锁和释放锁提供对资源同步方式访问
+	- 获取到锁的任务，阻塞其他任务; 意味着同一时间只有一个任务可以获取锁
+		var HcMutex sync.Mutex
+		HcMutex.Lock()    // 获取锁
+		HcMutex.UnLock()  // 释放锁
+ - sync.RWMutex 读写锁 
+	- 写锁阻塞所有锁(所有读锁和写锁)，目的是修改时其他人不要读取，也不要修改
+	- 读锁阻塞写锁，读锁可以同时施加多个，目的是不要让修改数据影响读取结果 
+		- 同时多个读任务，可以施加多个读锁，阻塞写锁
+		- 同时多个写任务，只可以施加一个写锁，阻塞其他所有锁，并且退化成互斥锁
+		- 读写混合: 若有写锁，等待释放后能施加 读或写
+		- 读写混合: 若有读锁，只能再施加读锁，阻塞写锁
+			var rwMutex sync.RWMutex
+			rwMutex.Lock      // 获取写入锁
+			rwMutex.Unlock    // 释放写入锁 
+			rwMutex.RLock     // 获取读取锁
+			rwMutex.RUnlock   // 释放读取锁 	
+ - sync.Map 
+	- go 1.9引入的内置方法，并发线程安全的map
+	- sync.Map 将key和value 按照interface{}存储
+	- 查询出来后要类型断言 x.(int) x.(string)
+	- 遍历使用Range() 方法，需要传入一个匿名函数作为参数，匿名函数的参数为k,v interface{}，每次调用匿名函数将结果返回
+		m := sync.Map{}
+		m.Store(k,v)  // 读
+		m.Load(k)     // 写
+		m.Delete(k)   // 删除
+		m.Range(func(k,v interface{}bool{   // 遍历
+			k := k.(string)
+			v := v.(string)
+			log.Printf("[找到了][%s=%d]", key, value)
+			return true
+		})
+		m.LoadOrstore(k,v)   // 若没有key，则添加
+		m.LoadAndDelete("key")  // 加载并删除
+3).原子操作
+ - 原子操作是指过程不能中断的操作
+ - sync/atomic包中提供了五类原子操作函数，其操作对象为整数型或整数指针
+	- Add*: 增加/减少
+	- Load*: 载入
+	- Store*: 存储
+	- Swap*: 更新
+	- CompareAndSwap*: 比较第一个参数引用值是否与第二个参数值相同，若相同则将第一个参数值更新为第三个参数
 
 6、管道
+1).定义
+ - go语言中可以通过 chan 来定义管道
+ - 通过操作符 -> 和 <- 对管道进行读取和写入操作，通过管道维护例程状态
+2).声明
+ - 管道是声明需要指定管道存放数据的类型，管道可以存放任何类型，但只建议用于存放值类型或者只包含值类型的结构体
+ - 在管道声明后，会被初始化为 nil
+	var channel chan int
+	fmt.Printf("%T %v", channel, channel)  // chan int <nil>
+3).初始化
+ - 使用 make函数初始化chan
+	- make(chan type)      不带 len参数创建无缓存区的管道
+	- make(chan type, len) 使用 len参数创建指定缓冲区长度的管道
+		channel = make(chan int)           // %T chan int;    %v 0xc00001e0c0; len 0
+		channel2 := make(chan string, 10)  // %T chan string; %v 0xc00005c180; len 0
+4).读取和写入
+ - 通过操作符 <- 对管道进行读取和写入操作
+ - 当写入 无缓冲区管道 或 缓冲区管道 已满时，写入则会阻塞，直到管道中元素被其他例程读取
+ - 当管道中无元素时，读取也会阻塞，直到管道被其他例程写入元素
+	channel2 <- "1"
+	fmt.Println(<-channel2)
+5).关闭管道
+ - 通过close函数关闭管道，关闭后的管道不能被写入
+ - 当读取到最后一个元素后可通过读取的第二个参数用于判断是否结束
+	e, ok := <-channel2  // 读取到最后一个元素返回false
+6).for-range 遍历管道
+ - 管道通过 for-range 进行遍历
+	channel03 := make(chan int)
+	go func() {
+		for e := range channel03 {
+				fmt.Println(e)
+		}
+		channel <- 0                     // 利用chan的特性进行阻塞
+	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+				channel03 <- i
+		}
+		close(channel03)
+	}()
+	<-channel
+ - Go语言time包实现了Tick函数，可以用于实现定时机制，Tick函数返回一个只读管道
+	- func Tick(d Duration) <-chan Time
+	- 示例
+		for now := range time.Tick(3 * time.Second) {
+			fmt.Println(time.Now())      // 每隔3s打印一次时间
+		}
+7).只读和只写管道
+ - 在函数参数时声明管道
+	- chan<- 表示管道只写
+		- var wchannel chan<- int
+		- func Write(cl chan<- rune) { }
+	- <-chan 表示管道只读
+		- var rchannel <-chan int
+		- func Read(cl <-chan rune) { }
 
-7、select-case 语句
+7、多路复用 -> select-case语句
+1).使用
+ - 若需要同时对多个管道进行监听(写入或读取)，则可以使用select-case 语句、
+ - select语句自上到下执行case语句中对管道的读取和写入
+	- 当操作成功则执行对应子语句，否则执行下一个case语句
+	- 当所有case都失败，则执行default语句 default语句可省略
+		select {
+		case v, ok := <-channel:
+			fmt.Println("channel", v, ok)
+		case v, ok := <-channel02:
+			fmt.Println("channel02", v, ok)
+		default:
+			fmt.Println("default")
+		}
+2).超时机制
+ - 通过select-case 实现对执行操作超时的控制
+ - select-case语句监听每个case语句中管道的读取，当某个case语句中管道读取成功则执行对应子语句
+	var timeout chan int           
+	go func() {
+		time.Sleep(3 * time.Second)
+		close(timeout)                         // 设定3s后关闭管道
+	}()
+	select {
+	case v, ok := <-channel:
+		fmt.Println("success:", r)
+	case <-timeout:                            // 3s后关闭管道，读取timeout成功
+		fmt.Println("timeout")
+	}
+ - Go语言time包实现了After函数，可以用于实现超时机制，After函数返回一个只读管道
+	- func After(d Duration) <-chan Time
+	- 示例
+		select {
+		case v, ok := <-channel:
+			fmt.Println("success:", r)
+		case <-time.After(3 * time.Second):    // 3s后关闭管道，读取管道成功
+			fmt.Println("timeout")
+		}
 
 8、sync包
-
+ - sync包提供了同步原语
+ - 常用结构体
+	- sync.Mutex:  互斥锁
+	- sync.RWMutex: 读写锁
+	- sync.Cond: 条件等待
+	- sync.Once: 单次执行      // 多个Once也只执行一个
+	- sync.Map: 例程安全映射
+	- sync.Pool: 对象池
+	- sync.WaitGroup: 组等待
+	
 9、runtime包
+ - runtime包提供了与 Go运行时系统交互的操作
+ - 常用函数
+	- runtime.Gosched(): 当前 goroutine 让出时间片
+	- runtime.GOROOT(): 获取 Go 安装路径
+	- runtime.NumCPU(): 获取可使用的逻辑 CPU 数量
+	- runtime.GOMAXPROCS(1): 设置当前进程可使用的逻辑 CPU 数量
+	- runtime.NumGoroutine(): 获取当前进程中 goroutine 的数量
+
 
 编程思想
 一、函数式编程  // 面向过程编程
@@ -2804,41 +2956,6 @@
  - Go语言中获取字符串的字节长度使用len()函数，获取字符串的字符个数使用utf8.RuneCountInString函数或者转换为rune切片求其长度，这两种方法都可以达到预期结果。
 
 五、Go中的锁
-1、sync包
-1).sync.Mutex 互斥锁 
- - 获取到锁的任务，阻塞其他任务; 意味着同一时间只有一个任务可以获取锁
-	var HcMutex sync.Mutex
-	HcMutex.Lock()    // 获取锁
-	HcMutex.UnLock()  // 释放锁
-2).sync.RWMutex 读写锁 
- - 写锁阻塞所有锁(所有读锁和写锁)，目的是修改时其他人不要读取，也不要修改
- - 读锁阻塞写锁，读锁可以同时施加多个，目的是不要让修改数据影响读取结果 
-	- 同时多个读任务，可以施加多个读锁，阻塞写锁
-	- 同时多个写任务，只可以施加一个写锁，阻塞其他所有锁，并且退化成互斥锁
-	- 读写混合: 若有写锁，等待释放后能施加 读或写
-	- 读写混合: 若有读锁，只能再施加读锁，阻塞写锁
-		var rwMutex sync.RWMutex
-		rwMutex.Lock      // 获取写入锁
-		rwMutex.Unlock    // 释放写入锁 
-		rwMutex.RLock     // 获取读取锁
-		rwMutex.RUnlock   // 释放读取锁 	
-3).sync.Map 
- - go 1.9引入的内置方法，并发线程安全的map
- - sync.Map 将key和value 按照interface{}存储
- - 查询出来后要类型断言 x.(int) x.(string)
- - 遍历使用Range() 方法，需要传入一个匿名函数作为参数，匿名函数的参数为k,v interface{}，每次调用匿名函数将结果返回
-	m := sync.Map{}
-	m.Store(k,v)  // 读
-	m.Load(k)     // 写
-	m.Delete(k)   // 删除
-	m.Range(func(k,v interface{}bool{   // 遍历
-		k := k.(string)
-		v := v.(string)
-		log.Printf("[找到了][%s=%d]", key, value)
-		return true
-	})
-	m.LoadOrstore(k,v)   // 若没有key，则添加
-	m.LoadAndDelete("key")  // 加载并删除
 
 六、单元测试和基准测试
 1、单元测试
@@ -3642,3 +3759,6 @@
 	http.StatusOK
 19).github.com/gin-gonic/gin
 20).github.com/go-playground/validator // 校验参数的包
+21).github.com/spf13/cobra // 客户端
+22).github.com/AlecAivazis/survey      // 隐藏密码
+23).github.com/schollz/progressbar     // 进度条

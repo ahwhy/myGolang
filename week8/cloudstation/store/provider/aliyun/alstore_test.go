@@ -14,7 +14,7 @@ var (
 
 	endpoint = "https://oss-cn-chengdu.aliyuncs.com"
 	ak       = "LTAI5tPdJRm5driecxQFt6tK"
-	sk       = "edsFTXwFh4bkodhiTdBF4mPVGSJaPb"
+	sk       = "******"
 )
 
 // DDD的开发流程  DDD -> 测试驱动开发

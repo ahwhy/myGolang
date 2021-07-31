@@ -5,6 +5,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/ahwhy/myGolang/week8/cloudstation/store"
 	"github.com/ahwhy/myGolang/week8/cloudstation/store/provider/aliyun"
 	"github.com/spf13/cobra"
@@ -15,7 +16,7 @@ const (
 	defaultBuckName = "cloud-station"
 	defaultEndpoint = "https://oss-cn-chengdu.aliyuncs.com"
 	defaultALIAK    = "LTAI5tPdJRm5driecxQFt6tK"
-	defaultALISK    = "edsFTXwFh4bkodhiTdBF4mPVGSJaPb"
+	defaultALISK    = "******"
 )
 
 var (
@@ -31,6 +32,13 @@ func init() {
 	RootCmd.AddCommand(uploadCmd)
 }
 
+func getAccessKeyFromInput() {
+	prompt := &survey.Password{
+		Message: "请输入access key: ",
+	}
+	survey.AskOne(prompt, &aliAccessKey)
+}
+
 func getProvider() (p store.Uploader, err error) {
 	switch ossProvider {
 	case "aliyun":
@@ -42,6 +50,7 @@ func getProvider() (p store.Uploader, err error) {
 			aliAccessKey = defaultALISK
 		}
 		fmt.Printf("上传用户: %s\n", aliAccessID)
+		getAccessKeyFromInput()
 		p, err = aliyun.NewUploader(bucketEndpoint, aliAccessID, aliAccessKey)
 		return
 	case "qcloud":
@@ -74,6 +83,3 @@ var uploadCmd = &cobra.Command{
 		return nil
 	},
 }
-
-
-

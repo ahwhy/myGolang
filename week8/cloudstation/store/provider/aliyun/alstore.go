@@ -16,6 +16,8 @@ type aliyun struct {
 	Endpoint  string `validate:"required,url"`
 	AccessID  string `validate:"required"`
 	AccessKey string `validate:"required"`
+
+	listener oss.ProgressListener
 }
 
 // 构造函数
@@ -24,11 +26,14 @@ func NewUploader(endpint, accessID, accessKey string) (store.Uploader, error) {
 		Endpoint:  endpint,
 		AccessID:  accessID,
 		AccessKey: accessKey,
+
+		listener: NewOssProgressListener(),
 	}
 
 	if err := p.validate(); err != nil {
 		return nil, err
 	}
+
 	return p, nil
 }
 
@@ -42,7 +47,7 @@ func (p *aliyun) UploadFile(bucketName, objectKey, localFilePath string) error {
 		return err
 	}
 
-	err = bucket.PutObjectFromFile(objectKey, localFilePath)
+	err = bucket.PutObjectFromFile(objectKey, localFilePath, oss.Progress(p.listener))
 	if err != nil {
 		return err
 	}
