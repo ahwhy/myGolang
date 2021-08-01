@@ -13,6 +13,16 @@ type User struct {
 	Password *Password
 }
 
+type Password struct {
+	Password    string   // hash过后的密码
+	CreateAt    int64    // 密码创建时间
+	UpdateAt    int64    // 密码更新时间
+	NeedReset   bool     // 密码需要被重置
+	ResetReason string   // 需要重置的原因
+	History     []string // 历史密码
+	IsExpired   bool     // 是否过期
+}
+
 // NewHashedPassword 生产hash后的密码对象
 func NewHashedPassword(password string) (*Password, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
@@ -25,23 +35,6 @@ func NewHashedPassword(password string) (*Password, error) {
 		CreateAt: ftime.Now().Timestamp(),
 		UpdateAt: ftime.Now().Timestamp(),
 	}, nil
-}
-
-type Password struct {
-	// hash过后的密码
-	Password string
-	// 密码创建时间
-	CreateAt int64
-	// 密码更新时间
-	UpdateAt int64
-	// 密码需要被重置
-	NeedReset bool
-	// 需要重置的原因
-	ResetReason string
-	// 历史密码
-	History []string
-	// 是否过期
-	IsExpired bool
 }
 
 // Update 更新密码
@@ -72,11 +65,13 @@ func (p *Password) HistoryCount() int {
 	return len(p.History)
 }
 
+// rotaryHistory 更新历史密码
 func (p *Password) rotaryHistory(maxHistory uint) {
 	if uint(p.HistoryCount()) < maxHistory {
 		p.History = append(p.History, p.Password)
 	} else {
 		remainHistry := p.History[:maxHistory]
+		// fmt.Println(remainHistry)
 		p.History = []string{p.Password}
 		p.History = append(p.History, remainHistry...)
 	}

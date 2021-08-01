@@ -50,6 +50,7 @@ func test(e ecdh.ECDH) {
 	fmt.Printf("The secret1 shared keys: %x\n", secret1)
 	fmt.Printf("The secret2 shared keys: %x\n", secret2)
 }
+
 func TestECDH(t *testing.T) {
 	e1 := ecdh.NewEllipticECDH(elliptic.P521())
 	e2 := ecdh.NewCurve25519ECDH()

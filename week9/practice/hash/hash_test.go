@@ -58,7 +58,7 @@ func TestSHA1Hash(t *testing.T) {
 //  abc c2b520d835e6a2e3f8f1ecc9fd57d794b3a9d2ae
 //  meq 4b983170ca50abad2e4af6d72c23c612405b9b59
 
-// 
+//
 func TestHMAC(t *testing.T) {
 	h := hmac.New(sha1.New, []byte("meq"))
 	io.WriteString(h, hashData)
@@ -75,6 +75,6 @@ func TestBcrypto(t *testing.T) {
 		fmt.Println(time.Since(now).Milliseconds())
 	}()
 
-	hd, _ := bcrypt.GenerateFromPassword([]byte(hashData), 28)
+	hd, _ := bcrypt.GenerateFromPassword([]byte(hashData), 10)
 	fmt.Printf("%s\n", hd)
 }
