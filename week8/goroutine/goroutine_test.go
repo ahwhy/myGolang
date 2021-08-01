@@ -58,3 +58,22 @@ func TestAdd(t *testing.T) {
 		time.Sleep(40 * time.Millisecond)
 	}
 }
+
+func TestFor(t *testing.T) {
+	channel := make(chan int)
+	channel03 := make(chan int)
+
+	go func() {
+		for e := range channel03 {
+			fmt.Println(e)
+		}
+		channel <- 0
+	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+			channel03 <- i
+		}
+		close(channel03)
+	}()
+	<-channel
+}
