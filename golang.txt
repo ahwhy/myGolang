@@ -1800,7 +1800,6 @@
 	- 每次取出的fieldValue类型是reflect.value
 	- 每次反射都要malloc这个reflect.Value结构体，还有GC
 
-
 十一、并发
 1、定义
  - 并发编程开发，将一个过程按照 并行算法 拆分为多个可以独立执行的代码块，从而充分利用多核和多处理器提高系统吞吐率
@@ -2028,6 +2027,215 @@
 	- runtime.NumCPU(): 获取可使用的逻辑 CPU 数量
 	- runtime.GOMAXPROCS(1): 设置当前进程可使用的逻辑 CPU 数量
 	- runtime.NumGoroutine(): 获取当前进程中 goroutine 的数量
+
+十二、数据结构
+1、类型
+ - 逻辑结构
+	- 集合结构(离散结构)
+	- 线性结构
+		- 线性表、栈、队列
+	- 非线性结构
+		- 树结构
+		- 图结构或网状结构
+ - 存储结构
+	- 顺序存储结构
+	- 链式存储结构
+	- 索引结构
+	- 哈希结构
+	
+2、链表
+
+3、栈
+ - 栈stack，一种运算受限的线性表
+	- 限定仅在表尾进行插入和删除操作的线性表
+	- 这一端被称为栈顶，另一端被称为栈底，是被封死的
+ - FILO(First In Last Out)，先进后出
+ - Go语言中的栈
+	- 2个核心方法
+		- Push
+		- Pop
+	- 实现代码 
+		// 定义需要存入的元素对象
+		// 这里Item是范型, 指代任意类型
+		type Item interface{}
+		
+		type Stack struct {
+			items []Item
+		}
+		// 构建函数
+		func NewStack() *Stack {
+			return &Stack{
+				items: []Item{},
+			}
+		}
+		// Push adds an Item to the top of the stack
+		func (s *Stack) Push(item Item) {
+			s.items = append(s.items, item)
+		}
+		// Pop removes an Item from the top of the stack
+		func (s *Stack) Pop() Item {
+			if s.IsEmpty() {
+				return nil
+			}
+			item := s.items[len(s.items)-1]
+			s.items = s.items[0 : len(s.items)-1]
+			return item
+		}
+		// Len 栈的大小 
+		func (s *Stack) Len() int {
+			return len(s.items)
+		}
+		// IsEmpty 判断是否为空 
+		func (s *Stack) IsEmpty() bool {
+			return len(s.items) == 0
+		}
+		// Peek 获取栈顶元素的值 Peek
+		func (s *Stack) Peek() Item {
+			if s.IsEmpty() {
+				return nil
+			}
+			return s.items[len(s.items)-1]
+		}
+		// Clear 清空栈 
+		func (s *Stack) Clear() {
+			s.items = []Item{}
+		}
+		// Search 查询某个值 距离栈顶的距离 
+		func (s *Stack) Search(item Item) (pos int, err error) {
+			for i := range s.items {
+				if item == s.items[i] {
+					return i, nil
+				}
+			}
+			return 0, fmt.Errorf("item %s not found", item)
+		}
+		// 遍历栈 ForEach
+		func (s *Stack) ForEach(fn func(Item)) {
+			for i := range s.items {
+				fn(i)
+			}
+		}
+		// Sort 插入排序 把stack的元素从大到小进行排序 插入排序
+		func (s *Stack) Sort() {
+			// 准备一个辅助的stack, 另一个容器
+			orderdStack := NewStack()
+		
+			for !s.IsEmpty() {
+				// 然后开始的排序流程
+				current := s.Pop()
+		
+				// orderdStack顶端大于current，应该将orderdStack顶端移至s，直到orderdStack顶端小于current
+				for !orderdStack.IsEmpty() && current.(int) > orderdStack.Peek().(int) {
+					s.Push(orderdStack.Pop())
+				}
+		
+				// 此时 当前current 一定是 <= orderdStack顶端
+				orderdStack.Push(current)
+			}
+		
+			// 倒过来
+			for !orderdStack.IsEmpty() {
+				s.Push(orderdStack.Pop())
+			}
+		}
+		
+4、堆
+
+
+5、Trie树
+
+
+十三、算法的评估
+1、定义
+ - 算法(Algorithm)是指用来操作数据、解决程序问题的一组方法
+2、排序算法
+	- 冒泡排序: 两个数比较大小，较大的数下沉，较小的数冒起来
+		func BubbleSort(numbers []int) []int {
+			for i := range numbers {
+				for j := 0; j < len(numbers)-1; j++ {
+					// 当前值 numbers[i], 后一个值是多少 numbers[j+1]
+					fmt.Printf("数据: 当前: %d, 比对: %d\n", numbers[j], numbers[j+1])
+		
+					// 比较2个数, 交换顺序, 大数沉底, 小数冒出
+					if numbers[j+1] < numbers[j] {
+						numbers[j], numbers[j+1] = numbers[j+1], numbers[j]
+					}
+				}
+				fmt.Printf("第%d趟: %v\n", i+1, numbers)
+			}
+			return numbers
+		}
+	- 选择排序: 在长度为N的无序数组中，第一次遍历n-1个数，找到最小的数值与第一个元素交换，第二次遍历n-2个数，找到最小的数值与第二个元素交换...第n-1次遍历，找到最小的数值与第n-1个元素交换，排序完成
+		func SelectSort(numbers []int) []int {
+			for i := range numbers {
+				// 拿到第一个的数, 就是numbers[i], 比如 3
+				fmt.Printf("第%d趟: %d\n", i+1, numbers[i])
+		
+				// 依次和后面相邻的数比较
+				for j := i + 1; j < len(numbers); j++ {
+					fmt.Printf("数据 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
+					if numbers[i] > numbers[j] {
+						// 如果当前数 > 后面的数据, 则交换位置
+						numbers[i], numbers[j] = numbers[j], numbers[i]
+						fmt.Printf("交换 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
+					}
+				}
+		
+				fmt.Println("结果: ", numbers)
+			}
+		
+			fmt.Println("最终结果", numbers)
+			return numbers
+		}
+	- 插入排序: 在要排序的一组数中，假定前n-1个数已经排好序，现在将第n个数插到前面的有序数列中，使得这n个数也是排好顺序的。如此反复循环，直到全部排号顺序
+		func NewNumberStack(numbers []int) *Stack {
+			items := make([]Item, 0, len(numbers))
+			for i := range numbers {
+				items = append(items, numbers[i])
+			}
+			return &Stack{
+				items: items,
+			}
+		}
+	- 快速排序: 快速排序是对冒泡排序的一种改进，也属于交换类的排序算法
+	- 其他 
+		- Go语言中内置排序 -> sort包，用于对象的排序, 参与排序的对象必须实现比较方法
+			// Sort sorts data.
+			// It makes one call to data.Len to determine n and O(n*log(n)) calls to
+			// data.Less and data.Swap. The sort is not guaranteed to be stable.
+			func Sort(data Interface) {
+				...
+			}
+			// 实现一个IntSlice结构
+			func NewIntSlice(numbers []int) IntSlice {
+				return IntSlice(numbers)
+			}
+			
+			type IntSlice []int
+			
+			func (s IntSlice) Len() int { return len(s) }
+			
+			func (s IntSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+			
+			func (s IntSlice) Less(i, j int) bool { return s[i] < s[j] }
+			// 比较函数
+			func BuildInSort(numbers []int) []int {
+				sort.Sort(IntSlice(numbers))
+				return numbers
+			}
+			
+3、算法评估的维度
+ - 时间维度: 是指执行当前算法所消耗的时间，通常用「时间复杂度」来描述，可以估算出程序对处理器的使用程度
+	- 时间频度: T(n) 通常，一个算法所花费的时间与代码语句执行的次数成正比，算法执行语句越多，消耗的时间也就越多
+	- 渐进时间复杂度: 算法的时间复杂度函数为 T(n)=O(f(n))
+	- 常见的算法时间复杂度由小到大依次为: Ο(1)＜Ο(log n)＜Ο(n)＜Ο(nlog n)＜Ο(n2)＜Ο(n3)＜…＜Ο(2^n)＜Ο(n!)
+ - 空间维度: 是指执行当前算法需要占用多少内存空间，通常用「空间复杂度」来描述，可以估算出程序对计算机内存的使用程度
+	- 空间复杂度 O(1)
+		- 不开辟额外空间，程序运行时，使用的空间是个常数
+		- 冒泡排序、选择排序
+	- 空间复杂度 O(n)
+		- 程序使用的额外空间, 这个额外空间的大小和数据规模成线性关系
+		- Map 的空间负责度 就介于0(1) ~ O(n)，不会因为一个元素就开辟一个bucket
 
 
 编程思想
@@ -2586,7 +2794,7 @@
 1).简介
  - 内置日志库
  - 提供基本的日志功能，但是没有提供日志级别
- - 比如: debug、warning、error)
+ - 比如: debug、warning、error
 2).简单使用
  - 输出文件
 	- 只要实现接口io.Writer的类型都可以作为文件的输出
@@ -2608,19 +2816,19 @@
 		time.Sleep(1 * time.Hour)
  - 自定义的logger
 	var (
-			WarningLogger *log.Logger          // type Logger struct { // Has unexported fields. }
-			InfoLogger    *log.Logger
-			ErrorLogger   *log.Logger
+		WarningLogger *log.Logger          // type Logger struct { // Has unexported fields. }
+		InfoLogger    *log.Logger
+		ErrorLogger   *log.Logger
 	)
 	
 	func init() {
-			file, err := os.OpenFile("c.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-			if err != nil {
-					log.Fatal(err)
-			}
-			InfoLogger = log.New(file, "[INFO]", log.Ldate|log.Ltime|log.Lshortfile)
-			WarningLogger = log.New(file, "[WARNING]", log.LstdFlags|log.Lshortfile)
-			ErrorLogger = log.New(file, "[ERROR]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
+		file, err := os.OpenFile("c.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+				log.Fatal(err)
+		}
+		InfoLogger = log.New(file, "[INFO]", log.Ldate|log.Ltime|log.Lshortfile)
+		WarningLogger = log.New(file, "[WARNING]", log.LstdFlags|log.Lshortfile)
+		ErrorLogger = log.New(file, "[ERROR]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 	}
 	
     // 创建文件对象
@@ -2964,17 +3172,18 @@
  - 加密算法种类
 	- 散列算法、对称加密算法、非对称加密算法、秘钥交换算法
 	
-2、散列算法
- - 散列是信息的提炼，通常其长度要比信息小得多，且为一个固定长度
-	- 加密性强的散列一定是不可逆的，即通过散列结果，无法推出任何部分的原始信息
+2、Hash 散列算法
+ - 散列是信息的提炼
+	- 通常其输入可以是任意长度，长度往往要比信息小得多，且为一个固定长度
+	- 加密性强的散列一定是不可逆的，即通过散列结果，无法推出任何部分的原始信息 -> 单向性
 	- 任何输入信息的变化，哪怕仅一位，都将导致散列结果的明显变化，这称之为雪崩效应
-	- 散列还应该是防冲突的，即找不出具有相同散列结果的两条信息
+	- 散列还应该是防冲突的，即找不出具有相同散列结果的两条信息 -> 唯一性
 	- 具有这些特性的散列结果就可以用于验证信息是否被修改，常用于保证数据完整性
  - 单向散列函数一般用于产生消息摘要，密钥加密等
 	- MD5(Message Digest Algorithm 5  信息-摘要算法5): 是RSA数据安全公司开发的一种单向散列算法  // 已被破解
 		- Go语言中，由crypto/md5包实现
 	- SHA(Secure Hash Algorithm  安全散列算法): 可以对任意长度的数据运算生成一个160位的数值
-		- SHA-1是一种数据加密算法
+		- SHA-1是一种数据加密算法，防伪装，防窜扰，保证信息的合法性和完整性
 		- 接收一段明文，然后以一种不可逆的方式将它转换成一段(通常更小)密文
 		- 或理解为取一串输入码(称为预映射或信息)，并把它们转化为长度较短、位数固定的输出序列即散列值(也称为信息摘要或信息认证代码)的过程
 		- 该算法输入报文的最大长度不超过264位，产生的输出是一个160位的报文摘要，且输入是按512位的分组进行处理的
@@ -2997,14 +3206,21 @@
 				- salt: 盐，一个128bits随机字符串，22字符
 				- myHash: 经过明文密码password和盐salt进行hash，比如默认10次下，循环加盐hash10次，得到myHash
 		- Go语言中，由golang.org/x/crypto/bcrypt包实现
-		- 示例 -> 用户名密码校验
+		- 示例 -> 
+ - 应用
+	- 用户密码的存储和校验
+	- 文件上传/下载完整性校验
+	- mysql大字段的快速对比
 
 2、对称加密算法
  - 对称加密算法用来对敏感数据等信息进行加密
+	- 加密过程的每一步都是可逆的
+	- 加密和解密用的是同一组密钥
+	- 异或是最简单的对称加密算法
  - 对称加密种类
 	- 分组密码，也叫块加密(block cyphers)，一次加密明文中的一个块
 		- 将明文按一定的位长分组，明文组经过加密运算得到密文组，密文组经过解密运算(加密运算的逆运算)，还原成明文组
-		- 模式: ECB、CBC、CFB、OFB
+		- 模式: ECB、CBC、CFB、OFB、CTR、CFR
 			- CBC(Cipher Block Chaining)/密文分组链接方式
 				- 加密步骤
 					- 首先将数据按照8个字节一组进行分组得到D1D2......Dn（若数据不是8的整数倍，用指定的PADDING数据补位）
@@ -3028,6 +3244,9 @@
 		- 利用少量的密钥(制乱元素)通过某种复杂的运算(密码算法)产生大量的伪随机位流，用于对明文位流的加密
  - 常用的算法
 	- DES(Data Encryption Standard): 数据加密标准，一种使用密钥加密的块算法，速度较快，适用于加密大量数据的场合
+		- DES是目前最为流行的加密算法之一
+		- 对原始数据(明文)进行分组，每组64位，最后一组不足64位时按一定规则填充
+		- 每一组上单独施加DES算法
 	- 3DES(Triple DES): 是基于DES，对一块数据用三个不同的密钥进行三次加密，强度更高
 	- AES(Advanced Encryption Standard): 高级加密标准，是下一代的加密算法标准，速度快，安全级别高
 		- 算法原理
@@ -3048,8 +3267,14 @@
 		- 基于整数有限域离散对数难题，其安全性与RSA相比差不多
 		- DSA的一个重要特点是两个素数公开，因此当使用他人的p和q时，即使不知道私钥，也能确认它们是否是随机产生的，还是作了手脚
 		- RSA算法却做不到，但是其缺点就是只能用于数字签名，不能用于加密
+		- Go语言中，由crypto/des包实现
 	- RSA: 由RSA公司发明，是一个支持变长密钥的公共密钥算法，需要加密的文件块的长度也是可变的
 		- 目前最有影响力的公钥加密算法，能够抵抗到目前为止已知的绝大多数密码攻击，已被ISO推荐为公钥数据加密标准
+		- Ron Rivest，Adi Shamir，Leonard Adleman
+		- 密钥越长，越难破解
+			- 目前768位的密钥还无法破解(至少没人公开宣布)
+			- 因此可以认为1024位的RSA密钥基本安全，2048位的密钥极其安全
+		- RSA的算法原理主要用到了数论
 		- Go语言中，由crypto/rsa包实现
 	- ECC(Elliptic Curves Cryptography): 椭圆曲线密码编码学
 		- 基于椭圆曲线的离散对数难题
