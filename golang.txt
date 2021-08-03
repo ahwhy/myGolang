@@ -1935,6 +1935,7 @@
  - 当管道中无元素时，读取也会阻塞，直到管道被其他例程写入元素
 	channel2 <- "1"
 	fmt.Println(<-channel2)
+ - channel <- struct{}{} 起通知作用，同时由于struct是数据组合，并不占内存
 5).关闭管道
  - 通过close函数关闭管道，关闭后的管道不能被写入
  - 当读取到最后一个元素后可通过读取的第二个参数用于判断是否结束
@@ -2044,6 +2045,179 @@
 	- 哈希结构
 	
 2、链表
+ - 单向链表
+	- 在底层结构上，单向链表通过指针将一组零散的内存块串联在一起
+		- 内存块称为链表的"结点"(Node)
+		- 为了将所有的结点串起来，每个链表的结点除了存储数据之外，还需要记录链上的下一个结点的地址
+		- 这个记录下个结点地址的指针叫作后继指针 next
+	- 实现代码
+		// 定义节点
+		type Node struct {
+			// 需要存储的数据
+			Value interface{}
+			// 下一跳
+			Next  *Node
+		}
+		// 定义链表结构
+		type List struct {
+			head *Node
+		}
+		func NewIntNode(v int) *Node {
+			return &Node{Value: v}
+		}
+		func NewIntList(headValue int) *List {
+			// 链表的头
+			head := &Node{Value: headValue}
+			return &List{
+				head: head,
+			}
+		}
+		func (l *List) AddNode(n *Node) {
+			// 需要找到尾节点
+			next := l.head.Next
+			for next.Next != nil {
+				next = next.Next
+			}
+			// 修改为节点
+			next.Next = n
+		}
+		func (l *List) Traverse(fn func(n *Node)) {
+			n := l.head
+			for n.Next != nil {
+				fn(n)                // func(n *list.Node){ fmt.Println(n) }
+				n = n.Next
+			}
+			fn(n)
+			fmt.Println()
+		}
+		func (l *List) InsertAfter(after, current *Node) error {
+			// after --> current --> afterNext
+			// 保存after的下一跳 
+			afterNext := after.Next
+			// 插入current，修改指向
+			after.Next = current
+			current.Next = afterNext
+			return nil
+		}
+	- 缺陷
+		- 单向链表的情况下(单方向的)，要获取之前Node 需要遍历整个List
+		- 以下功能并没有在单向链表中实现
+			- 插入到指定Node的前面
+			- 删除链表中的元素
+		- 要高效解决这个问题，需要一个Previos指针，直接知道前一个Node的信息，而不是遍历
+ - 双向链表
+	- 支持两个方向，每个结点除一个后继指针 next 指向后面的结点外，还有一个前驱指针 prev 指向前面的结点
+		- 双向链表相比于单向链表需要额外增加一个空间来保存前驱结点的地址
+		- 存储同样多的数据，双向链表要比单链表占用更多的内存空间
+		- 可以支持双向遍历
+	- 实现代码
+		// 重新定义节点
+		type Node struct {
+			// 需要存储的数据
+			Value interface{}
+			// 下一跳
+			Next *Node
+			// 上一跳
+			Prev *Node
+		}
+		func (l *List) AddNode(n *Node) {
+			// 需要找到尾节点
+			next := l.head.Next
+			for next.Next != nil {
+				next = next.Next
+			}
+			// 修改为节点
+			next.Next = n
+			n.Prev = next
+		}
+		func (l *List) InsertAfter(after, current *Node) error {
+			// after --> current --> afterNext
+			// 保存after的下一跳 
+			afterNext := after.Next
+			// 插入current，修改指向
+			after.Next = current
+			current.Next = afterNext
+			// after <-- current <-- after_next
+			current.Prev = after
+			afterNext.Prev = current
+			return nil
+		}
+		func (l *List) InsertBefore(before, current *Node) error {
+			// beforePrev <-- current <-- before
+			// 保存before的上一跳 
+			beforePrev := before.Prev
+			// 插入current，修改指向
+			before.Prev = current
+			current.Prev = beforePrev
+			// beforePrev --> current --> before
+			current.Next = before
+			beforePrev.Next = current
+			return nil
+		}
+		func (l *List) Remove(current *Node) error {
+			prev := current.Prev
+			prev.Next = current.Next
+			return nil
+		}
+	- 应用场景
+		- LRU缓存淘汰 -> LRU(Least Recently Used)最近最少使用
+			- 实现思路: 缓存的key放到链表中，头部的元素表示最近刚使用
+				- 如果命中缓存，从链表中找到对应的key，移到链表头部
+				- 如果没命中缓存
+					- 如果缓存容量没超，放入缓存，并把key放到链表头部
+					- 如果超出缓存容量，删除链表尾部元素，再把key放到链表头部
+ - 循环链表 -> ring
+	- 将头节点的前趋指针指向尾节点，将尾节点的后驱指针指向头节点
+	- 它的表现为一个环(Ring), 可以正向转和反向转
+	- 实现代码
+		// ChangeToRing 将链表头尾相连成环
+		func (l *List) ChangeToRing() {
+			// 需要找到尾节点
+			next := l.head
+			for next.Next != nil {
+				next = next.Next
+			}
+			head, tail := l.head, next
+			// head  -->  tail
+			head.Prev = tail
+			// head  <--  tail
+			tail.Next = head
+		}
+		func (l *List) Traverse(fn func(n *Node)) {
+			loopCount := 1
+			n := l.head
+			for n.Next != nil {
+				// 最多循环5轮
+				if loopCount > 5 {
+					return
+				}
+				fn(n)
+				n = n.Next
+				if n == l.head {
+					loopCount++
+				}
+			}
+			fn(n)
+			fmt.Println()
+		}
+	- 应用场景 -> 基于滑动窗口的统计
+		- 最近100次接口调用的平均耗时、最近10笔订单的平均值、最近30个交易日股票的最高点
+		- ring的容量即为滑动窗口的大小，把待观察变量按时间顺序不停地写入ring即可
+ - 数组和链表的比较
+	- 数组简单易用，在实现上使用的是连续的内存空间
+		- 可以借助 CPU 的缓存机制，预读数组中的数据，所以访问效率更高
+		- 而链表在内存中并不是连续存储，	对 CPU 缓存不友好，没办法有效预读
+	- 数组的缺点是大小固定，一经声明就要占用整块连续内存空间
+		- 如果声明的数组过大，系统可能没有足够的连续内存空间分配给它，导致"内存不足(out of memory)"
+		- 如果声明的数组过小，则可能出现不够用的情况
+		- 这时只能再申请一个更大的内存空间，把原数组拷贝进去，非常费时
+		- 链表本身没有大小的限制，支持动态扩容，这也是其与数组最大的区别
+	- 应用场景
+		- 频繁的插入和删除用list
+		- 频繁的遍历查询选slice
+ - Go语言中的标准库
+	- contianer/list  双向链表
+	- container/ring  循环链表
 
 3、栈
  - 栈stack，一种运算受限的线性表
@@ -2054,7 +2228,7 @@
 	- 2个核心方法
 		- Push
 		- Pop
-	- 实现代码 
+	- 实现代码 -> 使用slice
 		// 定义需要存入的元素对象
 		// 这里Item是范型, 指代任意类型
 		type Item interface{}
@@ -2138,8 +2312,13 @@
 				s.Push(orderdStack.Pop())
 			}
 		}
+
 		
 4、堆
+ - 堆这种数据结构的应用场景非常多，最经典的莫过于堆排序了。堆排序是一种原地的、时间复杂度为 O(nlogn)
+
+堆是一个完全二叉树
+堆中每一个节点的值都必须大于等于（或小于等于）其子树中每个节点的值
 
 
 5、Trie树

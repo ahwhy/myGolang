@@ -3,7 +3,6 @@ module github.com/ahwhy/myGolang
 go 1.16
 
 require (
-	gitee.com/infraboard/go-course v0.0.0-20210801104735-005c9ba7c66d
 	github.com/AlecAivazis/survey/v2 v2.2.15
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.9+incompatible
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect

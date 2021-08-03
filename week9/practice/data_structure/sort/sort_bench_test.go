@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/ahwhy/myGolang/week9/practice/data_structure/sort"
-	"github.com/ahwhy/myGolang/week9/practice/data_structure/stack/slice/stack"
 )
 
 const (
@@ -57,7 +56,7 @@ func BenchmarkSelectSort10000(b *testing.B) {
 
 func benchmarkInsertSort(i int, b *testing.B) {
 	a := generateRandomArray(i)
-	s := stack.NewNumberStack(a)
+	s := sort.NewNumberStack(a)
 	s.Sort()
 }
 

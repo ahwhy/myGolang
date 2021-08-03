@@ -4,6 +4,7 @@ import (
 	"sort"
 )
 
+// 冒泡排序
 func BubbleSort(numbers []int) []int {
 	for range numbers {
 		for j := 0; j < len(numbers)-1; j++ {
@@ -21,6 +22,7 @@ func BubbleSort(numbers []int) []int {
 	return numbers
 }
 
+// 选择排序
 func SelectSort(numbers []int) []int {
 	for i := range numbers {
 		for j := i + 1; j < len(numbers); j++ {
@@ -38,9 +40,12 @@ func SelectSort(numbers []int) []int {
 	return numbers
 }
 
+// Sort包应用
 type IntSlice []int
 
-func (s IntSlice) Len() int { return len(s) }
+func (s IntSlice) Len() int {
+	return len(s)
+}
 
 func (s IntSlice) Less(i, j int) bool {
 	return s[i] < s[j]
