@@ -12,7 +12,7 @@ func TraverseRing(ring *ring.Ring) {
 	fmt.Println()
 }
 
-func main4() {
+func main() {
 	ring := ring.New(5) //必须指定长度，各元素被初始化为nil
 	ring2 := ring.Prev()
 	for i := 0; i < 3; i++ {

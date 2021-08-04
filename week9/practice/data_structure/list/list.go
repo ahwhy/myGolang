@@ -4,33 +4,34 @@ import (
 	"fmt"
 )
 
-func NewIntNode(v int) *Node {
-	return &Node{Value: v}
-}
-
-// 定义节点
+// 重新定义节点
 type Node struct {
-	// 存储你需要存储的数据
+	// 需要存储的数据
 	Value interface{}
-	// 下一跳的指向
+	// 下一跳
 	Next *Node
 	// 上一跳
 	Prev *Node
-}
-
-func NewIntList(headValue int) *List {
-	head := &Node{Value: headValue}
-	return &List{
-		head: head,
-	}
 }
 
 type List struct {
 	head *Node
 }
 
+func NewIntNode(v interface{}) *Node {
+	return &Node{Value: v}
+}
+
+func NewIntList(headValue interface{}) *List {
+	// 链表的头
+	head := &Node{Value: headValue}
+	return &List{
+		head: head,
+	}
+}
+
 func (l *List) AddNode(n *Node) {
-	// 我需要找到尾节点
+	// 需要找到尾节点
 	next := l.head
 	for next.Next != nil {
 		next = next.Next
@@ -38,8 +39,6 @@ func (l *List) AddNode(n *Node) {
 
 	// 修改为节点
 	next.Next = n
-
-	// 补充Previos指针
 	n.Prev = next
 }
 
@@ -65,61 +64,78 @@ func (l *List) Traverse(fn func(n *Node)) {
 	fmt.Println()
 }
 
-func (l *List) InsertAfter(after, current *Node) error {
-	// 假设我们已经插入，他数据结构应该是啥样的
-	// after --> current --> after_next
+func (l *List) Len() int {
+	len := 0
+	n := l.head
+	if n.Prev != nil {
+		return -1
+	}
+	for n.Next != nil {
+		n = n.Next
+		len++
+	}
+	return len + 1
+}
 
-	// 保存下之前的after next
+func (l *List) Get(idx int) interface{} {
+	index := 0
+	n := l.head
+	for n.Next != nil {
+		n = n.Next
+		index++
+		if index == idx {
+			return n.Value
+		}
+	}
+	return nil
+}
+
+func (l *List) InsertAfter(after, current *Node) error {
+	// after --> current --> afterNext
+	// 保存after的下一跳
 	afterNext := after.Next
 
-	// 插入，修改指向
+	// 插入current，修改指向
 	after.Next = current
 	current.Next = afterNext
 
-	// 补充Previos指针
 	// after <-- current <-- after_next
 	current.Prev = after
 	afterNext.Prev = current
 	return nil
 }
 
-func (l *List) InsertBefore(current, n *Node) error {
-	// 假设我们已经插入，他数据结构应该是啥样的
-	//   -->   previous  -->     current -->
-	//   previous --> n  --> current
-	//
+func (l *List) InsertBefore(before, current *Node) error {
+	// beforePrev <-- current <-- before
+	// 保存before的上一跳
+	beforePrev := before.Prev
 
-	// 保存下之前的before next
-	previous := current.Prev
+	// 插入current，修改指向
+	before.Prev = current
+	current.Prev = beforePrev
 
-	// 插入，修改指向
-	previous.Next = n
-	n.Next = current
-
-	// 补充Previos指针
-	// before <-- current <-- before_next
-	// current.Prev = before
-	// beforeNext.Prev = current
+	// beforePrev --> current --> before
+	current.Next = before
+	beforePrev.Next = current
 	return nil
 }
 
 func (l *List) Remove(current *Node) error {
-	// before --> current --> before_next
+	// prev --> current --> next
 	prev := current.Prev
-	prev.Next = current.Next
+	next := current.Next
+	prev.Next, next.Prev = next, prev
 	return nil
 }
 
-// 变身成环
+// ChangeToRing 将链表头尾相连成环
 func (l *List) ChangeToRing() {
-	// 我需要找到尾节点
+	// 需要找到尾节点
 	next := l.head
 	for next.Next != nil {
 		next = next.Next
 	}
-
 	head, tail := l.head, next
-
 	// head  -->  tail
 	head.Prev = tail
 	// head  <--  tail

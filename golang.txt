@@ -2122,13 +2122,37 @@
 		}
 		func (l *List) AddNode(n *Node) {
 			// 需要找到尾节点
-			next := l.head.Next
+			next := l.head
 			for next.Next != nil {
 				next = next.Next
 			}
 			// 修改为节点
 			next.Next = n
 			n.Prev = next
+		}
+		func (l *List) Len() int {
+			len := 0
+			n := l.head
+			if n.Prev != nil {
+				return -1
+			}
+			for n.Next != nil {
+				n = n.Next
+				len++
+			}
+			return len + 1
+		}
+		func (l *List) Get(idx int) interface{} {
+			index := 0
+			n := l.head
+			for n.Next != nil {
+				n = n.Next
+				index++
+				if index == idx {
+					return n.Value
+				}
+			}
+			return nil
 		}
 		func (l *List) InsertAfter(after, current *Node) error {
 			// after --> current --> afterNext
@@ -2155,8 +2179,10 @@
 			return nil
 		}
 		func (l *List) Remove(current *Node) error {
+			// prev --> current --> next
 			prev := current.Prev
-			prev.Next = current.Next
+			next := current.Next
+			prev.Next, next.Prev = next, prev
 			return nil
 		}
 	- 应用场景
@@ -2315,13 +2341,121 @@
 
 		
 4、堆
- - 堆这种数据结构的应用场景非常多，最经典的莫过于堆排序了。堆排序是一种原地的、时间复杂度为 O(nlogn)
-
-堆是一个完全二叉树
-堆中每一个节点的值都必须大于等于（或小于等于）其子树中每个节点的值
-
-
+ - 定义
+	- 树(Tree)
+		- 树是n(n>=0)个结点的有限集
+			- n=0时称为空树
+				- 在任意一颗非空树中，有且仅有一个特定的称为根(Root)的结点
+			- 当n>1时，其余结点可分为m(m>0)个互不相交的有限集T1、T2、......、Tn
+				- 其中每一个集合本身又是一棵树，并且称为根的子树
+		- 二叉树
+			- 在计算机科学中，二叉树是每个结点最多有两个子树的树结构
+				- 通常子树被称作"左子树"(left subtree)和"右子树"(right subtree)
+			- 相关名词
+				- 根节点: 一棵树最上方的节点称为根节点
+				- 父节点、子节点: 如果一个节点下面连接多个节点，那么该节点称为父节点，它下面的节点称为子节点
+				- 叶子节点: 没有任何子节点的节点称为叶子节点
+				- 兄弟节点: 具有相同父节点的节点互称为兄弟节点
+				- 节点度: 节点拥有的子树数
+				- 树的深度: 从根节点开始(其深度为0)自顶向下逐层累加的
+				- 树的高度: 从叶子节点开始(其高度为0)自底向上逐层累加的
+					- 对于树中相同深度的每个节点来说，它们的高度不一定相同，这取决于每个节点下面的叶子节点的深度
+			- 满二叉树
+				- 一棵深度为k且有2^k - 1个结点的二叉树称为满二叉树
+					- 除最后一层无任何子节点外，每一层上的所有节点都有两个子节点，最后一层都是叶子节点
+					- 特点
+						- 一颗树深度为h，最大层数为k，深度与最大层数相同，k=h
+						- 叶子节点数(最后一层)为2k−1
+						- 第 i 层的节点数是: 2i−1
+						- 总节点数是: 2k-1，且总节点数一定是奇数
+			- 完全二叉树
+				- 一棵深度为k的有n个结点的二叉树，对树中的结点按从上至下、从左到右的顺序进行编号，如果编号为i(1≤i≤n)的结点与满二叉树中编号为i的结点在二叉树中的位置相同
+				- 每一层都是紧凑靠左排列的, 上层排满了, 才能排下层, 每层先排满左节点，才能排右节点
+	- 堆(Heap)
+		- 堆通常是一个可以被看做一棵完全二叉树的数组对象
+			- 堆是一个完全二叉树
+			- 堆中每一个节点的值都必须大于等于(或小于等于)其子树中每个节点的值
+				- 大顶堆: 堆中每一个节点的值都必须大于等于其子树中每个节点的值
+				- 小顶堆: 堆中每一个节点的值都必须小于等于其子树中每个节点的值
+		- 应用场景
+			- 堆排序(Heapsort)是指利用堆这种数据结构所设计的一种排序算法
+				- 构建堆O(n)
+				- 删除堆顶O(nlogn)
+			- 求集合中最大的K个元素
+				- 用集合的前K个元素构建小根堆
+				- 逐一遍历集合的其他元素，如果比堆顶小直接丢弃
+				- 否则替换掉堆顶，然后向下调整堆
+			- 把超时的元素从缓存中删除
+				- 按key的到期时间把key插入小根堆中
+				- 周期扫描堆顶元素，如果它的到期时间早于当前时刻，则从堆和缓存中删除，然后向下调整堆
+			- Go语言中的堆
+				- 使用数组(array)/切片(slice)进行存储，
+					- 由于数组(array)/切片(slice)的特性，在时间和空间上都很高效
+					- 节点在数组中的位置index 和它的父节点以及子节点的索引之间有一个映射关系
+						parent(i) = floor((i - 1)/2)
+						left(i)   = 2i + 1
+						right(i)  = 2i + 2 // right(i) 就是简单的 left(i) + 1，左右节点总是处于相邻的位置
+						- 示例
+							array:  10    7    2    5     1
+							index:  0     1    2    3     4
+							level:  1     2    2    3     3
+						- 二叉数，指定层可以容纳的元素是固定的，2^level这个是二叉数的特性决定的
+						- 把数组按照2^n次方，切分成多层，每层放对应的元素，就实现了一维到二维的映射
+				- 添加/删除元素
+					- 添加元素 -> 将新的元素插入到数组的尾部 -> 重新计算修复堆属性
+					- 删除元素 -> 弹出堆顶的元素 -> 将数组的尾部元素，填补堆顶位置 -> 重新计算修复堆属性
+				- 实现堆
+					- 堆化(Init)
+					- 往堆里添加元素(Push)
+					- 弹出堆顶的元素(Pop)
+				- Go语言中，由container/heap包实现
+					- 需要实现五个方法，来定义一个堆
+						type Interface interface {
+							sort.Interface
+							Push(x interface{}) // add x as element Len()
+							Pop() interface{}   // remove and return element Len() - 1.
+						}
+						// sort.Interface
+						type Interface interface {
+							Less(i, j int) bool
+							Len() int		
+							Swap(i, j int)
+						}
+					- 官方示例 /usr/local/go/src/container/heap/example_intheap_test.go
+						type IntHeap []int
+						func (h IntHeap) Len() int              { return len(h) }
+						// func (h IntHeap) Less(i, j int) bool { return h[i] > h[j] }       // 大顶堆 
+						func (h IntHeap) Less(i, j int) bool    { return h[i] < h[j] }       // 小顶堆
+						func (h IntHeap) Swap(i, j int)         { h[i], h[j] = h[j], h[i] }
+						func (h *IntHeap) Push(x interface{})   { *h = append(*h, x.(int)) }	
+						func (h *IntHeap) Pop() interface{} {
+							old := *h
+							n := len(old)
+							x := old[n-1]
+							*h = old[0 : n-1]
+							return x
+						}
+						h := &IntHeap{2, 1, 5}
+						heap.Init(h)
+						heap.Push(h, 3)
+						fmt.Printf("minimum: %d\n", (*h)[0])
+						for h.Len() > 0 {
+							fmt.Printf("%d ", heap.Pop(h))
+						}
+						// Output:
+						// minimum: 1
+						// 1 2 3 5
+			- 高性能定时器
+						
+						
 5、Trie树
+ - trie树又叫字典权
+ - term集合
+	- 根节点是总入口，不存储字符
+	- 对于英文，第个节点有26个子节点，子节点可以存到数组里
+	- 中文由于汉字很多，用数组存子节点太浪费内存，可以用map存子节点
+	- 从根节点到叶节点的完整路径是一个term
+	- 从根节点到某个中间节点也可能是一个term，即一个term可能是另一个term的前缀
 
 
 十三、算法的评估

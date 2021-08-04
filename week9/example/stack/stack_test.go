@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ahwhy/myGolang/week9/practice/data_structure/stack"
+	"github.com/ahwhy/myGolang/week9/example/stack"
 	"github.com/stretchr/testify/assert"
 )
 

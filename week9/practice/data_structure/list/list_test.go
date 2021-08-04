@@ -12,11 +12,13 @@ func TestListBasic(t *testing.T) {
 	l.AddNode(list.NewIntNode(2))
 	l.AddNode(list.NewIntNode(3))
 	l.AddNode(list.NewIntNode(4))
+	fmt.Println(l.Len())
+	fmt.Println(l.Get(3))
 	l.Traverse(func(n *list.Node) {
 		if n.Next != nil {
-			fmt.Printf("%d --> ", n.Value)
+			fmt.Printf("%v --> ", n.Value)
 		} else {
-			fmt.Printf("%d", n.Value)
+			fmt.Printf("%v", n.Value)
 		}
 	})
 }
@@ -39,6 +41,9 @@ func TestListRich(t *testing.T) {
 
 	// 测试插入
 	l.InsertAfter(n2, list.NewIntNode(20))
+	l.InsertBefore(n2, list.NewIntNode(20))
+	fmt.Println(l.Len())
+	fmt.Println(l.Get(5))
 	l.Traverse(PrintNode)
 }
 
@@ -52,6 +57,7 @@ func TestListWithPre(t *testing.T) {
 
 	// 测试插入
 	l.InsertBefore(n2, list.NewIntNode(20))
+	l.InsertAfter(n2, list.NewIntNode(20))
 	l.Traverse(PrintNode)
 
 	// 测试删除
@@ -73,4 +79,27 @@ func TestListRing(t *testing.T) {
 	fmt.Println()
 	l.InsertAfter(n3, list.NewIntNode(100))
 	l.Traverse(PrintNode)
+	l.InsertBefore(n3, list.NewIntNode(100))
+	l.Traverse(PrintNode)
+	fmt.Println()
+	fmt.Println(l.Len())
+	fmt.Println(l.Get(5))
+}
+
+func TestTListBasic(t *testing.T) {
+	list := new(list.TList)
+	list.Append(1)
+	list.Append(2)
+	list.Append(3)
+	list.Append(4)
+	list.Append(5)
+	list.Traverse()
+	fmt.Println(list.Len())
+	node := list.Get(3)
+	list.InsertAfter(9, node)
+	list.InsertBefore(9, node)
+	list.Remove(4)
+	list.Traverse()
+	// list.ChangeToRing()
+	// list.TraverseRing()
 }

@@ -1,8 +1,9 @@
-package main
+package main_test
 
 import (
 	"container/list"
 	"fmt"
+	"testing"
 )
 
 func TraversList(lst *list.List) {
@@ -23,7 +24,7 @@ func ReverseList(lst *list.List) {
 	fmt.Println(tail.Value)
 }
 
-func main1() {
+func TestListBasic(t *testing.T) {
 	lst := list.New()
 	lst.PushBack(1)
 	lst.PushBack(2)
