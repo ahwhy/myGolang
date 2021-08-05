@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ahwhy/myGolang/week6/homework/simple-http-probe/probe"
+	"github.com/ahwhy/myGolang/week6/example/simple-http-probe/probe"
 	"github.com/gin-gonic/gin"
 )
 

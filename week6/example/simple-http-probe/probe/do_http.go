@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ahwhy/myGolang/week6/homework/simple-http-probe/config"
+	"github.com/ahwhy/myGolang/week6/example/simple-http-probe/config"
 )
 
 // 使用 net/http/httptrace 实现http耗时探测

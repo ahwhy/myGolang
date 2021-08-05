@@ -11,7 +11,7 @@ type IntHeap []int
 func (h IntHeap) Len() int { return len(h) }
 
 // 由于是小顶堆, 所以前面的元素(堆顶)要比后面的小
-func (h IntHeap) Less(i, j int) bool { return h[i] > h[j] }
+func (h IntHeap) Less(i, j int) bool { return h[i] < h[j] }
 
 // 交换2个元素的位置
 func (h IntHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }

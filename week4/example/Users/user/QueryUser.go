@@ -3,7 +3,7 @@ package user
 import (
 	"strings"
 
-	"github.com/ahwhy/myGolang/week4/homework/Users/utils"
+	"github.com/ahwhy/myGolang/week4/example/Users/utils"
 )
 
 /*

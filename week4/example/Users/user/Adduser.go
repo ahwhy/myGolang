@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ahwhy/myGolang/week4/homework/Users/utils"
+	"github.com/ahwhy/myGolang/week4/example/Users/utils"
 )
 
 const (

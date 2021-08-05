@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/ahwhy/myGolang/week4/homework/Users/utils"
+	"github.com/ahwhy/myGolang/week4/example/Users/utils"
 )
 
 func Auth(password string) bool {

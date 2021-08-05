@@ -2192,6 +2192,42 @@
 				- 如果没命中缓存
 					- 如果缓存容量没超，放入缓存，并把key放到链表头部
 					- 如果超出缓存容量，删除链表尾部元素，再把key放到链表头部
+						cache = make(map[int]string, 10)
+						lst = list.New()
+						func read(key int) string {
+							if v, exists := cache[key]; exists { //命中缓存
+								head := lst.Front()
+								notFound := false
+								for {
+									if head == nil {
+										notFound = true
+										break
+									}
+									// fmt.Printf("%v\n", notFound)
+									if head.Value.(int) == key { //从链表里找到相应的key
+										lst.MoveToFront(head) //把key移到链表头部
+										break
+									} else {
+										head = head.Next()
+									}
+								}
+								if !notFound { //正常情况下不会发生这种情况
+									lst.PushFront(key)
+								}
+								return v
+							} else { //没有命中缓存
+								v = readFromDisk(key) //从磁盘中读取数据
+								cache[key] = v        //放入缓存
+								lst.PushFront(key) //放入链表头部
+								if len(cache) > CAP { //缓存已满
+									tail := lst.Back()
+									delete(cache, tail.Value.(int)) //从缓存是移除很久不使用的元素
+									lst.Remove(tail)                //从链表中删除最后一个元素
+									fmt.Printf("remove %d from cache\n", tail.Value.(int))
+								}
+								return v
+							}
+						}
  - 循环链表 -> ring
 	- 将头节点的前趋指针指向尾节点，将尾节点的后驱指针指向头节点
 	- 它的表现为一个环(Ring), 可以正向转和反向转
@@ -3624,58 +3660,64 @@
 				- 由crypto库实现了P224/P256/P384/P521
 				- curve25519则不在标准库中: golang.org/x/crypto/curve25519
 
-六、单元测试和基准测试
-1、单元测试
-1).定义
- - 单元是应用中最小的可测试部件，如函数和对象的方法
- - 单元测试是软件开发中对最小单位进行正确性检验的测试工作
- - Go语言原生支持了单元测试，使用上非常简单
-2).意义
- - 保证变更/重构的正确性，特别是在一些频繁变动和多人合作开发的项目中
- - 简化调试过程: 可以轻松的测试出哪一部分代码出现问题
- - 单元测试是最好的文档 -> 在单测中直接给出具体接口的使用方法，是最好的实例代码
-3).单元测试用例编写的原则
- - 单一原则: 一个测试用例只负责一个场景
- - 原子性: 结果只有两种情况: PASS/FAIL
- - 优先要核心组件和逻辑的测试用例
- - 对于高频使用库，如: util，需要重点覆盖
-4).单元测试用例使用要求
- - 文件名命名要求: {pkg_name}_test.go
- - 测试方法/函数命名要求: 大写Test开头
- - 函数参数: (t *testing.T)
- - 测试文件和被测试文件必须在一个包中
- - 使用 package packagename_test 命名的测试包在构建二进制文件时不会被打包
-5).Go语言的测试框架
- - testing 测试框架
-	- 基本使用
-	- 子测试 t.Run
-		func TestMul(t *testing.T) {
-			t.Run("正数", func(t *testing.T) {
-				if Mul(4, 5) != 20 {
-					t.Fatal("muli.zhengshu.error")
-				}
-			})
-		
-			t.Run("负数", func(t *testing.T) {
-				if Mul(2, -3) != -6 {
-					t.Fatal("muli.fusshu.error")
-				}
-			})
-		}
-	- table-driven tests
-		- 所有用例的数据组织在切片 cases 中，看起来就像一张表，借助循环创建子测试
-		- 益处
-			- 新增用例非常简单，只需给 cases 新增一条测试数据即可
-			- 测试代码可读性好，直观地能够看到每个子测试的参数和期待的返回值
-			- 用例失败时，报错信息的格式比较统一，测试报告易于阅读
-			- 如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取
-        - 举例 https://github.com/prometheus/prometheus/blob/main/web/api/v1/api_test.go
-	- 执行
-		- go test -v .
-		- -cover测试覆盖率 go test -v -cover .
-		- 只执行某个函数 go test -run=TestAdd -v .
-		- 正则过滤函数名 go test -run=TestM.* -v .
-		- 指定func/sub跑子测试 go test -run=TestMul/正数 -v
+六、测试
+1、Go语言中的测试
+ - Go提供了test工具用于代码的测试
+	- test工具会查找包下以 _test.go结尾的文件
+	- 调用测试文件中以Test或Benchmark开头的函数并给出运行结果
+
+2、单元测试
+ - 定义
+	- 单元是应用中最小的可测试部件，如函数和对象的方法
+	- 单元测试是软件开发中对最小单位进行正确性检验的测试工作
+	- Go语言原生支持了单元测试，使用上非常简单
+ - 意义
+	- 保证变更/重构的正确性，特别是在一些频繁变动和多人合作开发的项目中
+	- 简化调试过程: 可以轻松的测试出哪一部分代码出现问题
+	- 单元测试是最好的文档 -> 在单测中直接给出具体接口的使用方法，是最好的实例代码
+ - 单元测试用例编写的原则
+	- 单一原则: 一个测试用例只负责一个场景
+	- 原子性: 结果只有两种情况: PASS/FAIL
+	- 优先要核心组件和逻辑的测试用例
+	- 对于高频使用库，如: util，需要重点覆盖
+ - 使用要求
+	- 文件名命名要求: {pkg_name}_test.go
+	- 需要导入testing包
+	- 测试方法/函数命名要求: 定义以Test开头的函数
+	- 函数参数: (t *testing.T)
+	- 测试文件和被测试文件必须在一个包中
+	- 在测试函数中调用函数进行返回值测试，当测试失败可通过testing.T结构体的Error*函数抛出错误
+	- 使用 package packagename_test 命名的测试包在构建二进制文件时不会被打包
+ - Go语言的测试框架
+	- testing 测试框架
+		- 执行命令
+			- go test -v .
+			- -cover测试覆盖率 go test -v -cover .
+			- 只执行某个函数 go test -run=TestAdd -v .
+			- 正则过滤函数名 go test -run=TestM.* -v .
+			- 指定func/sub跑子测试 go test -run=TestMul/正数 -v
+		- 子测试 t.Run
+			func TestMul(t *testing.T) {
+				t.Run("正数", func(t *testing.T) {
+					if Mul(4, 5) != 20 {
+						t.Fatal("muli.zhengshu.error")
+					}
+				})
+			
+				t.Run("负数", func(t *testing.T) {
+					if Mul(2, -3) != -6 {
+						t.Fatal("muli.fusshu.error")
+					}
+				})
+			}
+		- table-driven tests
+			- 所有用例的数据组织在切片 cases 中，看起来就像一张表，借助循环创建子测试
+			- 益处
+				- 新增用例非常简单，只需给 cases 新增一条测试数据即可
+				- 测试代码可读性好，直观地能够看到每个子测试的参数和期待的返回值
+				- 用例失败时，报错信息的格式比较统一，测试报告易于阅读
+				- 如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取
+			- 举例 https://github.com/prometheus/prometheus/blob/main/web/api/v1/api_test.go
  - GoConvey 测试框架
 	- go get github.com/smartystreets/goconvey
  - testify 测试框架
@@ -3684,43 +3726,54 @@
 	- https://github.com/m3db/m3/pull/3525
 
 2、基准测试
-1).目的
- - 检测代码中方法性能问题
-2).用法
+ - 用途
+	- 基准测试常用于代码性能测试 
+ - 用法
+	- 函数需要导入testing包
+	- 定义以 Benchmark开头的函数，参数为(b *testing.B)
+	- 在测试函数中 循环调用函数多次
+ - bench的工作原理
+	- 基准测试函数会被一直调用直到b.N无效，它是基准测试循环的次数
+	- b.N 从 1 开始，如果基准测试函数在1秒内就完成(默认值)，则 b.N 增加，并再次运行基准测试函数
+	- b.N 的值会按照序列 1,2,5,10,20,50,... 增加，同时再次运行基准测测试函数
+	- 输出: BenchmarkFib-12    183    6272054 ns/op    0 B/op    0 allocs/op
+		- 上述结果解读代表 1秒内运行了183次 每次 6272054 ns
+		- -12 后缀和用于运行次测试的 GOMAXPROCS 值有关
+		- 与GOMAXPROCS一样，此数字默认为启动时 Go
+ - 执行命令
+	- go test 会在运行基准测试之前执行包里所有的单元测试
+		- 如果包里有很多单元测试，或者它们会运行很长时间
+		- 通过 go test 的-run 标识排除这些单元测试
+		- go test -bench=. -run=none
+	- 内存消耗情况
+		- go test -bench=. -benchmem -run=none
+	- CPU消耗情况
+		- go test -bench=. -cpu=1,2,4 -benchmem -run=none
+	- count多次运行基准测试
+		- go test -bench=. -count=10 -benchmem -run=none      // 热缩放、内存局部性、后台处理、gc活动等等会导致单次的误差
+	- benchtime指定运行秒数 
+		- go test -bench=. -benchtime=5s -benchmem -run=none  // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次
  - 示例
- 	func fib(n int) int {                   // fib.go
- 		if n == 0 || n == 1 {
- 			return n
- 		}
- 		return fib(n-2) + fib(n-1)
- 	}
- 	func BenchmarkFib(b *testing.B) {       // fib_test.go
- 		for n := 0; n < b.N; n++ {
- 			fib(30)
- 		}
- 	}
-	- ResetTimer   // 如果基准测试在循环前需要一些耗时的配置，则可以先重置定时器
-		func BenchmarkFib(b *testing.B) {
-			time.Sleep(3 * time.Second)
-			b.ResetTimer()
+	- 斐波那契数列
+		func fib(n int) int {                   // fib.go
+			if n == 0 || n == 1 {
+				return n
+			}
+			return fib(n-2) + fib(n-1)
+		}
+		func BenchmarkFib(b *testing.B) {       // fib_test.go
 			for n := 0; n < b.N; n++ {
 				fib(30)
 			}
 		}
- - 运行
-	- go test -bench=. -run=none
-		- go test 会在运行基准测试之前执行包里所有的单元测试，所有如果包里有很多单元测试，或者它们会运行很长时间，可以通过 go test 的-run 标识排除这些单元测试
-	- 内存消耗情况 go test -bench=. -benchmem -run=none
-	- CPU消耗情况  go test -bench=. -cpu=1,2,4 -benchmem -run=none
-	- count多次运行基准测试  go test -bench=. -count=10 -benchmem -run=none   // 因为热缩放、内存局部性、后台处理、gc活动等等会导致单次的误差
-	- benchtime 指定运行秒数 go test -bench=. -benchtime=5s -benchmem -run=none // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次。
-	- bench的工作原理
-			s- 基准测试函数会被一直调用直到b.N无效，它是基准测试循环的次数
-		- b.N 从 1 开始，如果基准测试函数在1秒内就完成 (默认值)，则 b.N 增加，并再次运行基准测试函数。
-		- b.N 的值会按照序列 1,2,5,10,20,50,... 增加，同时再次运行基准测测试函数。
-		- 上述结果解读代表 1秒内运行了168次 每次 6566836 ns
-		- -8 后缀和用于运行次测试的 GOMAXPROCS 值有关。 与GOMAXPROCS一样，此数字默认为启动时Go
- - 示例
+		- ResetTimer   // 如果基准测试在循环前需要一些耗时的配置，则可以先重置定时器
+			func BenchmarkFib(b *testing.B) {
+				time.Sleep(3 * time.Second)
+				b.ResetTimer()
+				for n := 0; n < b.N; n++ {
+					fib(30)
+				}
+			}
 	- benchmem 展示内存消耗情况
 		- go test -bench=. -benchtime=5s -benchmem -run=none
 		- 测试大cap的切片，直接用cap初始化，然后动态扩容
@@ -3744,7 +3797,6 @@
 			}
 			return nums
 		}
-		
 		func BenchmarkGenerateWithCap(b *testing.B) {
 			for n := 0; n < b.N; n++ {
 				generateWithCap(100000)
@@ -3756,7 +3808,7 @@
 			}
 		}
 	- 测试函数复杂度 不带cap的slice 动态扩容
-		- 结论: 输入变为原来的10倍，单次耗时也差不多是上一级的10倍。说明这个函数的复杂度是线性的。
+		- 结论: 输入变为原来的10倍，单次耗时也差不多是上一级的10倍，说明这个函数的复杂度是线性的
 		func benchmarkGenerate(i int, b *testing.B) {
 			for n := 0; n < b.N; n++ {
 				generateDynamic(i)

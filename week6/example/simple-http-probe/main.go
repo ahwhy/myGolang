@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/ahwhy/myGolang/week6/homework/simple-http-probe/config"
-	"github.com/ahwhy/myGolang/week6/homework/simple-http-probe/web"
+	"github.com/ahwhy/myGolang/week6/example/simple-http-probe/config"
+	"github.com/ahwhy/myGolang/week6/example/simple-http-probe/web"
 )
 
 var (

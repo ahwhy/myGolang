@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ahwhy/myGolang/week4/homework/Users/controller"
-	"github.com/ahwhy/myGolang/week4/homework/Users/user"
-	"github.com/ahwhy/myGolang/week4/homework/Users/utils"
+	"github.com/ahwhy/myGolang/week4/example/Users/controller"
+	"github.com/ahwhy/myGolang/week4/example/Users/user"
+	"github.com/ahwhy/myGolang/week4/example/Users/utils"
 )
 
 var users = []map[string]string{}

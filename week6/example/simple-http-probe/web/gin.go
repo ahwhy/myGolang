@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/ahwhy/myGolang/week6/homework/simple-http-probe/config"
+	"github.com/ahwhy/myGolang/week6/example/simple-http-probe/config"
 	"github.com/gin-gonic/gin"
 )
 

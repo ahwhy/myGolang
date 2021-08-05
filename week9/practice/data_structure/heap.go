@@ -5,10 +5,11 @@ import (
 	"fmt"
 )
 
+// 定义Item 用堆实现数据优先级
 type Item struct {
 	Value    string
-	priority int //优先级，数字越大，优先级越高
-	index    int //item在堆里的编号
+	priority int // 优先级，数字越大，优先级越高
+	index    int // item在堆里的编号
 }
 
 type PriorityQueue []*Item
@@ -18,7 +19,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].priority > pq[j].priority //golang默认提供的是小根堆，而优先队列是大根堆，所以这里要反着定义Less
+	return pq[i].priority > pq[j].priority // golang默认提供的是小根堆，而优先队列是大根堆，所以这里要反着定义Less
 }
 
 func (pq PriorityQueue) Swap(i, j int) {

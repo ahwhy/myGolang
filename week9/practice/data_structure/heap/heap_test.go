@@ -7,7 +7,7 @@ import (
 	"github.com/ahwhy/myGolang/week9/practice/data_structure/heap"
 )
 
-func TestHeap(t *testing.T) {
+func TestHeapbig(t *testing.T) {
 	m := []int{0, 9, 3, 6, 2, 1, 7} //第0个下标不放目标元素
 	h := heap.NewIntHeap(m)
 	fmt.Println(h.Items())
@@ -17,10 +17,19 @@ func TestHeap(t *testing.T) {
 
 	h.Pop()
 	fmt.Println(h.Items())
+
+	h.Pop()
+	fmt.Println(h.Items())
+}
+
+func TestHeapcontainer(t *testing.T) {
+	heap.Example_intHeap()
 }
 
 func TestBuildHeap(t *testing.T) {
-	heap.Example_intHeap()
+	arr := []int{62, 20, 30, 15, 10, 49, 78, 45, 12, 11, 45}
+	heap.ReverseAdjust(arr)
+	fmt.Println(arr)
 }
 
 func TestPriorityQueue(t *testing.T) {
