@@ -696,7 +696,7 @@
 	- 在调用函数时，也可以使用运算符 ... 将切片解包传递到可变参数函数中
 		max(1, 2, slice[3:]...)
  - 值传递
-	- 函数如果使用参数，该变量可称为函数的形参。形参就像定义在函数体内的局部变量
+	- 函数如果使用参数，该变量可称为函数的形参，形参就像定义在函数体内的局部变量
 	- 值传递是指在调用函数时将实际参数复制一份传递到函数中，这样在函数中如果对参数进行修改，将不会影响到实际参数
 	- 默认情况下，Go语言使用的是值传递(则先拷贝参数的副本，再将副本传递给函数)，即在调用过程中不会影响到实际参数
  - 引用传递
@@ -929,8 +929,8 @@
 	e := errors.New("原始的错误")
 	w := fmt.Errorf("Wrap了一个新的错误: %w", e)
 5).defer
- - defer 用户声明函数，不论函数是否发生错误都在函数执行最后执行(return之前);若使用defer声明多个函数，则按照声明的顺序，先声明后执行(堆)常用来做资源释放，记录日志等工作.
- - defer的本质是，当在某个函数中使用了defer关键字，则创建一个独立的defer栈帧，并将该defer语句压入栈中，同时将其使用的相关变量也拷贝到该栈帧中(值拷贝的)。因为栈是LIFO方式，所以先压栈的后执行
+ - defer 用户声明函数，不论函数是否发生错误都在函数执行最后执行(return之前);若使用defer声明多个函数，则按照声明的顺序，先声明后执行(堆)常用来做资源释放，记录日志等工作
+ - defer的本质是，当在某个函数中使用了defer关键字，则创建一个独立的defer栈帧，并将该defer语句压入栈中，同时将其使用的相关变量也拷贝到该栈帧中(值拷贝的);因为栈是LIFO方式，所以先压栈的后执行
 	- 因为是独立的栈帧，所以即使调用者函数已经返回或报错，也一样能在它们之后进入defer栈帧去执行
 6).panic与 recover 函数
  - panic
@@ -1933,6 +1933,7 @@
  - 通过操作符 <- 对管道进行读取和写入操作
  - 当写入 无缓冲区管道 或 缓冲区管道 已满时，写入则会阻塞，直到管道中元素被其他例程读取
  - 当管道中无元素时，读取也会阻塞，直到管道被其他例程写入元素
+	- 只有在例程中读取才会阻塞，在main会直接报错
 	channel2 <- "1"
 	fmt.Println(<-channel2)
  - channel <- struct{}{} 起通知作用，同时由于struct是数据组合，并不占内存
@@ -2492,6 +2493,85 @@
 	- 中文由于汉字很多，用数组存子节点太浪费内存，可以用map存子节点
 	- 从根节点到叶节点的完整路径是一个term
 	- 从根节点到某个中间节点也可能是一个term，即一个term可能是另一个term的前缀
+		type TrieNode struct {
+			Word     rune                                                        // 当前节点存储的字符；byte只能表示英文字符，rune可以表示任意字符
+			Children map[rune]*TrieNode                                          // 孩子节点，用一个map存储
+			Term     string
+		}
+		type TrieTree struct {
+			root *TrieNode
+		}
+		// add 把words[beginIndex:]插入到Trie树中
+		func (node *TrieNode) add(words []rune, term string, beginIndex int) {
+			if beginIndex >= len(words) {                                        // words已经遍历完了
+				node.Term = term
+				return
+			}
+			if node.Children == nil {
+				node.Children = make(map[rune]*TrieNode)
+			}
+			word := words[beginIndex]                                            //把这个word放到node的子节点中
+			if child, exists := node.Children[word]; !exists {
+				newNode := &TrieNode{Word: word}
+				node.Children[word] = newNode
+				newNode.add(words, term, beginIndex+1)                           //递归
+			} else {                                                             
+				child.add(words, term, beginIndex+1)                             //递归
+			}
+		}
+		// AddTerm 增加一个Term
+		func (tree *TrieTree) AddTerm(term string) {
+			if len(term) <= 1 {
+				return
+			}
+			words := []rune(term)
+			if tree.root == nil {
+				tree.root = new(TrieNode)
+			}
+			tree.root.add(words, term, 0)
+		}
+		// walk words[0]就是当前节点上存储的字符，按照words的指引顺着树往下走，最终返回words最后一个字符对应的节点
+		func (node *TrieNode) walk(words []rune, beginIndex int) *TrieNode {
+			if beginIndex == len(words)-1 {
+				return node
+			}
+			beginIndex += 1
+			word := words[beginIndex]
+			if child, exists := node.Children[word]; exists {
+				return child.walk(words, beginIndex)
+			} else {
+				return nil
+			}
+		}
+		// traverseTerms 遍历一个Node下面所有的Term，注意要传数组的指针，才能真正修改这个数组
+		func (node *TrieNode) traverseTerms(terms *[]string) {
+			if len(node.Term) > 0 {
+				*terms = append(*terms, node.Term)
+			}
+			for _, child := range node.Children {
+				child.traverseTerms(terms)
+			}
+		}
+		// Retrieve 检索一个Term
+		func (tree *TrieTree) Retrieve(prefix string) []string {
+			if tree.root == nil || len(tree.root.Children) == 0 {
+				return nil
+			}
+			words := []rune(prefix)
+			firstWord := words[0]
+			if child, exists := tree.root.Children[firstWord]; exists {
+				end := child.walk(words, 0)
+				if end == nil {
+					return nil
+				} else {
+					terms := make([]string, 0, 100)
+					end.traverseTerms(&terms)
+					return terms
+				}
+			} else {
+				return nil
+			}
+		}
 
 
 十三、算法的评估
