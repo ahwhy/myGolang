@@ -1,28 +1,31 @@
-package chnanel
+package channel_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/ahwhy/myGolang/week10/practice/channel"
 )
 
 func TestBasic(t *testing.T) {
-	Basic()
+	channel.Basic()
 }
 
 func TestBufferedChan(t *testing.T) {
-	BufferedChan()
+	channel.BufferedChan()
 }
 
 func TestSyncAB(t *testing.T) {
-	SyncAB()
+	channel.SyncAB()
 }
 
 func TestDeadLockV1(t *testing.T) {
 	ch := make(chan string)
+	
 	// send
-	go func() {
+	{
 		ch <- "hello"
-	}()
+	}
 
 	// receive
 	{
@@ -32,6 +35,7 @@ func TestDeadLockV1(t *testing.T) {
 
 func TestDeadLockV2(t *testing.T) {
 	ch := make(chan string, 1)
+
 	// send
 	{
 		ch <- "hello"
@@ -44,5 +48,5 @@ func TestDeadLockV2(t *testing.T) {
 }
 
 func TestRunTaskWithPool(t *testing.T) {
-	RunTaskWithPool()
+	channel.RunTaskWithPool()
 }
