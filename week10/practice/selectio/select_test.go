@@ -7,7 +7,7 @@ import (
 )
 
 func TestBasic1(t *testing.T) {
-	fmt.Println("don't cache1sfdsd")
+	fmt.Println("don't cachefsfdsd")
 	Basic1()
 }
 
@@ -23,7 +23,7 @@ func TestSelectOrder(t *testing.T) {
 func TestTimeAfter(t *testing.T) {
 	fmt.Println(time.Now())
 
-	a := time.After(1 * time.Second)
+	a := time.After(6 * time.Second)
 	fmt.Println(<-a)
 }
 

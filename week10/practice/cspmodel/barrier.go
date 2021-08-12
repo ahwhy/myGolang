@@ -95,7 +95,7 @@ func doSiteRequest(out chan<- SiteResp, url string) {
 		return
 	}
 
-	// 站不处理结果
+	// 暂不处理结果
 	_, err = io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {

@@ -14,6 +14,7 @@ var (
 )
 
 type SiteResp struct {
+	Site   string
 	Err    error
 	Resp   string
 	Status int
@@ -56,7 +57,9 @@ type SiteRespCallback func(SiteResp)
 
 // 构造请求
 func doSiteRequest(cb SiteRespCallback, url string) {
-	res := SiteResp{}
+	res := SiteResp{
+		Site: url,
+	}
 	startAt := time.Now()
 	defer func() {
 		res.Cost = time.Since(startAt).Milliseconds()
@@ -73,7 +76,7 @@ func doSiteRequest(cb SiteRespCallback, url string) {
 		return
 	}
 
-	// 站不处理结果
+	// 暂不处理结果
 	_, err = ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {

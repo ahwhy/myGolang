@@ -18,6 +18,7 @@ require (
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
+	github.com/x-mod/routine v1.3.3
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
