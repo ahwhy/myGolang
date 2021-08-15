@@ -74,6 +74,7 @@ func workerV3(ctx context.Context, wg *sync.WaitGroup) error {
 		}
 	}
 }
+
 func CancelWithCtx() {
 	start := time.Now()
 
@@ -82,7 +83,7 @@ func CancelWithCtx() {
 	}()
 
 	// 控制超时
-	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
@@ -90,6 +91,7 @@ func CancelWithCtx() {
 		go workerV3(ctx, &wg)
 	}
 
+	cancel()
 	// 等待安全退出
 	wg.Wait()
 }

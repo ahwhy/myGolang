@@ -2258,7 +2258,6 @@
 				}
 			)
 			type SiteResp struct {
-				Site   string
 				Err    error
 				Resp   string
 				Status int
@@ -2266,9 +2265,7 @@
 			}
 			// 构造请求
 			func doSiteRequest(out chan<- SiteResp, url string) {
-				res := SiteResp{
-					Site: url,
-				}
+				res := SiteResp{}
 				startAt := time.Now()
 				defer func() {
 					res.Cost = time.Since(startAt).Milliseconds()
@@ -2414,6 +2411,110 @@
 			- 在这个模型中，消息生产者成为发布者(publisher)，而消息消费者则成为订阅者(subscriber)，生产者和消费者是M:N的关系
 			- 在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题
 		- 示例
+			type (
+				subscriber chan interface{}         // 订阅者为一个管道
+				topicFunc  func(v interface{}) bool // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
+			)
+			// 发布者对象
+			type Publisher struct {
+				m           sync.RWMutex             // 读写锁
+				buffer      int                      // 订阅队列的缓存大小
+				timeout     time.Duration            // 发布超时时间
+				subscribers map[subscriber]topicFunc // 订阅者信息
+			}
+			// 构建一个发布者对象, 可以设置发布超时时间和缓存队列的长度
+			func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
+				return &Publisher{
+					buffer:      buffer,
+					timeout:     publishTimeout,
+					subscribers: make(map[subscriber]topicFunc),
+				}
+			}
+			// 添加一个新的订阅者，订阅全部主题
+			func (p *Publisher) Subscribe() chan interface{} {
+				return p.SubscribeTopic(nil)
+			}
+			// 添加一个新的订阅者，订阅过滤器筛选后的主题
+			func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
+				ch := make(chan interface{}, p.buffer)
+				p.m.Lock()
+				p.subscribers[ch] = topic
+				p.m.Unlock()
+				return ch
+			}
+			// 退出订阅
+			func (p *Publisher) Evict(sub chan interface{}) {
+				p.m.Lock()
+				defer p.m.Unlock()
+			
+				delete(p.subscribers, sub)
+				close(sub)
+			}
+			// 发布一个主题
+			func (p *Publisher) Publish(v interface{}) {
+				p.m.RLock()
+				defer p.m.RUnlock()
+			
+				var wg sync.WaitGroup
+				for sub, topic := range p.subscribers {
+					wg.Add(1)
+					go p.sendTopic(sub, topic, v, &wg)
+				}
+				wg.Wait()
+			}
+			// 关闭发布者对象，同时关闭所有的订阅者管道。
+			func (p *Publisher) Close() {
+				p.m.Lock()
+				defer p.m.Unlock()
+			
+				for sub := range p.subscribers {
+					delete(p.subscribers, sub)
+					close(sub)
+				}
+			}
+			// 发送主题，可以容忍一定的超时
+			func (p *Publisher) sendTopic(
+				sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
+			) {
+				defer wg.Done()
+				if topic != nil && !topic(v) {
+					return
+				}
+			
+				select {
+				case sub <- v:
+				case <-time.After(p.timeout):
+				}
+			}
+			p := NewPublisher(100*time.Millisecond, 10)
+			defer p.Close()
+			// 订阅所有
+			all := p.Subscribe()
+			// 通过过滤订阅一部分信息
+			golang := p.SubscribeTopic(func(v interface{}) bool {
+				if s, ok := v.(string); ok {
+					return strings.Contains(s, "golang")
+				}
+				return false
+			})
+			// 发布者 发布信息
+			p.Publish("hello,   python!")
+			p.Publish("godbybe, python!")
+			p.Publish("hello,   golang!")
+			// 订阅者查看消息
+			go func() {
+				for msg := range all {
+					fmt.Println("all:", msg)
+				}
+			}()
+			// 订阅者查看消息
+			go func() {
+				for msg := range golang {
+					fmt.Println("golang:", msg)
+				}
+			}()
+			// 运行一定时间后退出
+			time.Sleep(3 * time.Second)
 	- Workers Pool 模式
 		- Go语言中 goroutine 已经足够轻量，甚至 net/http server 的处理方式也是 goroutine-per-connection 的，所以比起其他语言来说可能场景稍微少一些
 			- 每个 goroutine 的初始内存消耗在 2~8kb，当有大批量任务的时候，需要起很多goroutine来处理，这会给系统代理很大的内存开销和GC压力，这个时候就可以考虑一下协程池
@@ -2539,9 +2640,7 @@
 			type SiteRespCallBack func(SiteResp)
 			// 构造请求
 			func doSiteRequest(cb SiteRespCallBack, url string) {
-				res := SiteResp{
-					Site: url,
-				}
+				res := SiteResp{}
 				startAt := time.Now()
 				defer func() {
 					res.Cost = time.Since(startAt).Milliseconds()
