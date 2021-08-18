@@ -43,8 +43,8 @@ func main() {
 		json.Unmarshal(requestBytes[:read_len], &request) // json反序列化时会把0都考虑在内，需要指定只读前read_len个字节
 		response := socket.Response{Sum: request.A + request.B}
 		responseBytes, _ := json.Marshal(response)
-		_, err = conn.Write(responseBytes)
+		_, err = conn.WriteToUDP(responseBytes, remoteAddr)
 		socket.CheckError(err)
-		fmt.Printf("Write response %s\n", string(responseBytes))
+		fmt.Printf("Write response %s to %s\n", string(responseBytes), remoteAddr.String())
 	}
 }

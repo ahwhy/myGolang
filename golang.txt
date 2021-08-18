@@ -20,7 +20,7 @@
 	  string 		: 16bytes（4 * 4） // string = 2*int64 = 2*8bytes  []byte(string)
 	  slice  		: 24bytes          // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
 	- 数据单位
-	1Word(字) = 2Byte(字节)
+	1Word(字) = 2Bytes(字节)
 	1Byte = 8bit(位)  // 2^8
 	1KB   = 1024B
 	1MB   = 1024KB
@@ -5179,8 +5179,167 @@
 			rusers = append(rusers, User{id, line[1]})
 		}
 		fmt.Println(rusers)
-		
-八、其他类型
+
+八、网络
+1、网络通信
+ - 网络请求过程
+	- 流程图
+											内核空间          						 用户空间
+				1).网络请求 ->        2).copy(I/O模型、DMA)->        3).copy(MMAP) ->      4-1).处理请求
+		client                   网卡                         内核缓冲区            web服务进程    |
+				7).返回数据 <-               6).copy <-                  6).copy <-        4-2).构建Respense
+	- DMA
+		- 网卡和磁盘数据拷贝到内存流程比较固定，不涉及到运算操作，且非常耗时
+		- 在磁盘嵌入一个DMA芯片，完成上述拷贝工作，把CPU解脱出来，让CPU专注于运算
+	- MMAP
+		- 用户空间和内核空间映射同一块内存空间，从而达到省略将数据从内核缓冲区拷贝到用户空间的操作，用户空间通过映射直接操作内核缓冲区的数据
+	- I/O模型
+		- 阻塞式网络I/O
+		- 非阻塞式网络I/O
+		- 多路复用网络I/O
+	- socket
+		- 用户进程(复数，即应用层) -> socket抽象层 -> TCP/UDP(传输层)
+		- socket把复杂的传输层协议封装成简单的接口，使应用层可以像读写文件一样进行网络数据的传输
+		- socket通信过程
+			- Server端
+						设置监听端口|设置监听队列|阻塞，循环等待客户端连接
+				Socket() -> Bind() -> Listen() -> Accept() -> Receive() -> Send() -> Close()
+			- Client端                           建立连接    发送数据     接收数据    关闭连接
+				Socket()           ->            Connect() -> Send()    -> Receive() -> Close()
+2、Socket编程
+ - 网络进程标识
+	- 用三元组(ip地址，协议，端口号)唯一标示网络中的一个进程，如(172.122.121.111, tcp, 5656)
+	- IPv4的地址位数为32位，分为4段，每段最大取值为255
+	- IPv6的地址位数为128位，分为8段，各段用16进制表示，最大取值为ffff
+	- 端口: 0~1023被熟知的应用程序占用(普通应用程序不可以使用)，49152~65535 客户端程序运行时动态选择使用
+ - TCP/CS架构
+	- TCP协议
+		- 传输层协议
+		- MSS = MTU - ip首部 - tcp首部，MTU视网络接口层的不同而不同
+		- TCP在建立连接时通常需要协商双方的MSS值
+		- 应用层传输的数据大于MSS时需要分段
+		- TCP首部
+			- 报文结构
+				|     源端口(2Bytes)         |         目的端口(2Bytes)    |
+				|                           序号                           |
+				|                          确认号                          |
+				|数据偏移 | 保留位 |          tcp flags           |  窗口  | 
+				| (4bit)  | (6bit) |(URG、ACK、PSH、RST、SYS、FIN)|(2Bytes)|
+				|     检验和(2Bytes)         |         紧急指针(2Bytes)    |
+				|                         TCP选项                          |
+			- 前20个字节是固定的，后面还有4N个可选字节(TCP选项)
+			- 端口在 TCP层指定，ip在 IP层指定
+				- 端口占2个字节，则最大端口号为2^16-1=65535
+			- 由于应用层的数据被进行分段，为了在接收端对数据按顺序重组，需要为每段数据编个"序号"
+			- 数据偏移
+				- TCP数据部分距TCP开头的偏移量(一个偏移量是4个字节)，亦即TCP首部的长度
+				- 所以TCP首部的最大长度是15*4=60个字节，即TCP选项最多有40个字节
+			- TCP协议规定在连接建立后所有传输的报文段都必须把ACK设置为1
+			- TCP连接
+				- 建立连接 三次握手
+					- 第一次握手: TCP首部SYN=1，初始化一个序号=J；SYN报文段不能携带数据
+					- 第二次握手: TCP首部SYN=1，ACK=1，确认号=J+1，初始化一个序号=K；此报文同样不携带数据
+					- 第三次握手: SYN=1，ACK=1，序号=J+1，确认号=K+1；此次一般会携带真正需要传输的数据
+					- 确认号: 即希望下次对方发过来的序号值
+					- SYN Flood 攻击始终不进行第三次握手，属于DDOS攻击的一种
+				- 断开连接 四次挥手
+					- TCP的连接是全双工(可以同时发送和接收)的连接，因此在关闭连接的时候，必须关闭传送和接收两个方向上的连接
+					- 第一次挥手: FIN=1，序号=M
+					- 第二次挥手: ACK=1，序号=M+1
+					- 第三次挥手: FIN=1，序号=N
+					- 第四次挥手: ACK=1，序号=N+1
+					- 从TIME_WAIT进入CLOSED需要经过2个MSL(Maxinum Segment Lifetime)，RFC793建议MSL=2分钟
+	- Go语言中的TCP编程接口
+		- net.ResolveTCPAddr
+			- func ResolveTCPAddr(network, address string) (*TCPAddr, error)
+			- net参数是"tcp4"、"tcp6"、"tcp"中的任意一个，分别表示TCP4(IPv4-only)，TCP6(IPv6-only)或者TCP(IPv4,、IPv6的任意一个)
+			- addr表示域名或者IP地址，例如" www.qq.com:80" 或者"127.0.0.1:22"
+		- net.ListenTCP
+			- func ListenTCP(network string, laddr *TCPAddr) (*TCPListener, error)
+			- 监听端口
+		- net.Accept
+			- func (l *TCPListener) Accept() (Conn, error)
+			- 等待客户端连接
+		- net.DialTCP
+			- func DialTCP(network string, laddr, raddr *TCPAddr) (*TCPConn, error)
+			- net参数是"tcp", "tcp4" (IPv4-only), "tcp6" (IPv6-only)
+			- laddr表示本机地址，一般设置为nil
+			- 向raddr端发起请求，建立tcp连接
+		- net.DialTimeout
+			- func DialTimeout(network, address string, timeout time.Duration) (Conn, error)
+			- 创建连接时设置超时时间
+			- netwok指定为tcp，建立连接时指定超时
+		- net.SetReadDeadline
+			- func (c *TCPConn) SetReadDeadline(t time.Time) error
+			- 设置从一个tcp连接上读取的超时时间
+		- net.SetWriteDeadline
+			- func (c *TCPConn) SetWriteDeadline(t time.Time) error
+			- 设置从一个tcp连接上写入的超时时间
+		- net.SetKeepAlive
+			- func (c *TCPConn) SetKeepAlive(keepalive bool) error
+			- 当一个tcp连接上没有数据时，操作系统会间隔性地发送心跳包，如果长时间没有收到心跳包会认为连接已经断开
+		- net.Write
+			- func (c *TCPConn) Write(b []byte) (int, error)
+			- 通过conn发送数据
+		- net.Read
+			- func (c *TCPConn) Read(b []byte) (int, error)
+			- 从conn里读取数据
+		- ioutil.ReadAll
+			- func ReadAll(r io.Reader) ([]byte, error)
+			- 从conn中读取所有内容，直到遇到error(比如连接关闭)或EOF
+		- net.Close
+			- func (c *TCPConn) Close() error
+			- func (l *TCPListener) Close() error
+			- 关闭连接
+ - UDP/CS架构
+	- UDP协议
+		- 不需要建立连接，直接收发数据，效率很高
+		- 面向报文
+			- 对应用层交下来的报文，既不合并也不拆分，直接加上边界交给IP层
+			- TCP是面向字节流
+		- 从机制上不保证顺序(在IP层要对数据分段)，可能会丢包(检验和如果出差错就会把这个报文丢弃掉)
+			- 在内网环境下分片乱序和数据丢包极少发生
+		- 支持一对一、一对多、多对一和多对多的交互通信
+		- 首部开销小，只占8个字节
+		- UDP首部
+			- 报文结构
+				| 源端口(2Bytes) | 目的端口(2Bytes) |  // UDP首部
+				|  UDP报文长度   |       检验和     |
+				|           用户数据部分            |
+	- Go语言中的UDP编程接口
+		- net.ResolveUDPAddr
+			- func ResolveUDPAddr(network, address string) (*UDPAddr, error)
+			- netwok指定为"udp", "udp4" (IPv4-only), "udp6" (IPv6-only)，解析成udp地址
+		- net.ListenUDP
+			- func ListenUDP(network string, laddr *UDPAddr) (*UDPConn, error)
+			- 直接调用Listen返回一个udp连接
+		- net.DialUDP
+			- func DialUDP(network string, laddr, raddr *UDPAddr) (*UDPConn, error)
+			- netwok指定为"udp", "udp4" (IPv4-only), "udp6" (IPv6-only)
+			- 建立udp连接(伪连接)
+		- net.DialTimeout
+			- func DialTimeout(network, address string, timeout time.Duration) (Conn, error)
+			- 创建连接时设置超时时间
+			- netwok指定为udp，建立连接时指定超时
+		- net.SetReadDeadline
+			- func (c *UDPConn) SetReadDeadline(t time.Time) error
+		- net.SetWriteDeadline
+			- func (c *UDPConn) SetWriteDeadline(t time.Time) error
+		- net.Read
+			- func (c *UDPConn) Read(b []byte) (int, error)
+		- net.ReadFromUDP
+			- func (c *UDPConn) ReadFromUDP(b []byte) (int, *UDPAddr, error)
+			- 读数据，会返回remote的地址
+		- net.Write
+			- func (c *UDPConn) Write(b []byte) (int, error)
+		- net.WriteToUDP
+			- func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (int, error)
+			- 写数据，需要指定remote的地址
+		- net.Close
+			- func (c *UDPConn) Close() error
+
+
+九、其他类型
 1、进程的内存结构
 	0xc0000000  内核虚拟内存    	 <-- 内核使用
 	0x40000000		栈区			 <-- 程序运行时用于存放局部变量，可向下延伸空间
