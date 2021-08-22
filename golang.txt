@@ -5337,6 +5337,130 @@
 			- 写数据，需要指定remote的地址
 		- net.Close
 			- func (c *UDPConn) Close() error
+ - TLS协议
+ 	- 很多应用层协议(http、ftp、smtp等)直接使用明文传输
+ 	- TLS(Transport Layer Security，安全传输层)将应用层的报文进行加密后再交由TCP进行传输
+ 	- TLS 在SSL v3.0 的基础上，提供了一些增强功能，两者差别很小
+ 	- TLS的作用
+ 		- 保密性，信息加密传输(对称加密)
+ 		- 完整性，MAC检验(散列函数)
+ 		- 认证，双方都可以配备证书，防止身份被冒充
+ 	- TLS过程
+ 		- C端获得S端的证书
+ 		- C端生成一个随机的AES口令，然后用S端的公钥通过RSA加密这个口令，并发给S端
+ 		- S端用自己的RSA私钥解密得到AES口令
+ 		- 双方使用这个共享的AES口令用AES加密通信
+ 	- TLS证书
+ 		- TLS 通过两个证书来实现服务端身份验证，以及对称密钥的安全生成
+ 			- CA 证书: 浏览器/操作系统自带，用于验证服务端的 TLS 证书的签名，保证服务端证书可信
+ 			- TLS 证书: 客户端和服务端使用 TLS 证书进行协商，以安全地生成一个对称密钥
+ 		- 证书，是非对称加密中的公钥，加上一些别的信息组成的一个文件
+ 		- 通过权威CA机构验证证书主人的真实身份
+ 			- 验证签名
+ 				- 私钥加密，公钥解密
+ 		- 证书来源
+ 			- 向权威CA机构申请证书需要收费(也有短期免费的)
+ 			- 若所有通信全部在自家网站或APP内完成可以使用本地签名证书(即自己生成CA证书)
+ 				- 编写证书签名请求的配置文件csr.conf，指定加密算法、授信域名、申请者信息等，规范参考(openssl.org)
+ 				- 生成server的TLS证书私钥
+ 					openssl genrsa -out server.key 2048
+ 				- 根据第1步的配置文件，生成证书签名请求(公钥加申请者信息)
+ 					openssl req -new -key server.key -out server.csr -config csr.conf
+ 				- 生成CA的私钥
+ 					openssl genrsa -out ca.key 2048
+ 				- 生成CA证书，有效期1000天
+ 					openssl req -x509 -new -nodes -key ca.key -subj "/CN=MaGeCA" -days 1000 -out ca.crt
+ 				- 签名，得到server的TLS证书，有效其365天
+ 					- 包含四部分: 公钥+申请者信息 + 颁发者(CA)的信息 + 签名(使用 CA 私钥加密)
+ 						openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key  -CAcreateserial -out server.crt -days 365  -extensions v3_ext -extfile csr.conf
+ 		- 服务端安装TLS证书
+ 			- 编辑Nginx配置文件 
+ 				$ vim /etc/nginx/nginx.conf 
+ 				# Settings for a TLS enabled server.
+ 				server {
+ 					listen       443;
+ 					server_name  july.go.edu;                     // 填写自己的域名
+ 					ssl_certificate "/path/to/server.crt";        // 填写刚生成的TLS证书（包含公钥）
+ 					ssl_certificate_key "/path/to/server.key";    // 填写刚生成的TLS证书私钥
+ 				}
+ 			- 使Nginx重新加载配置文件 nginx -s reload
+ 		- 客户端安装TLS证书
+ 			- 将服务端的TLS证书添加到 OS 的默认证书列表中
+ 				- linux
+ 					sudo cp server.crt /usr/local/share/ca-certificates/server.crt 
+ 					sudo update-ca-certificates
+ 				- mac
+ 					- 打开钥匙串，把刚刚生成的server.crt 拖到证书一栏里
+ 			- 编程: 使用 HTTPS 客户端的 api 指定使用的 TLS 证书
+ - WebSocket协议
+	- 与http的异同
+		- 通信方式
+			- http 客户端和服务端每次通信，都需要进行客户端请求(如 POST/GET)，服务端返回的流程
+			- websocket 客户端和服务端再进行握手确认后，直接使用全双工的方式进行通信，最后断开连接
+		- 相似和关联
+			- 都是应用层协议，基于tcp传输协议
+			- 跟http有良好的兼容性，websocket和http的默认端口都是80，websockets和https的默认端口都是443
+			- websocket在握手阶段采用http发送数据
+		- 差异
+			- http是半双工，而websocket通过多路复用实现了全双工
+			- http只能由client主动发起数据请求，而websocket还可以由server主动向client推送数据
+				- 在需要及时刷新的场景中，http只能靠client高频地轮询，浪费严重
+			- http是短连接(也可以实现长连接，HTTP1.1的连接默认使用长连接)，每次数据请求都得经过三次握手重新建立连接，而websocket是长连接
+			- http长连接中每次请求都要带上header，而websocket在传输数据阶段不需要带header
+	- websocket握手协议
+		- Request Header
+			Sec-Websocket-Version:13
+			Upgrade:websocket
+			Connection:Upgrade
+			Sec-Websocket-Key:duR0pUQxNgBJsRQKj2Jxsw==
+		- Response Header
+			Upgrade:websocket
+			Connection:Upgrade
+			Sec-Websocket-Accept:a1y2oy1zvgHsVyHMx+hZ1AYrEHI=
+		- 特点
+			- Upgrade:websocket 和 Connection:Upgrade 指明使用WebSocket协议
+			- Sec-WebSocket-Version 指定Websocket协议版本
+			- Sec-WebSocket-Key是一个Base64 encode的值，是浏览器随机生成的
+			- 服务端收到Sec-WebSocket-Key后拼接上一个固定的GUID，进行一次SHA-1摘要，再转成Base64编码，得到Sec-WebSocket-Accept返回给客户端
+				- 客户端对本地的Sec-WebSocket-Key执行同样的操作跟服务端返回的结果进行对比，如果不一致会返回错误关闭连接
+				- 该操作把websocket header跟http header区分开
+	- WebSocket/CS架构
+		- 引用第三方包
+			go get github.com/gorilla/websocket
+		- 服务端需要将 http协议升级到 WebSocket协议
+			func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*websocket.Conn, error)	
+		- 客户端发起握手，请求连接
+			func (*websocket.Dialer) Dial(urlStr string, requestHeader http.Header) (*websocket.Conn, *http.Response, error)
+	- Go语言中的标准库 http
+		- http.Serve                                                                 // 启动http服务
+			func Serve(l net.Listener, handler Handler) error
+		- http.ListenAndServe                                                        // net.Listen和 http.Serve两步合成一步
+			func ListenAndServe(addr string, handler Handler) error
+		- http.Handler                                                               // 需要实现Handler接口
+			type Handler interface {
+				ServeHTTP(ResponseWriter, *Request)
+			}
+			func (ws *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request)
+		- http.HandleFunc
+			func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+		- http.ServeFile                                                             // ServeFile用命名文件或者目录的内容，回复请求
+			func ServeFile(w ResponseWriter, r *Request, name string)
+	- Go语言中的第三方库 github.com/gorilla/websocket
+		- Upgrader结构体
+			type Upgrader struct {
+				HandshakeTimeout time.Duration                                                 // websocket握手超时时间
+				ReadBufferSize, WriteBufferSize int                                            // io操作的缓存大小
+				Error func(w http.ResponseWriter, r *http.Request, status int, reason error)   // http错误响应函数
+				CheckOrigin func(r *http.Request) bool                                         // 用于统一的链接检查，以防止跨站点请求伪造
+			}
+		- websocket发送的消息类型有5种：TextMessag, BinaryMessage, CloseMessag, PingMessage, PongMessage
+		- TextMessag 和 BinaryMessage 分别表示发送文本消息和二进制消息
+		- CloseMessage 关闭帧，接收方收到这个消息就关闭连接
+		- PingMessage和PongMessage是保持心跳的帧
+			- 发送方 -> 接收方是PingMessage
+			- 接收方 -> 发送方是PongMessage
+			- 目前浏览器没有相关api发送ping给服务器，只能由服务器发ping给浏览器，浏览器返回pong消息
+	- 示例 聊天室实现
 
 
 九、其他类型

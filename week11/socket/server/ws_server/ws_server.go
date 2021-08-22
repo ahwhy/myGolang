@@ -75,7 +75,7 @@ func (ws *WsServer) handleConnection(conn *websocket.Conn) {
 	}
 }
 
-// httpHandler必须实现ServeHTTP接口
+// http.Handler必须实现ServeHTTP接口
 func (ws *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/add" {
 		httpCode := http.StatusInternalServerError // 返回一个内部错误的信息
