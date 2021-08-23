@@ -3,9 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/ahwhy/myGolang/week12/database"
 	"strconv"
 	"time"
+
+	"github.com/ahwhy/myGolang/week12/database"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -29,8 +30,10 @@ func insert(db *sql.DB) {
 func query(db *sql.DB) {
 	stmt, err := db.Prepare("select id,name from student where province=?")
 	database.CheckError(err)
+
 	rows, err := stmt.Query("山西")
 	database.CheckError(err)
+
 	for rows.Next() {
 		var id int
 		var name string
@@ -43,6 +46,7 @@ func traverse(db *sql.DB) {
 	var offset int
 	begin := time.Now()
 	stmt, _ := db.Prepare("select id,name,province from student limit ?,100")
+
 	for i := 0; i < 100; i++ {
 		t0 := time.Now()
 		rows, _ := stmt.Query(offset)
@@ -63,6 +67,7 @@ func traverse2(db *sql.DB) {
 	var maxid int
 	begin := time.Now()
 	stmt, _ := db.Prepare("select id,name,province from student where id>? limit 100")
+
 	for i := 0; i < 100; i++ {
 		t0 := time.Now()
 		rows, _ := stmt.Query(maxid)
@@ -84,7 +89,12 @@ func traverse2(db *sql.DB) {
 func main() {
 	db, err := sql.Open("mysql", "root:@/test")
 	database.CheckError(err)
+	insert(db)
+	query(db)
+
 	traverse(db)
+
 	fmt.Println("============")
+
 	traverse2(db)
 }
