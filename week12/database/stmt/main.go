@@ -3,8 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-course/database"
 	"time"
+
+	"github.com/ahwhy/myGolang/week12/database"
 
 	_ "github.com/go-sql-driver/mysql"
 )

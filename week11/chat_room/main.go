@@ -33,4 +33,4 @@ func main() {
 	}
 }
 
-//go run socket/chat_room/*.go --port 5657
+//go run chat_room/*.go --port 5657

@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-course/database"
+	"github.com/ahwhy/myGolang/week12/database"
 	"strconv"
 	"time"
 

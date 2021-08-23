@@ -3,7 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-course/database"
+
+	"github.com/ahwhy/myGolang/week12/database"
 
 	"github.com/didi/gendry/builder"
 	"github.com/didi/gendry/manager"

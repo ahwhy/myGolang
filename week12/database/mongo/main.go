@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"go-course/database"
 	"time"
+
+	"github.com/ahwhy/myGolang/week12/database"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
