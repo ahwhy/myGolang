@@ -92,9 +92,8 @@ func main() {
 	insert(db)
 	query(db)
 
-	traverse(db)
-
 	fmt.Println("============")
-
+	traverse(db)
+	fmt.Println("============")
 	traverse2(db)
 }

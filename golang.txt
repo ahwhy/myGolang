@@ -980,7 +980,7 @@
 
 6、包的维护
  - 包的提供者 -> 打tag  -> git tag
- - 包的使用者 -> 改版本 -> go mods
+ - 包的使用者 -> 改版本 -> go mod
 
 7、关系说明
  - import 导入的是路径，而非包名
@@ -4563,7 +4563,7 @@
 				}
 			}
 	- benchmem 展示内存消耗情况
-		- go test -bench=. -benchtime=5s -benchmem -run=none
+		- G
 		- 测试大cap的切片，直接用cap初始化，然后动态扩容
 		- 结论: 用cap初始化好的性能可以高一个数据量级
 		// 制定大的cap的切片
@@ -5522,7 +5522,8 @@
 	- 注意事项
 		- 写sql时一律使用小写
 		- 建表时先判断表是否已存在  if not exists 
-		- 所有的列和表都加  comment
+		- 所有的列和表都加 comment
+			- comment 是备注、注释的意思，写上comment 'id'之后，在建表信息里可以看到添加的备注信息
 		- 字符串长度比较短时尽量使用char，定长有利于内存对齐，读写性能更好，而varchar字段频繁修改时容易产生内存碎片
 		- 满足需求的前提下尽量使用短的数据类型，如tinyint vs int, float vs double, date vs datetime
 		- null
@@ -5535,7 +5536,7 @@
 	- B+树
 		- B即Balance，对于m叉树每个节点上最多有m个数据，最少有m/2个数据(根节点除外)
 		- 叶节点上存储了所有数据，把叶节点链接起来可以顺序遍历所有数据
-		- 每个节点设计成内存页的整倍数；MySQL的m=1200，树的前两层放在内存中
+		- 每个节点设计成内存页的整倍数；MySQL的 m=1200，树的前两层放在内存中
 		- 示例
 							2  28 65
 							P1 P2 P3
@@ -5559,8 +5560,8 @@
 			- Go官方没有提供数据库驱动，而是为开发数据库驱动定义了一些标准接口(即database/sql)，开发者可以根据定义的接口来开发相应的数据库驱动
 			- Go语言中支持MySQL的驱动比较多，如
 				github.com/go-sql-driver/mysql  支持 database/sql
-				github.com/ziutek/mymysql       支持 database/sql，也支持自定义的接口
-				github.com/Philio/GoMySQL     不支持 database/sql，自定义接口
+				github.com/ziutek/mymysql       支持 database/sql，支持自定义的接口
+				github.com/Philio/GoMySQL     不支持 database/sql，支持自定义的接口
 		- Driver
 			// driver.Driver
 			package driver // import "database/sql/driver"
@@ -5570,6 +5571,8 @@
 			- 注册数据库驱动
 				var d = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
 				sql.Register("mysql", &d)                              // func Register(name string, driver driver.Driver)
+			- 打开数据库连接
+				db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/test?charset=utf8")
 		- Conn
 			// driver.Conn
 			type Conn interface {
@@ -5677,20 +5680,36 @@
 				- 使用专业的SQL注入检测工具进行检测，如sqlmap、SQLninja
 				- 避免网站打印出SQL错误信息，以防止攻击者利用这些错误信息进行SQL注入
 		- SQL预编译
-			- DB执行SQL分为3步：
+			- DB执行SQL分为3步
 				- 词法和语义解析
 				- 优化 SQL 语句，制定执行计划
 				- 执行并返回结果
 			- SQL 预编译技术是指将用户输入用占位符?代替，先对这个模板化的sql进行预编译，实际运行时再将用户输入代入
 			- 除了可以防止 SQL 注入，还可以对预编译的SQL语句进行缓存，之后的运行就省去了解析优化SQL语句的过程
 
-
 2、ORM与NoSQL技术
 	- 开源工具SQLBuilder
 		- Go-SQLBuilder是一个用于创建SQL语句的工具函数库，提供一系列灵活的、与原生SQL语法一致的链式函数，归属于艾润物联公司
-			go get -u github.com/parkingwang/go-sqlbuilder
+				go get -u github.com/parkingwang/go-sqlbuilder
+			- 函数链
+				sql := gsb.NewContext().
+					Select("id", "name", "score", "city").
+					From("student").
+					OrderBy("score").DESC().                  // 按"score"降序
+					Column("name").ASC().                     // 当"score"相同，按"name"升序
+					Limit(10).Offset(20).                     // 从第20个开始，读10个 limit 20, 10
+					ToSQL()
 		- Gendry是一个用于辅助操作数据库的Go包，基于go-sql-driver/mysql，它提供了一系列的方法来为调用标准库database/sql中的方法准备参数
-			go get –u github.com/didi/gendry
+				go get –u github.com/didi/gendry
+			- map
+				where := map[string]interface{}{
+					"city": []string{"北京", "上海", "杭州"},
+					"score<": 30,
+					"addr": builder.IsNotNull,
+					"_orderby": "score desc",
+				}
+				fields := []string{"id", "name", "city", "score"}
+				_, _, err := builder.BuildSelect("student", where, fields)
 	- 封装SQL构建器
 		- 背景
 			- 写一句很长的sql容易出错，且出错后不好定位
@@ -5698,7 +5717,7 @@
 			- 函数式编程比一长串sql更容易编写和理解
 	- ORM技术与GORM
 		- ORM
-			- ORM即Object Relational Mapping，对象关系映射
+			- ORM 即 Object Relational Mapping，对象关系映射
 			- Relational指各种sql类的关系型数据为
 			- Object指面向对象编程(object-oriented programming)中的对象
 			- ORM在数据库记录和程序对象之间做一层映射转换，使程序中不用再去编写原生SQL，而是面向对象的思想去编写类、对象、调用相应的方法来完成数据库操作
@@ -5707,11 +5726,57 @@
 			- go get -u gorm.io/driver/mysql
 			- GORM是一个全能的、友好的、基于golang的ORM库
 			- GORM 倾向于约定，而不是配置。默认情况下，GORM 使用 ID 作为主键，使用结构体名的 蛇形复数 作为表名，字段名的 蛇形 作为列名，并使用 CreatedAt、UpdatedAt 字段追踪创建、更新时
-	- Go操作MongoDB
-		- 定义
-			NoSQL泛指非关系型数据库，如mongo,redis,HBase
-			mongo使用高效的二进制数据存储，文件存储格式为 BSON （ 一种json的扩展，比json性能更好，功能更强大）
-			MySQL中表的概念在mongo里叫集合(collection)， MySQL中行的概念在mongo中叫文档(document)，一个文档看上去像一个json
+				dsn := "root:@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True"   // data source name
+				db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+				student := Student{Name: "光绪", Province: "北京", City: "北京", Score: 38, Enrollment: time.Now()}
+				db.Create(&student)
+				- 完全是在操作struct，看不到sql的影子
+	- MongoDB
+		- 相关概念
+			- NoSQL泛指非关系型数据库，如 mongo, redis, HBase
+			- mongo使用高效的二进制数据存储，文件存储格式为 BSON(一种json的扩展，比json性能更好，功能更强大)
+			- MySQL中表的概念在mongo里叫集合(collection)， MySQL中行的概念在mongo中叫文档(document)，一个文档看上去像一个json
+		- 安装MongoDB
+			 - $ vim /etc/yum.repos.d/mongodb-org-4.2.repo
+				[mongodb-org-4.2] 
+				name=MongoDB Repository
+				baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+				gpgcheck=1
+				enabled=1
+				gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+			 - $ yum install -y mongodb-org
+			 - $ systemctl start mongod.service
+		- MongoDB常用命令
+			use test;                                                                                // 切换到test库，如果没有则创建
+			db.createUser({user: "tester", pwd: "123456", roles: [{role: "dbAdmin", db: "test"}]});  // 创建用户
+			db.createCollection("student");                                                          // 创建collection
+			db.student.createIndex({"name":1});                                                      // 在name上创建索引,不是唯一索引
+			db.student.insertOne({name:"张三",city:"北京"});
+			db.student.find({name:"张三"});
+			db.student.update({name:"张三"},{name:"张三",city:"上海"})
+			db.student.deleteOne({name:"张三"});
+		- Go语言中安装mongo-driver
+			go get go.mongodb.org/mongo-driver
+			go get go.mongodb.org/mongo-driver/x/bsonx/bsoncore@v1.7.1
+			go get go.mongodb.org/mongo-driver/x/mongo/driver@v1.7.1
+			go get go.mongodb.org/mongo-driver/mongo/options@v1.7.1
+			go get go.mongodb.org/mongo-driver/x/mongo/driver/topology@v1.7.1
+			go get go.mongodb.org/mongo-driver/mongo@v1.7.1
+		- Go语言中连接MongoDB
+			option := options.Client().ApplyURI("mongodb://127.0.0.1:27017").
+			SetConnectTimeout(time.Second).//连接超时时长
+			SetAuth(options.Credential{Username: "tester", Password: "123456", AuthSource: "test"}) //指定用户名和密码，AuthSource代表Database
+			client, err := mongo.Connect(context.Background(), option)
+			err = client.Ping(ctx, nil) 
+			- 注意: Ping成功才代表连接成功
+		- Go语言中查询MongoDB
+			sort := bson.D{{"name", 1}} //1升序，-1降序
+			filter := bson.D{{"score", bson.D{{"$gt", 3}}}} //score>3   // greater than
+			findOption := options.Find()
+			findOption.SetSort(sort)//按name排序
+			findOption.SetLimit(10) //最多返回10个
+			findOption.SetSkip(3) //跳过前3个
+			cursor, err := collection.Find(ctx, filter, findOption)
 
 
 十、其他类型

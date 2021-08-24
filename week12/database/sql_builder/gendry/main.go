@@ -23,8 +23,8 @@ func query() {
 	fields := []string{"id", "name", "city", "score"}
 	template, values, err := builder.BuildSelect(table, where, fields)
 	database.CheckError(err)
-	fmt.Println(template)  //包含占位符的sql模板
-	fmt.Println(values...) //占位符的具体值
+	fmt.Println(template)  // 包含占位符的sql模板  SELECT id,name,city,score FROM student WHERE (score<=? AND city IN (?,?,?) AND addr IS NOT NULL) GROUP BY province ORDER BY score desc
+	fmt.Println(values...) //占位符的具体值  30 北京 上海 杭州
 }
 
 func insert() {
@@ -35,8 +35,8 @@ func insert() {
 	table := "student"
 	template, values, err := builder.BuildInsert(table, data)
 	database.CheckError(err)
-	fmt.Println(template)  //包含占位符的sql模板
-	fmt.Println(values...) //占位符的具体值
+	fmt.Println(template)  // 包含占位符的sql模板  INSERT INTO student (city,enrollment,name,province) VALUES (?,?,?,?),(?,?,?,?)
+	fmt.Println(values...) // 占位符的具体值  郑州 2021-05-01 王五 河南 杭州 2021-04-01 大王 浙江
 }
 
 func update() {
@@ -49,8 +49,8 @@ func update() {
 	table := "student"
 	template, values, err := builder.BuildUpdate(table, where, data)
 	database.CheckError(err)
-	fmt.Println(template)  //包含占位符的sql模板
-	fmt.Println(values...) //占位符的具体值
+	fmt.Println(template)  // 包含占位符的sql模板  UPDATE student SET score=? WHERE (city IN (?,?,?))
+	fmt.Println(values...) // 占位符的具体值  25 北京 上海 杭州
 }
 
 func delete() {
@@ -60,8 +60,8 @@ func delete() {
 	table := "student"
 	template, values, err := builder.BuildDelete(table, where)
 	database.CheckError(err)
-	fmt.Println(template)  //包含占位符的sql模板
-	fmt.Println(values...) //占位符的具体值
+	fmt.Println(template)  //包含占位符的sql模板  DELETE FROM student WHERE (city=?)
+	fmt.Println(values...) //占位符的具体值  杭州
 }
 
 func query2(db *sql.DB) {
@@ -75,6 +75,7 @@ func query2(db *sql.DB) {
 	fields := []string{"id", "name", "city", "score"}
 	template, values, err := builder.BuildSelect(table, where, fields)
 	database.CheckError(err)
+
 	rows, err := db.Query(template, values...)
 	database.CheckError(err)
 	for rows.Next() {
@@ -95,6 +96,7 @@ func insert2(db *sql.DB) {
 	table := "student"
 	template, values, err := builder.BuildReplaceInsert(table, data) //使用replace
 	database.CheckError(err)
+
 	res, err := db.Exec(template, values...)
 	database.CheckError(err)
 	rows, err := res.RowsAffected()
@@ -112,6 +114,7 @@ func update2(db *sql.DB) {
 	table := "student"
 	template, values, err := builder.BuildUpdate(table, where, data)
 	database.CheckError(err)
+
 	res, err := db.Exec(template, values...)
 	database.CheckError(err)
 	rows, err := res.RowsAffected()
@@ -126,6 +129,7 @@ func delete2(db *sql.DB) {
 	table := "student"
 	template, values, err := builder.BuildDelete(table, where)
 	database.CheckError(err)
+	
 	res, err := db.Exec(template, values...)
 	database.CheckError(err)
 	rows, err := res.RowsAffected()

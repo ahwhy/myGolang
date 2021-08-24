@@ -75,3 +75,13 @@ func main() {
 	delete()
 	delete2()
 }
+
+/*
+INSERT INTO `student`(`name`, `province`, `city`, `enrollment`) VALUES ('赵四', '江苏', '南京', '2021-02-18');
+INSERT INTO `student`(`name`, `province`, `city`, `enrollment`) VALUES (?, ?, ?, ?);
+UPDATE `student` SET `name`=?, `province`=?, `city`=?, `enrollment`=? WHERE `province` = '河南' AND `city` IN ('郑州', '洛阳');
+UPDATE `student` SET `name`=?, `province`=?, `city`=?, `enrollment`=? WHERE `province` = ?;
+SELECT `id`, `name`, `score`, `city` FROM `student` ORDER BY `score` DESC, `name` ASC LIMIT 10 OFFSET 20;
+DELETE FROM `student` WHERE `score` >= 10;
+DELETE FROM `student` WHERE `score` >= ?;
+*/
