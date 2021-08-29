@@ -1710,7 +1710,6 @@
 		Age  int    `json:"age"  yaml:"yaml_age"  mage:"age"`
 		City string `json:"-" yaml:"yaml_city" mage:"-"`
 	}
-	
 	//json解析
 	func jsonWork() {
 		// 对象marshal成字符串
@@ -1741,7 +1740,6 @@
 		}
 		log.Printf("[person.unmarshal.res][res:%v]", p2)
 	}
-	
 	// yaml读取文件
 	func yamlWork() {
 		filename := "a.yaml"
@@ -1759,7 +1757,6 @@
 		}
 		log.Printf("[yaml.UnmarshalStrict.res][res:%v]", p)
 	}
-	
 	// 自定义标签
 	func jiexizidingyibiaoqian(s interface{}) {
 		// typeOf type类型
@@ -1780,7 +1777,6 @@
 			}
 		}
 	}
-	
 	jsonWork()
 	yamlWork()
 	p := Person{
@@ -5497,9 +5493,10 @@
 		- 查询记录
 			select id,name from student where id>0;
 			select province,avg(score) as avg_score from student 
-			where score>0 
-			group by province having avg_score>50 
-			order by avg_score desc;
+				where score>0 
+				group by province having avg_score>50 
+				order by avg_score desc;
+			select * from student order by c1 asc, c2 desc;    // 先按列 c1 升序排列，再按 c2 降序排列
 		- 修改记录
 			update student set score=score+10,addr='海淀' where province='北京';
 			update student set
@@ -5550,11 +5547,20 @@
 		data:   Q  Q  Q    Q  Q  Q    Q  Q  Q 
 	- 索引
 		- MySQL索引默认使用B+树
+			- 散列表(Hash table，也叫哈希表) 与 B+树
+				- Hash table 查询时间为 O(1)，但是其对范围查询的支持不如 B+树
 		- 主键默认会加索引
 			- 按主键构建的B+树里包含所有列的数据，而普通索引的B+树里只存储了主键，还需要再查一次主键对应的B+树(回表)
+			- 使用 explain命令 查看一个SQL语句的执行计划，如使用的索引，是否做全表扫描等
 		- 联合索引的前缀同样具有的索引的效果
 		- sql语句前加explain可以查看索引使用情况
 		- 如果MySQL没有选择最优的索引方案，可以在where前force index (index_name)
+		- 规避慢查询
+			- 大部分的慢查询都是因为没有正确地使用索引
+			- 一次select不要超过1000行
+			- 分页查询limit m,n 会检索前m+n行，只是返回后n行，通常用id>x来代替这种分页方式
+			- 批量操作时最好一条sql语句搞定；其次打包成一个事务，一次性提交(高并发情况下减少对共享资源的争用)
+			- 不要使用连表操作，join逻辑在业务代码里完成
 	- Go语言中SQL驱动接口
 		- database/sql
 			- Go官方没有提供数据库驱动，而是为开发数据库驱动定义了一些标准接口(即database/sql)，开发者可以根据定义的接口来开发相应的数据库驱动
@@ -5688,7 +5694,8 @@
 			- 除了可以防止 SQL 注入，还可以对预编译的SQL语句进行缓存，之后的运行就省去了解析优化SQL语句的过程
 
 2、ORM与NoSQL技术
-	- 开源工具SQLBuilder
+ - SQLBuilder
+	- Go语言中的第三方库
 		- Go-SQLBuilder是一个用于创建SQL语句的工具函数库，提供一系列灵活的、与原生SQL语法一致的链式函数，归属于艾润物联公司
 				go get -u github.com/parkingwang/go-sqlbuilder
 			- 函数链
@@ -5710,74 +5717,77 @@
 				}
 				fields := []string{"id", "name", "city", "score"}
 				_, _, err := builder.BuildSelect("student", where, fields)
-	- 封装SQL构建器
-		- 背景
-			- 写一句很长的sql容易出错，且出错后不好定位
-			- 函数式编程可以直接定位到是哪个函数的问题
-			- 函数式编程比一长串sql更容易编写和理解
-	- ORM技术与GORM
-		- ORM
-			- ORM 即 Object Relational Mapping，对象关系映射
-			- Relational指各种sql类的关系型数据为
-			- Object指面向对象编程(object-oriented programming)中的对象
-			- ORM在数据库记录和程序对象之间做一层映射转换，使程序中不用再去编写原生SQL，而是面向对象的思想去编写类、对象、调用相应的方法来完成数据库操作
-		- GORM
-			- go get -u gorm.io/gorm
-			- go get -u gorm.io/driver/mysql
-			- GORM是一个全能的、友好的、基于golang的ORM库
-			- GORM 倾向于约定，而不是配置。默认情况下，GORM 使用 ID 作为主键，使用结构体名的 蛇形复数 作为表名，字段名的 蛇形 作为列名，并使用 CreatedAt、UpdatedAt 字段追踪创建、更新时
+	- 自行封装SQL构建器
+		- 写一句很长的sql容易出错，且出错后不好定位
+		- 函数式编程可以直接定位到是哪个函数的问题
+		- 函数式编程比一长串sql更容易编写和理解
+		- github.com/ahwhy/myGolang/blob/main/week12/database/self_sql_builder/main.go
+ - ORM技术与GORM
+	- ORM
+		- ORM 即 Object Relational Mapping，对象关系映射
+		- Relational指各种sql类的关系型数据为
+		- Object指面向对象编程(object-oriented programming)中的对象
+		- ORM在数据库记录和程序对象之间做一层映射转换，使程序中不用再去编写原生SQL，而是面向对象的思想去编写类、对象、调用相应的方法来完成数据库操作
+	- GORM
+		- go get -u gorm.io/gorm
+		- go get -u gorm.io/driver/mysql
+		- GORM是一个全能的、友好的、基于golang的ORM库
+		- GORM 倾向于约定，而不是配置
+			- 默认情况下，GORM 使用 ID 作为主键，使用结构体名的 蛇形复数 作为表名，字段名的 蛇形 作为列名，并使用 CreatedAt、UpdatedAt 字段追踪创建、更新时
 				dsn := "root:@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True"   // data source name
 				db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 				student := Student{Name: "光绪", Province: "北京", City: "北京", Score: 38, Enrollment: time.Now()}
 				db.Create(&student)
 				- 完全是在操作struct，看不到sql的影子
-	- MongoDB
-		- 相关概念
-			- NoSQL泛指非关系型数据库，如 mongo, redis, HBase
-			- mongo使用高效的二进制数据存储，文件存储格式为 BSON(一种json的扩展，比json性能更好，功能更强大)
-			- MySQL中表的概念在mongo里叫集合(collection)， MySQL中行的概念在mongo中叫文档(document)，一个文档看上去像一个json
-		- 安装MongoDB
-			 - $ vim /etc/yum.repos.d/mongodb-org-4.2.repo
-				[mongodb-org-4.2] 
-				name=MongoDB Repository
-				baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
-				gpgcheck=1
-				enabled=1
-				gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
-			 - $ yum install -y mongodb-org
-			 - $ systemctl start mongod.service
-		- MongoDB常用命令
-			use test;                                                                                // 切换到test库，如果没有则创建
-			db.createUser({user: "tester", pwd: "123456", roles: [{role: "dbAdmin", db: "test"}]});  // 创建用户
-			db.createCollection("student");                                                          // 创建collection
-			db.student.createIndex({"name":1});                                                      // 在name上创建索引,不是唯一索引
-			db.student.insertOne({name:"张三",city:"北京"});
-			db.student.find({name:"张三"});
-			db.student.update({name:"张三"},{name:"张三",city:"上海"})
-			db.student.deleteOne({name:"张三"});
-		- Go语言中安装mongo-driver
+ - MongoDB
+	- 相关概念
+		- NoSQL泛指非关系型数据库，如 mongodb, redis, HBase
+		- mongo使用高效的二进制数据存储，文件存储格式为 BSON(一种json的扩展，比json性能更好，功能更强大)
+		- MySQL中表的概念在mongo里叫集合(collection)， MySQL中行的概念在mongo中叫文档(document)，一个文档看上去像一个json
+	- 安装MongoDB
+		- $ vim /etc/yum.repos.d/mongodb-org-4.2.repo
+			[mongodb-org-4.2] 
+			name=MongoDB Repository
+			baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+			gpgcheck=1
+			enabled=1
+			gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+		- $ yum install -y mongodb-org
+		- $ systemctl start mongod.service
+	- MongoDB常用命令
+		$ mongo
+		use test;                                                                                // 切换到test库，如果没有则创建
+		db.createUser({user: "tester", pwd: "123456", roles: [{role: "dbAdmin", db: "test"}]});  // 创建用户
+		db.createCollection("student");                                                          // 创建collection
+		db.student.createIndex({"name":1});                                                      // 在name上创建索引,不是唯一索引
+		db.student.insertOne({name:"张三",city:"北京"});
+		db.student.find({name:"张三"});
+		db.student.update({name:"张三"},{name:"张三",city:"上海"});
+		db.student.deleteOne({name:"张三"});
+	- Go语言中 MongoDB的操作
+		- 安装mongo-driver
 			go get go.mongodb.org/mongo-driver
 			go get go.mongodb.org/mongo-driver/x/bsonx/bsoncore@v1.7.1
 			go get go.mongodb.org/mongo-driver/x/mongo/driver@v1.7.1
 			go get go.mongodb.org/mongo-driver/mongo/options@v1.7.1
 			go get go.mongodb.org/mongo-driver/x/mongo/driver/topology@v1.7.1
 			go get go.mongodb.org/mongo-driver/mongo@v1.7.1
-		- Go语言中连接MongoDB
+		- 连接MongoDB
 			option := options.Client().ApplyURI("mongodb://127.0.0.1:27017").
-			SetConnectTimeout(time.Second).//连接超时时长
-			SetAuth(options.Credential{Username: "tester", Password: "123456", AuthSource: "test"}) //指定用户名和密码，AuthSource代表Database
+			SetConnectTimeout(time.Second).                                                         // 连接超时时长
+			SetAuth(options.Credential{Username: "tester", Password: "123456", AuthSource: "test"}) // 指定用户名和密码，AuthSource代表Database
 			client, err := mongo.Connect(context.Background(), option)
 			err = client.Ping(ctx, nil) 
 			- 注意: Ping成功才代表连接成功
-		- Go语言中查询MongoDB
-			sort := bson.D{{"name", 1}} //1升序，-1降序
+		- 查询MongoDB
+			sort := bson.D{{"name", 1}}                                 // 1升序，-1降序
 			filter := bson.D{{"score", bson.D{{"$gt", 3}}}} //score>3   // greater than
 			findOption := options.Find()
-			findOption.SetSort(sort)//按name排序
-			findOption.SetLimit(10) //最多返回10个
-			findOption.SetSkip(3) //跳过前3个
+			findOption.SetSort(sort)                                    // 按name排序
+			findOption.SetLimit(10)                                     // 最多返回10个
+			findOption.SetSkip(3)                                       // 跳过前3个
 			cursor, err := collection.Find(ctx, filter, findOption)
-
+	
 
 十、其他类型
 1、进程的内存结构

@@ -1,7 +1,8 @@
 package main
 
-/**
-自己实现一个函数链式的sql构建器。只是一个小demo，还有诸多不完善的地方。
+/*
+ - 自行实现一个函数链式的sql构建器
+ - 一个小demo，还有诸多不完善的地方
 */
 
 import (
@@ -10,20 +11,20 @@ import (
 	"strings"
 )
 
-//Builder 根据一个函数生成一小段sql
-type Builder interface { //select、where、limit、orderby这些都是Builder
+// Builder 根据一个函数生成一小段sql
+type Builder interface { // select、where、limit、orderby这些都是Builder
 	toString() string
 	getPrev() Builder
 }
 
 type LimitBuilder struct {
 	sb   strings.Builder
-	prev Builder //前面的Builder
+	prev Builder // 前面的Builder
 }
 
 func newLimitBuilder(offset, n int) *LimitBuilder {
 	builder := &LimitBuilder{}
-	//通过strings.Builder实现高效的字符串连接
+	// 通过strings.Builder实现高效的字符串连接
 	builder.sb.WriteString(" limit ")
 	builder.sb.WriteString(strconv.Itoa(offset))
 	builder.sb.WriteString(",")
@@ -42,7 +43,7 @@ func (self *LimitBuilder) getPrev() Builder {
 func (self *LimitBuilder) ToString() string {
 	var root Builder
 	root = self
-	for root.getPrev() != nil { //找到最前面的root Builder
+	for root.getPrev() != nil { // 找到最前面的root Builder
 		root = root.getPrev()
 	}
 	return root.toString()
@@ -65,6 +66,13 @@ func (self *OrderByBuilder) getPrev() Builder {
 	return self.prev
 }
 
+func (self *OrderByBuilder) toString() string {
+	if self.limit != nil {
+		self.sb.WriteString(self.limit.toString())
+	}
+	return self.sb.String()
+}
+
 func (self *OrderByBuilder) ToString() string {
 	var root Builder
 	root = self
@@ -84,14 +92,7 @@ func (self *OrderByBuilder) Desc() *OrderByBuilder {
 	return self
 }
 
-func (self *OrderByBuilder) toString() string {
-	if self.limit != nil {
-		self.sb.WriteString(self.limit.toString())
-	}
-	return self.sb.String()
-}
-
-//orderby后面可以接limit
+// orderby后面可以接limit
 func (self *OrderByBuilder) Limit(offset, n int) *LimitBuilder {
 	limit := newLimitBuilder(offset, n)
 	limit.prev = self
@@ -117,6 +118,17 @@ func (self *WhereBuilder) getPrev() Builder {
 	return self.prev
 }
 
+func (self *WhereBuilder) toString() string {
+	// 递归调用后续Builder的ToString()
+	if self.orderby != nil {
+		self.sb.Write([]byte(self.orderby.toString()))
+	}
+	if self.limit != nil {
+		self.sb.Write([]byte(self.limit.toString()))
+	}
+	return self.sb.String()
+}
+
 func (self *WhereBuilder) ToString() string {
 	var root Builder
 	root = self
@@ -126,7 +138,21 @@ func (self *WhereBuilder) ToString() string {
 	return root.toString()
 }
 
-//where后面可以接order by
+// And和Or都是where里的可选部分，它们的地位平等，都返回WhereBuilder
+func (self *WhereBuilder) And(condition string) *WhereBuilder {
+	self.sb.WriteString(" and ")
+	self.sb.WriteString(condition)
+	return self
+}
+
+// And和Or都是where里的可选部分，它们的地位平等，都返回WhereBuilder
+func (self *WhereBuilder) Or(condition string) *WhereBuilder {
+	self.sb.WriteString(" or ")
+	self.sb.WriteString(condition)
+	return self
+}
+
+// where后面可以接order by
 func (self *WhereBuilder) OrderBy(column string) *OrderByBuilder {
 	orderby := newOrderByBuilder(column)
 	self.orderby = orderby
@@ -134,37 +160,12 @@ func (self *WhereBuilder) OrderBy(column string) *OrderByBuilder {
 	return orderby
 }
 
-//where后面可以接limit
+// where后面可以接limit
 func (self *WhereBuilder) Limit(offset, n int) *LimitBuilder {
 	limit := newLimitBuilder(offset, n)
 	limit.prev = self
 	self.limit = limit
 	return limit
-}
-
-//And和Or都是where里的可选部分，它们的地位平等，都返回WhereBuilder
-func (self *WhereBuilder) And(condition string) *WhereBuilder {
-	self.sb.WriteString(" and ")
-	self.sb.WriteString(condition)
-	return self
-}
-
-//And和Or都是where里的可选部分，它们的地位平等，都返回WhereBuilder
-func (self *WhereBuilder) Or(condition string) *WhereBuilder {
-	self.sb.WriteString(" or ")
-	self.sb.WriteString(condition)
-	return self
-}
-
-func (self *WhereBuilder) toString() string {
-	//递归调用后续Builder的ToString()
-	if self.orderby != nil {
-		self.sb.Write([]byte(self.orderby.toString()))
-	}
-	if self.limit != nil {
-		self.sb.Write([]byte(self.limit.toString()))
-	}
-	return self.sb.String()
 }
 
 type SelectBuilder struct {
@@ -181,7 +182,27 @@ func NewSelectBuilder(table string) *SelectBuilder {
 	return builder
 }
 
-//通过select查询哪几列
+func (self *SelectBuilder) getPrev() Builder {
+	return nil
+}
+
+func (self *SelectBuilder) toString() string {
+	if self.where != nil {
+		self.sb.Write([]byte(self.where.toString()))
+	}
+	return self.sb.String()
+}
+
+func (self *SelectBuilder) ToString() string {
+	var root Builder
+	root = self
+	for root.getPrev() != nil {
+		root = root.getPrev()
+	}
+	return root.toString()
+}
+
+// 通过select查询哪几列
 func (self *SelectBuilder) Column(columns string) *SelectBuilder {
 	self.sb.WriteString(columns)
 	self.sb.WriteString(" from ")
@@ -196,28 +217,8 @@ func (self *SelectBuilder) Where(condition string) *WhereBuilder {
 	return where
 }
 
-func (self *SelectBuilder) toString() string {
-	if self.where != nil {
-		self.sb.Write([]byte(self.where.toString()))
-	}
-	return self.sb.String()
-}
-
-func (self *SelectBuilder) getPrev() Builder {
-	return nil
-}
-
-func (self *SelectBuilder) ToString() string {
-	var root Builder
-	root = self
-	for root.getPrev() != nil {
-		root = root.getPrev()
-	}
-	return root.toString()
-}
-
 func main() {
-	//Where、OrderBy、Limit有没有都不影响调用ToString();Where里的And和Or有没有都不影响调用ToString()
+	// Where、OrderBy、Limit有没有都不影响调用ToString()；Where里的And和Or有没有都不影响调用ToString()
 	sql := NewSelectBuilder("student").Column("id,name,city").
 		Where("id>0").
 		And("city='郑州'").

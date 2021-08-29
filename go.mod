@@ -10,9 +10,11 @@ require (
 	github.com/ethereum/go-ethereum v1.10.6
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/infraboard/mcube v1.3.6
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/orcaman/concurrent-map v0.0.0-20210501183033-44dafcb38ecc
 	github.com/parkingwang/go-sqlbuilder v0.0.0-20180607100556-9ecb2bce72ed
