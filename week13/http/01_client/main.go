@@ -152,32 +152,38 @@ func complexRequest() {
 }
 
 func restful() {
-	if resp, err := http.Post("http://127.0.0.1:5656/user/xiaoming/vip/bj/haidian", "text/plain", nil); err != nil { //Content-Type为text/plain，表示一个朴素的字符串
+	if resp, err := http.Post("http://127.0.0.1:5656/user/xiaoming/vip/bj/haidian", "text/plain", nil); err != nil { // Content-Type为text/plain，表示一个朴素的字符串
 		panic(err)
 	} else {
 		defer resp.Body.Close()
+
+		fmt.Printf("\n==========\n")
 	}
 }
 
 func requestBook() {
-	if resp, err := http.Post("http://book.dianshang:5656", "text/plain", nil); err != nil { //Content-Type为text/plain，表示一个朴素的字符串
+	if resp, err := http.Post("http://book.dianshang:5656", "text/plain", nil); err != nil { // Content-Type为text/plain，表示一个朴素的字符串
 		panic(err)
 	} else {
 		defer resp.Body.Close()
+
 		fmt.Println("response body")
 		io.Copy(os.Stdout, resp.Body) //两个io数据流的拷贝
 		os.Stdout.WriteString("\n")
+		fmt.Printf("\n==========\n")
 	}
 }
 
 func requestFood() {
-	if resp, err := http.Post("http://food.dianshang:5656", "text/plain", nil); err != nil { //Content-Type为text/plain，表示一个朴素的字符串
+	if resp, err := http.Post("http://food.dianshang:5656", "text/plain", nil); err != nil { // Content-Type为text/plain，表示一个朴素的字符串
 		panic(err)
 	} else {
 		defer resp.Body.Close()
+
 		fmt.Println("response body")
-		io.Copy(os.Stdout, resp.Body) //两个io数据流的拷贝
+		io.Copy(os.Stdout, resp.Body) // 两个io数据流的拷贝
 		os.Stdout.WriteString("\n")
+		fmt.Printf("\n==========\n")
 	}
 }
 
@@ -187,13 +193,17 @@ func requestPanic() {
 	} else {
 		defer resp.Body.Close()
 		fmt.Printf("response status: %s\n", resp.Status)
+
 		fmt.Println("response header")
 		for key, values := range resp.Header {
 			fmt.Printf("%s: %v\n", key, values)
 		}
+		fmt.Println()
+
 		fmt.Println("response body")
-		io.Copy(os.Stdout, resp.Body) //两个io数据流的拷贝
+		io.Copy(os.Stdout, resp.Body) // 两个io数据流的拷贝
 		os.Stdout.WriteString("\n")
+		fmt.Printf("\n==========\n")
 	}
 }
 
@@ -204,8 +214,10 @@ func authLogin() {
 		fmt.Println("response body")
 		io.Copy(os.Stdout, resp.Body) //两个io数据流的拷贝
 		os.Stdout.WriteString("\n")
+
 		loginCookies := resp.Cookies() //读取服务端返回的Cookie
 		resp.Body.Close()
+
 		if req, err := http.NewRequest("POST", "http://127.0.0.1:5656/user_center", nil); err != nil {
 			panic(err)
 		} else {
@@ -215,6 +227,7 @@ func authLogin() {
 				cookie.Value += "1"
 				req.AddCookie(cookie)
 			}
+
 			client := &http.Client{}
 			if resp, err := client.Do(req); err != nil {
 				fmt.Println(err)

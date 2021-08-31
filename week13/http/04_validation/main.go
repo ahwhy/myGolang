@@ -26,7 +26,7 @@ func validateEmail(fl validator.FieldLevel) bool {
 
 type InnerRequest struct {
 	Pass  string `validate:"min=6,max=12"` //密码长度[6, 12]
-	Email string `validate:"school"`
+	Email string `validate:"my_email"`
 }
 
 type OutterRequest struct {
@@ -40,14 +40,14 @@ func processErr(err error) {
 		return
 	}
 
-	//给Validate.Struct()函数传了一个非法的参数
+	// 给Validate.Struct()函数传了一个非法的参数
 	invalid, ok := err.(*validator.InvalidValidationError)
 	if ok {
 		fmt.Println("param error:", invalid)
 		return
 	}
 
-	//ValidationErrors是一个错误切片，它保存了每个字段违反的每个约束信息
+	// ValidationErrors是一个错误切片，它保存了每个字段违反的每个约束信息
 	validationErrs := err.(validator.ValidationErrors)
 	for _, validationErr := range validationErrs {
 		fmt.Printf("field %s 不满足条件 %s\n", validationErr.Field(), validationErr.Tag())
@@ -55,8 +55,6 @@ func processErr(err error) {
 }
 
 func main() {
-	val.RegisterValidation("school", validateEmail) //注册一个自定义的validator
-
 	req := RegistRequest{
 		UserName:   "zcy",
 		PassWord:   "12345",
@@ -65,8 +63,10 @@ func main() {
 	}
 	processErr(val.Struct(req)) //Struct()返回的error分为两种类型：InvalidValidationError和ValidationErrors
 	processErr(val.Struct(3))
+
 	fmt.Println("==============")
 
+	val.RegisterValidation("my_email", validateEmail) // 注册一个自定义的validator
 	inreq := InnerRequest{
 		Pass:  "123456",
 		Email: "123qq.com",

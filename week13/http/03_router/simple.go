@@ -12,7 +12,7 @@ import (
 func handle(method string, w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	fmt.Printf("request method: %s\n", r.Method)
 	fmt.Printf("request body: ")
-	io.Copy(os.Stdout, r.Body) //把r.Body流里的内容拷贝到os.Stdout流里
+	io.Copy(os.Stdout, r.Body) // 把r.Body流里的内容拷贝到os.Stdout流里
 	fmt.Println()
 	w.Write([]byte("Hi boy, you request " + method))
 }
@@ -47,7 +47,7 @@ func delete(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
 func panic(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	var arr []int
-	_ = arr[1] //数组越界panic
+	_ = arr[1] // 数组越界panic
 }
 
 func main2() {
@@ -59,25 +59,25 @@ func main2() {
 	router.PUT("/", put)
 	router.PATCH("/", patch)
 	router.DELETE("/", delete)
-	//router没有提供CONNECT和TRACE
+	// router没有提供CONNECT和TRACE
 
-	//*只能有一个，且必须放path的末尾。catch-all routes are only allowed at the end of the path
+	// *只能有一个，且必须放path的末尾；catch-all routes are only allowed at the end of the path
 	router.POST("/user/:name/:type/*addr", func(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		fmt.Printf("name:%s, type:%s, addr:%s\n", p.ByName("name"), p.ByName("type"), p.ByName("addr"))
 	})
 
-	//必须以/*filepath结尾，因为要获取我们要访问的路径信息
-	//在浏览器中访问：http://127.0.0.1:5656/file/home.html
-	//或 http://127.0.0.1:5656/file/readme.md
-	router.ServeFiles("/file/*filepath", http.Dir("./static"))
+	// 必须以/*filepath结尾，因为要获取访问的路径信息
+	// 在浏览器中访问：http://127.0.0.1:5656/file/home.html
+	// 或 http://127.0.0.1:5656/file/readme.md
+	router.ServeFiles("/file/*filepath", http.Dir("./"))
 
-	//通过recover捕获panic
+	// 通过recover捕获panic
 	router.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
-		w.WriteHeader(http.StatusInternalServerError) //设置response status
-		fmt.Fprintf(w, "error:%s", err)               //线上环境不要把原始错误信息返回给前端。测试阶段可以这么搞
+		w.WriteHeader(http.StatusInternalServerError) // 设置response status
+		fmt.Fprintf(w, "error:%s", err)               // 线上环境不要把原始错误信息返回给前端
 	}
 	router.GET("/panic", panic)
 
-	//Router实现了ServerHTTP接口，所以它是一种http.Handler
+	// router实现了ServerHTTP接口，所以它是一种http.Handler
 	http.ListenAndServe(":5656", router)
 }
