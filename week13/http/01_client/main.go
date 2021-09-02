@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -218,35 +219,37 @@ func authLogin() {
 		loginCookies := resp.Cookies() //读取服务端返回的Cookie
 		resp.Body.Close()
 
-		if req, err := http.NewRequest("POST", "http://127.0.0.1:5656/user_center", nil); err != nil {
+		if req, err := http.NewRequest("POST", "http://127.0.0.1:5656/userCenter", nil); err != nil {
 			panic(err)
 		} else {
-			//下次请求再带上cookie
+			// 下次请求再带上cookie
 			for _, cookie := range loginCookies {
 				fmt.Printf("receive cookie %s = %s\n", cookie.Name, cookie.Value)
 				cookie.Value += "1"
 				req.AddCookie(cookie)
 			}
 
+			// 再次请求center
 			client := &http.Client{}
 			if resp, err := client.Do(req); err != nil {
 				fmt.Println(err)
 			} else {
 				defer resp.Body.Close()
 				fmt.Println("response body")
-				io.Copy(os.Stdout, resp.Body) //两个io数据流的拷贝
+				io.Copy(os.Stdout, resp.Body) // 两个io数据流的拷贝
 				os.Stdout.WriteString("\n")
+				fmt.Printf("\n==========\n")
 			}
 		}
 	}
 }
 
 func main() {
-	simpleGet()
-	simplePost()
-	postForm()
-	head()
-	complexRequest()
+	// simpleGet()
+	// simplePost()
+	// postForm()
+	// head()
+	// complexRequest()
 
 	// restful()
 	// requestPanic()
@@ -254,18 +257,18 @@ func main() {
 	// requestFood()
 
 	//测试限流中间件
-	// const P = 130
-	// wg := sync.WaitGroup{}
-	// wg.Add(P)
-	// for i := 0; i < P; i++ {
-	// 	go func() {
-	// 		defer wg.Done()
-	// 		if resp, err := http.Get("http://127.0.0.1:5656"); err == nil {
-	// 			resp.Body.Close()
-	// 		}
-	// 	}()
-	// }
-	// wg.Wait()
+	const P = 130
+	wg := sync.WaitGroup{}
+	wg.Add(P)
+	for i := 0; i < P; i++ {
+		go func() {
+			defer wg.Done()
+			if resp, err := http.Get("http://127.0.0.1:5656"); err == nil {
+				resp.Body.Close()
+			}
+		}()
+	}
+	wg.Wait()
 
 	// authLogin()
 }

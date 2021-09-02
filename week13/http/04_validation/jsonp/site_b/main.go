@@ -15,5 +15,5 @@ func main() {
 	http.ListenAndServe(":5657", router)
 }
 
-//go run http/validation/jsonp/site_b/main.go
-//浏览器中访问  http://localhost:5657/file/test.js ，js文件被当成普通的文本文件
+// go run http/validation/jsonp/site_b/main.go
+// 浏览器中访问  http://localhost:5657/file/test.js ，js文件被当成普通的文本文件
