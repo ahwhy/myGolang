@@ -96,7 +96,7 @@ Vue.use(ElementUI)
 
 效果如下:
 
-![](./images/vue-element-demo.jpg)
+![](./pic/vue-element-demo.jpg)
 
 ## 使用Table展示数据
 
@@ -152,7 +152,7 @@ Vue.use(ElementUI)
 
 样式有点丑, 但不要在意这些，这才是开始
 
-![](./images/element-table-base.jpg)
+![](./pic/element-table-base.jpg)
 
 ## 对接后端接口数据
 
@@ -242,7 +242,7 @@ export default {
 
 然后我们刷下页面查看, 按F12 打开chrome的调试模式，看看控制台有没有如期打印出API调用后的返回
 
-![](./images/cors.jpg)
+![](./pic/cors.jpg)
 
 ## 解决跨域问题
 
@@ -267,7 +267,7 @@ server := &http.Server{
 }
 ```
 
-![](./images/cors-ok.jpg)
+![](./pic/cors-ok.jpg)
 
 
 ## 数据绑定视图
@@ -288,7 +288,7 @@ axios
 
 我们将请求回来的数据保存到tableData, table这个视图绑定了变量tableData, 这样视图会跟随数据的变化而变化
 
-![](./images/table-data.jpg)
+![](./pic/table-data.jpg)
 
 最后我们调整需要展示的字段
 
@@ -297,7 +297,7 @@ axios
 
 我们先验证后端API接口的分页功能
 
-![](./images/server-page-query.jpg)
+![](./pic/server-page-query.jpg)
 
 
 参照官方文档: [Pagination 分页](https://element.eleme.cn/#/zh-CN/component/pagination)
@@ -381,11 +381,11 @@ export default {
 
 打开控制台，我们的请求已经携带参数了:
 
-![](./images/network-query.jpg)
+![](./pic/network-query.jpg)
 
 现在分页效果基本已经出来, 但是切换缺没有效果
 
-![](./images/page-effect.jpg)
+![](./pic/page-effect.jpg)
 
 我们需要切换时修改参数并再次向服务端 请求数据
 
@@ -452,7 +452,7 @@ func NewQueryHostRequestFromHTTP(r *http.Request) *QueryHostRequest {
 }
 ```
 
-![](./images/keywords-query.jpg)
+![](./pic/keywords-query.jpg)
 
 ## 前端添加关键字搜索框
 
@@ -487,4 +487,4 @@ export default {
 
 最好验证界面效果:
 
-![](./images/keyword-input.jpg)
+![](./pic/keyword-input.jpg)

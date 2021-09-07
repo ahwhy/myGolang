@@ -646,7 +646,7 @@ func (s *service) QueryHost(ctx context.Context, req *host.QueryHostRequest) (*h
 
 控制反转（Inversion of Control）是一种是面向对象编程中的一种设计原则，用来减低计算机代码之间的耦合度。其基本思想是：借助于“第三方”实现具有依赖关系的对象之间的解耦
 
-![](./images/ioc.png)
+![](./pic/ioc.png)
 
 由于引进了中间位置的“第三方”，也就是IOC容器，使得A、B、C、D这4个对象没有了耦合关系，齿轮之间的传动全部依靠“第三方”了
 
