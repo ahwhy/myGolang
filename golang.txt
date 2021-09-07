@@ -5781,7 +5781,10 @@
 				c.Ctx.WriteString("Hi boy") 
 			}
 		- MVC
-			- 在Model层可以使用beego提供的ORM功能
+			- View 前端页面
+			- Controller 处理业务逻辑
+			- Model 把Controller层重复的代码抽象出来
+				- 在Model层可以使用beego提供的ORM功能
 
 
 
