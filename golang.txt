@@ -5498,6 +5498,8 @@
 			- URI: uniform resource identifier，统一资源标识符，用来标识唯一的一个资源
 			- URL: uniform resource locator，统一资源定位器，它是一种具体的URI，指明了如何locate这个资源
 			- 示例
+				https://baijiahao.baidu.com/s?id=1603848351636567407&wfr=spider&for=pc
+				协议    域名                  参数
 				http://www.qq.com:8080/news/tech/43253.html?id=432&name=f43s#pic
 				协议   域名       端口 路径      文件名     参数             锚点
 		- 协议版本
@@ -5515,6 +5517,7 @@
 				Cookie           HTTP请求发送时，会把保存在该请求域名下的所有cookie值一起发送给web服务器，如 Cookie: $Version=1; Skin=new;
 				Content-Length   请求的内容长度，如 Content-Length: 348
 				Content-Type     指定正文(body)的数据格式，如 Content-Type: application/x-www-form-urlencoded
+				Date             请求发送日期和时间
 				User-Agent       浏览器信息，如 Mozilla/5.0 (Windows NT 6.1; Win64; x64)
 			- Content-Type
 				- application/x-www-form-urlencoded
@@ -5524,9 +5527,30 @@
 					- 上传文件时使用multipart/form-data，支持多种文件格式
 					- 正文示例: name="text"name="file"; filename="chrome.png"Content-Type: image/png... content of chrome.png
 				- application/json
+					- JSON数据格式
 					- 正文示例: {"title":"test","sub":[1,2,3]}
+				- application/xhtml+xml
+					- XHTML格式
+				- application/xml
+					- XML数据格式
+				- application/pdf
+					- pdf格式
+				- application/msword
+					- word文档格式
+				- application/octet-stream
+					- 二进制流数据
 				- text/xml
 					- 正文示例: <?xml version="1.0"?><methodCall>    <methodName>examples.getStateName</methodName>    </methodCall>
+				- text/html
+					- HTML格式
+				- text/plain
+					- 纯文本格式
+				- image/gif
+					- gif图片格式
+				- image/jpeg
+					- jpg图片格式
+				- image/png
+					- png图片格式
 		- 请求正文
 			- GET请求没有请求正文
 			- POST可以包含GET
@@ -5718,7 +5742,7 @@
 			var stu Student
 			ctx.ShouldBindJSON(&stu)
 		- Gin生成response
-			c.String()   response Content-Type=text/plain
+			c.String()   response Content-Type= text/plain
 			c.JSON()     response Content-Type= application/json
 			c.XML()      response Content-Type= application/xml
 			c.HTML()     前端写好模板，后端往里面填值
@@ -5726,15 +5750,15 @@
 		- Gin参数校验
 			- 基于go-playground/validator
 				type Student struct {
-					Name string `form:"name" binding:"required"` //required:必须上传name参数
-					Score int `form:"score" binding:"gt=0"` //score必须为正数
+					Name string `form:"name" binding:"required"` // required:必须上传name参数
+					Score int `form:"score" binding:"gt=0"` // score必须为正数
 					Enrollment time.Time `form:"enrollment" binding:"required,before_today" time_format:"2006-01-02" time_utc:"8"` // 自定义验证before_today，日期格式东8区
 					Graduation time.Time `form:"graduation" binding:"required,gtfield=Enrollment" time_format:"2006-01-02" time_utc:"8"` // 毕业时间要晚于入学时间
 				}
 		- Gin中间件
-			//全局MiddleWare
+			// 全局MiddleWare
 			engine.Use(timeMiddleWare()) 
-			//局部MiddleWare
+			// 局部MiddleWare
 			engine.GET("/girl", limitMiddleWare(), func(c *gin.Context) {
 				c.String(http.StatusOK, "hi girl")
 			})
@@ -5787,9 +5811,6 @@
 				- 在Model层可以使用beego提供的ORM功能
 
 
-
-
-
 九、数据库
 1、SQL语法简介
  - MySQL初始配置
@@ -5802,7 +5823,8 @@
 		- SQL管理员创建账号      create user 'tester' identified by '123456';
 		- 查看账号创建是否成功   select host, user from mysql.user where user='tester';
 		- 赋予账号对应权限       grant create, insert on *.* to 'tester';    // grant <privileges> on <database>.<table> to 'tester'@'localhost';
-	- 以tester登录           mysql -utester -p'123456'
+		                         grant all privileges on *.* to '用户名'@'%' identified by '密码' with grant option;  // 这里表示赋予该用户所有数据库所有表(*.*表示所有表)，%表示所有IP地址
+	- 以tester登录           mysql -utester -p'123456' -h121.40.150.39 -P9528
 		- 创建database           create database test;
 		- 使用database           use test;                        // show tables;
 			create table if not exists student(
@@ -5849,6 +5871,13 @@
 			drop table student;     --删除表
  - MySQL相关概念
 	- 注意事项
+		- 注意存储引擎的选择(InnoDB)
+		- 主键选择 和 唯一键考虑清楚
+		- 考虑数据类型与长度，选择合适的类型，避免空间浪费
+		- 字符串注意确认字符集, 如果需要存入中文, 请选择utf8编码
+		- 为过滤条件的字段 添加索引
+		- 高频组合查询可以考虑 联合索引
+		- 注意选择使用索引的方法: Hash Btree Normal
 		- 写sql时一律使用小写
 		- 建表时先判断表是否已存在  if not exists 
 		- 所有的列和表都加 comment
@@ -5867,20 +5896,21 @@
 		- 叶节点上存储了所有数据，把叶节点链接起来可以顺序遍历所有数据
 		- 每个节点设计成内存页的整倍数；MySQL的 m=1200，树的前两层放在内存中
 		- 示例
-							2  28 65
-							P1 P2 P3
-					|          |         |
+			                2  28 65
+			                P1 P2 P3
+				    |          |         |
 				2  13 20   28 35 56   65 80 90
 				P1 P2 P3   P1 P2 P3   P1 P2 P3
 				|  |  |    |  |  |    |  |  | 
 				2  13 20   28 35 56   65 80 90
 				8  15 23   30 38 60   73 85 96
 				9  19 27   32 50 63   79 88 99
-		data:   Q  Q  Q    Q  Q  Q    Q  Q  Q 
+				Q  Q  Q    Q  Q  Q    Q  Q  Q   // data 
 	- 索引
 		- MySQL索引默认使用B+树
 			- 散列表(Hash table，也叫哈希表) 与 B+树
 				- Hash table 查询时间为 O(1)，但是其对范围查询的支持不如 B+树
+				- 即Hash table只支持等于或不等于，不支持关键词检索
 		- 主键默认会加索引
 			- 按主键构建的B+树里包含所有列的数据，而普通索引的B+树里只存储了主键，还需要再查一次主键对应的B+树(回表)
 			- 使用 explain命令 查看一个SQL语句的执行计划，如使用的索引，是否做全表扫描等
@@ -6123,13 +6153,13 @@
 
 十、其他类型
 1、进程的内存结构
-	0xc0000000  内核虚拟内存    	 <-- 内核使用
-	0x40000000		栈区			 <-- 程序运行时用于存放局部变量，可向下延伸空间
-				共享库的内存映像
-					堆区			 <-- 程序运行时用于分配mallco和new申请的区域
-				可读写区(.data .bss) <-- 存放全局变量和静态变量
-	0x08048000		只读区			 <-- 存放程序和常量等
-			0		未使用
+	0xc0000000  内核虚拟内存         <-- 内核使用
+	0x40000000      栈区             <-- 程序运行时用于存放局部变量，可向下延伸空间
+	            共享库的内存映像
+	                堆区             <-- 程序运行时用于分配mallco和new申请的区域
+	            可读写区(.data .bss) <-- 存放全局变量和静态变量
+	0x08048000     只读区            <-- 存放程序和常量等
+	        0      未使用
 				     
 2、常用包与函数  // 标准库 https://studygolang.com/pkgdoc
 1).time
@@ -6205,8 +6235,10 @@
 	yaml.Unmarshal()
 18).net/http
 	http.StatusOK
-19).github.com/gin-gonic/gin
-20).github.com/go-playground/validator // 校验参数的包
-21).github.com/spf13/cobra // 客户端
-22).github.com/AlecAivazis/survey      // 隐藏密码
-23).github.com/schollz/progressbar     // 进度条
+19).github.com/gin-gonic/gin               // http客户端
+20).github.com/go-playground/validator     // 校验参数的包
+21).github.com/spf13/cobra                 // cmd命令行客户端       
+22).github.com/AlecAivazis/survey          // 隐藏密码
+23).github.com/schollz/progressbar         // 进度条
+24).github.com/BurntSushi/toml             // toml解析库，解析配置文件
+25).github.com/caarlos0/env                // 环境变量解析库，解析环境变量

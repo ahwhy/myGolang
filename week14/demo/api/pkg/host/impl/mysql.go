@@ -3,9 +3,10 @@ package impl
 import (
 	"database/sql"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/conf"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
+
+	"github.com/ahwhy/myGolang/week14/demo/api/conf"
 )
 
 var (
@@ -23,8 +24,9 @@ func (s *service) Config() error {
 	if err != nil {
 		return err
 	}
+	s.db = db
 
 	s.log = zap.L().Named("Host")
-	s.db = db
+
 	return nil
 }

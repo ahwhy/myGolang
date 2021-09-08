@@ -10,7 +10,7 @@ const (
 	JSONFormat = LogFormat("json")
 )
 
-// LogTo 日志记录到哪儿
+// LogTo 日志记录位置
 type LogTo string
 
 const (

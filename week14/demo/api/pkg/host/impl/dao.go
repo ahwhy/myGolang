@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg/host"
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg/host"
 )
 
 func (s *service) save(ctx context.Context, h *host.Host) error {

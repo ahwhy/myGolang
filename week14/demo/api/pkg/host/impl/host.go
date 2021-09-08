@@ -10,7 +10,7 @@ import (
 	"github.com/infraboard/mcube/types/ftime"
 	"github.com/rs/xid"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg/host"
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg/host"
 )
 
 const (
