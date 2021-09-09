@@ -14,11 +14,22 @@ var (
 )
 
 type Service interface {
+	// 储存Host
 	SaveHost(context.Context, *Host) (*Host, error)
+	// 查询Host
 	QueryHost(context.Context, *QueryHostRequest) (*HostSet, error)
-	UpdateHost(context.Context, *UpdateHostRequest) (*Host, error)
 	DescribeHost(context.Context, *DescribeHostRequest) (*Host, error)
+	// 更新Host
+	UpdateHost(context.Context, *UpdateHostRequest) (*Host, error)
+	// 删除Host
 	DeleteHost(context.Context, *DeleteHostRequest) (*Host, error)
+}
+
+// 查询Host
+type QueryHostRequest struct {
+	PageSize   uint64 `json:"page_size,omitempty"` // omitempty 代表缺省
+	PageNumber uint64 `json:"page_number,omitempty"`
+	Keywords   string `json:"keywords"`
 }
 
 func NewQueryHostRequestFromHTTP(r *http.Request) *QueryHostRequest {
@@ -37,6 +48,7 @@ func NewQueryHostRequestFromHTTP(r *http.Request) *QueryHostRequest {
 	if pnUint64 == 0 {
 		pnUint64 = 1
 	}
+
 	return &QueryHostRequest{
 		PageSize:   psUint64,
 		PageNumber: pnUint64,
@@ -44,14 +56,12 @@ func NewQueryHostRequestFromHTTP(r *http.Request) *QueryHostRequest {
 	}
 }
 
-type QueryHostRequest struct {
-	PageSize   uint64 `json:"page_size,omitempty"`
-	PageNumber uint64 `json:"page_number,omitempty"`
-	Keywords   string `json:"keywords"`
-}
-
 func (req *QueryHostRequest) OffSet() int64 {
 	return int64(req.PageSize) * int64(req.PageNumber-1)
+}
+
+type DescribeHostRequest struct {
+	Id string `json:"id" validate:"required"`
 }
 
 func NewDescribeHostRequestWithID(id string) *DescribeHostRequest {
@@ -60,24 +70,24 @@ func NewDescribeHostRequestWithID(id string) *DescribeHostRequest {
 	}
 }
 
-type DescribeHostRequest struct {
-	Id string `json:"id" validate:"required"`
-}
-
-func NewDeleteHostRequestWithID(id string) *DeleteHostRequest {
-	return &DeleteHostRequest{Id: id}
-}
-
-type DeleteHostRequest struct {
-	Id string `json:"id" validate:"required"`
-}
-
+// 更新Host
 type UpdateMode int
 
 const (
 	PUT UpdateMode = iota
 	PATCH
 )
+
+type UpdateHostData struct {
+	*Resource
+	*Describe
+}
+
+type UpdateHostRequest struct {
+	Id             string          `json:"id" validate:"required"`
+	UpdateMode     UpdateMode      `json:"update_mode"`
+	UpdateHostData *UpdateHostData `json:"data" validate:"required"`
+}
 
 func NewUpdateHostRequest(id string) *UpdateHostRequest {
 	return &UpdateHostRequest{
@@ -87,17 +97,15 @@ func NewUpdateHostRequest(id string) *UpdateHostRequest {
 	}
 }
 
-type UpdateHostRequest struct {
-	Id             string          `json:"id" validate:"required"`
-	UpdateMode     UpdateMode      `json:"update_mode"`
-	UpdateHostData *UpdateHostData `json:"data" validate:"required"`
-}
-
 func (req *UpdateHostRequest) Validate() error {
 	return validate.Struct(req)
 }
 
-type UpdateHostData struct {
-	*Resource
-	*Describe
+// 删除Host
+type DeleteHostRequest struct {
+	Id string `json:"id" validate:"required"`
+}
+
+func NewDeleteHostRequestWithID(id string) *DeleteHostRequest {
+	return &DeleteHostRequest{Id: id}
 }

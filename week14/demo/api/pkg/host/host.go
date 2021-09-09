@@ -8,83 +8,14 @@ import (
 	"github.com/infraboard/mcube/types/ftime"
 )
 
+type Vendor int
+
 const (
 	PrivateIDC Vendor = iota
 	Tencent
 	AliYun
 	HuaWei
 )
-
-type Vendor int
-
-func NewDefaultHost() *Host {
-	return &Host{
-		&Base{},
-		&Resource{},
-		&Describe{},
-	}
-}
-
-type Host struct {
-	*Base
-	*Resource
-	*Describe
-}
-
-func (h *Host) Put(req *UpdateHostData) {
-	h.Resource = req.Resource
-	h.Describe = req.Describe
-	h.UpdateAt = ftime.Now().Timestamp() // time, 13 时间戳
-	h.GenHash()
-}
-
-func (h *Host) Patch(req *UpdateHostData) error {
-	err := ObjectPatch(h.Resource, req.Resource)
-	if err != nil {
-		return err
-	}
-
-	err = ObjectPatch(h.Describe, req.Describe)
-	if err != nil {
-		return err
-	}
-
-	h.UpdateAt = ftime.Now().Timestamp()
-	h.GenHash()
-	return nil
-}
-
-// patch JSON {a: 1, b： 2}， {b:20}  ===> {a:1, b:20}
-func ObjectPatch(old, new interface{}) error {
-	// {b: 20}
-	newByte, err := json.Marshal(new)
-	if err != nil {
-		return err
-	}
-	// {a:1, b:2}
-	// {a:1, b: 20}
-	return json.Unmarshal(newByte, old)
-}
-
-func (h *Host) GenHash() error {
-	hash := sha1.New()
-
-	b, err := json.Marshal(h.Resource)
-	if err != nil {
-		return err
-	}
-	hash.Write(b)
-	h.ResourceHash = fmt.Sprintf("%x", hash.Sum(nil))
-
-	b, err = json.Marshal(h.Describe)
-	if err != nil {
-		return err
-	}
-	hash.Reset()
-	hash.Write(b)
-	h.DescribeHash = fmt.Sprintf("%x", hash.Sum(nil))
-	return nil
-}
 
 type Base struct {
 	Id           string `json:"id"`            // 全局唯一Id
@@ -129,15 +60,86 @@ type Describe struct {
 	SecurityGroups          string `json:"security_groups"`            // 安全组  采用逗号分隔
 }
 
-func NewHostSet() *HostSet {
-	return &HostSet{
-		Items: []*Host{},
+type Host struct {
+	*Base
+	*Resource
+	*Describe
+}
+
+func NewDefaultHost() *Host {
+	return &Host{
+		&Base{},
+		&Resource{},
+		&Describe{},
 	}
+}
+
+func (h *Host) Put(req *UpdateHostData) {
+	h.Resource = req.Resource
+	h.Describe = req.Describe
+	h.UpdateAt = ftime.Now().Timestamp() // time 时间戳
+	h.GenHash()
+}
+
+// patch JSON {a: 1, b: 2}, {b: 20}  ==> {a: 1, b: 20}
+func objectPatch(old, new interface{}) error {
+	// {b: 20}
+	newByte, err := json.Marshal(new)
+	if err != nil {
+		return err
+	}
+
+	// {a: 1, b: 20}
+	return json.Unmarshal(newByte, old)
+}
+
+func (h *Host) Patch(req *UpdateHostData) error {
+	err := objectPatch(h.Resource, req.Resource)
+	if err != nil {
+		return err
+	}
+
+	err = objectPatch(h.Describe, req.Describe)
+	if err != nil {
+		return err
+	}
+
+	h.UpdateAt = ftime.Now().Timestamp() // time 时间戳
+	h.GenHash()
+
+	return nil
+}
+
+func (h *Host) GenHash() error {
+	hash := sha1.New()
+
+	b, err := json.Marshal(h.Resource)
+	if err != nil {
+		return err
+	}
+	hash.Write(b)
+	h.ResourceHash = fmt.Sprintf("%x", hash.Sum(nil))
+
+	b, err = json.Marshal(h.Describe)
+	if err != nil {
+		return err
+	}
+	hash.Reset()
+	hash.Write(b)
+	h.DescribeHash = fmt.Sprintf("%x", hash.Sum(nil))
+
+	return nil
 }
 
 type HostSet struct {
 	Items []*Host `json:"items"`
 	Total int     `json:"total"`
+}
+
+func NewHostSet() *HostSet {
+	return &HostSet{
+		Items: []*Host{},
+	}
 }
 
 func (s *HostSet) Add(item *Host) {

@@ -8,12 +8,8 @@ import (
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg"
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg/host"
-)
-
-var (
-	api = &handler{}
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg"
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg/host"
 )
 
 type handler struct {
@@ -21,21 +17,31 @@ type handler struct {
 	log     logger.Logger
 }
 
+var (
+	api = &handler{}
+)
+
 func (h *handler) Config() error {
 	h.log = zap.L().Named("Host")
 	if pkg.Host == nil {
 		return fmt.Errorf("dependence service host not ready")
 	}
+
 	h.service = pkg.Host
+
 	return nil
 }
 
 func RegistAPI(r *httprouter.Router) {
 	api.Config()
-	r.GET("/hosts", api.QueryHost)
+
 	r.POST("/hosts", api.CreateHost)
-	r.GET("/hosts/:id", api.DescribeHost)
-	r.DELETE("/hosts/:id", api.DeleteHost)
-	r.PUT("/hosts/:id", api.PutHost)
+
 	r.PATCH("/hosts/:id", api.PatchHost)
+	r.PUT("/hosts/:id", api.PutHost)
+
+	r.GET("/hosts", api.QueryHost)
+	r.GET("/hosts/:id", api.DescribeHost)
+
+	r.DELETE("/hosts/:id", api.DeleteHost)
 }

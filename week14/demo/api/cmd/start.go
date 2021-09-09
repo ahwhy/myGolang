@@ -13,10 +13,10 @@ import (
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/conf"
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg"
-	"gitee.com/infraboard/go-course/day14/demo/api/pkg/host/impl"
-	"gitee.com/infraboard/go-course/day14/demo/api/protocol"
+	"github.com/ahwhy/myGolang/week14/demo/api/conf"
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg"
+	"github.com/ahwhy/myGolang/week14/demo/api/pkg/host/impl"
+	"github.com/ahwhy/myGolang/week14/demo/api/protocol"
 )
 
 // startCmd represents the start command

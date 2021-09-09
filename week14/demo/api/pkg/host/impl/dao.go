@@ -8,10 +8,7 @@ import (
 )
 
 func (s *service) save(ctx context.Context, h *host.Host) error {
-	var (
-		stmt *sql.Stmt
-		err  error
-	)
+	var stmt *sql.Stmt
 
 	// 开启一个事物
 	// 文档请参考: http://cngolib.com/database-sql.html#db-begintx
@@ -23,7 +20,7 @@ func (s *service) save(ctx context.Context, h *host.Host) error {
 	}
 
 	// 执行结果提交或者回滚事务
-	// 当使用sql.Tx的操作方式操作数据后，需要我们使用sql.Tx的Commit()方法显式地提交事务，
+	// 当使用sql.Tx的操作方式操作数据后，需要使用sql.Tx的Commit()方法显式地提交事务，
 	// 如果出错，则可以使用sql.Tx中的Rollback()方法回滚事务，保持数据的一致性
 	defer func() {
 		if err != nil {
@@ -32,7 +29,7 @@ func (s *service) save(ctx context.Context, h *host.Host) error {
 		}
 	}()
 
-	// 避免SQL注入, 请使用Prepare
+	// 避免SQL注入, 使用Prepare
 	stmt, err = tx.Prepare(insertResourceSQL)
 	if err != nil {
 		return err
@@ -54,13 +51,14 @@ func (s *service) save(ctx context.Context, h *host.Host) error {
 		return err
 	}
 
-	// 避免SQL注入, 请使用Prepare
+	// 避免SQL注入, 使用Prepare
 	stmt, err = tx.Prepare(insertHostSQL)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
+	// vendor  h.Version.String()
 	_, err = stmt.Exec(
 		h.ResourceId, h.CPU, h.Memory, h.GPUAmount, h.GPUSpec, h.OSType, h.OSName,
 		h.SerialNumber, h.ImageID, h.InternetMaxBandwidthOut,
@@ -74,22 +72,13 @@ func (s *service) save(ctx context.Context, h *host.Host) error {
 }
 
 func (s *service) delete(ctx context.Context, req *host.DeleteHostRequest) error {
-	var (
-		stmt *sql.Stmt
-		err  error
-	)
+	var stmt *sql.Stmt
 
-	// 开启一个事物
-	// 文档请参考: http://cngolib.com/database-sql.html#db-begintx
-	// 关于事物级别可以参考文章: https://zhuanlan.zhihu.com/p/117476959
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	// 执行结果提交或者回滚事务
-	// 当使用sql.Tx的操作方式操作数据后，需要我们使用sql.Tx的Commit()方法显式地提交事务，
-	// 如果出错，则可以使用sql.Tx中的Rollback()方法回滚事务，保持数据的一致性
 	defer func() {
 		if err != nil {
 			tx.Rollback()

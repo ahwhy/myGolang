@@ -9,15 +9,15 @@ import (
 	"github.com/ahwhy/myGolang/week14/demo/api/conf"
 )
 
-var (
-	// Service 服务实例
-	Service = &service{}
-)
-
 type service struct {
 	db  *sql.DB
 	log logger.Logger
 }
+
+var (
+	// Service 服务实例
+	Service = &service{}
+)
 
 func (s *service) Config() error {
 	db, err := conf.C().MySQL.GetDB()
