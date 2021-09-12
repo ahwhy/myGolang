@@ -5646,6 +5646,7 @@
 			- <script>标签的src属性不受同源策略限制
 			- 通过script的src请求返回的数据，浏览器会当成js脚本去处理
 				- 所以服务端可以返回一个在客户端存在的js函数
+			- https://www.ruanyifeng.com/blog/2016/04/cors.html
 		- validator
 			- Go语言中的第三方库 "github.com/go-playground/validator"
 				- go get github.com/go-playground/validator
@@ -5827,17 +5828,53 @@
 	- 以tester登录           mysql -utester -p'123456' -h121.40.150.39 -P9528
 		- 创建database           create database test;
 		- 使用database           use test;                        // show tables;
-			create table if not exists student(
-			id int not null auto_increment comment '主键自增id',
-			name char(4) not null comment '姓名',
-			province char(6) not null comment '省',
-			city char(10) not null comment '城市',
-			addr varchar(100) default '' comment '地址',
-			score float not null default 0 comment '考试成绩',
-			enrollment date not null comment '入学时间',
-			primary key (id),  unique key idx_name (name),  
-			key idx_location (province,city)
-			)default charset=utf8 comment '学员基本信息';
+			- 示例一
+				create table if not exists student(
+				id int not null auto_increment comment '主键自增id',
+				name char(4) not null comment '姓名',
+				province char(6) not null comment '省',
+				city char(10) not null comment '城市',
+				addr varchar(100) default '' comment '地址',
+				score float not null default 0 comment '考试成绩',
+				enrollment date not null comment '入学时间',
+				primary key (id),  unique key idx_name (name),  
+				key idx_location (province,city)
+				)default charset=utf8 comment '学员基本信息';
+			- 示例二
+				show variables like 'innodb_large_prefix';
+				show variables like 'innodb_file_format';
+				set global innodb_large_prefix=1;
+				set global innodb_file_format=BARRACUDA;
+				CREATE TABLE `resource` (
+				`id` char(64) CHARACTER SET latin1 NOT NULL,
+				`vendor` tinyint(1) NOT NULL,
+				`region` varchar(64) CHARACTER SET latin1 NOT NULL,
+				`zone` varchar(64) CHARACTER SET latin1 NOT NULL,
+				`create_at` bigint(13) NOT NULL,
+				`expire_at` bigint(13) DEFAULT NULL,
+				`category` varchar(64) CHARACTER SET latin1 NOT NULL,
+				`type` varchar(120) CHARACTER SET latin1 NOT NULL,
+				`instance_id` varchar(120) CHARACTER SET latin1 NOT NULL,
+				`name` varchar(255) NOT NULL,
+				`description` varchar(255) DEFAULT NULL,
+				`status` varchar(255) CHARACTER SET latin1 NOT NULL,
+				`update_at` bigint(13) DEFAULT NULL,
+				`sync_at` bigint(13) DEFAULT NULL,
+				`sync_accout` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+				`public_ip` varchar(64) CHARACTER SET latin1 DEFAULT NULL,
+				`private_ip` varchar(64) CHARACTER SET latin1 DEFAULT NULL,
+				`pay_type` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+				`describe_hash` varchar(255) NOT NULL,
+				`resource_hash` varchar(255) NOT NULL,
+				PRIMARY KEY (`id`),
+				KEY `name` (`name`) USING BTREE,
+				KEY `status` (`status`) USING HASH,
+				KEY `private_ip` (`private_ip`) USING BTREE,
+				KEY `public_ip` (`public_ip`) USING BTREE,
+				KEY `instance_id` (`instance_id`) USING HASH
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+		- 查看索引  // https://blog.csdn.net/shaochenshuo/article/details/51064685
+			show index from student\G;
 		- 新增记录
 			- 必须给not null且无default值的列赋值
 				insert into student (name,province,city,enrollment) values
@@ -6242,3 +6279,4 @@
 23).github.com/schollz/progressbar         // 进度条
 24).github.com/BurntSushi/toml             // toml解析库，解析配置文件
 25).github.com/caarlos0/env                // 环境变量解析库，解析环境变量
+25).github.com/rs/xid                      // ID生成器库
