@@ -11,30 +11,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 
-	"gitee.com/infraboard/go-course/day14/demo/api/conf"
-	hostAPI "gitee.com/infraboard/go-course/day14/demo/api/pkg/host/http"
+	"github.com/ahwhy/myGolang/week14/demo/api/conf"
+	hostAPI "github.com/ahwhy/myGolang/week14/demo/api/pkg/host/http"
 )
-
-// NewHTTPService 构建函数
-func NewHTTPService() *HTTPService {
-	r := httprouter.New()
-
-	server := &http.Server{
-		ReadHeaderTimeout: 60 * time.Second,
-		ReadTimeout:       60 * time.Second,
-		WriteTimeout:      60 * time.Second,
-		IdleTimeout:       60 * time.Second,
-		MaxHeaderBytes:    1 << 20, // 1M
-		Addr:              conf.C().App.Addr(),
-		Handler:           cors.AllowAll().Handler(r),
-	}
-	return &HTTPService{
-		r:      r,
-		server: server,
-		l:      zap.L().Named("API"),
-		c:      conf.C(),
-	}
-}
 
 // HTTPService http服务
 type HTTPService struct {
@@ -44,9 +23,30 @@ type HTTPService struct {
 	server *http.Server
 }
 
+// NewHTTPService 构建函数
+func NewHTTPService() *HTTPService {
+	r := httprouter.New()
+	server := &http.Server{
+		ReadHeaderTimeout: 60 * time.Second,
+		ReadTimeout:       60 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 20, // 1M
+		Addr:              conf.C().App.Addr(),
+		Handler:           cors.AllowAll().Handler(r),
+	}
+
+	return &HTTPService{
+		r:      r,
+		server: server,
+		l:      zap.L().Named("API"),
+		c:      conf.C(),
+	}
+}
+
 // Start 启动服务
 func (s *HTTPService) Start() error {
-	// 装置子服务路由
+	// 配置子服务路由
 	hostAPI.RegistAPI(s.r)
 
 	// 启动 HTTP服务
@@ -57,6 +57,7 @@ func (s *HTTPService) Start() error {
 		}
 		return fmt.Errorf("start service error, %s", err.Error())
 	}
+	
 	return nil
 }
 
@@ -65,9 +66,11 @@ func (s *HTTPService) Stop() error {
 	s.l.Info("start graceful shutdown")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
 	// 优雅关闭HTTP服务
 	if err := s.server.Shutdown(ctx); err != nil {
 		s.l.Errorf("graceful shutdown timeout, force exit")
 	}
+
 	return nil
 }

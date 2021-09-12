@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ahwhy/myGolang/week14/demo/api/version"
 )
 
 var (
@@ -23,10 +25,10 @@ var RootCmd = &cobra.Command{
 	Short: "demo-api 管理系统",
 	Long:  `demo-api ...`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// if vers {
-		// 	fmt.Println(version.FullVersion())
-		// 	return nil
-		// }
+		if vers {
+			fmt.Println(version.FullVersion())
+			return nil
+		}
 		return errors.New("no flags find")
 	},
 }
@@ -39,6 +41,7 @@ func Execute() {
 		os.Exit(-1)
 	}
 }
+
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&confType, "config-type", "t", "file", "the service config type [file/env/etcd]")
 	RootCmd.PersistentFlags().StringVarP(&confFile, "config-file", "f", "etc/demo.toml", "the service config from file")

@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "25d04eed-332b-4e47-9851-48f847bb2db7",
+		"name": "devcloud-cmdb",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "查询主机",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-oauth-token",
+						"type": "text",
+						"value": "{{AccessToken}}"
+					},
+					{
+						"key": "Origin",
+						"value": "http://192.168.31.17:8080",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8050/hosts?page_number=1&keywords=test3",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8050",
+					"path": [
+						"hosts"
+					],
+					"query": [
+						{
+							"key": "page_size",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "page_number",
+							"value": "1"
+						},
+						{
+							"key": "keywords",
+							"value": "test3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "查询详情",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-oauth-token",
+						"type": "text",
+						"value": "{{AccessToken}}"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8050/hosts/c4mro2ua0brlk5hri040",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8050",
+					"path": [
+						"hosts",
+						"c4mro2ua0brlk5hri040"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "创建主机",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-oauth-token",
+						"type": "text",
+						"value": "{{AccessToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"region\": \"shanghai\",\n    \"zone\": \"a1\",\n    \"name\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8050/hosts",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8050",
+					"path": [
+						"hosts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "删除主机",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-oauth-token",
+						"type": "text",
+						"value": "{{AccessToken}}"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8050/hosts/c4mpaj6a0brkgj3hscu0",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8050",
+					"path": [
+						"hosts",
+						"c4mpaj6a0brkgj3hscu0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "更新主机",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "x-oauth-token",
+						"type": "text",
+						"value": "{{AccessToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"test-for-patch\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8050/hosts/c4pj45h3n7pjhd2r4dg0",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8050",
+					"path": [
+						"hosts",
+						"c4pj45h3n7pjhd2r4dg0"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
