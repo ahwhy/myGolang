@@ -3,6 +3,7 @@
  - Css  内容展现的样式
  - JavaScript 给页面添加一些动作，或者对页面的一些操作
 
+
 二、Html基础
 1、Html 网页结构
  - 基本格式
@@ -137,6 +138,302 @@
 
 
 三、Css基础
+1、Css的作用
+ - 可以通过直接指定style属性来配置 DOM元素的样式
+	- <p style="color:red;font-size:20px;">这边显示该章节的内容……</p>
+	- 如果一个页面上 有多个元素都是用了这个样式
+	- 这是就需要将样式独立出来，单独写到一个保存在外部的 .css 文件中，这就形成了css
+
+2、Css的语法
+ - 对所有的p标签 使用下面定义的样式
+	/* 这是个注释 */
+	p {
+	color: red;
+	}
+ - 选择器，对应p，用于选择样式生效的范围，也就是对那些元素生效
+ - 样式属性(style attribute)，也就是具体需要添加的样式，属性有key和value组成，多个属性用';'分开
+ - 注释是用来解释你的代码，并且可以随意编辑它，浏览器会忽略它
+	- CSS注释以 /* 开始, 以 */ 结束
+
+3、CSS选择器  https://www.runoob.com/cssref/css-selectors.html
+ - 基础选择器
+	- 类型
+		- 标签，标签名称  比如  h1
+		- 类，类名称      比如  .className
+		- ID，元素id      比如  #id
+	- 标签选择器
+		- 以标签名开头，选择所有div元素，比如前面的p标签选择器就是这种
+			- 所有h1标签 都显示为红色
+				<style scoped>
+				h1 {
+				color: red;
+				}
+				</style>
+	- 类选择器
+		- 给标签取class名，以点(.)加class名开头，选择所有该class名的元素
+		- 最常用的一种选择器
+			<h1 class="f12">基础标签</h1>
+			<style scoped>
+			.f12 {
+			font-size: 12px;
+			}
+			</style>
+	- id选择器
+		- 给标签取id名，以 #加id名 开头，具有唯一性
+			<h2><a id="C4">章节 4</a></h2>
+			<style scoped>
+			#C4 {
+			color: blue;
+			}
+			</style>
+	- 群选择器
+		- 也可以组合使用，一次选择多个元素，比如 h1, .f12, #C4 都选中，以逗号','分隔多个选中的元素
+			<style scoped>
+			h1,.f12,#C4 {
+			color: blue;
+			}
+			</style>
+	- 全局选择器
+		- 既然有多选，那就有全选，使用'*'
+			<style scoped>
+			* {
+			color: blue;
+			}
+			</style>
+ - 层级选择器
+	- 类型
+		- 如果直接选择元素的话，可能会很多，并不能精确选中需要的元素
+		- 因此就可以引入层级关系来选择，比如 div元素下的p标签，而不是顶层p标签
+		- 总共有4种层级关系选择器
+			- 子选择器: 父元素 > 子元素
+			- 包含选择器: 父元素 包含的元素
+			- 兄弟选择器: 当前元素 ~ 兄弟元素
+			- 相邻选择器: 当前元素 + 相邻元素
+	- 子选择器
+		- 用于已知父元素，选择子元素、
+		- 语法: 以 > 隔开父子级元素，(模块名>模块名，修饰>前模块内的子模块)
+			<ul id="list_menu" class="ul_class">
+				<li id="coffee">Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+			</ul>
+			<style scoped>
+			ul>li {
+			font-weight: 600;
+			}
+			</style>
+		- 子选择器，只能选择其当前层的子元素，如果不是就无法选中
+			<ul id="list_menu" class="ul_class">
+				<li id="coffee">Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+				<div>
+				<li>In Div</li>
+				</div>
+			</ul>
+	- 包含选择器
+		- 包含选择器 可以选择父元素下的 包含该标签的所有元素
+		- 语法: 父元素 子元素
+			<ul id="list_menu" class="ul_class">
+				<li id="coffee">Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+				<div>
+				<li>In Div</li>
+				</div>
+			</ul>
+			<style scoped>
+			ul li {
+				font-weight: 600;
+			}
+			</style>
+	- 兄弟选择器
+		- 兄弟选择器 可以选择从一层级的兄弟元素，比如 #coffee同层的li元素
+		- 语法: 同层元素 ~ 需要选中的同层元素
+			<ul id="list_menu" class="ul_class">
+				<li id="coffee">Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+				<div>
+				<li>In Div</li>
+				</div>
+			</ul>
+			<style scoped>
+			#coffee~li {
+				font-weight: 600;
+			}
+			</style>
+	- 相邻选择器
+		- 相邻弟选择器 可以选择相邻的元素，而不是同层所有的元素
+		- 语法: 当前元素 + 相邻元素
+			<ul id="list_menu" class="ul_class">
+				<li id="coffee">Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+				<div>
+				<li>In Div</li>
+				</div>
+			</ul>
+			<style scoped>
+			#coffee+li {
+				font-weight: 600;
+			}
+			</style>
+ - 其他常用选择器
+	- 属性选择器
+		- 元素会有多属性，可以根据元素的属性来选择元素，比如下面的input框
+			<form action="demo_form.php">
+				<input type="submit" value="提交">
+			</form>
+			<style scoped>
+			[type=submit] {
+				font-size: 22px;
+			}
+			</style>
+	- 伪类选择器
+		- 当选中一堆元素后，如果对其中部分元素 进行选择 就可以使用伪类选择器
+		- 语法: 选择的元素:函数方法
+			- first-child:   第一个
+			- last-child:    最后一个
+			- nth-child(n):  第n个元素
+			- not():         not函数，不包含
+			- https://www.runoob.com/css/css-pseudo-classes.html
+				<ul id="list_menu" class="ul_class">
+					<li id="coffee">Coffee</li>
+					<li>Tea</li>
+					<li>Milk</li>
+				</ul>
+				<style scoped>
+				ul>li:first-child {
+					font-weight: 600;
+				}
+				</style>
+
+4、CSS引入方式
+ - 内联
+	- 在标签内直接写的，style="attr:value;..."
+		<el-table
+			:data="tableData"
+			style="width: 100%">
+			...
+		</el-table>
+ - 内嵌
+	- 通过style标签定义的样式
+		<style scoped>
+		ul>li:first-child {
+			font-weight: 600;
+		}
+		</style>
+ - 外联
+	- 当样式需要被应用到很多页面的时候，外部样式表将是理想的选择
+	- 使用外部样式表，就可以通过更改一个文件来改变整个站点的外观
+		<head>
+		<link rel="stylesheet" type="text/css" href="mystyle.css">
+		</head>
+
+5、样式基础
+ - CSS单位
+	- 在布局或者设置字体大小的时候经常看到: 22px; ，px其实是css里面长度单位
+	- 绝对长度
+		px * 像素 (1px = 1/96th of 1in)
+		cm 厘米
+		mm 毫米
+		in 英寸 (1in = 96px = 2.54cm)
+	- 相对长度
+		em 它是描述相对于应用在当前元素的字体尺寸，所以它也是相对长度单位。一般浏览器字体大小默认为16px，则2em == 32px
+		ex 依赖于英文字母小 x 的高度
+		ch 数字 0 的宽度
+		rem rem 是根 em（root em）的缩写，rem作用于非根元素时，相对于根元素字体大小；rem作用于根元素字体大小时，相对于其出初始字体大小
+		vw viewpoint width，视窗宽度，1vw=视窗宽度的1%
+		vh viewpoint height，视窗高度，1vh=视窗高度的1%
+		vmin vw和vh中较小的那个。
+		vmax vw和vh中较大的那个。
+ - CSS颜色
+	- https://www.w3school.com.cn/cssref/css_colors.asp
+
+6、常用属性
+ - 元素尺寸控制
+	- height 设置元素的高度
+	- width 设置元素的宽度
+	- line-height 设置行高
+	- min-width 设置元素的最小宽度
+	- min-height 设置元素的最小高度
+	- max-height 设置元素的最大高度
+	- max-width 设置元素的最大宽度
+		<div style="height: 220px;width:440px">
+			<p>我们的内容</p>
+		</div>
+ - 盒子模型
+	- Margin(外边距)  清除边框外的区域，外边距是透明的
+	- Border(边框)    围绕在内边距和内容外的边框
+	- Padding(内边距) 清除内容周围的区域，内边距是透明的
+	- Content(内容)   盒子的内容，显示文本和图像
+		<div style="height: 220px;width:440px">
+			<p style="margin-top:22px;">我们的内容</p>
+		</div>
+ - Display
+	- inline: 现在在一行
+	- block: 块元素是一个元素，占用了全部宽度，在前后都是换行符
+	- flex: flex布局，见后面参考
+		<div>
+			<li style="display: inline;">Tea</li>
+			<li style="display: inline;">Milk</li>
+		</div>
+		<div>
+			<span style="display: block;">span1</span>
+			<span style="display: block;">span2</span>
+		</div>
+ - Overflow
+	- overflow 属性可以控制内容溢出元素框时在对应的元素区间内添加滚动条
+		- visible 默认值，内容不会被修剪，会呈现在元素框之外
+		- hidden  内容会被修剪，并且其余内容是不可见的
+		- scroll  内容会被修剪，但是浏览器会显示滚动条以便查看其余的内容
+		- auto    如果内容被修剪，则浏览器会显示滚动条以便查看其余的内容
+		- inherit 规定应该从父元素继承 overflow 属性的值
+			<div id="overflowTest">
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+				<p>这里的文本内容是可以滚动的，滚动条方向是垂直方向。</p>
+			</div>
+			<style scoped>
+			#overflowTest {
+				background: #4CAF50;
+				color: white;
+				padding: 15px;
+				width: 80%;
+				height: 100px;
+				overflow: scroll;
+				border: 1px solid rgb(150, 18, 18);
+			}
+			</style>
+ - 浮动
+	- 控制元素左移还是右移
+		- left
+		- right
+		- 元素浮动之后，周围的元素会重新排列，为了避免这种情况，使用 clear 属性
+			<div id="overflowTest" style="clear:both">
+				<span style="display: block;">span1</span>
+				<span style="display: block;">span2</span>
+			</div>
+ - 对齐
+	- 以常见的居中为例
+		<div id="overflowTest" style="text-align: center">
+			<span style="display: block;">span1</span>
+			<span style="display: block;">垂直居中</span>
+			<span style="display: block;">span2</span>
+		</div>
+		- 为了文本在元素内居中对齐，可以使用 text-align: center
+		- 或者行高到div 就整体居中
+
+7、常用网址
+	- CSS布局教学           https://zh.learnlayout.com/
+	- Flex布局教学游戏      http://flexboxfroggy.com/
+	- 在线CSS代码可视工具   https://enjoycss.com/
+	- 新拟态模拟工具        https://neumorphism.io/#e0e0e0
+	- 渐变色方案            https://uigradients.com/#Copper
 
 
 四、Javascript基础
@@ -612,3 +909,195 @@
  - for循环推荐forEach
 
 五、浏览器基础
+1、浏览器
+ - 场景
+	- 适配屏幕
+	- 兼容多种浏览器
+	- JavaScript可以获取浏览器提供的很多对象，并进行操作
+ - 浏览器对象
+	- 网页是通过浏览器加载出来的，而浏览器本身也有很多功能
+		- 浏览器本身版本信息
+		- 当前窗口大小
+		- 历史记录
+		- ...
+	- 而这些数据都是绑定在window对象上，可以认为对于浏览器加载的网页，window就表示浏览器本身
+ - 浏览器窗口大小
+	- window的如下4个属性控制这个浏览器的窗口大小
+		- IE9+、Safari、Opera和Chrome都支持这4个属性
+			- innerWidth: 页面视图的宽
+			- innerHeight: 页面视图的高
+			- outerWidth: 浏览器整个窗口的宽
+			- outerHeight: 浏览器整个窗口的高
+		- 调整浏览器窗口大小
+			- console.log('window inner size: ' + window.innerWidth + ' x ' + window.innerHeight);
+			- console.log('window outer size: ' + window.outerWidth + ' x ' + window.outerHeight);
+ - 浏览器信息
+	- 关于浏览器的相关信息都保存在navigator对象上面
+		window.navigator
+		- 常用的属性
+			navigator.appName: 浏览器名称；
+			navigator.appVersion: 浏览器版本；
+			navigator.language: 浏览器设置的语言；
+			navigator.platform: 操作系统类型；
+			navigator.userAgent: 浏览器设定的User-Agent字符串
+			navigator.userAgentData: useragent相关信息, Object
+ - 屏幕信息
+	- 需要知道用户的屏幕尺寸，以便做网页布局，这是就需要获取屏幕的数据
+		window.screen
+ - 访问网址
+	- 为了保证每个用户访问该URL都呈现统一的效果，页面往往都需要读取当前Page的参数
+		window.location
+		- 常用的属性
+			location.protocol;     // 'http'
+			location.host;         // 'www.example.com'
+			location.port;         // '8080'
+			location.pathname;     // '/path/index.html'
+			location.search;       // '?a=1&b=2'
+			location.hash;         // 'TOP'
+			location.assign(url)   // 加载页面
+			location.replace(url)  // 重定向页面
+			location.reload()      // 重新加载当前页面
+		- 示例
+			if (confirm('重新加载当前页' + location.href + '?')) {
+				location.reload();
+			} else {
+				location.assign('/'); // 设置一个新的URL地址
+			}
+ - 历史记录
+	- history对象保存了浏览器的历史记录
+	- JavaScript可以调用history对象的back()或forward ()，相当于用户点击了浏览器的"后退"或"前进"按钮
+		- <- 浏览器的"后退"按钮
+			history.back();
+		- -> 浏览器的"前进"按钮
+			history.forward()
+
+2、AJAX
+ - Asynchronous JavaScript and XML，意思就是用JavaScript执行异步网络请求
+	- 简单来说就是浏览器中的Http Client
+	- 在现代浏览器上写AJAX主要依靠XMLHttpRequest对象
+ - XMLHttpRequest
+	- 声明XMLHttpRequest对象
+		var request = new XMLHttpRequest(); 
+	- 发送请求
+		request.open('GET', 'https://www.baidu.com');
+		request.send();
+	- 由于js都是异步的，需要定义回调来处理返回，用于获取请求结果
+		request.onreadystatechange = function () {
+			console.log(request.status)
+			console.log(request.responseText)
+		}
+	- 对于AJAX请求特别需要注意跨域问题: CORS  https://www.ruanyifeng.com/blog/2016/04/cors.html
+		- 简单请求
+			- 请求特征
+				- HTTP Method: GET、HEAD和POST
+				- Content-Type: application/x-www-form-urlencoded、multipart/form-data和text/plain
+				- 不能出现任何自定义头
+			- 请求流程
+				- 通常能满足90%的需求
+				- 控制其跨域的关键头 来自于服务端设置的: Access-Control-Allow-Origin
+				- 对于简单请求，浏览器直接发出CORS请求
+					- 具体来说，就是在头信息之中，增加一个Origin字段
+				- 客户端发送请求时 Origin: xxxx
+				- 服务端响应请求时 Access-Control-Allow-Origin: xxxx / *
+				- 如果服务端不允许该域，就跨越失败
+				- 如果想允许特定的Header，服务端也可以通过添加 Access-Control-Expose-Headers 来进行控制
+		- 复杂请求
+			- 请求特征
+				- HTTP Method: PUT、DELETE
+				- Content-Type: 其他类型如application/json
+				- 含自定义头，比如后面携带的用于认证的X-OAUTH-TOKEN头
+			- 请求流程
+				- 非简单请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为"预检"请求(preflight)
+					- preflight请求
+						- Method: OPTIONS
+						- Header: Access-Control-Request-Method   列出浏览器的CORS请求会用到哪些HTTP方法
+						- Header: Access-Control-Request-Headers  该字段是一个逗号分隔的字符串，指定浏览器CORS请求会额外发送的头信息字段
+							OPTIONS /cors HTTP/1.1
+							Origin: http://api.bob.com
+							Access-Control-Request-Method: PUT
+							Access-Control-Request-Headers: X-Custom-Header
+							Host: api.alice.com
+							Accept-Language: en-US
+							Connection: keep-alive
+							User-Agent: Mozilla/5.0...
+					- preflight响应
+						- Header: Access-Control-Allow-Origin    允许的源(域)
+						- Header: Access-Control-Allow-Methods   服务端 允许的方法(所有方法，一般大于请求的该头)
+						- Header: Access-Control-Allow-Headers   服务端 允许的自定义Header
+						- Header: Access-Control-Max-Age         用来指定本次预检请求的有效期，避免多次请求，该字段可选
+							Access-Control-Allow-Methods: GET, POST, PUT
+							Access-Control-Allow-Headers: X-Custom-Header
+							Access-Control-Allow-Credentials: true
+							Access-Control-Max-Age: 1728000
+ - axios
+ - 页面(DOM)
+	- DOM
+		- 浏览器当前加载的Page也是一个对象: window.document
+		- 由于HTML在浏览器中以DOM形式表示为树形结构，document对象就是整个DOM树的根节点
+		- 获取当前Document中的一些属性
+			- 比如 title document的title属性是从HTML文档中的<title>xxx</title>读取的，但是可以动态改变
+				document.title
+				// 'golang random int_百度搜索'
+				// 动态修改
+				document.title = '测试修改'
+		- 很多js库比如JQuery都是通过动态操作Dom来实现很多高级功能的，这些是上层库的基石
+	- DOM查询
+		- 要查找DOM树的某个节点，需要从document对象开始查找
+		- 最常用的查找是根据ID和Tag Name以及ClassName
+			<h1>列表</h1>
+			<ul id="list_menu" class="ul_class">
+				<li>Coffee</li>
+				<li>Tea</li>
+				<li>Milk</li>
+			</ul>
+			document.getElementById('list_menu')
+			// <ul data-v-7ba5bd90 id=​"list_menu">​<li data-v-7ba5bd90>​…​</li>​<li data-v-7ba5bd90>​…​</li>​<li data-v-7ba5bd90>​…​</li>​</ul>​
+			document.getElementsByTagName('ul')
+			// 返回所有的ul元素
+			document.getElementsByClassName('ul_class')
+		- 组合使用
+			document.getElementById('list_menu').getElementsByTagName('li')
+			// 上面也等价于
+			document.getElementById('list_menu').children
+			// firstElementChild
+			document.getElementById('list_menu').firstElementChild
+			// lastElementChild
+			document.getElementById('list_menu').lastElementChild
+			// parentElement 获取父元素
+			document.getElementById('list_menu').parentElement
+	- 更新DOM
+		- 获取的元素后，可以通过元素的如下2个方法，修改元素
+			- innerHTML: 不但可以修改一个DOM节点的文本内容，还可以直接通过HTML片段修改DOM节点内部的子树
+			- innerText: 只修改文本内容
+				var le = document.getElementById('list_menu').lastElementChild
+				le.innerText = '牛奶'                                           // 页面的内容已经修改
+				le.innerText = '<span style="color:red">牛奶</span>'            // html格式无法识别
+				le.innerHTML = '<span style="color:red">牛奶</span>'            // 使用innterHTML则可以
+	- 插入DOM
+		- 很多响应式框架都会根据数据新增，动态创建一个DOM元素，并插入到指定位置
+			- 使用 createElement 来创建一个DOM元素，比如创建一个a标签
+				
+				var newlink = document.createElement('a')                       // 创建一个A标签
+				newlink.href = "http://www.baidu.com"                           // <a></a>
+				newlink.innerText = '跳转到百度'                                // 修改A标签属性
+				var lm = document.getElementById('list_menu')                   // 追加到某个元素后面
+				lm.appendChild(newlink)
+			- 想要控制元素插入的位置可以使用insertBefore
+				parentElement.insertBefore(newElement, referenceElement);       // 父元素
+				var lm = document.getElementById('list_menu')                   // 子元素
+				var cf = document.getElementById('coffee')                      // 需要插入的元素
+				var newlink = document.createElement('a')
+				newlink.href = "http://www.baidu.com"   
+				newlink.innerText = '跳转到百度'
+				lm.insertBefore(newlink, cf)                                    // 插入到coffee之前
+		- 有2种方式可以插入一个DOM元素
+			- appendChild: 把一个子节点添加到父节点的最后一个子节点
+			- insertBefore: 插入到某个元素之前
+	- 删除DOM
+		- 删除一个节点，首先要获得该节点本身以及它的父节点，然后调用父节点的removeChild把自己删掉
+			parent.removeChild(childNode);
+		- 删除刚才添加的那个元素
+			lm.removeChild(newlink)
+
+
+
