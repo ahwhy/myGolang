@@ -436,7 +436,7 @@
 	- 渐变色方案            https://uigradients.com/#Copper
 
 
-四、Javascript基础
+四、JavaScript基础
 1、JavaScript 运行时
 	- 浏览器
 		NodeJS
@@ -908,6 +908,17 @@
  - 由于变量提升问题，尽量使用let声明变量，并且写在开头
  - for循环推荐forEach
 
+12、Jquery
+ - Jquery 是一JavaScript的一个库，极大的简化了js的开发
+	- 包含
+		- Html元素选取
+		- Html元素操作
+		- Css操作
+		- 绑定事件
+		- Ajax
+		- 工具函数
+		- 插件系统
+
 五、浏览器基础
 1、浏览器
  - 场景
@@ -975,6 +986,7 @@
  - Asynchronous JavaScript and XML，意思就是用JavaScript执行异步网络请求
 	- 简单来说就是浏览器中的Http Client
 	- 在现代浏览器上写AJAX主要依靠XMLHttpRequest对象
+	- 异步获取数据 + 局部刷新页面
  - XMLHttpRequest
 	- 声明XMLHttpRequest对象
 		var request = new XMLHttpRequest(); 
@@ -1098,6 +1110,4 @@
 			parent.removeChild(childNode);
 		- 删除刚才添加的那个元素
 			lm.removeChild(newlink)
-
-
 
