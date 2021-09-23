@@ -833,7 +833,7 @@ p1.then((resp) => {
 
 可见Promise最大的好处是在异步执行的流程中，把执行代码和处理结果的代码清晰地分离了:
 
-![](./images/promise.png)
+![](./pic/promise.png)
 
 
 ### Async函数 + Promise组合

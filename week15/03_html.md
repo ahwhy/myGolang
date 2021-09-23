@@ -2,7 +2,7 @@
 
 ## HTML 网页结构
 
-![](./images/html-struct.jpg)
+![](./pic/html-struct.jpg)
 
 ## 标签与元素
 

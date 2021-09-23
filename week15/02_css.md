@@ -24,7 +24,7 @@ p {
 + 选择器, 对应p, 用于选择样式生效的范围，也就是对那些元素生效
 + 样式属性（style attribute), 也就是具体需要添加的样式是啥, 属性有key和value组成, 多个属性用`;`分开
 
-![](./images/css.jpeg)
+![](./pic/css.jpeg)
 
 注释是用来解释你的代码，并且可以随意编辑它，浏览器会忽略它。
 
@@ -96,7 +96,7 @@ h1 {
 
 h1,.f12,#C4 {
   color: blue;
-}
+}c
 
 </style>
 ```
@@ -376,14 +376,14 @@ ul>li:first-child {
 
 ### 盒子模型
 
-![](./images/box-model.png)
+![](./pic/box-model.png)
 
 + Margin(外边距)  清除边框外的区域，外边距是透明的。
 + Border(边框)  围绕在内边距和内容外的边框。
 + Padding(内边距) 清除内容周围的区域，内边距是透明的。
 + Content(内容) 盒子的内容，显示文本和图像。
 
-![](./images/margin-padding.png)
+![](./pic/margin-padding.png)
 
 ```html
 <div style="height: 220px;width:440px">

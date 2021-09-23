@@ -8,7 +8,7 @@
 					  特定场景注释: 构建注释，如: windows，linux  
 					  包注释，包文件开头注释
 
-2、基础类型
+2、基础数据类型
  - 内置常量: true、false、nil、iota
  - 内置类型: bool、byte、rune、int、int8、int16、int32、int64、uint、uint8、unit16、unit32、unit64、uintptr、float32、float64、complex64、complex128、string、error
  - 空白标识符: _  // 使用空白标识符，则无需引用
@@ -17,15 +17,15 @@
 	- in8			: 1byte
 	  int64/uint64  : 8bytes 2^64
 	  rune   		: 4bytes
-	  string 		: 16bytes（4 * 4） // string = 2*int64 = 2*8bytes  []byte(string)
+	  string 		: 16bytes(4 * 4)   // string = 2*int64 = 2*8bytes  []byte(string)
 	  slice  		: 24bytes          // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
 	- 数据单位
-	1Word(字) = 2Bytes(字节)
-	1Byte = 8bit(位)  // 2^8
-	1KB   = 1024B
-	1MB   = 1024KB
-	1GB   = 1024Mb
-	1TB   = 1024GB
+		1Word(字) = 2Bytes(字节)
+		1Byte = 8bit(位)  // 2^8
+		1KB   = 1024B
+		1MB   = 1024KB
+		1GB   = 1024Mb
+		1TB   = 1024GB
 	- new和make对比
 		new 开辟一个类型对应的内存空间，返回一个内存空间的地址；且只能分配地址，一般用于基础类型的初始化；
 		make{makeslice,makemap,makechannel} make返回创建对象的内存地址 // 以slice为例，unsafe.Pointer --> slince struct --- {member: pointer ---> array}  表现为: []int
@@ -37,11 +37,10 @@
 3、25 关键字: 
  - 声明: import、package
  - 实体声明和定义: chan、const、func、interface、map、struct、type、var
- - 流程控制: break、case、continue、default、defer、else、fallthrough、for、go、goto、
- - if、range、return、select、switch
+ - 流程控制: break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select、switch
 
 4、操作符
- - 算术运算符: +、-、*、/、%、++、--
+ - 算术运算符: +、-、*、/、%、++、--        // i++ 为表达式，非语句，无法赋值给变量
  - 关系运算符: >、>=、<、<=、==、!=         // 判断A 与 B的关系，结构: 布尔值，函数不可以比较
  - 逻辑运算符: &&、||、!
  - 位运算符: &、|、^、<<、>>、&^
@@ -55,7 +54,7 @@
 6、指针
  - 指针与变量
 	- 变量是一种使用方便的占位符，用于引用计算机内存地址。
-	- 可以通过&运算符获取变量在内存中的存储位置, 指针是用来存储变量地址的变量
+	- 可以通过&运算符获取变量在内存中的存储位置，指针是用来存储变量地址的变量
 	- 本质 -> 内存地址，没有数据类型，占8bytes
  - 声明初始化与赋值
 	- 指针声明需要指定存储地址中对应数据的类型，并使用*作为类型前缀。 
@@ -110,11 +109,11 @@
 二、输入输出
 1、标准输入
 1).函数种类
-	Print:   输出到控制台,不接受任何格式化操作
-	Println: 输出到控制台并换行
-	Printf : 只可以打印出格式化的字符串。只可以直接输出字符串类型的变量（不可以输出别的类型）
-	Sprintf: 格式化并返回一个字符串而不带任何输出
-	Fprintf: 来格式化并输出到 io.Writers 而不是 os.Stdout     // func fmt.Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
+ - Print:   输出到控制台，不接受任何格式化操作
+ - Println: 输出到控制台并换行
+ - Printf : 只可以打印出格式化的字符串；只可以直接输出字符串类型的变量(不可以输出别的类型)
+ - Sprintf: 格式化并返回一个字符串而不带任何输出
+ - Fprintf: 来格式化并输出到 io.Writers 而不是 os.Stdout     // func fmt.Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
 2).占位符
  - 类型
 	%v : 值的默认格式。
@@ -123,38 +122,38 @@
 	%T : 相应值的类型的Go语法表示
 	%% : 百分号,字面上的%,非占位符含义
  - 字符串
-	%s : 字符串类型   // %ns  打印字符前空n个宽度,  默认+， 右对齐 ，若- ，左对齐
+	%s : 字符串类型                               // %ns 打印字符前空n个宽度，默认+，右对齐；若-，左对齐
 	%q : 双引号围绕的字符串
 	%x : 十六进制，小写字母，每字节两个字符
 	%X : 十六进制，大写字母，每字节两个字符
  - 整型
 	%t : bool类型
-	%c : 相应Unicode码点所表示的字符   // rune: Unico de co de point
-	%q : 带单引号 的字符
-	%b : 二进制
-	%o : 八进制 //  %#o 带 0 的前缀
-	%d : 十进制               
-	%x 、 %X : 十六进制   //  %#x(%# 带 0x(0X) 的前缀
-	%U : Unicode 字符, Unicode格式: 123，等同于 "U+007B"     //  %#U 带字符的 Unicode 码点
+	%c : 相应Unicode码点所表示的字符                        // rune: Unico de co de point
+	%q : 带单引号 的字符                                    
+	%b : 二进制                                             
+	%o : 八进制                                             // %#o 带 0 的前缀
+	%d : 十进制                                             
+	%x 、 %X : 十六进制                                     // %#x(%# 带 0x(0X) 的前缀
+	%U : Unicode 字符, Unicode格式: 123，等同于 "U+007B"    // %#U 带字符的 Unicode 码点
 		%d : 十进制 
-			%+d   表示 对正整数 带 符号
-			%nd   表示 最小 占位 n 个宽度且右对齐
-			%-nd    表示 最小 占位 n 个宽度且左对齐
-			%0nd  表示 最小 占位 n 个宽度且右对齐 空字符使用 0 填充
+			%+d  表示 对正整数 带 符号
+			%nd  表示 最小 占位 n 个宽度且右对齐
+			%-nd 表示 最小 占位 n 个宽度且左对齐
+			%0nd 表示 最小 占位 n 个宽度且右对齐 空字符使用 0 填充
 			"%d|%+d|%10d|%-10d|%010d|%+-10d|%+010d"
  - 浮点型
-	%f 、 %F : 十进制表示法            //%n.mf 表示最小 占 n 个宽度并且保留 m 位小数
+	%f 、 %F : 十进制表示法                                 // %n.mf 表示最小占 n 个宽度并且保留 m 位小数
 	%e 、 %E : 科学记数法表示
-	%g 、 %G : 自动选择 最 紧凑的表示 方法 %e(E%) 或 %f(F%)  
+	%g 、 %G : 自动选择 最 紧凑的表示 方法 %e(E%) 或 %f(F%)
  - 指针
 	%t : 指针变量的具体内容
-	%v : 指针变量访问位置中存储的值     //  %#v接口的类型
+	%v : 指针变量访问位置中存储的值                         // %#v接口的类型
 	%q : 指针变量访问位置中存储的值(unicode 中文)
-	%p : 十六进制表示，前缀 0x           // 默认情况下，指针是已16进制存在的
+	%p : 十六进制表示，前缀 0x                              // 默认情况下，指针是已16进制存在的
  - 特殊字符: 
 	\: 反斜线
-	': 单引号   // '' 只可以定义单一字符
-	": 双引号   // "" 可解析的字符串
+	': 单引号                                               // '' 只可以定义单一字符
+	": 双引号                                               // "" 可解析的字符串
 	``: 原始字符串/多行字符串
 	\a: 响铃
 	\b: 退格
@@ -163,24 +162,31 @@
 	\r: 回车
 	\t: 制表符
 	\v: 垂直制表符
-	\ooo: 3 个 8 位数字给定的八进制码点的 Unicode 字符（不能超过\377
+	\ooo: 3 个 8 位数字给定的八进制码点的 Unicode 字符(不能超过\377)
 	\uhhhh: 4 个 16 位数字给定的十六进制码点的 Unicode 字符
 	\Uhhhhhhhh: 8 个 32 位数字给定的十六进制码点的 Unicode 字符
 	\xhh: 2 个 8 位数字给定的十六进制码点的 Unicode 字符
 
 2、标准输出 
 1).函数种类 
-	go doc fmt | grep -Ei "func [FS]*Scan"   
-	Scan家族: 从标准输入os.Stdin中读取数据，包括Scan()、Scanf()、Scanln()   // 需要使用指针 Scan(&name) scan会直接将输入的值存入指针所指的内存地址的值
-	SScan家族: 从字符串中读取数据，包括Sscan()、Sscanf()、Sscanln()         // 即从字符串扫描到变量 func fmt.Sscan(str string, a ...interface{}) (n int, err error) 
-	Fscan家族: 从io.Reader中读取数据，包括Fscan()、Fscanf()、Fscanln()      // 即从文件扫描到变量 func fmt.Fscan(r io.Reader, a ...interface{}) (n int, err error)
+ - go doc fmt | grep -Ei "func [FS]*Scan"   
+ - Scan家族: 从标准输入os.Stdin中读取数据，包括Scan()、Scanf()、Scanln()   // 需要使用指针 Scan(&name) scan会直接将输入的值存入指针所指的内存地址的值
+ - SScan家族: 从字符串中读取数据，包括Sscan()、Sscanf()、Sscanln()         // 即从字符串扫描到变量 func fmt.Sscan(str string, a ...interface{}) (n int, err error) 
+ - Fscan家族: 从io.Reader中读取数据，包括Fscan()、Fscanf()、Fscanln()      // 即从文件扫描到变量 func fmt.Fscan(r io.Reader, a ...interface{}) (n int, err error)
 2).注意事项
-	Scanln、Sscanln、Fscanln在遇到换行符的时候停止
-	Scan、Sscan、Fscan将换行符当作空格处理
-	Scanf、Sscanf、Fscanf根据给定的format格式读取，就像Printf一样
-	Scan家族函数从标准输入读取数据时，以空格做为分隔符分隔标准输入的内容，并将分隔后的各个记录保存到给定的变量中。
+ - Scanln、Sscanln、Fscanln在遇到换行符的时候停止
+ - Scan、Sscan、Fscan将换行符当作空格处理
+ - Scanf、Sscanf、Fscanf根据给定的format格式读取，就像Printf一样
+ - Scan家族函数从标准输入读取数据时，以空格做为分隔符分隔标准输入的内容，并将分隔后的各个记录保存到给定的变量中。
 
-3、格式转换
+3、流结束
+ - EOF: 用于标识 流(io stream)结束 
+	- parser/parser.go 会重复解析声明到文件的最后
+		for p.tok != token.EOF {
+			decls = append(decls, p.parseDecl(declStart))
+		}
+
+4、格式转换
  - strconv包
 	- 提供了字符串与简单数据类型之间的类型转换功能，可以将简单类型转换为字符串，也可以将字符串转换为其它简单类型  // import "strconv"
 	- int转string   ->   strconv.Itoa()
@@ -440,10 +446,10 @@
 	copy(slice2, slice)
 6).其他
  - 字节切片    // bytes包
-	[]byte(string)
+	[]byte{string}
 	string([]byte{})
  - rune切片
-	[]rune(string)
+	[]rune{string}
 	string([]rune{})
 
 3、映射map
