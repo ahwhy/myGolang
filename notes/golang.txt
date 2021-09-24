@@ -1,24 +1,32 @@
 ##Golang基础
 一、基础语法
-1、底层语法
- - 决定语法正确的是:  底层编译器
- - 编译的基础单位:    Lexical Token(词法标记)      // go/token 包
- - 标识符:            标识符是编程时所使用的名字，用于给变量、常量、函数、类型、接口、包名等进行命名，以建立名称和使用之间的关系
- - 注释:              // 单行注释  /*多行注释*/  
-					  特定场景注释: 构建注释，如: windows，linux  
-					  包注释，包文件开头注释
+1、Golang简介
+ - Go语言中将数据类型分为四类: 基础类型、复合类型、引用类型和接口类型
+ 	- 基础类型，包括: 数字、字符串和布尔型
+ 	- 复合数据类型，包括: 数组和结构体，即通过组合简单类型，来表达更加复杂的数据结构
+ 	- 引用类型，包括指针、切片、字典、函数、通道，虽然数据种类很多，但它们都是对程序中一个变量或状态的间接引用，这意味着对任一引用类型数据的修改都会影响所有该引用的拷贝
+ 	- 接口类型
+ - Go语言的编译
+ 	- 决定语法正确的是: 底层编译器
+ 	- 编译的基础单位: Lexical Token (词法标记)，如 `go/token` 包
+ - Go语言的注释 
+	- `// 单行注释`
+	- `/* 多行注释 */`
+	- 特定场景注释: 构建注释，如: windows，linux  
+	- 包注释，包文件开头注释等 
 
-2、基础数据类型
+2、程序结构
  - 内置常量: true、false、nil、iota
  - 内置类型: bool、byte、rune、int、int8、int16、int32、int64、uint、uint8、unit16、unit32、unit64、uintptr、float32、float64、complex64、complex128、string、error
  - 空白标识符: _  // 使用空白标识符，则无需引用
  - 内置函数: make、len、cap、new、append、copy、close、delete、complex、real、imag、panic、recover
  - 其他
-	- in8			: 1byte
-	  int64/uint64  : 8bytes 2^64
-	  rune   		: 4bytes
-	  string 		: 16bytes(4 * 4)   // string = 2*int64 = 2*8bytes  []byte(string)
-	  slice  		: 24bytes          // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
+	- 各数据类型所占字节大小
+		in8			: 1byte
+		int64/uint64  : 8bytes 2^64
+		rune   		: 4bytes
+		string 		: 16bytes(4 * 4)   // string = 2*int64 = 2*8bytes  []byte(string)
+		slice  		: 24bytes          // 切片的本质是一个slice结构体指针，指针为一个uint64内存地址，默认值为0，长度为24
 	- 数据单位
 		1Word(字) = 2Bytes(字节)
 		1Byte = 8bit(位)  // 2^8
@@ -33,11 +41,21 @@
 			函数类型   适用范围                                返回值         填充类型
 			new        new可以对所有类型进行分配               new返回指针    new填充零值 
 			make       make只能创建类型(slice、map、channel)   make返回引用   make填充非零值
-
-3、25 关键字: 
- - 声明: import、package
- - 实体声明和定义: chan、const、func、interface、map、struct、type、var
- - 流程控制: break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select、switch
+ - 25 关键字
+	- Go语言中类似if和switch的关键字有25个
+	- 关键字不能用于自定义名字，只能在特定语法结构中使用
+		- 引用包: import、package
+		- 实体声明和定义: const、var、type、func、interface、map、struct、chan
+		- 流程控制: break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select、switch
+	- 在声明变量时，如果初始化表达式被省略，那么将用零值初始化该变量
+		- 数值类型变量对应的零值是0
+		- 布尔类型变量对应的零值是false
+		- 字符串类型对应的零值是空字符串
+		- 接口或引用类型(包括slice、map、chan和函数)变量对应的零值是nil
+		- 数组或结构体等聚合类型对应的零值是每个元素或字段都是对应该类型的零值
+	- 初始化表达式可以是字面量或任意的表达式
+		- 在包级别声明的变量会在main入口函数执行前完成初始化
+		- 局部变量将在声明语句被执行到的时候完成初始化
 
 4、操作符
  - 算术运算符: +、-、*、/、%、++、--        // i++ 为表达式，非语句，无法赋值给变量
@@ -116,11 +134,11 @@
  - Fprintf: 来格式化并输出到 io.Writers 而不是 os.Stdout     // func fmt.Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
 2).占位符
  - 类型
-	%v : 值的默认格式。
+	%v : 变量的自然形式(natural format)
 		%+v : 类似%v，但输出结构体时会添加字段名  // 类型+值对象
 		%#v : 相应值的Go语法表示                  // 输出字段名和字段值形式
-	%T : 相应值的类型的Go语法表示
-	%% : 百分号,字面上的%,非占位符含义
+	%T : 相应值的类型的Go语法表示，变量的类型
+	%% : 百分号，字面上的%，非占位符含义
  - 字符串
 	%s : 字符串类型                               // %ns 打印字符前空n个宽度，默认+，右对齐；若-，左对齐
 	%q : 双引号围绕的字符串
@@ -146,7 +164,6 @@
 	%e 、 %E : 科学记数法表示
 	%g 、 %G : 自动选择 最 紧凑的表示 方法 %e(E%) 或 %f(F%)
  - 指针
-	%t : 指针变量的具体内容
 	%v : 指针变量访问位置中存储的值                         // %#v接口的类型
 	%q : 指针变量访问位置中存储的值(unicode 中文)
 	%p : 十六进制表示，前缀 0x                              // 默认情况下，指针是已16进制存在的
@@ -979,7 +996,7 @@
  - init函数在import包时自动被调用(const -->var -->init)。
 
 5、标准包
- - Go提供了大量标准包，可查看 https://golang.google.cn/pkg/
+ - Go提供了大量标准包，可查看 https://golang.google.cn/pkg/ &&  https://godoc.org 
 	- go list std 查看所有标准包
 	- go doc packagename 查看包的帮助信息
 	- go doc packagename.element 查看包内成员 帮助信息
@@ -6225,7 +6242,7 @@
 	*os.PathError           // PathError records an error and the operation and file path that caused it.
 	*os.LinkError           // LinkError records an error during a link or symlink or rename system call and the paths that caused it.
 	*os.SyscallError        // SyscallError records an error from a specific system call.
-	os.Esxit(1) 系统退出
+	os.Exit(1) 系统退出
 	os.Args                 // 接收命令行参数生成切片，从程序本身的路径开始 var os.Args []string
 	os.Stat("test.txt")     // func os.Stat(name string) (fs.FileInfo, error)  Stat returns a FileInfo describing the named file. If there is an error, it will be of type *PathError.
 5).strings  // 见上字符串
@@ -6271,6 +6288,7 @@
 	sync.WaitGroup(计数信号量)
 13).runtime
 14).bufio  // 提供缓冲流的功能,具体见上
+	bufio.NewScanner(os.Stdin)
 15).io 
 	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
 16).io/ioutil

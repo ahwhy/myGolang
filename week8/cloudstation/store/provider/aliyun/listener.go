@@ -60,8 +60,8 @@ func (p *OssProgressListener) ProgressChanged(event *oss.ProgressEvent) {
 		p.startAt = time.Now()
 		fmt.Println()
 		fmt.Printf("文件大小: %s\n", tool.HumanBytesLoaded(event.TotalBytes))
-	case oss.TransferDataEvent:
-		p.bar.Add64(event.RwBytes)
+	// case oss.TransferDataEvent:
+	// 	p.bar.Add64(event.RwBytes)
 	case oss.TransferCompletedEvent:
 		fmt.Printf("\n上传完成: 耗时%d秒\n", int(time.Since(p.startAt).Seconds()))
 	case oss.TransferFailedEvent:

@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -42,5 +43,5 @@ func main() {
 		fmt.Println("You don't have a chance!\nYou're too stupid!!\nGame is over!!!")
 	}
 	fmt.Println("Thank You!")
-	time.Sleep(99999999999999999)
+	os.Exit(1)
 }
