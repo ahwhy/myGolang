@@ -6234,6 +6234,10 @@
  - math/rand
 	- rand.Seed(time.Now().Unix())  // 使用当前时间设置随机数种子
 	- rand.Intn(100)    // 生产[0, 100)的随机数
+ - math.IsNaN
+	- 用于测试一个数是否是非数NaN     // NaN非数，一般用于表示无效的除法操作结果0/0或Sqrt(-1)
+ - math.NaN
+	- 返回非数对应的值
 3).reflect
 	reflect.TypeOf() 获取数据类型 // 同Printf("%T")
 	reflect.ValueOf()
@@ -6242,7 +6246,7 @@
 	*os.PathError           // PathError records an error and the operation and file path that caused it.
 	*os.LinkError           // LinkError records an error during a link or symlink or rename system call and the paths that caused it.
 	*os.SyscallError        // SyscallError records an error from a specific system call.
-	os.Exit(1) 系统退出
+	os.Esxit(1) 系统退出
 	os.Args                 // 接收命令行参数生成切片，从程序本身的路径开始 var os.Args []string
 	os.Stat("test.txt")     // func os.Stat(name string) (fs.FileInfo, error)  Stat returns a FileInfo describing the named file. If there is an error, it will be of type *PathError.
 5).strings  // 见上字符串

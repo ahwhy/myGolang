@@ -32,6 +32,7 @@
 	body
 	h1
 	p
+	a
  - Html元素
 	- Html元素指一个具体的标签实例，下面有2个Html元素，都是h标签
 		<h1>这是一个标题</h1>
@@ -1110,4 +1111,123 @@
 			parent.removeChild(childNode);
 		- 删除刚才添加的那个元素
 			lm.removeChild(newlink)
+
+
+六、Vue
+1、Vue的简介
+ - Vue 是一套用于构建用户界面的渐进式框架
+	- 与其它大型框架不同的是，Vue 被设计为可以自底向上逐层应用
+ - Vue 的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合，比如实现拖拽: vue + sortable.js
+ - vue借鉴了很有框架优秀的部分进行了整合
+	- 借鉴 angular 的模板和数据绑定技术
+	- 借鉴 react 的组件化和虚拟 DOM 技术
+ - 所有框架的逻辑都是通过js封装，上层概念比如MVVM，方便快速开发，因此学习任何框架前都需要具有Web基础
+	- HTML
+	- CSS
+	- Javascript
+
+2、Vue.js与环境的安装
+1).安装Node.js
+ - 一个基于 Chrome V8 引擎 的 JavaScript 运行时环境
+	https://nodejs.org/zh-cn/
+	$ node -v   // v14.17.1
+	$ npm -v    // 6.14.13
+ - 配置使用国内源
+	$ npm config set registry http://registry.npm.taobao.org/
+	$ npm config get registry
+
+2).安装Vue和脚手架工具
+ - 直接使用Node.js进行全局安装
+	# 最新稳定版
+	$ npm install -g vue            // -g 参数即为全局安装
+ - 安装项目脚手架工具
+	- 官方同时提供了1个cli工具，用于快速初始化一个vue工程，官方文档 https://cli.vuejs.org/
+		$ npm install -g @vue/cli
+		$ npm list -g               // 查看当前Node.js环境下安装的包
+		
+3).Vue Devtools
+ - chrome商店
+ - https://www.jianshu.com/p/63f09651724c
+ 
+4).vscode 插件
+ - Beautify:          js, css, html 语法高亮差距
+ - ESLint:            js eslint语法风格检查
+ - Auto Rename Tag:   tag rename
+ - Vetur:             vue语法高亮插件
+ 
+5).项目
+ - vue项目创建
+	$ vue create demo
+	$ cd demo 
+	$ npm run serve
+ - 项目结构
+	- 通过vue-cli搭建一个vue项目，会自动生成一系列文件
+		├── dist/                      	# 项目构建后的产物
+		├── node_module/               	# 项目中安装的依赖模块
+		├── public/                    	# 纯静态资源，入口文件(index.html)也在里面
+		├── src/
+		│   ├── main.js                 # 程序入口文件
+		│   ├── App.vue                 # 程序入口vue组件，大写字母开头，后缀 .vue
+		│   ├── components/             # 组件
+		│   │   └── ...
+		│   └── assets/                 # 资源文件夹，一般放一些静态资源文件，比如CSS/字体/图片
+		│       └── ...
+		├── babel.config.js             # babel 配置文件，es6语法转换
+		├── .gitignore                  # 用来过滤一些版本控制的文件，比如node_modules文件夹 
+		└── package.json                # 项目文件，记载着一些命令和依赖还有简要的项目描述信息 
+		└── README.md                   # 介绍创建的项目，可参照github上star多的项目
+ - 部署项目
+	$ npm run build ## 会在项目的dist目录下生成html文件, 使用这个静态文件部署即可
+	// 比如使用python快速搭建一个http静态站点，如果是nginx copy到 对应的Doc Root位置
+	$ cd dist
+	$ python3 -m http.server
+
+3、MVVM
+ - MVVM模型
+	- M  (Model，模型层): 模型层，主要负责业务数据相关，对应vue中的 data部分
+	- V  (View，视图层) : 视图层，顾名思义，负责视图相关，细分下来就是html+css层，对应于vue中的模版部分
+	- VM (ViewModel, 控制器): V与M沟通的桥梁，负责监听M或者V的修改，是实现MVVM双向绑定的要点，对应vue中双向绑定
+ - Web技术的历史
+	- CGI时代
+	- 后端模版时代
+		- ASP: 微软，C#体系
+		- JSP: SUN，Java体系
+		- PHP: 开源社区
+	- JavaScript原生时代
+	- 前端模版时代
+		- ViewModel动态完成渲染
+	- 虚拟DOM技术
+	- 组件化时代
+		- MVVM最早由微软提出来，它借鉴了桌面应用程序的MVC思想，在前端页面中，把Model用纯JavaScript对象表示，View负责显示，两者做到了最大限度的分离
+		- 结合虚拟Dom技术，就可以动态生成view，在集合mvvm的思想，前端终于迎来了组件化时代
+			- 页面由多个组建构成
+			- 每个组件都有自己的 MVVM
+	
+4、Vue与MVVM
+	- Model: vue中用于标识model的数据是 data对象，data 对象中的所有的 property 加入到 vue 的响应式系统中，由Vue监听变化  // Data
+	- View:  vue使用模版来实现展示，但是渲染时要结合 vdom技术	                                                         // Html、Css 
+	- ViewModle: vue的核心，负责视图的响应，也就是数据双向绑定
+		- 监听view中的数据，如果数据有变化，动态同步到 data中
+		- 监听data中的数据，如果数据有变化，通过vdom动态渲视图
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
