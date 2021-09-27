@@ -32,7 +32,6 @@
 	body
 	h1
 	p
-	a
  - Html元素
 	- Html元素指一个具体的标签实例，下面有2个Html元素，都是h标签
 		<h1>这是一个标题</h1>
@@ -1210,12 +1209,551 @@
 		- 监听view中的数据，如果数据有变化，动态同步到 data中
 		- 监听data中的数据，如果数据有变化，通过vdom动态渲视图
 
+5、Vue实例
+ - Vue实例源码
+	export interface Vue {
+		// 生产的HTML元素
+		readonly $el: Element; 
+		// 实例的一些配置, 比如components, directives, filters ...
+		readonly $options: ComponentOptions<Vue>;
+		// 父Vue实例 
+		readonly $parent: Vue;
+		// Root Vue实例
+		readonly $root: Vue;
+		// 该vue实例的子vue实例，一般为 子组建
+		readonly $children: Vue[];
+		// 元素refs, 当元素有refs属性时才能获取
+		readonly $refs: { [key: string]: Vue | Element | (Vue | Element)[] | undefined };
+		// 插槽, 模版插槽
+		readonly $slots: { [key: string]: VNode[] | undefined };
+		readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
+		readonly $isServer: boolean;
+		// Model对应的数据
+		readonly $data: Record<string, any>;
+		// 实例props, 用于组件见消息传递
+		readonly $props: Record<string, any>;
+		readonly $ssrContext: any;
+		// 虚拟node
+		readonly $vnode: VNode;
+		readonly $attrs: Record<string, string>;
+		readonly $listeners: Record<string, Function | Function[]>;
+		// 实例挂在到具体的HTML上
+		$mount(elementOrSelector?: Element | string, hydrating?: boolean): this;
+		// 强制刷新渲染, 收到刷新界面, 当有些情况下 界面没响应时
+		$forceUpdate(): void;
+		// 销毁实例
+		$destroy(): void;
+		$set: typeof Vue.set;
+		$delete: typeof Vue.delete;
+		// watch对象变化
+		$watch(
+			expOrFn: string,
+			callback: (this: this, n: any, o: any) => void,
+			options?: WatchOptions
+		): (() => void);
+		$watch<T>(
+			expOrFn: (this: this) => T,
+			callback: (this: this, n: T, o: T) => void,
+			options?: WatchOptions
+		): (() => void);
+		$on(event: string | string[], callback: Function): this;
+		$once(event: string | string[], callback: Function): this;
+		$off(event?: string | string[], callback?: Function): this;
+		// 触发事件
+		$emit(event: string, ...args: any[]): this;
+		// Dom更新完成后调用
+		$nextTick(callback: (this: this) => void): void;
+		$nextTick(): Promise<void>;
+		$createElement: CreateElement;
+	}
+ - Vue实例的构造函数
+	- Data: Model
+	- Methods: 方法
+	- Computed: 计算属性
+	- Props: 类似于一个自定义 attribute
+		new <Data = object, Methods = object, Computed = object, Props = object>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>;
 
+6、Vue实例生命周期
+ - 生命周期
+	https://gitee.com/infraboard/go-course/blob/master/day16/images/lifecycle.png
+ - 定义的函数钩子
+	beforeCreate()
+	created()
+	beforeMount()
+	mounted()
+	beforeUpdate()
+	updated()
+	beforeDestroy()
+	destroyed()
 
+7、模板语法
+1)、模板定义
+ - 通过template标签定义的部分都是vue的模版
+	- 模版会被vue-template-compiler编译后渲染
+		<template>
+		  ...
+		</template>
 
+2)、文本值
+ - 当需要访问Model时，比如 data 这个Object
+	- 直接使用 {{ attr }} 就可以访问
+	- vue会根据属性是否变化，而动态渲染模版
+		<template>
+		<div>{{ name }}</div>              // data中的 name属性
+		</template>
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  data() {
+		    return {
+		      name: 'This is first Web.'
+		    }
+		  }
+		}
+		</script>
 
+3)、元素属性
+ - 变量不能作用在 HTML attribute 上
+	- 示例一  语法错误
+		<template>
+		  <div id={{ name }}>{{ name }}</div>
+		</template>
+	- 示例二
+		- buttom有个disabled属性，用于控制当前按钮是否可以点击
+		<template>
+		  <button disabled="true">Button</button>
+		</template>
+ - 针对HTML元素的属性 vue专门提供一个 v-bind指令，这个指令就是模版引擎里面的一个函数，作用是完成HTML属性变量替换
+	- v-bind:disabled="attr"   ==>  disabled="data.attr"
+		<template>
+		  <button v-bind:disabled="isButtomDisabled">Button</button>
+		</template>
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  data() {
+		    return {
+		      name: 'This is first Web.',
+		      isButtomDisabled: false,
+		    }
+		  }
+		}
+		</script>
+	- v-binding 缩写 `:`
+		<template>
+		  <button :disabled="isButtomDisabled">Button</button>
+		</template>
 
+4)、元素事件
+ - 给buttom元素绑定一个事件
+	- HTML 原生语法  https://www.runoob.com/tags/ref-eventattributes.html
+		<button onclick="copyText()">复制文本</button>
+ - 对于vue的模版系统来说，copyText这个函数如何渲染，他不是一个文本，而是一个函数
+	- vue针对事件专门定义了一个指令: v-on
+		v-on:eventName="eventHandler"
+		eventName: 事件的名称
+		eventHandler: 处理这个事件的函数
+	- data 是定义Model的地方，vue专门给一个属性用于定义方法: methods
+		<template>
+		  <button :disabled="isButtomDisabled" v-on:click="clickButtom" >Button</button>
+		</template>
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  data() {
+		    return {
+			  name: 'This is first Web.',
+			  isButtomDisabled: false,
+		    }
+		  },
+		  methods: {
+		    clickButtom() {
+		      alert("别点我")  
+		    }
+		  }
+		}
+		</script>
+	- v-on 缩写 `@`
+		<template>
+		  <button :disabled="isButtomDisabled" @click="clickButtom" >Button</button>
+		</template>
 
+4)、Vue指令
+ - 指令类型
+	v-model: 双向绑定的数据
+	v-bind: html元素属性绑定
+	v-on: html元素事件绑定
+	v-if: if 渲染
+	v-show: 控制是否显示
+	v-for: for 循环
+ - 指令
+	- 语法
+		v-directive:argument.modifier.modifier...
+	- v-directive: 表示指令名称，如v-on
+	- argument： 表示指令的参数，比如click
+	- modifier:  修饰符，用于指出一个指令应该以特殊方式绑定
+	- 示例 当用户按下回车时，表示用户输入完成，触发搜索
+		v-directive: 需要使用绑定事件的指令: v-on
+		argument:    监听键盘事件: keyup，按键弹起时
+		modifier:    监听Enter建弹起时
+		完整语法:    v-on:keyup.enter
+			<template>
+			  <input v-model="name" type="text" @keyup.enter="pressEnter">
+			</template>
+			<script>
+			export default {
+			  name: 'HelloWorld',
+				data() {
+				return {
+				  name: 'This is first Web.',
+				  isButtomDisabled: false,
+				}
+			  },
+			  methods: {
+			    clickButtom() {
+			      alert("别点我")  
+			    },
+			    pressEnter() {
+			 	  alert("点击了回车键")
+			    }
+			  },
+			}
+			</script>
+	- 需要注意事件的指令的函数是可以接受参数的
+		<template>
+		  <input v-model="name" type="text" @keyup.enter="pressEnter(name)">
+		  <button v-on:click="say('hi')">Say hi</button>
+		</template>
+	- 函数是直接读到model数据的，不能使用{{ }}，如果要传字符串 使用''
+	- 修饰符还有很多其他用法，具体的请看官方文档
+		<!-- 即使 Alt 或 Shift 被一同按下时也会触发 -->
+		<button v-on:click.ctrl="onClick">A</button>
+		
+		<!-- 有且只有 Ctrl 被按下的时候才触发 -->
+		<button v-on:click.ctrl.exact="onCtrlClick">A</button>
+		
+		<!-- 没有任何系统修饰符被按下的时候才触发 -->
+		<button v-on:click.exact="onClick">A</button>
+
+5)、JavaScript 表达式
+	- 模版支持JavaScript的表达式, 可以在显示的动态的做一些处理
+		<template>
+		  <div>{{ name.split('').reverse().join('') }}</div>
+		</template>
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  data() {
+		    return {
+		      name: 'This is first Web.'
+		    }
+		  }
+		}
+		</script>
+
+6)、条件渲染
+ - 有2个指令用于在模版中控制条件渲染
+	v-if: 控制元素是否创建，创建开销较大
+	v-show: 控制元素是否显示，对象无效销毁，开销较小
+ - v-if 语法
+	<t v-if="" /> 
+	<t v-else-if="" /> 
+	<t v-else="" /> 
+ - v-show 语法
+	<t v-show="" />
+ - 示例 根据用户输入，判断当前分数的等级
+	<input v-model="name" type="text" @keyup.enter="pressEnter(name)">
+	<div v-if="name >= 90">
+	  A
+	</div>
+	<div v-else-if="name >= 80">
+	  B
+	</div>
+	<div v-else-if="name >= 60">
+	  C
+	</div>
+	<div v-else-if="name >= 0">
+	  D
+	</div>
+	<div v-else>
+	  请输入正确的分数
+	</div>
+	// 使用 v-show
+	<input v-model="name" type="text" @keyup.enter="pressEnter(name)">
+	<div v-show="name >= 90">
+	  A
+	</div>
+	<div v-show="name >= 80 && name < 90">
+	  B
+	</div>
+	<div v-show="name >= 60 && name < 80">
+	  C
+	</div>
+	<div v-show="name >= 0 && name < 60">
+	  D
+	</div>
+	- 一般来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销
+	- 因此，如果需要非常频繁地切换，则使用 v-show 较好
+	- 如果在运行时条件很少改变，则使用 v-if 较好
+
+7)、列表渲染
+ - v-for元素的列表渲染
+	<t v-for="(item, index) in items" :key="item.message">
+	  {{ item.message }}
+	</t>
+	<!-- items: [
+	  { message: 'Foo' },
+	  { message: 'Bar' }
+	] -->
+ - 也可以省略 index
+	<ul>
+	  <li v-for="item in items" :key="item.message">
+	    {{ item.message }}
+	  </li>
+	</ul>
+	<script>
+	export default {
+	  name: 'HelloWorld',
+	  data() {
+	    return {
+	    items: [
+		  { message: 'Foo' },
+		  { message: 'Bar' }
+	    ]
+	    }
+	  },
+	}
+	</script>
+ - v-for 除了可以遍历列表，可以遍历对象，比如嵌套2层循环，先遍历列表，再遍历对象
+	<ul>
+	  <li v-for="(item, index) in items" :key="item.message">
+	    {{ item.message }} - {{ index}}
+	    <br>
+	    <span v-for="(value, key) in item" :key="key"> {{ value }} {{ key }} <br></span>
+	  </li>
+	</ul>
+	<script>
+	export default {
+	  name: 'HelloWorld',
+	  data() {
+	    return {
+	      items: [
+	        { message: 'Foo', level: 'info' },
+	        { message: 'Bar', level: 'error'}
+	      ]
+	    }
+	  }
+	}
+	</script>
+ - 可以在console界面里进行数据修改测试
+	$vm._data.items.push({message: "num4", level: "pannic"})
+	$vm._data.items.pop()
+ - 不推荐在同一元素上使用 v-if 和 v-for，请另外单独再起一个元素进行条件判断
+		<li v-for="todo in todos" v-if="!todo.isComplete">
+		{{ todo }}
+		</li>
+	- 请改写成下面方式:
+		<ul v-if="todos.length">
+		  <li v-for="todo in todos">
+		    {{ todo }}
+		  </li>
+		</ul>
+		<p v-else>No todos left!</p>
+
+8、计算属性
+ - 如果model的数据并不是要直接渲染的，需要处理再展示，简单的方法是使用表达式
+	- 示例
+		<h2>{{ name.split('').reverse().join('') }}</h2>
+	- 这种把数据处理逻辑嵌入的视图中，并不合适，不易于维护，可以把改成一个方法	
+		<h2>{{ reverseData(name) }}</h2>
+		<script>
+		  methods: {
+		    reverseData(data) {
+		      return data.split('').reverse().join('')
+		    }
+		  }
+		</script>
+	- 除了函数，vue还提供了一个计算属性，这样视图可以看起来更干净
+		computed: {
+		  attrName: {
+		    get() {
+		      return value
+		    },
+		    set(value) {
+		    // set value
+		    }
+		  }
+		}
+	- 修改为计算属性
+		<h2>{{ reverseName }}</h2>
+		<script>
+		export default {
+		  computed: {
+		    reverseName: {
+		      get() {
+		        return this.name.split('').reverse().join('')
+		      },
+		      set(value) {
+		        this.name = this.name = value.split('').reverse().join('')
+		      }
+		    }
+		  },
+		}
+		</script>
+
+9、侦听器
+ - 一个页面有多个参数，用户可能把url copy给别人，需要不同的url看到页面内容不同，不然用户每次到这个页面都是第一个页面
+	- 这个就需要监听url参数的变化，然后视图做调整，vue-router会有个全局属性: $route 可以监听它的变化
+ - window本身提供一个事件回调
+	window.onhashchange = function () {
+	  console.log('URL发生变化了', window.location.hash);
+	  this.urlHash = window.location.hash
+	};
+ - vue 提供的属性watch
+	watch: {
+	  // 如果 `urlHash` 发生改变，这个函数就会运行
+	  urlHash: function (newData, oldData) {
+	    this.debouncedGetAnswer()
+	  }
+	},
+ - 先监听变化，挂载后修改vue对象，然后watch
+	<script>
+	export default {
+	  name: 'HelloWorld',
+	  data() {
+	    return {
+	      urlHash: '',
+	    }
+	  },
+	  mounted() {
+	    /* 来个骚操作 */
+	    let that = this
+	    window.onhashchange = function () {
+	      that.urlHash = window.location.hash
+	    };
+	  },
+	  watch: {
+	    urlHash: function(newURL, oldURL) {
+	      console.log(newURL, oldURL)
+	    }
+	  }
+	}
+	</script>
+ - Vue Watch API  
+	https://cn.vuejs.org/v2/api/#vm-watch
+
+10、过滤器
+ - Vue.js 允许自定义过滤器，可被用于一些常见的文本格式化，最常见的是 时间的格式化
+	- 过滤器语法
+		<!-- 在双花括号中 -->
+		{{ message | capitalize }}
+	- 可以将其等价于一个函数: capitalize(message)
+	- 在当前组件的vue实例上定义一个过滤器
+		filters: {
+		  capitalize: function (value) {
+		    /*过滤逻辑*/
+		  }
+		}
+ - 定义 parseTime过滤器
+	{{ ts | parseTime }}
+	<script>
+	export default {
+	  name: 'HelloWorld',
+	  data() {
+	    return {
+	      ts: Date.now()
+	    }
+	  },
+	  filters: {
+	    parseTime: function (value) {
+	      let date = new Date(value)
+	      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`
+	    }
+	  }
+	}
+	</script>
+ - vue提供全局过滤器，再初始化vue实例的时候可以配置，找到main.js添加
+	// 添加全局过滤器
+	Vue.filter('parseTime', function (value) {
+	  let date = new Date(value)
+	  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`
+	})
+
+11、自定义指令
+ - 除了核心功能默认内置的指令 (v-model 和 v-show)，Vue 也允许注册自定义指令
+	- 比如用户进入页面让输入框自动聚焦，方便快速输入
+	- 比如登陆页面，快速聚焦到 username输入框
+	- 如果是HTML元素聚焦，找到元素，调用focus
+		let inputE = document.getElementsByTagName('input')
+		inputE[0].focus()
+	- 添加到mounted中进行测试
+		mounted() {
+		  let inputE = document.getElementsByTagName('input')
+		  inputE[0].focus()
+		}
+    - 将这个功能做成一个vue的指令，比如 v-focus
+		- 先注册一个局部指令，在本组件中使用
+			<script>
+			export default {
+			  name: 'HelloWorld',
+			  directives: {
+			    focus: {
+			      // 指令的定义
+			      inserted: function (el) {
+			        el.focus()
+				  }
+				}
+			  },
+			}
+			</script>
+		- 这里注册的指令名字叫focus，所有的指令在模版要加一个v前缀，因此注册的指令就是v-focus
+			<input v-focus v-model="name" type="text" @keyup.enter="pressEnter(name)">
+			// 注册一个全局自定义指令 `v-focus`
+			Vue.directive('focus', {
+			  // 当被绑定的元素插入到 DOM 中时……
+			  inserted: function (el) {
+			    // 聚焦元素
+			    el.focus()
+			  }
+			})
+
+12、组件
+
+13、插件
+ - 插件通常用来为 Vue 添加全局功能
+ - 插件的功能范围没有严格的限制，一般有下面几种
+	- 添加全局方法或者 property，如：vue-custom-element
+	- 添加全局资源：指令/过滤器/过渡等，如 vue-touch
+	- 通过全局混入来添加一些组件选项，如 vue-router
+	- 添加 Vue 实例方法，通过把它们添加到 Vue.prototype 上实现
+	- 一个库，提供自己的 API，同时提供上面提到的一个或多个功能，如 vue-router
+ - 示例 element-ui 插件
+	import ElementUI from "element-ui"
+	import "element-ui/lib/theme-chalk/index.css"
+	Vue.use(ElementUI)
+	// 组件
+	import Vue, { PluginObject } from 'vue'
+	import { ElementUIComponent, ElementUIComponentSize, ElementUIHorizontalAlignment } from './component'
+	import { ElAlert } from './alert'
+	import { ElAside } from './aside'
+	import { ElAutocomplete } from './autocomplete'
+	import { ElBadge } from './badge'
+	import { ElBreadcrumb } from './breadcrumb'
+	import { ElBreadcrumbItem } from './breadcrumb-item'
+	import { ElButton } from './button'
+	// 这些element的组件都被注册到vue里面
+	import Vue from 'vue'
+	/** ElementUI component common definition */
+	export declare class ElementUIComponent extends Vue {
+	  /** Install component into Vue */
+	  static install (vue: typeof Vue): void
+	}
+
+14、参考
+ - VUE2官方文档                   https://cn.vuejs.org/v2/guide/
+ - 那些前端MVVM框架是如何诞生的   https://zhuanlan.zhihu.com/p/36453279
+ - MVVM设计模式                   https://zhuanlan.zhihu.com/p/36141662 
+ - vue核心之虚拟DOM(vdom)         https://www.jianshu.com/p/af0b398602bc
 
 
 

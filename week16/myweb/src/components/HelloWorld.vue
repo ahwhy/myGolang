@@ -1,8 +1,32 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <h2>{{ name }}</h2>
-    <input v-model="name" type="text">
+    <h2>{{ reverseName }}</h2>
+    <input v-model="name" type="text" @keyup.enter="pressEnter(name)">
+    <button :disabled="isButtomDisable" @click="clickButtom">你点呀</button>
+    <br>
+    <div v-if="name >= 90">
+      A
+    </div>
+    <div v-else-if="name >= 80">
+      B
+    </div>
+    <div v-else-if="name >= 60">
+      C
+    </div>
+    <div v-else-if="name >= 0">
+      D
+    </div>
+    <div v-else>
+      请输入正确的分数
+    </div>
+    <ul>
+      <li v-for="(item, index) in items" :key="item.message">
+        {{ item.message }} - {{ index}}
+        <br>
+        <span v-for="(value, key) in item" :key="key"> {{ value }} {{ key }} <br></span>
+      </li>
+    </ul>
     <p>
       For a guide and recipes on how to configure / customize this project,<br>
       check out the
@@ -37,7 +61,54 @@ export default {
   name: 'HelloWorld',
   data() {
     return {
-    name: 'This is first Web.'
+    name: 'This is first Web.',
+    isButtomDisabled: false,
+    items:[
+      { message: 'Foo' },
+      { message: 'Bar' }
+    ]
+    }
+  },
+  methods: {
+    pressEnter() {
+      alert("别敲回车键呀")
+    },
+    clickButtom() {
+      alert("别点我")
+    }
+  },
+  beforeCreate() {
+    console.log('beforeCreate')
+  },
+  created() {
+    console.log('created')
+  },
+  beforeMount() {
+    console.log('beforeMount')
+  },
+  mounted() {
+    console.log('mounted')
+  },
+  beforeUpdate() {
+    console.log('beforeUpdate')
+  },
+  updated() {
+    console.log('updated')
+  },
+  beforeDestroy() {
+    console.log('beforeDestroy')
+  },
+  destroyed() {
+    console.log('destroyed')
+  },
+  computed: {
+    reverseName: {
+      get() {
+        return this.name.split('').reverse().join('')
+      },
+      set(value){
+        this.name = this.name = value.split('').reverse().join('')
+      }
     }
   },
   props: {
@@ -60,6 +131,6 @@ li {
   margin: 0 20px;
 }
 a {
-  color: #f70b0b3a;
+  color: #fd0000;
 }
 </style>
