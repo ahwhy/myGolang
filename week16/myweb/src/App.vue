@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <!--  <- <HelloWorld :msg="message"/>  --> 
+    <hello-world v-model="message" :msg="message" />
   </div>
 </template>
 
@@ -10,8 +11,25 @@ import HelloWorld from './components/HelloWorld.vue'
 
 export default {
   name: 'App',
+  data() {
+    return {
+      message: "Welcome to Your Vue.js App",
+      urlHash: '',
+    }
+  },
   components: {
     HelloWorld
+  },
+  mounted() {
+    let that = this
+    window.onhashchange = function () {
+      that.urlHash = window.location.hash
+    };
+  },
+  watch: {
+    urlHash: function(newURL, oldURL) {
+      console.log(newURL, oldURL)
+    }
   }
 }
 </script>

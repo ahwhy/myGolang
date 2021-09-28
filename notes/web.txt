@@ -1306,7 +1306,7 @@
 		  name: 'HelloWorld',
 		  data() {
 		    return {
-		      name: 'This is first Web.'
+		      name: '老喻'
 		    }
 		  }
 		}
@@ -1333,7 +1333,7 @@
 		  name: 'HelloWorld',
 		  data() {
 		    return {
-		      name: 'This is first Web.',
+		      name: '老喻',
 		      isButtomDisabled: false,
 		    }
 		  }
@@ -1362,7 +1362,7 @@
 		  name: 'HelloWorld',
 		  data() {
 		    return {
-			  name: 'This is first Web.',
+			  name: '老喻',
 			  isButtomDisabled: false,
 		    }
 		  },
@@ -1405,7 +1405,7 @@
 			  name: 'HelloWorld',
 				data() {
 				return {
-				  name: 'This is first Web.',
+				  name: '老喻',
 				  isButtomDisabled: false,
 				}
 			  },
@@ -1445,7 +1445,7 @@
 		  name: 'HelloWorld',
 		  data() {
 		    return {
-		      name: 'This is first Web.'
+		      name: '老喻'
 		    }
 		  }
 		}
@@ -1718,6 +1718,116 @@
 			})
 
 12、组件
+1)、组件的介绍
+ - 组件是可复用的 Vue 实例，所以它们与 new Vue 接收相同的选项，例如 data、computed、watch、methods 以及生命周期钩子等，仅有的例外是像 el 这样根实例特有的选项
+	- export default语法，ES6的模块语法
+	- 每个vue组件，只能有1个根元素，所以不能在模版里面写2个并排的div
+	- 组件的命名风格是首字母大写，导出名字最好和文件名称相同，方便阅读
+	- 局部组件必须放到实例的components属性里面，代表这个组件注册到了该实例，只有注册后的组件才能使用
+	- 组件的使用方式和HTML标签一样，可以认为是自定义的HTML标签，应该遵循html标签规范，小写加-链接，比如hello-world
+		<template>
+		  <div id="app">
+		    <img alt="Vue logo" src="./assets/logo.png">
+		    <hello-world msg="Welcome to Your Vue.js App"/>
+		    <hello-world msg="component2"/>
+		  </div>
+		</template>
+2)、向子组件传递数据
+ - props就是用于传递数据的变量，使用Prop 可以在组件上注册的一些自定义 attribute，父组件通过绑定数据来传递消息给子组件
+ - 子组件
+	<script>
+	export default {
+	  name: 'HelloWorld',
+	  props: {
+	    msg: String
+	  }
+	}
+	</script>
+ - 父组件
+	<template>
+	  <div id="app">
+	    <img alt="Vue logo" src="./assets/logo.png">
+	    <hello-world :msg="msg1"/>
+	  </div>
+	</template>
+	<script>
+	import HelloWorld from './components/HelloWorld.vue'
+	export default {
+	name: 'App',
+	  data() {
+	    return {
+	      msg1: 'Welcome to Your Vue.js App'
+	    }
+	  },
+	  components: {
+	    HelloWorld
+	  }
+	}
+	</script>
+3)、向父组件传递数据
+ - 需要条件	 
+	- 子组件使用$emit发送事件，事件名称: changeMsg
+	- 父组件使用v-on 订阅子组件的事件
+ - 具体步骤
+	- 修改子组建，重新绑定一个属性: tmpMsg，等点击回车时发生事件给父组件
+		<input v-model="tmpMsg" type="text" @keyup.enter="changeProps(tmpMsg)">
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  data() {
+		    return {
+		      tmpMsg: '',
+		    }
+		  },
+		  methods: {
+		    changeProps(msg) {
+		      this.$emit('changeMsg', msg)
+		    }
+		  },
+		  props: {
+		    msg: String
+		  }
+		}
+		</script>
+	- 父组件修改
+		<hello-world :msg="msg1" @changeMsg="msgChanged" />
+		<script>
+		import HelloWorld from './components/HelloWorld.vue'
+		export default {
+		  name: 'App',
+		  data() {
+		    return {
+		      msg1: 'Welcome to Your Vue.js App'
+		    }
+		  },
+		  methods: {
+		    msgChanged(event) {
+		      this.msg1 = event
+		    }
+		  },
+		  components: {
+		    HelloWorld
+		  }
+		}
+		</script>
+4)、使用 v-model 实现
+ - 上述使用 v-bind 和 v-on 完成了数据的双向绑定
+	- 但其实就是 v-model
+		v-model <==>  v-bind:value + v-on:input
+	- 将其 value attribute 绑定到一个名叫 value 的 prop 上 在其 input 事件被触发时，将新的值通过自定义的 input 事件抛出
+ - 使用 v-model
+	- 父组件使用 v-model进行值的双向传递
+		<hello-world v-model="msg1" />
+	- 子组件绑定value属性和抛出input事件
+		<input :value="value" type="text" @input="$emit('input', $event.target.value)">
+		<script>
+		export default {
+		  name: 'HelloWorld',
+		  props: {
+		    value: String,
+		  }
+		}
+		</script>
 
 13、插件
  - 插件通常用来为 Vue 添加全局功能
@@ -1749,7 +1859,370 @@
 	  static install (vue: typeof Vue): void
 	}
 
-14、参考
+14、Vue路由
+1)、页面路由
+ - 当前的vue配置
+	// Root Vue实例
+	new Vue({
+	  render: h => h(App),
+	}).$mount('#app')
+
+2)、简单路由
+ - window.location.pathname
+	- 为每个path，定义一个组件，就实现了一个简单的路由
+		// Root Vue实例
+		// 添加currentRoute数据 和 浏览器的path绑定
+		// 根据path 返回对应组件
+		new Vue({
+		  data: {
+		    currentRoute: window.location.pathname
+		  },
+		  render(h) {
+		    if (this.currentRoute === '/index') {
+		      return h(App2)
+		    }
+		    return h(App)
+		  },
+		}).$mount('#app')
+	- 官方示例
+		https://cn.vuejs.org/v2/guide/routing.html
+ - vue-router
+	- Vue Router 是 Vue.js (opens new window)官方的路由管理器
+		- 它和 Vue.js 的核心深度集成，让构建单页面应用变得易如反掌
+		- 包含的功能
+			- 套的路由/视图表
+			- 块化的、基于组件的路由配置
+			- 由参数、查询、通配符
+			- 于 Vue.js 过渡系统的视图过渡效果
+			- 粒度的导航控制
+			- 有自动激活的 CSS class 的链接
+			- TML5 历史模式或 hash 模式，在 IE9 中自动降级
+			- 定义的滚动条行为
+	- 安装vue-router
+		- 使用npm
+			- $ npm install vue-router
+			- vue-router是vue的插件，按照插件的方式引入到vue中
+				import Vue from 'vue'
+				import VueRouter from 'vue-router'
+				Vue.use(VueRouter)
+		- 使用vue-cil
+			- $ vue add router
+	- 基本使用
+		- 添加一个页面: Test.vue
+			<template>
+			  <div class="about">
+			    <h1>This is an test page</h1>
+			  </div>
+			</template>
+		- 补充到路由 ./router/index.js
+			const routes = [
+			  {
+			    path: '/test',
+			    name: 'Test',
+			    // route level code-splitting
+			    // this generates a separate chunk (about.[hash].js) for this route
+			    // which is lazy-loaded when the route is visited.
+			    component: () => import(/* webpackChunkName: "about" */ '../views/Test.vue')
+			  }
+			  ]
+		- 在界面上添加一个跳转
+			<div id="nav">
+			  <router-link to="/">Home</router-link> |
+			  <router-link to="/about">About</router-link> |
+			  <router-link to="/test">Test</router-link>
+			</div>
+	- 编程式的导航
+		- router-link 组件是需要用户点击生效，如果需要动态加载，或者跳转前检查用户的权限，这个时候再使用router-link就不合适了
+			- window.history 和 location 可以模拟用户操作浏览器
+				location.assign('/')
+				location.reload()
+				history.back()
+				history.forward()
+			- vue-router 提供了一个函数用于js来控制路由那就是 push 功能和location.assign类似
+				vm.router
+				router.push(location, onComplete?, onAbort?)
+				// location    location参数 等价于 <router-link :to="...">, 比如<router-link :to="/home">  等价于 router.push('/home')
+				// onComplete  完成后的回调
+				// onAbort     取消后的回调
+			- 使用a标签
+				<div id="nav">
+				  <a @click="jumpToHome">Home</a> |
+				  <a @click="jumpToAbout">About</a> |
+				  <a @click="jumpToTest">Test</a>
+				</div>
+				<script>
+				export default {
+				  name: 'App',
+				  data() {
+				    return {
+				    }
+				  },
+				  methods: {
+				    jumpToHome() {
+				      this.$router.push('/')
+				    },
+				    jumpToAbout() {
+				      this.$router.push('/about')
+				    },
+				    jumpToTest() {
+				 	  this.$router.push('/test')
+				    }
+				  },
+				}
+				</script>
+	- 动态路由匹配
+		- 前后端路由的区别
+			后端:  path --->   handler
+			前端:  path --->   view
+		- 后端demo里面的http-router路由
+			r.GET("/hosts", api.QueryHost)
+			r.POST("/hosts", api.CreateHost)
+			r.GET("/hosts/:id", api.DescribeHost)
+			r.DELETE("/hosts/:id", api.DeleteHost)
+			r.PUT("/hosts/:id", api.PutHost)
+			r.PATCH("/hosts/:id", api.PatchHost)
+		- 前端vue-router的路由
+			模式                            匹配路径              $route.params
+			/user/:username                 /user/evan            { username: 'evan' }
+			/user/:username/post/:post_id   /user/evan/post/123   { username: 'evan', post_id: '123' }
+		- 修改./router/index.js
+			{
+			  path: '/test/:id',
+			  name: 'Test',
+			  // route level code-splitting
+			  // this generates a separate chunk (about.[hash].js) for this route
+			  // which is lazy-loaded when the route is visited.
+			  component: () => import(/* webpackChunkName: "about" */ '../views/Test.vue')
+			}
+	- 404处理
+		- 如果找不页面，需要返回一个视图，告诉用户页面不存在
+		- vue-router在处理404的方式和后端不同，路由依次匹配
+			- 如果都匹配不上，写一个特殊的*路由作为 404路由
+				{
+				  path: '*',
+				  name: '404',
+				  // route level code-splitting
+				  // this generates a separate chunk (about.[hash].js) for this route
+				  // which is lazy-loaded when the route is visited.
+				  component: () => import(/* webpackChunkName: "about" */ '../views/404.vue')
+				}
+	- 加载数据
+		- 制作一个详情页面，根据不同的id，向后端获取不同的对象，用于显示
+			- 请求id对应的后端数据，通过axios
+				$ npm install --save axios  // axios@0.21.4
+			- 需要将ajax封装下，添加一些通用逻辑，模块位于 utils/request.js
+				import axios from 'axios'
+				// create an axios instance
+				const service = axios.create({
+				    baseURL: 'http://localhost:8050', // url = base url + request url
+				    // withCredentials: true, // send cookies when cross-domain requests
+				    timeout: 5000 // request timeout
+				})
+				// request interceptor
+				service.interceptors.request.use(
+				    config => {
+				      return config
+				    },
+				    error => {
+				      // do something with request error
+				      console.log(error) // for debug
+				      return Promise.reject(error)
+				    }
+				)
+				// response interceptor
+				service.interceptors.response.use(
+				    /**
+				    * If you want to get http information such as headers or status
+				    * Please return  response => response
+				    */
+				    
+				    /**
+				    * Determine the request status by custom code
+				    * Here is just an example
+				    * You can also judge the status by HTTP Status Code
+				    */
+				    response => {
+				      const res = response.data
+				      // if the custom code is not 20000, it is judged as an error.
+				      if (res.code !== 0) {
+				  	    // 比如 token过期
+				      } else {
+				  	    // 正常
+				  	    return res
+				      }
+				    },
+				    error => {
+				      console.log('err' + error) // for debug
+				      // 传递出去
+				      return Promise.reject(error)
+				    }
+				)
+				export default service
+			- 新增一个api目录用于存放所有的API请求，在里面新建一个模块: test.js
+				import request from '../utils/request'
+				export function GET_TEST_DATA(id, query) {
+				  return request({
+				    url: `/hosts/${id}`,
+				    method: 'get',
+				    params: query
+				  })
+				}
+			- 最后在视图中使用: Test.vue
+				- 关于选择在什么时候加载数据，通常有2种方案
+					- 导航完成之后获取: 先完成导航，然后在接下来的组件生命周期钩子中获取数据，在数据获取期间显示"加载中"之类的指示
+					- 导航完成之前获取: 导航完成前，在路由进入的守卫中获取数据，在数据获取成功后执行导航
+				- 方案一
+					<script>
+					import { GET_TEST_DATA } from '../api/test'
+					export default {
+					  name: 'Test',
+					  data () {
+					    return {
+					      loading: false,
+					      post: null,
+					      error: null
+					    }
+					  },
+					  created () {
+					    // 组件创建完后获取数据，
+					    // 此时 data 已经被 observed 了
+					    this.fetchData()
+					  },
+					  watch: {
+					    // 如果路由有变化，会再次执行该方法
+					    '$route': 'fetchData'
+					  },
+					  methods: {
+					    async fetchData () {
+					      this.error = this.post = null
+					      this.loading = true
+					      // replace GET_TEST_DATA with your data fetching util / API wrapper
+					      try {
+					        this.loading = true
+					        let resp = await GET_TEST_DATA(this.$route.params.id)
+					        this.post = resp.data
+					      } catch (err) {
+					        this.error = err.toString()
+					      } finally {
+					        this.loading = false
+					      }
+						}
+					  }
+					}
+					</script>
+				- 方案二
+					- 在router的钩子中获取数据
+						beforeRouteEnter: 进入路由前
+						beforeRouteUpdate: 路由update前
+					- https://router.vuejs.org/zh/guide/advanced/data-fetching.html#%E5%9C%A8%E5%AF%BC%E8%88%AA%E5%AE%8C%E6%88%90%E5%89%8D%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE
+	- Router对象
+		- VueRouter源码
+			export declare class VueRouter {
+			  constructor(options?: RouterOptions)
+			  
+			  app: Vue
+			  options: RouterOptions
+			  mode: RouterMode
+			  currentRoute: Route
+			  
+			  beforeEach(guard: NavigationGuard): Function
+			  beforeResolve(guard: NavigationGuard): Function
+			  afterEach(hook: (to: Route, from: Route) => any): Function
+			  push(location: RawLocation): Promise<Route>
+			  replace(location: RawLocation): Promise<Route>
+			  push(
+			    location: RawLocation,
+			    onComplete?: Function,
+			    onAbort?: ErrorHandler
+			  ): void
+			  replace(
+			    location: RawLocation,
+			    onComplete?: Function,
+			    onAbort?: ErrorHandler
+			  ): void
+			  go(n: number): void
+			  back(): void
+			  forward(): void
+			  match (raw: RawLocation, current?: Route, redirectedFrom?: Location): Route
+			  getMatchedComponents(to?: RawLocation | Route): Component[]
+			  onReady(cb: Function, errorCb?: ErrorHandler): void
+			  onError(cb: ErrorHandler): void
+			  addRoutes(routes: RouteConfig[]): void
+			  
+			  addRoute(parent: string, route: RouteConfig): void
+			  addRoute(route: RouteConfig): void
+			  getRoutes(): RouteRecordPublic[]
+			  
+			  resolve(
+			    to: RawLocation,
+			    current?: Route,
+			    append?: boolean
+			  ): {
+			  location: Location
+			  route: Route
+			  href: string
+			  // backwards compat
+			  normalizedTo: Location
+			    resolved: Route
+			  }
+			}
+	- Router钩子
+		- 在路由前后做一些额外的处理，可以通过路由留得钩子
+		- 最常见的使用钩子的地方是认证，在访问页面的时候，判断用户是否有权限访问
+		- router为提供了如下钩子
+			beforeEach: 路由前处理
+			beforeEnter
+			beforeRouteEnter
+			beforeRouteUpdate
+			beforeRouteLeave
+			afterEach: 路由后出来
+		- 示例 设置钩子函数，做一个简单的页面加载progress bar
+			- 使用最广泛的函数 beforeEach和afterEach
+				router.beforeEach((to, from, next) => {
+				  console.log(to, from, next)
+				  next()
+				})
+				router.afterEach((to, from) => {
+				  console.log(to, from)
+				})
+			- 选用nprogress库 https://www.npmjs.com/package/nprogress
+				- 安装
+					// nprogress@0.2.0
+					$ npm install --save nprogress
+				- 使用
+					NProgress.start();
+					NProgress.done();
+					NProgress.set(0.0);     // Sorta same as .start()
+					NProgress.set(0.4);
+					NProgress.set(1.0);     // Sorta same as .done()
+			- 代码
+				- 引入库和样式
+					import NProgress from 'nprogress' // progress bar
+					import 'nprogress/nprogress.css'  // progress bar style
+					// 路由开始时: NProgress.start();
+					// 路由结束时: NProgress.done();
+				- 修改router
+					router.beforeEach((to, from, next) => {
+					  // start progress bar
+					  NProgress.start()
+					  console.log(to, from, next)
+					  next()
+					})
+					router.afterEach(() => {
+					  // finish progress bar
+					  NProgress.done()
+					})
+				- 调整颜色   找到样式，写入一个文件: styles/index.css，进行全局加载
+					#nprogress .bar {
+					    background:#13C2C2;
+					  }
+				- 在main.js加载全局样式
+					// 加载全局样式
+					import './styles/index.css'
+
+15、Vue状态管理
+
+16、参考
  - VUE2官方文档                   https://cn.vuejs.org/v2/guide/
  - 那些前端MVVM框架是如何诞生的   https://zhuanlan.zhihu.com/p/36453279
  - MVVM设计模式                   https://zhuanlan.zhihu.com/p/36141662 
