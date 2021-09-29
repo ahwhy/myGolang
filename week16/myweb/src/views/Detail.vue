@@ -1,16 +1,15 @@
 <template>
-  <div class="about">
-    <h1>This is an detail page</h1>
-    {{ $route.params }}
+  <div class="detail">
+    <h1>This is an detail page</h1>   
+    <span>{{ $route.params }}</span>
   </div>
 </template>
 
-
 <script>
-import { GET_TEST_DATA } from '../api/test'
+import { GET_TEST_DATA } from '../api/detail'
 
 export default {
-  name: 'Test',
+  name: 'Detail',
   data () {
     return {
       loading: false,
@@ -20,8 +19,11 @@ export default {
   },
   created () {
     // 组件创建完后获取数据，
-    // 此时 data 已经被 observed 了
+    // 此时 data 已经被 observed
     this.fetchData()
+  },
+  mounted() {
+    console.log(this.$root.$data.currentRoute)
   },
   watch: {
     // 如果路由有变化，会再次执行该方法

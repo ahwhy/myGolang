@@ -30,8 +30,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/Test.vue')
   },
   {
-    path: '/test/:id',
-    name: 'Detail',
+    path: '/detail',
+    name: 'detail',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Detail.vue')
+  },
+  {
+    path: '/detail/:id',
+    name: 'detail-id',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -54,13 +62,16 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
- console.log(to, from)
-  NProgress.start();
+  // start progress bar
+  NProgress.start()
+  
+  console.log(to, from, next)
   next()
 })
 
 router.afterEach(() => {
-  NProgress.done();
+  // finish progress bar
+  NProgress.done()
 })
 
 export default router

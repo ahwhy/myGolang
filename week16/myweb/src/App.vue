@@ -1,36 +1,39 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <!--  <- <HelloWorld :msg="message"/>  --> 
-    <hello-world v-model="message" :msg="message" />
+    <div id="nav">
+     <a @click="jumpToHome">Home</a> |
+     <a @click="jumpToAbout">About</a> |
+     <a @click="jumpToTest">Test</a> |
+     <a @click="jumpToDetail">Detail</a>
+    </div>
+    <router-view/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
   name: 'App',
   data() {
     return {
-      message: "Welcome to Your Vue.js App",
-      urlHash: '',
     }
   },
-  components: {
-    HelloWorld
+  created() {
+    this.$root.$data.currentRoute
   },
-  mounted() {
-    let that = this
-    window.onhashchange = function () {
-      that.urlHash = window.location.hash
-    };
-  },
-  watch: {
-    urlHash: function(newURL, oldURL) {
-      console.log(newURL, oldURL)
+  methods: {
+    jumpToHome() {
+      this.$router.push('/')
+    },
+    jumpToAbout() {
+      this.$router.push('/about')
+    },
+    jumpToTest() {
+      this.$router.push('/test')
+    },
+    jumpToDetail() {
+      this.$router.push('/detail')
     }
-  }
+  },
 }
 </script>
 
@@ -41,6 +44,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>
