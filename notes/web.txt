@@ -2221,13 +2221,203 @@
 					import './styles/index.css'
 
 15、Vue状态管理
+ - token
+	- 每个页面在访问后端数据的时候 都需要token，所有组件都依赖token这个数据，所以就需要找个地方存起来，让其他组件都能访问到它
+	- 即 存储一些公用的东西，提供给各个组件使用，和服务器端的session功能很类似
+ - 共享内存
+	- 直接开辟一个变量，使全局都可以直接访问，同定义一个全局map
+	- 示例 在root 实例上添加一个data，其他子实例 通过root.data来访问数据
+		- root
+			// Root Vue实例
+			new Vue({
+			  render: h => h(App),
+			  data: {a: 1},
+			}).$mount('#app')
+		- 在父节点添加一个b属性
+			<script>
+			import HelloWorld from './components/HelloWorld.vue'
+			export default {
+			  name: 'App',
+			  created() {
+			    this.$root.$data.b = 2
+			  },
+			}
+			</script>
+		- 子节点上读取
+			<script>
+			export default {
+			  name: 'HelloWorld',
+			  mounted() {
+			    console.log(this.$root.$data.b)
+			  },
+			}
+			</script>
+ - 本地存储
+	- 使用到浏览器的存储功能，其提供了存储客户端临时信息，简称 Web Storage
+		- F12 -> Application -> Stroage
+			- cookie
+			- sessionStorage
+			- localStorage
+		- cookie
+			- cookie可以设置过期时间，同一个域下的页面都可以访问
+			- cookie在没有设置过期时间时，系统默认浏览器关闭时失效
+				- 只有设置了没到期的保存日期时，浏览器才会把cookie作为文件保存在本地上
+				- 当expire到期时，cookie不会自动删除，仅在下次启动浏览器或者刷新浏览器时，浏览器会检测cookie过期时间，如已过期浏览器则会删除过期cookie
+			- 数据存放大小: 4k，因为每次http请求都会携带cookie
+			- 浏览器关闭时，cookie会失效
+			- 注意cookie可以支持httpOnly，这个时候前端js是无法查看也无法修改的
+			- 示例语法
+				document.cookie  // 读取cookie, 注意读取出来的cookie是个字符串
+				document.cookie.split('; ')
+				document.cookie = "username=John Doe; expires=Thu, 18 Dec 2043 12:00:00 GMT; path=/"; // 直接赋值就添加了一个key-value；修改cookie和设置cookie一样，保证key相同就可以
+				document.cookie = `cookieKey=;expires=Mon, 26 Aug 2019 12:00:00 UTC` // 删除cookie时，把expires 设置到过期的时间即可，比如设置个2019年的时间
+		- sessionStorage
+			- 存储的数据只有在同一个会话中的页面才能访问并且当会话结束后数据也随之销毁
+				- 因此sessionStorage不是一种持久化的本地存储，仅仅是会话级别的存储
+			- 一个标签页 就表示一个回话，当标签页关闭，会话就被清除
+			- 不通标签页之间不共享数据
+			- 示例语法
+				// 通过setItem设置key-value
+				sessionStorage.setItem('key1', 'value1')
+				sessionStorage['key2']= 'value2'
+				sessionStorage.key2= 'value2'
+				
+				// 查询sessionStorage对象
+				sessionStorage
+				Storage {key2: 'value2', key1: 'value1', length: 2}
+				
+				// 通过getItem获取key的值
+				sessionStorage.getItem('key1')
+				sessionStorage['key1']
+				sessionStorage.key1
+				
+				// 修改
+				sessionStorage.key1 = 'value11'
+				sessionStorage['key1'] = 'value11'
+				
+				// 删除key
+				sessionStorage.removeItem('key1')
+				
+				// 清空storage
+				sessionStorage.clear()
+		- localStorage
+			- localStorage生命周期是永久，除非主动删除数据，否则数据是永远不会过期的
+			- 相同浏览器的不同页面间可以共享相同的 localStorage(页面属于相同域名和端口)
+			- 示例语法
+				// 通过setItem设置key-value
+				localStorage.setItem('key1', 'value1')
+				localStorage['key2']= 'value2'
+				localStorage.key2 = 'value2'
+				
+				// 查询sessionStorage对象
+				localStorage
+				Storage {key2: 'value2', key1: 'value1', length: 2}
+				
+				// 通过getItem获取key的值
+				localStorage.getItem('key1')
+				localStorage['key1']
+				localStorage.key1
+				
+				// 修改
+				localStorage.key1 = 'value11'
+				localStorage['key1'] = 'value11'
+				
+				// 删除key
+				localStorage.removeItem('key1')
+				
+				// 清空storage
+				localStorage.clear()
+		- vuex
+			- vuex是一种更高级的抽象
+				- state，驱动应用的数据源
+				- actions，响应在 view 上的用户输入导致的状态变化
+				- mutation，用于直接修改数据的方法
+			- 读取数据
+				- 组件通过store的getter方法 从中取数据
+			- 修改数据
+				- 组件通过store提供的dispatch方法触发一个action，由action提交mutation来修改数据
+			- 安装
+				- 使用npm
+					- $ npm install vuex --save
+					- vue-router是vue的插件，按照插件的方式引入到vue中
+						import Vue from 'vue'
+						import Vuex from 'vuex'
+						Vue.use(Vuex)
+				- 使用vue-cil
+					- $ vue add vuex
+				- 基本使用
+					-  示例  用户设置分页大小，希望每个页面都能生效，
+						- 在store中定义一个状态: pageSize    // 文件 store/index.js 
+							export default new Vuex.Store({
+							  state: {
+							    /* 添加pageSize状态变量 */
+							    pageSize: 20
+							  },
+							  getters: {
+							    /* 设置获取方法 */
+							    pageSize: state => {
+							      return state.pageSize
+							    } 
+							  },
+							  mutations: {
+							    /* 定义修改pageSize的函数 */
+							    setPageSize(state, ps) {
+							      state.pageSize = ps
+							    }
+							  },
+							  actions: {
+							    /* 一个动作可以由可以提交多个mutation */
+							    /* { commit, state } 这个是一个解构赋值, 正在的参数是context, 我们从中解出我们需要的变量*/
+							    setPageSize({ commit }, ps) {
+							    /* 使用commit 提交修改操作 */
+							      commit('setPageSize', ps)
+							    }
+							  },
+							  modules: {
+							  }
+							})
+						- 子组件建中修改状态，采用store提供的dispatch方法来进行修改: Test.vue
+							<input v-model="pageSize" type="text">
+							computed: {
+							  pageSize: {
+							    get() {
+							      return this.$store.getters.pageSize
+							    },
+							    set(value) {
+							      this.$store.dispatch('setPageSize', value)
+							    }
+							  }
+							},
+			- vuex-persist
+				- vuex的状态存储并不能持久化，存储在 Vuex 中的 store 里的数据，只要一刷新页面，数据就会丢失
+				- 安装vuex-persistvuex插件，将 Vuex 的存储修改为localstorage   // https://github.com/championswimmer/vuex-persist
+					- $ npm install --save vuex-persist // vuex-persist@3.1.3
+				- 基本使用 配置vuex使用该插件: store/index.js
+					// 1. 引入依赖
+					import VuexPersistence from 'vuex-persist'
+					// 2. 实例化一个插件对象, 我们使用localStorage作为存储
+					const vuexLocal = new VuexPersistence({
+					  storage: window.localStorage
+					})
+					// 3.配置store实例使用localStorage插件
+					export default new Vuex.Store({
+					  // ...
+					  plugins: [vuexLocal.plugin],
+					})
+				- 通过console进行确认
+					- localStorage
+					- 可以发现vuex-persist，使用vuex做一个key，把所有数据都存储在这个字段里面，所以还是不要使用vuex存储太多数据，不然有性能问题
 
 16、参考
- - VUE2官方文档                   https://cn.vuejs.org/v2/guide/
- - 那些前端MVVM框架是如何诞生的   https://zhuanlan.zhihu.com/p/36453279
- - MVVM设计模式                   https://zhuanlan.zhihu.com/p/36141662 
- - vue核心之虚拟DOM(vdom)         https://www.jianshu.com/p/af0b398602bc
-
+ - VUE2官方文档                                               https://cn.vuejs.org/v2/guide/
+ - 那些前端MVVM框架是如何诞生的                               https://zhuanlan.zhihu.com/p/36453279
+ - MVVM设计模式                                               https://zhuanlan.zhihu.com/p/36141662 
+ - vue核心之虚拟DOM(vdom)                                     https://www.jianshu.com/p/af0b398602bc
+ - Vue Router文档                                             https://next.router.vuejs.org/zh/introduction.html
+ - Vuex 文档                                                  https://vuex.vuejs.org/zh/
+ - cookies、sessionStorage和localStorage解释及区别            https://www.cnblogs.com/pengc/p/8714475.html
+ - JavaScript Cookie                                          https://www.runoob.com/js/js-cookies.html
+ - JavaScript创建、读取和删除cookie                           https://www.jb51.net/article/169117.htm
 
 
 
