@@ -7,6 +7,10 @@ import (
 	"github.com/ahwhy/myGolang/utils"
 )
 
+func TestBinaryFormat(t *testing.T){
+	fmt.Println(utils.BinaryFormat(7))
+}
+
 func TestHumanBytesLoaded(t *testing.T) {
 	fmt.Println(utils.HumanBytesLoaded(1024))
 	fmt.Println(utils.HumanBytesLoaded(1024 * 1024))
