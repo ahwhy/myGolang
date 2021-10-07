@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// 输出一个int32对应的二进制表示
+// BinaryFormat 输出一个int32对应的二进制表示
 func BinaryFormat(n int32) string {
 	a := uint32(n)
 	sb := strings.Builder{}
