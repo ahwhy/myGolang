@@ -18,6 +18,7 @@ import (
 
 func main() {
 	sliceBin:=[]int{0b0101010110011100,0b0110101100100010,0b0111101001111111,0b0100111000101101,0b0101011011111101,0b0111111010100010}
+
 	for _,u := range sliceBin{
 		unicodeStr:=fmt.Sprintf("%U",u)
 		toCN(unicodeStr)
@@ -29,6 +30,7 @@ func main() {
 func toCN(u string) string {
 	uSp := strings.Split(u, "U+") //通过U+来切割unicode
 	var context string
+
 	for _, v := range uSp {
 		if len(v) < 1 {
 			continue
@@ -40,5 +42,6 @@ func toCN(u string) string {
 		context += fmt.Sprintf("%c", temp)  //通过字符连接起来
 	}
 	fmt.Printf("%v",context)
+	
 	return context
 }

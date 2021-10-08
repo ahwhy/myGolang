@@ -371,7 +371,7 @@
 1).定义
  - 数组是具有相同数据类型的数据项组成的一组长度固定的序列，数据项叫做数组的元素，数组的长度必须是非负整数的常量，长度也是类型的一部分
  - 当在Go中声明一个数组之后，会在内存中开辟一段固定长度的、连续的空间存放数组中的各个元素，这些元素的数据类型完全相同，可以是内置的简单数据类型(int、string等)，也可以是自定义的struct类型
-	- 固定长度: 这意味着数组不可增长、不可缩减。想要扩展数组，只能创建新数组，将原数组的元素复制到新数组
+	- 固定长度: 这意味着数组不可增长、不可缩减，想要扩展数组，只能创建新数组，将原数组的元素复制到新数组
 	- 连续空间: 这意味可以在缓存中保留的时间更长，搜索速度更快，是一种非常高效的数据结构，同时还意味着可以通过数值index的方式访问数组中的某个元素
 	- 数据类型: 意味着限制了每个block中可以存放什么样的数据，以及每个block可以存放多少字节的数据
 2).声明&&初始化
@@ -412,7 +412,7 @@
 2、切片 slice
 1).定义
  - 切片是长度可变的数组，即 具有相同数据类型的数据项组成的一组长度可变的序列 ，切片由三部分组成
-	- 指针(array): 指向 切片第一个元素指向的数组元素的地址
+	- 指针(array): 指向 第一个slice元素对应的底层数组元素的地址，要注意的是slice的第一个元素并不一定就是数组的第一个元素
 	- 长度(length): 切片元素的数量
 	- 容量(capacity): 切片开始到结束位置(可容纳)元素的数量
  - Go语言中的slice依赖于数组，它的底层就是数组，所以数组具有的优点，slice都有
@@ -4263,14 +4263,17 @@
  - s 中是否以 suffix 结尾
 	func HasSuffix(s, suffix string) bool 
 6).字符串拼接
+ - '+' 用加号连接
+ - func fmt.Sprintf(format string, a ...interface{}) string
  - 将字符串数组(或 slice)连接起来可以通过 Join 实现
 	func Join(a []string, sep string) string  
  - 拼接性能较高
-	strings.Builder
+	strings.Builder 
 	bytes.Buffer
 7).计算子串位置
  - 查询子串的开始Index的函数有:
 	func Index(s, sep string) int                   // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引
+	func LastIndex(s, substr string) int
 	func IndexByte(s string, c byte) int            // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
 	func IndexAny(s, chars string) int              // chars 中任何一个 Unicode 代码点在 s 中首次出现的位置
 	func IndexRune(s string, r rune) int            // Unicode 代码点 r 在 s 中第一次出现的位置

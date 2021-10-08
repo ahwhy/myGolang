@@ -39,9 +39,11 @@ func main() {
 			targ = true
 		}
 	}
+
 	if targ {
 		fmt.Println("You don't have a chance!\nYou're too stupid!!\nGame is over!!!")
 	}
+	
 	fmt.Println("Thank You!")
 	os.Exit(1)
 }

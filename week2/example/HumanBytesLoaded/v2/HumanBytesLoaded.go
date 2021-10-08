@@ -25,16 +25,19 @@ func main() {
 		num2 = HumanBytesLoaded(num2)
 		fmt.Printf("已转换的值：%.3f%s \n", num2, j)
 	}
+
 	fmt.Println("已完成所有转换，感谢使用！")
 }
 
 func HumanBytesLoaded(bytesLength float64) float64 {
 	resp := bytesLength / 1024
+	
 	return resp
 }
 
 func Next(tag string) {
 	str := "y"
+
 	if tag == str {
 		fmt.Println("程序继续")
 	} else {

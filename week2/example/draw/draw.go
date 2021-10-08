@@ -21,6 +21,7 @@ func main() {
 	a := rand.Intn(10)
 	b := rand.Intn(10)
 	c := rand.Intn(10) + 1
+
 	fmt.Printf("Please answer a question:%d + %d = ", a, b)
 	fmt.Scan(&num)
 	if a+b == num {
@@ -36,6 +37,7 @@ func main() {
 
 func draw(num int) {
 	lucky_Number := rand.Intn(10000)
+	
 	for i := 1; i < num+1; i++ {
 		num1 := rand.Intn(10000)
 		if lucky_Number == num1 {

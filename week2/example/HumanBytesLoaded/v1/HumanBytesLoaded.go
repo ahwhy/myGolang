@@ -42,6 +42,7 @@ func main() {
 // B——字节,KB——千比特,MB——兆比特,GB——吉比特
 func HumanBytesLoaded3(bytesLength float64) float64 {
 	resp := bytesLength / 1024
+	
 	return resp
 }
 
@@ -77,6 +78,7 @@ func HumanBytesLoaded3(bytesLength float64) float64 {
 
 func Next(tag string) {
 	str := "y"
+
 	if tag == str {
 		fmt.Println("程序继续")
 	} else {

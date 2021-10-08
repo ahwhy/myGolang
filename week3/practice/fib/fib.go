@@ -14,5 +14,6 @@ func fib(n int) int {
 	if n == 1 || n == 2 { // f(2) = f(1) = 1
 		return 1
 	}
+	
 	return fib(n-1) + fib(n-2) // f(n)=f(n-1)+f(n-2)
 }

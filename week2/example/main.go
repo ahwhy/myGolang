@@ -102,6 +102,7 @@ var (
 func duang() bool {
 	count := rand.Intn(10) + 1
 	fmt.Printf("你当前获取[%d]次抽奖机会\n", count)
+	
 	for i := 1; i <= count; i++ {
 		ticket := rand.Intn(rollCount)
 		totalCount++

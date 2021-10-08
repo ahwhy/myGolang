@@ -4,6 +4,7 @@ import "fmt"
 
 func main() {
 	num := factorial(20)
+	
 	fmt.Println(num)
 }
 

@@ -18,12 +18,14 @@ func ScanfFromBufio() {
 	if err != nil {
 		panic(err)
 	}
+
 	n, err := fmt.Sscanln(string(line), &name, &age)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("read number of items: %d", n)
 	fmt.Println()
+	
 	fmt.Printf("姓名:%s 年龄:%d", name, age)
 	fmt.Println()
 }

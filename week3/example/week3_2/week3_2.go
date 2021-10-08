@@ -28,9 +28,9 @@ func main() {
 	for i, v := range scores {
 		// fmt.Printf("%5d %7d %7d\n", scores[i][0], scores[i][1], scores[i][2])
 		for j := range v {
-		fmt.Printf("%10d", scores[i][j])
+			fmt.Printf("%10d", scores[i][j])
 		}
-	fmt.Println()
+		fmt.Println()
 	}
 	fmt.Printf("%10d %9d %9d\n", mathAvg, chineseAvg, englishAvg)
 }

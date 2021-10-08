@@ -75,6 +75,7 @@ func main() {
 			stats[ch]++
 		}
 	}
+
 	for ch, cnt := range stats {
 		fmt.Printf("%c, %v\n", ch, cnt)
 	}

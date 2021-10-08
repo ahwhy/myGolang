@@ -11,6 +11,7 @@ import (
 
 func Test_holle(t *testing.T) {
 	pkg.Demo()
+	
 	fmt.Println("Holle World!\nThis is my first golang program!")
 }
 
@@ -49,9 +50,9 @@ func Test_var(t *testing.T) {
 	height, weight := 180, 145
 
 	/*
-		        var age, weight, height int
-				var age, weight, height int = 1， 2， 3
-				var age, weight, height  = 1， ""， 3
+		var age, weight, height int
+		var age, weight, height int = 1， 2， 3
+		var age, weight, height  = 1， ""， 3
 
 	*/
 
@@ -117,11 +118,13 @@ func Test_complex(t *testing.T) {
 		c1 complex64 = 1 + 2i
 		c2 complex64 = complex(3, 4)
 	)
+
 	fmt.Println(c1 + c2)
 	fmt.Println(real(c1), imag(c1))
 }
 
 func Test_random(t *testing.T) {
 	rand.Seed(time.Now().Unix()) // 设置随机数种子
+
 	fmt.Println(rand.Intn(100))
 }
