@@ -1153,8 +1153,8 @@
 	var empty = struct{}{}
 	
 10、可见性
- - 结构体首字母大写则包外可见(公开的)，否者仅包内可访问(内部的)
- - 结构体属性名首字母大写包外可见(公开的)，否者仅包内可访问(内部的)
+ - 结构体名首字母大写则包外可见(公开的)，小写则仅包内可访问(内部的)
+ - 结构体属性名首字母大写包外可见(公开的)，小写则仅包内可访问(内部的)
 	- 组合
 		结构体名首字母大写，属性名大写: 结构体可在包外使用，且访问其大写的属性名
 		结构体名首字母大写，属性名小写: 结构体可在包外使用，且不能访问其小写的属性名
@@ -1999,24 +1999,27 @@
 	- 通过操作符 <- 对管道进行读取和写入操作，通过管道维护协程状态
  - 本质
 	- 一个 mutex 锁加上一个环状缓存、一个发送方队列和一个接收方队列
-		// src/runtime/chan.go
-		type hchan struct {
-			qcount   uint           // 队列中的所有数据数
-			dataqsiz uint           // 环形队列的大小
-			buf      unsafe.Pointer // 指向大小为 dataqsiz 的数组
-			elemsize uint16         // 元素大小
-			closed   uint32         // 是否关闭
-			elemtype *_type         // 元素类型
-			sendx    uint           // 发送索引
-			recvx    uint           // 接收索引
-			recvq    waitq          // recv 等待列表，即（ <-ch ）
-			sendq    waitq          // send 等待列表，即（ ch<- ）
-			lock mutex
-		}
-		type waitq struct { // 等待队列 sudog 双向队列
-			first *sudog
-			last  *sudog
-		}
+		- 管道底层是一个环形队列(先进先出)，send(插入) 和 recv(取走) 从同一个位置沿同一个方向顺序执行
+		- sendx 表示最后一次插入的元素
+		- recvx 表示最后一次取走元素的位置
+			// src/runtime/chan.go
+			type hchan struct {
+				qcount   uint           // 队列中的所有数据数
+				dataqsiz uint           // 环形队列的大小
+				buf      unsafe.Pointer // 指向大小为 dataqsiz 的数组
+				elemsize uint16         // 元素大小
+				closed   uint32         // 是否关闭
+				elemtype *_type         // 元素类型
+				sendx    uint           // 发送索引
+				recvx    uint           // 接收索引
+				recvq    waitq          // recv 等待列表，即（ <-ch ）
+				sendq    waitq          // send 等待列表，即（ ch<- ）
+				lock mutex
+			}
+			type waitq struct { // 等待队列 sudog 双向队列
+				first *sudog
+				last  *sudog
+			}
 	- 发送过程包含三个步骤
 		- 持有锁
 		- 入队，拷贝要发送的数据
