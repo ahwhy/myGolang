@@ -693,6 +693,31 @@
 			export MYAPP
 		- 示例 其他文件中
 			import { MYAPP } from './export';
+	- 默认导出
+		- 使用import命令的时候，用户需要知道所要加载的变量名或函数名，否则无法加载
+		- 如果想要直接导入模块，再看该模块下有哪些变量可用，就像golang的pkg一样，这个时候就要使用到export default
+			- export default命令，为模块指定默认输出
+				export default MYAPP
+			- 与export命令的区别: 其他模块加载该模块时，import命令可以为该匿名函数指定任意名字
+				import myPkg from './export';
+				myPkg.foo(); // 'foo'
+			- export default命令用于指定模块的默认输出
+			- 一个模块只能有一个默认输出，因此export default命令只能使用一次
+			- 所以，import命令后面才不用加大括号，因为只可能唯一对应export default命令
+	- 注意版本
+		- ES版本不同，有2种导入语法
+			- require/exports: CommonJS/AMD 中为了解决模块化语法而引入的，ES5语法，注意NodeJs使用的该规范
+			- import/export: ES6引入的新规范，因为浏览器引擎兼容问题，需要在node中用babel将ES6语法编译成ES5语法
+		- CommonJs的语法
+			- 一个模块想要对外暴露变量(函数也是变量)
+				module.exports = variable;
+			- 一个模块要引用其他模块暴露的变量
+				var ref = require('module_name');    // 拿到引用模块的变量
+			- 这里的机制是为每个文件准备一个module对象，把它装进去
+				var module = {
+					id: 'hello',
+					exports: {}
+				};
 
 7、函数
  - JavaScript中的函数签名
@@ -1275,7 +1300,7 @@
 
 6、Vue实例生命周期
  - 生命周期
-	https://gitee.com/infraboard/go-course/blob/master/day16/images/lifecycle.png
+	https://gitee.com/infraboard/go-course/blob/master/day16/pic/lifecycle.png
  - 定义的函数钩子
 	beforeCreate()
 	created()
@@ -2419,15 +2444,33 @@
  - JavaScript Cookie                                          https://www.runoob.com/js/js-cookies.html
  - JavaScript创建、读取和删除cookie                           https://www.jb51.net/article/169117.htm
 
-
-
-
-
-
-
-
-
-
+七、项目实例
+1、前端框架搭建
+ - 初始化项目
+	- $ Vue CLI v4.5.13
+		? Please pick a preset: Manually select features
+		? Check the features needed for your project: Choose Vue version, Babel, Router, Vuex, CSS Pre-processors, Linter
+		? Choose a version of Vue.js that you want to start the project with 2.x
+		? Use history mode for router? (Requires proper server setup for index fallback in production) Yes
+		? Pick a CSS pre-processor (PostCSS, Autoprefixer and CSS Modules are supported by default): Sass/SCSS (with node-sass)
+		? Pick a linter / formatter config: Prettier
+		? Pick additional lint features: Lint on save
+		? Where do you prefer placing config for Babel, ESLint, etc.? In dedicated config files
+		? Save this as a preset for future projects? Yes
+		? Save preset as: devcloud
+	- 确认项目依赖
+		"core-js": "^3.6.5",
+		"vue": "^2.6.11",
+		"vue-router": "^3.2.0",
+		"vuex": "^3.4.0"
+		
+ - 项目npm配置  https://www.npmjs.cn/files/npmrc/
+	- 使用 npm config edit 查看可以配置的选项
+	- 后面需要用到node-sass，这个是二进制的css预处理器(编译器)，默认的url是国外下载地址(不在npm源中)，针对这种类型的依赖，需要单独配置下载的url
+		- 使用sass_binary_site将它配置到npm的配置文件中
+		- 本项目npm配置文件: .npmrc
+			sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
+			registry=https://registry.npm.taobao.org
 
 
 
