@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/week1/compile/pkg"
+	"github.com/ahwhy/myGolang/historys/week01/compile/pkg"
 )
 
 func Test_holle(t *testing.T) {
