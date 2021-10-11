@@ -676,7 +676,24 @@
 	- 示例四
 		- 甚至可以覆盖掉浏览器的内置方法
 			alert = () => {console.log("覆盖alert方法")}
-			alert()                                      // 覆盖alert方法
+			alert()                                         // 覆盖alert方法
+ - export
+	- 在js中，一个模块就是一个独立的文件
+		- 该文件内部的所有变量，外部无法获取
+		- 如果希望外部能够读取模块内部的某个变量，就必须使用export关键字输出该变
+	- 使用export命令输出变量
+		// profile.js
+		export var firstName = 'Michael';
+		export var lastName = 'Jackson';
+		export var year = 1958;
+		// profile.js  为了方便写到一行
+		export {firstName, lastName, year};
+ - import
+	- 通过import来导入其他模块中定义的变量
+		import { firstName, lastName, year } from './profile.js';
+	- 如果导入的变量和本命令空间有冲突，可以使用 import as 语法来为变量进行重命名
+		import { lastName as surname } from './profile.js';
+	- 如果一不小心忘记了as，可能会导致变量覆盖，这回到了全局变量的问题，所以模块导出的时候最好设置模块命名空间
  - 命名空间与 export
 	- 可以将所有方法绑定到一个变量上暴露出去，避免全局变量的混乱
 	- 许多著名的JavaScript库都采用这种方法，如: jQuery，YUI，underscore等等
@@ -2447,7 +2464,8 @@
 七、项目实例
 1、前端框架搭建
  - 初始化项目
-	- $ Vue CLI v4.5.13
+	- $ vue create devcloud
+		Vue CLI v4.5.13
 		? Please pick a preset: Manually select features
 		? Check the features needed for your project: Choose Vue version, Babel, Router, Vuex, CSS Pre-processors, Linter
 		? Choose a version of Vue.js that you want to start the project with 2.x
@@ -2471,6 +2489,157 @@
 		- 本项目npm配置文件: .npmrc
 			sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
 			registry=https://registry.npm.taobao.org
+
+ - 项目vue配置
+	- vue.config.js 是一个可选的配置文件，如果项目的 (和 package.json 同级的) 根目录中存在这个文件，那么它会被 @vue/cli-service 自动加载  
+		- 官网的配置说明 https://cli.vuejs.org/zh/config/
+	- 基础配置
+		- 创建一个js的模块，用于导出配置给cli使用，这里采用commonJS模块导出语法
+		- 在项目根下面创建: vue.config.js
+		- https://github.com/ahwhy/myGolang/blob/main/week17/devcloud/vue.config.js
+			// All configuration item explanations can be find in https://cli.vuejs.org/config/
+			module.exports = {
+			}
+	- DevServer
+	- webpack 基础配置
+		- webpack是一个用于现代 JavaScript 应用程序的 静态模块打包工具
+			- 当 webpack 处理应用程序时，它会在内部从一个或多个入口点构建一个 依赖图(dependency graph)
+			- 然后你项目中所需的每一个模块组合成一个或多个 bundles，它们均为静态资源，用于展示具体的内容
+			- webpack 中文文档 https://webpack.docschina.org/concepts/
+	- webpack插件配置
+		- Vue CLI 内部的 webpack 配置是通过 webpack-chain 维护的
+			- 这个库提供了一个 webpack 原始配置的上层抽象，使其可以定义具名的 loader 规则和具名插件，并有机会在后期进入这些规则并对它们的选项进行修改
+		- 静态资加载
+			- 静态资源的加载对页面性能起着至关重要的作用，浏览器提供的两个资源指令-preload/prefetch，它们能够辅助浏览器优化资源加载的顺序和时机，提升页面性能 其中rel="prefetch"被称为Resource-Hints（资源提示），也就是辅助浏览器进行资源优化的指令 类似的指令还有rel="preload"
+			- 预提取(prefetch)
+				- 其利用浏览器空闲时间来下载或预取用户在不久的将来可能访问的文档，网页向浏览器提供一组预取提示，并在浏览器完成当前页面的加载后开始静默地拉取指定的文档并将其存储在缓存中
+					- 当用户访问其中一个预取文档时，便可以快速的从浏览器缓存中得到
+					- <link rel="prefetch" href="static/img/ticket_bg.a5bb7c33.png">
+				- 一个Vue CLI应用会为所有作为async chunk生成的JavaScript文件(通过动态import()按需code splitting的产物)自动生成prefetch提示
+					- 这些提示会被@vue/preload-webpack-plugin注入，并且可以通过chainWebpack的config.plugin('prefetch')进行修改和删除
+					- when there are many pages, it will cause too many meaningless requests
+						config.plugins.delete('prefetch')
+			- 预加载preload)
+				- 对于页面即刻需要的资源，可能希望在页面加载的生命周期的早期阶段就开始获取，在浏览器的主渲染机制介入前就进行预加载
+					- 简单来说，就是通过标签显式声明一个高优先级资源，强制浏览器提前请求资源
+					- <link rel="preload" href="xxx" as="xx">
+				- 一个Vue CLI应用会为所有初始化渲染需要的文件自动生成preload提示，这些提示会被@vue/preload-webpack-plugin注入，并且可以通过chainWebpack的config.plugin('preload')进行修改和删除
+				- it can improve the speed of the first screen, it is recommended to turn on preload
+					config.plugin('preload').tap(() => [
+					{
+						rel: 'preload',
+						// to ignore runtime.js
+						// https://github.com/vuejs/vue-cli/blob/dev/packages/@vue/cli-service/lib/config/app.js#L171
+						fileBlacklist: [/\.map$/, /hot-update\.js$/, /runtime\..*\.js$/],
+						include: 'initial'
+					}
+					])
+		- vue-loader
+			- Vue Loader 是一个 webpack 的 loader，它允许以一种名为单文件组件(SFCs)的格式撰写 Vue 组件
+			- 作用: 解析和转换 .vue 文件，提取出其中的逻辑代码 script、样式代码 style、以及 HTML 模版 template，再分别把它们交给对应的 Loader 去处理
+			- Vue Loader 还提供了很多酷炫的特性
+				- 允许为 Vue 组件的每个部分使用其它的 webpack loader
+				- 允许在一个 .vue 文件中使用自定义块，并对其运用自定义的 loader 链
+				- 使用 webpack loader 将 style 和 template 中引用的资源当作模块依赖来处理
+				- 为每个组件模拟出 scoped CSS
+				- 在开发过程中使用热重载来保持状态
+			- 简而言之，webpack 和 Vue Loader 的结合提供了一个现代、灵活且极其强大的前端工作流，来帮助撰写 Vue.js 应用
+				- Vue Loader 官方文档  https://vue-loader.vuejs.org/zh/
+			- 一般 vue-loader 提取出template后，会调用vue-template-compiler来编译模版，所以vue-loader和vue-template-compiler经常一起安装
+				- 一般使用vue cli时已经完成安装，通过npm list 查看当前项目安装的vue-loader和vue-template-compiler信息
+					$ npm list  | grep vue-loader
+					│ ├─┬ vue-loader@15.9.8
+					│ ├─┬ vue-loader-v16@npm:vue-loader@16.8.1
+					$ npm list  | grep vue-template-compiler
+					├─┬ vue-template-compiler@2.6.14
+				- 如果没有安装, 使用下面命令安装:
+					npm install -D vue-loader vue-template-compiler
+			- 通过chainWebpack来配置 包含vue的文件使用 vue-loader来处理:
+				// set preserveWhitespace
+				config.module
+					.rule('vue')
+					.use('vue-loader')
+					.loader('vue-loader')
+					.tap(options => {
+					options.compilerOptions.preserveWhitespace = true
+					return options
+					})
+					.end()
+		- svg图标处理
+			- 无论使用哪个UI组件，总会遇到icon不够用的时候，这时候为了保证icon放大不失真，需要使用svg icon
+				- 最常用的svg icon库 阿里巴巴矢量图标库 https://www.iconfont.cn/search/index?searchType=icon&q=gitee&page=1&fromCollection=-1&fills=&tag=
+			- 简单使用
+				- 直接使用img标签，把资源放到静态文件的目录下: assets/feishu.svg
+				- 在App.vue中通过相对路径使用 <img alt="Feishu logo" src="./assets/feishu.svg" />
+			- 优化
+				- 当icon很多的时候，由于使用的img标签，所以每次都需要从服务端拉去，可以使用下面两个库去优化
+					- svg-sprite-loader: 会把 svg 塞到一个个 symbol 中，合成一个大的 svg，最后将这个大的 svg 放入 body 中，通过symbol id引用，symbol的id如果不特别指定，就是文件名
+					- svgo-loader: 帮助svg文件进行瘦身的库
+				- 步骤
+					- 安装
+						npm i --dev svg-sprite-loader svgo-loader
+					- webpack配置使用vg-sprite-loader
+						// set svg-sprite-loader
+						// 设置svg相对路径: src/icons
+						config.module
+						.rule('svg')
+						.exclude.add(resolve('src/icons'))
+						.end()
+						// svg结尾的文件使用svg-sprite-loader处理
+						// 在svg-sprite-loader处理之前, 使用svgo-loader提取处理
+						config.module
+						.rule('icons')
+						.test(/\.svg$/)
+						.include.add(resolve('src/icons'))
+						.end()
+						.use('svg-sprite-loader')
+						.loader('svg-sprite-loader')
+						.options({
+							symbolId: 'icon-[name]'
+						})
+						.end()
+					- 引入svg图片
+					- 引入到main.js中
+					- 通过svg-sprite-loader使用
+					- 封装Svg Icon组件
+		- 打包优化
+			- 在进行webpack打包的时候，为了避免某个js库文件太大，打包成单个文件加载过慢的问题，需要对大文件进行切割，让浏览器可以并行加载，提高页面加载速度
+
+ - 引入UI组件
+	- 安装element ui      官方安装文档  https://element.eleme.cn/#/zh-CN/component/installation
+		$ npm i element-ui -S
+		$ npm install --save js-cookie
+	- 将element ui组件库和样式库 引入到 vue项目中，入口文件:main.js
+ - 项目样式配置
+ - VUE全局指令
+ - VUE全局过滤器
+ - Home页面
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
