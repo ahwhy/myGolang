@@ -9,7 +9,10 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml"
   },
   "dependencies": {
+    "clipboard": "^2.0.8",
     "core-js": "^3.6.5",
+    "element-ui": "^2.15.6",
+    "js-cookie": "^3.0.1",
     "svg-sprite-loader": "^6.0.9",
     "svgo-loader": "^3.0.0",
     "vue": "^2.6.11",
