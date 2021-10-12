@@ -686,7 +686,7 @@
 
 五、函数
 1、定义
- - 函数用于对代码块的逻辑封装，提供代码复用的最基本方式, Go中有3种函数:
+ - 函数用于对代码块的逻辑封装，提供代码复用的最基本方式，Go语言中有3种函数
 	- 普通函数
 	- 匿名函数(没有名称的函数)
 	- 方法(定义在struct上的函数)
@@ -703,7 +703,7 @@
 	- function_name: 函数名称，函数名和参数列表一起构成了函数签名(signature)
 	- parameter list: 参数列表，参数就像一个占位符，当函数被调用时，可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数
 	- return_types: 返回类型，函数返回一列值。return_types 是该列值的数据类型；有些功能不需要返回值，这种情况下 return_types 不是必须的
-	- 函数体: 函数定义的代码集合。
+	- 函数体: 函数定义的代码集合
 	
 2、参数
  - 形参&&入参
@@ -842,7 +842,7 @@
 	func asArg(fn addFunc) int {                   // 创建函数asArg使用声明函数类型addFunc作为参数
 		return fn(2, 2) * 2
 	}
-	ret := asArg(func(x, y int) int {          // 调用函数asArg并使用匿名函数传参
+	ret := asArg(func(x, y int) int {              // 调用函数asArg并使用匿名函数传参
 		return x + y
 	}
 
@@ -1099,8 +1099,8 @@
 		name: "lywq",
 		tel: "18600000000",
 		addr: Address{
-			"安徽省芜湖市",
-			"赤铸山西路",
+			"安徽省合肥市",
+			"望江西路",
 			"001",
 		},
 	}
@@ -1723,6 +1723,7 @@
 	3. []reflect.Value，这是最终需要调用方法的参数，无参数传空切片
 5).结构体标签和反射
  - json的标签解析json
+	- JSON是对JavaScript中各种类型的值——字符串、数字、布尔值和对象——Unicode本文编码
  - yaml的标签解析yaml
  - xorm gorm的标签 标识db字段
  - 自定义标签
@@ -1928,8 +1929,8 @@
 				- 调度器将Goroutine调度入队(本地队列或者全局队列)
 				- M获取G执行(绑定的P的队列, 全局队列, 其他P的队列)
 				- M 循环的调度 G 执行
-				- 如果M阻塞, 创建一个M或者从休眠的M队列中挑选一个M来服务于该P
-				- G执行完成, 销毁G, 返回, 此时M空闲, 放入休眠中的M队列
+				- 如果M阻塞，创建一个M或者从休眠的M队列中挑选一个M来服务于该P
+				- G执行完成，销毁G，返回，此时M空闲，放入休眠中的M队列
 		- 创建
 			- go + 语句
 			- main函数也是由一个协程来启动执行，这个协程称为主协程，其他协程叫工作协程
@@ -2733,7 +2734,7 @@
 		type Context interface {
 			Deadline() (deadline time.Time, ok bool)
 			Done() <-chan struct{}
-		}
+		}l
 		func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
 		- 当Context的deadline到期或调用了CancelFunc后，Context的Done()管道会关闭，该管道上关联的读操作会解除阻塞，然后执行协程退出前的清理工作
  - 协程管理组件 github.com/x-mod/routine
