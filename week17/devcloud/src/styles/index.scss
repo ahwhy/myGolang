@@ -1,1 +1,33 @@
 @import './element-ui.scss';
+
+html {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+#app {
+    height: 100%;
+}
+
+input:-internal-autofill-previewed,
+input:-internal-autofill-selected {
+    // 自动填充时的字体颜色
+    -webkit-text-fill-color: #fff !important;
+    // 采用过渡的办法吃掉背景色, 网上都是这个办法
+    transition: background-color 50000s ease-out 0.5s;
+}
+
+#nprogress .bar {
+    background:#13C2C2;
+}
+
+//main-container全局样式
+.main-container {
+    padding: 10px;
+}
