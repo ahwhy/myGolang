@@ -802,11 +802,11 @@
 		- sync.map 性能对比
 			- https://studygolang.com/articles/27515
 			- 性能对比结论
-				只读场景: sync.map > rwmutex >> mutex
-				读写场景(边读边写): rwmutex > mutex >> sync.map
-				读写场景(读80% 写20%): sync.map > rwmutex > mutex
-				读写场景(读98% 写2%): sync.map > rwmutex >> mutex
-				只写场景: sync.map >> mutex > rwmutex
+				- 只读场景: sync.map > rwmutex >> mutex
+				- 读写场景(边读边写): rwmutex > mutex >> sync.map
+				- 读写场景(读80% 写20%): sync.map > rwmutex > mutex
+				- 读写场景(读98% 写2%): sync.map > rwmutex >> mutex
+				- 只写场景: sync.map >> mutex > rwmutex
 			- sync.Map使用场景的建议
 				- 读多: 给定的key-v只写一次，但是读了很多次，只增长的缓存场景
 				- key不相交: 覆盖更新的场景比少

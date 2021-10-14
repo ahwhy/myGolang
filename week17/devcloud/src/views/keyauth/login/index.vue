@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <el-form class="login-form" ref="loginForm" :mode="loginForm">
+    <el-form class="login-form" ref="loginForm" :model="loginForm" :rules="loginRules">
       <!-- 切换 -->
       <div>
         <el-tabs v-model="loginForm.grant_type">
@@ -15,7 +15,7 @@
         name/autocomplete: 一起使用, 自动填充功能
         type: 输入框类型, text 文本框, password 密码框
         tabindex: 使用tab按键进行切换时的顺序控制 -->
-      <el-form-item>
+      <el-form-item prop="username">
       <span class="svg-container">
         <svg-icon icon-class="user" />
       </span>
@@ -23,7 +23,7 @@
       </el-form-item>
 
       <!-- 密码输入框 -->
-      <el-form-item>
+      <el-form-item prop="password">
       <span class="svg-container">
         <svg-icon icon-class="password" />
       </span>
@@ -34,7 +34,7 @@
       </el-form-item>
 
       <!-- 登陆按钮 -->
-      <el-button  class="login-btn" size="medium" type="primary" tabindex="3" @click="handleLogin">
+      <el-button  class="login-btn" :loading="loading" size="medium" type="primary" tabindex="3" @click="handleLogin">
         登陆
       </el-button>
     </el-form>
@@ -42,21 +42,66 @@
 </template>
 
 <script>
+const validateUsername = (rule, value, callback) => {
+  if (value === '') {
+    callback(new Error('请输入账号'))
+  } else {
+    callback()
+  }
+}
+
+const validatePassword = (rule, value, callback) => {
+  if (value === '') {
+    callback(new Error('请输入密码'))
+  } else {
+    callback()
+  }
+}
+
 export default{
   name: 'Login',
   data(){
     return{
+      loading: false,
       passwordType: 'password',
       loginForm: {
           grant_type: 'password',
           username: '',
           password: ''
       },
+      loginRules: {
+      // required 是否必填
+      // trigger  合适触发校验， change/blur
+      // message  校验失败信息
+        username: [{ trigger: 'blur', validator: validateUsername }],
+        password: [{ trigger: 'blur', validator: validatePassword }]
+      }
     }
   },  
   methods: {
     handleLogin() {
-      alert(`submit: ${this.loginForm.username},${this.loginForm.password}`)
+      this.$refs.loginForm.validate(async valid => {
+        if (valid) {
+          this.loading = true
+          try {
+            // 调用后端接口进行登录, 状态保存到vuex中
+            await this.$store.dispatch('user/login', this.loginForm)
+
+            // 调用后端接口获取用户profile, 状态保存到vuex中
+            const user = await this.$store.dispatch('user/getInfo')
+            console.log(user)
+          } catch (err) {
+            // 如果登陆异常, 中断登陆逻辑
+            console.log(err)
+            return
+          } finally {
+            this.loading = false
+          }
+
+          // 登陆成功, 重定向到Home或者用户指定的URL
+          this.$router.push({ path: this.$route.query.redirect || '/', query: this.otherQuery })
+        }
+  })
     },
     showPwd(){
       if (this.passwordType === 'password') {

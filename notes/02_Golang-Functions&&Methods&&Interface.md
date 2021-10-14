@@ -1,6 +1,6 @@
-# Golang-Func  Golong的函数
+# Golang-Functions&&Methods&&Interface  Golong的函数、方法和接口
 
-## 一、函数的定义
+## 一、Golong的函数定义
 - 函数用于对代码块的逻辑封装，是提供代码复用的最基本方式，Go语言中有3种函数
 	- 普通函数
 	- 匿名函数(没有名称的函数)
@@ -24,7 +24,7 @@
 	- `return_types` 返回类型，函数返回一列值。return_types 是该列值的数据类型；有些功能不需要返回值，这种情况下 return_types 不是必须的
 	- 函数体 函数定义的代码集合
 	
-## 二、函数的参数
+## 二、Golong的函数参数
 - 形参&&入参
 	- 形参 定义函数时的参数
 	- 入参 传递给函数的变量
@@ -61,7 +61,7 @@
 	- 引用表达的是关系，指针表达的是类型；  
 	- A -- B 是引用关系，而 A 是指针
 	
-## 三、函数的返回值
+## 三、Golong的函数返回值
 - 多返回值
 ```
 	func calcReturn(x, y int) (int, int, int, int) {
@@ -84,7 +84,7 @@
 	- return 中可以有表达式，但不能出现赋值表达式，这和其它语言可能有所不同
 		- 例如 return a+b 是正确的，但 return c=a+b 是错误的
 
-## 四、函数的递归
+## 四、Golong的函数递归
 
 ### 1. 定义
 - 函数内部调用函数自身的函数称为递归函数
@@ -143,7 +143,7 @@
 - 递归目录
 	- 递归基点是文件，只要是文件就返回，只要是目录就进入
  
-## 五、函数的类型
+## 五、Golong的函数类型
 - 函数也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数返回值进行返回
 
 - 声明&&初始化&&调用
@@ -250,7 +250,7 @@
 		fmt.Println(base2(3))
 ```
 
-## 七、错误处理
+## 七、Golong的错误处理
 
 ### 1. error 接口
 - error类型是个接口
@@ -374,3 +374,285 @@
 			sum(x, y)
 ```
 		- 在并发的场景中，需要在goroutine的启动函数里面专门编写recover，用于捕获当前goroutine的异常
+
+## 八、Golong的方法 Methods
+
+### 1. 方法的定义
+- 方法是 为特定类型定义，只能由该类型调用的函数
+
+- 方法是 添加了接收者的函数，接收者必须是自定义的类型
+```
+	func (t Type) method(parameters) returns {
+		...
+	}
+```
+
+- 示例
+```
+	type User struct {
+		name string
+	}
+	// 为结构体User定义方法
+	func (user User) Call(){   
+		fmt.Println(user.name)
+	}		
+	func (user User) SetName(name string) {
+		user.name = name
+	}
+```
+	
+### 2. 方法的调用
+- 调用方法通过自定义类型的 `对象.方法名` 进行调用，在调用过程中对象传递(赋值)给方法的接收者(值类型，拷贝)
+```
+	user := User{"aa"}  // 初始化结构体对象
+	user.Call()         // 调用结构体对象Call方法
+	user.SetName("bb")
+	user.Call()         // 返回 aa，值传递
+```
+	
+### 3. 指针接收者
+- 声明
+```
+	func (user *User) PSetName(name string) {
+		user.name = name
+	}
+```
+
+- 调用
+	- 示例
+```
+		(&user).PSetName("bb")  // 调用结构体指针对象的PSetName
+		user2 := &User{"cc"}
+		(*user2).Call()
+```
+		- 当使用结构体指针对象调用值接收者的方法时，Go编译器会自动将指针对象"解引用"为值调用方法，此为GO的语法糖
+		- 当使用结构体对象调用指针接收者的方法时，Go编译器会自动将值对象"取引用"为指针调用方法
+	- 注意
+		- 取引用和解引用发生在接收者中，对于函数方法的参数必须保持变量类型一一对应
+		- 该使用值接收者还是指针接收者，取决于是否现需要修改原始结构体
+			- 若不需要修改则使用值，若需要修改则使用指针
+			- 若存在指针接收者，则所有方法使用指针接收者
+		- 对于接收者为指针类型的方法，需要注意在运行时若接收者为nil时会发生错误
+	
+### 4. 匿名嵌入
+- 若结构体匿名嵌入带有方法的结构体时，则在外部结构体可以调用嵌入结构体的方法，并且在调用时只有嵌入的字段会传递给嵌入结构体方法的接收者
+
+- 当被嵌入结构体与嵌入结构体具有相同名称的方法时，则使用 `对象.方法名` 调用被嵌入结构体方法
+	- 若想要调用嵌入结构体方法，则使用 `对象.嵌入结构体名.方法`
+	
+### 5. 方法值&&方法表达式
+- 使用
+	- 方法也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数
+	- 返回值进行返回方法有两种，一种是使用 对象/对象指针 调用的(方法值)，另一种是使用 类型/类型指针 调用的(方法表达式)
+
+- 方法值
+	- 在方法值对象赋值时若方法接收者为值类型，则在赋值时会将值类型拷贝
+	- 若调用为指针则自动 解引用拷贝
+```
+		method01 := user.Call
+		method02 := user.SetName
+		method03 := user2.Call
+		method04 := user2.PSetName
+```
+
+- 方法表达式
+	- 方法表达式在赋值时
+		- 针对接收者为 值类型的方法 使用 类型名或类型指针 访问，go自动为指针变量生成隐式的指针类型接收者方法
+```
+			method05 := User.Call 
+			method05(&user)
+			method05(user2)
+```
+		- 针对接收者为 指针类型的方法 使用 类型指针 访问，同时在调用时需要根据参数传递对应的值对象或指针对象
+```
+			method06 := (*User).PSetName
+			method06(&user, "bb")  // (*User).PSetName(&user, "bb")
+			method06(user2, "bb")  // (*User).PSetName(user2, "bb")
+```
+
+- 自动生成指针接收者方法
+	- 为何会根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
+		- 接收者为 值类型 的方法
+```
+			func (user User) SetName(name string) {
+				user.name = name
+			}
+			/* 隐式
+			- func (user *User) SetName(name string) { user.name = name }
+			- (*user).SetName("bb")
+			- 获取user地址的值，并拷贝调用SetId；只影响拷贝(*user)的值，并不影响调用者的值
+			- 与(user User) SetName方法 行为一致
+			- 使用 值和指针都不改变调用者，行为一致
+			*/
+```
+		- 接收者为 指针类型 的方法
+```
+			func (user *User) PSetName(name string) {
+				user.name = name
+			}
+			/* 隐式
+			func (user User) PSetName(name string) { user.name = name }
+			- (&user).SetName("bb")
+			- user为值接收者，先拷贝值，再调用(&user).SetName只会影响接收者(user)的值，并不影响调用者的值
+			- 与(user *User) PSetName方法 行为不一致
+			- 使用 值 不改变调用者，使用指针改变调用者，行为不一致
+			*/
+```
+
+- 使用反射获取 User 对象和 *User 对象结构
+```
+	type User struct{
+		Fields(1): 
+			name string,
+			
+		Methods(2):
+			func Call(objs.User) {},
+			func SetName(objs.User, string) {},
+	}
+	*{
+		type User struct{
+			Fields(1): 
+				name string,
+				
+			Methods(2):
+				func Call(objs.User) {},
+				func SetName(objs.User, string) {},
+		}
+		Methods(3)
+				func Call(*objs.User) {},
+				func SetName(*objs.User, string) {},
+				func PSetName(*objs.User, string) {},
+	}
+```
+
+## 九、Golong的接口 Interface
+
+### 1. Golong的接口定义
+- 接口是自定义类型，是对是其他类型行为的抽象
+
+- 鸭子类型(duck typing)，动态类型的一种风格
+	- 在这种风格中，一个对象有效的语义，不是由继承自特定的类或实现特定的接口，而是由"当前方法和属性的集合"决定
+	- 一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟可以被称为鸭子
+	- 在鸭子类型中，关注点在于对象的行为，能作什么；而不是关注对象所属的类型
+
+- 接口定义使用interface标识，声明了一系列的函数签名(函数名、函数参数、函数返回值)
+
+- 在定义接口时可以指定接口名称，在后续声明接口变量时使用
+```
+	type interfaceName interface {
+		方法签名                        // 方法名，参数(数量，顺序，类型)，返回值(数量，顺序，类型)匹配
+	}
+	
+	type Useritf interface{
+		Call()
+		SetName(name string)
+		PSetName(name string)
+	}
+```
+
+### 2. 声明&&初始化&&赋值
+- 声明接口变量
+	- 需要定义变量类型为接口名，此时变量值被初始化为nil，类型也为nil
+```
+		var name interfaceName
+```
+
+- 赋值接口变量
+	- 接口无法实例化，即不能直接通过接口类型创建变量，只能由其他实现了接口的对象进行赋值
+```
+		var useritf Useritf = &User{"aa"}
+		useritf.Call()
+		useritf.SetName("bb")
+		useritf.PSetName("bb")
+```
+
+- 类型对象
+	- 当自定义类型实现了接口类型中声明的所有函数时，则该类型的对象可以赋值给接口变量，并使用接口变量调用实现的接口    
+		- 方法接收者全为值类型的方法
+		- 方法接收者全为指针类型的方法
+		- 方法接收者既有值类型又有指针类型的方法
+	- 由接口赋值的变量，无法调用结构体中的属性，也无法调用没有在接口中定义的其他方法，只能调用接口定义的方法行为
+	
+- 接口对象
+	- 当接口(A)包含另外一个接口(B)中声明的所有函数时(A接口函数是B接口函数的父集，B是A的子集)，则接口(A)的对象也可以赋值给其子集的接口(B)变量
+	- 若两个接口声明同样的函数签名，则者两个接口完全等价
+	- 当类型和父集接口赋值给接口变量后，只能调用接口变量定义接口中声明的函数(方法)
+
+### 3. 类型断言&&查询
+- 使用
+	- 当父集接口或者类型对象赋值给接口变量后，需要将接口变量重新转换为原来的类型，需要使用类型断言/查询
+- 断言
+	- 语法: `接口变量.(Type)` `i.(T)`
+	- `v, ok := i.(T)`
+- 查询
+	- 通过 `switch-case + 接口变量.(type)` 查询变量类型，并选择对应的分支块
+	
+### 4. 接口匿名嵌入
+- 接口之中也可以嵌入已存在的接口，从而实现接口的扩展
+```
+	type Useritf2 interface{
+		Useritf
+	}
+```
+	
+### 5. 匿名接口
+- 在定义变量时将类型指定为接口的函数签名的接口，此时叫匿名接口
+	- 匿名接口常用于初始化一次接口变量的场景
+```
+		// 通过匿名接口声明接口变量
+		var closer interface {
+			Close() error
+		}
+		closer.Close()
+```
+	
+### 6. 空接口
+- 不包含任何函数签名的接口叫空接口，空接口声明的变量可以赋值为任何类型的变量任意接口
+
+- 语法: `interface{}`
+
+- 直接声明空接口并使用
+```
+	type User struct {
+		Name string
+		Password string
+	}
+	
+	var empty interface {}
+	empty = 1
+	empty = "aa"
+	empty = User{"aa", "123456"}
+	
+	if u, ok := empty.(User); ok {
+		fmt.Println(u.Name, u.Password)    // aa 123456
+	}
+	fmt.Printf("%T %v\n", empty, empty)    // main.User {aa 123456}
+```
+
+- 使用场景
+	- 常声明函数参数类型为 `interface{}` ，用于接收任意类型的变量
+	- 示例
+```
+		func printType(vs ...interface{}) {
+			for _, v := range vs {
+				switch v.(type) {                           // 类型查询
+				case nil:                                   // - 使用switch时，若符合多个case项，则匹配最近的一个，因此勿将default放在最上方
+					fmt.Println("nil")                      // - 语法: 接口变量.(Type) 只能用在switch语句中，是类型查询的特定语法，无法直接 Println 打印
+				case int:                                   // - 或者在switch语句中直接赋值 data := v.(type)
+					fmt.Println("int")
+				case bool:
+					fmt.Println("bool")
+				case string:
+					fmt.Println("string")
+				case [5]int:
+					fmt.Println("[5]int")
+				case []int:
+					fmt.Println("[]int")
+				case map[string]string:
+					fmt.Println("map[string]string")
+				default:
+					fmt.Println("unknow")
+				}
+			}
+		}
+```	
