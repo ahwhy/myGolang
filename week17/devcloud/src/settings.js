@@ -1,3 +1,3 @@
 module.exports = {
-  title: "基础设施服务中心",
+  title: "极乐研发云",
 };

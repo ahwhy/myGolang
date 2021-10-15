@@ -5,10 +5,14 @@ import {beforeEach, afterEach} from './permission'
 /* Layout */
 import Layout from '@/layout'
 
-
 Vue.use(VueRouter);
 
 const routes = [
+  {
+    path: "/login",
+    name: "Login",
+    component: () => import("@/views/keyauth/login/index.vue"),
+  },
   {
     path: "/",
     component: Layout,
@@ -27,18 +31,17 @@ const routes = [
     redirect: '/cmdb/host',
     children: [
       {
+        path: 'search',
+        component: () => import('@/views/cmdb/search/index.vue'),
+        name: 'ResourceSearch',
+      },
+      {
         path: 'host',
         component: () => import('@/views/cmdb/host/index.vue'),
-        name: 'Cmdb-Host',
+        name: 'ResourceHost',
       }
     ]
   },
-  {
-    path: "/login",
-    name: "Login",
-    component: () => import("@/views/keyauth/login/index.vue"),
-  },
-
   {
     path: '/404',
     component: () => import('@/views/common/error-page/404.vue'),

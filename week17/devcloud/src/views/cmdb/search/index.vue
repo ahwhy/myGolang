@@ -1,6 +1,6 @@
 <template>
   <div class="main-container">
-    CMDB Search页面
+    CMDB Search
   </div>
 </template>
 
