@@ -2,19 +2,43 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import {beforeEach, afterEach} from './permission'
 
+/* Layout */
+import Layout from '@/layout'
+
+
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: () => import("../views/dashboard/index.vue"),
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
+        name: 'Dashboard',
+      }
+    ]
+  },
+  {
+    path: "/cmdb",
+    component: Layout,
+    redirect: '/cmdb/host',
+    children: [
+      {
+        path: 'host',
+        component: () => import('@/views/cmdb/host/index.vue'),
+        name: 'Cmdb-Host',
+      }
+    ]
   },
   {
     path: "/login",
     name: "Login",
-    component: () => import("../views/keyauth/login/index.vue"),
+    component: () => import("@/views/keyauth/login/index.vue"),
   },
+
   {
     path: '/404',
     component: () => import('@/views/common/error-page/404.vue'),

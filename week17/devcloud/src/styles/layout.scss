@@ -1,0 +1,33 @@
+$navbarHeight: 50px;
+
+#app {
+    .navbar-container {
+        display: flex;
+        position: fixed;
+        width:100vw;
+        height:$navbarHeight;
+        background: linear-gradient(to right, #2ebf91, #8360c3);
+        box-shadow: 0 5px 5px -3px var(--cb-color-shadow,rgba(0,0,0,0.16));
+    }
+    
+    .app-wrapper {
+        padding-top: $navbarHeight;
+        display: flex;
+    }
+
+    .sidebar-container {
+        transition: width 0.28s;
+
+        // reset element-ui css
+        .horizontal-collapse-transition {
+            transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
+        }
+    }
+
+    .main-container {
+        padding: 10px;
+        min-height: 100%;
+        width: 100%;
+        background-color: #f2f2f2;
+    }
+}

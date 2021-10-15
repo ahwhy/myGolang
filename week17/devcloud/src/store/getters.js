@@ -5,5 +5,7 @@ const getters = {
     username: state => state.user.name,
     userType: state => state.user.type,
     userAvatar: state => state.user.avatar,
+    sidebar: state => state.app.sidebar,
+    size: state => state.app.size,
   }
   export default getters

@@ -20,6 +20,9 @@ const mutations = {
         state.name = user.profile.real_name
         state.avatar = user.profile.avatar
     },
+    CLEAN_TOKEN: () => {
+        state.accessToken = ''
+    },
 }
 
 const actions = {
@@ -39,7 +42,15 @@ const actions = {
             commit('SET_PROFILE', resp.data)
             resolve(resp)
         })
-    }
+    },
+
+    // 退出登录
+    logout({ commit }) {
+        return new Promise((resolve, reject) => {
+            commit('CLEAN_TOKEN')
+            resolve()
+        })
+    },
 }
 
 export default {
@@ -47,5 +58,5 @@ export default {
     namespaced: true,
     state,
     mutations,
-    actions
+    actions,
 }
