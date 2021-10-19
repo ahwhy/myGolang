@@ -48,7 +48,7 @@ import Hamburger from '@/components/Hamburger'
 
 export default {
   name: 'Navbar',
-  computed: { Hamburger },
+  components: { Hamburger },
   data() {
     return {
       activeIndex: 'dashboard',

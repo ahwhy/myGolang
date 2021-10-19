@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar" :style="{'width': sidebarWidth}">
     <el-scrollbar wrap-class="scrollbar-wrapper">
-      <el-menu default-active="1-4-1" class="sidebar-el-menu" :collapse="isCollapse" router>
+      <el-menu default-active="1-1-1" class="sidebar-el-menu" :collapse="isCollapse" router>
         <el-submenu index="/host">
           <!-- 添加个title -->
           <template slot="title">

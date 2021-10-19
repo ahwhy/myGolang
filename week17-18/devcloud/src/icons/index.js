@@ -7,8 +7,3 @@ Vue.component('svg-icon', SvgIcon)
 const req = require.context('./svg', false, /\.svg$/)
 const requireAll = requireContext => requireContext.keys().map(requireContext)
 requireAll(req)
-
-
-import Hamburger from '@/components/Hamburger'
-// register globally
-Vue.component('hamburger', Hamburger)
