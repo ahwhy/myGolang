@@ -142,12 +142,14 @@
 					panic(err)
 				}
 				defer f.Close()
+				
 				// 启动trace goroutine
 				err = trace.Start(f)
 				if err != nil {
 					panic(err)
 				}
 				defer trace.Stop()
+				
 				// 启动goroutine
 				asyncRun()
 				wg.Wait()
@@ -516,6 +518,7 @@
 				Status int
 				Cost   int64
 			}
+			
 			// 构造请求
 			func doSiteRequest(out chan<- SiteResp, url string) {
 				res := SiteResp{}
@@ -541,6 +544,7 @@
 				}
 				// res.Resp = string(byt)
 			}
+			
 			// 聚合返回
 			func mergeResponse(resp <-chan SiteResp, ret *[]SiteResp, down chan struct{}) {
 				defer func() {
@@ -556,6 +560,7 @@
 					}
 				}
 			}
+			
 			// 执行请求
 			func BatchSiteReqeust() {
 				endpoints := []string{
@@ -585,59 +590,62 @@
 ```
 	- Pipeline 模式
 		- 利用多核的优势把一段粗粒度逻辑分解成多个 goroutine 执行
-		- 示例
-			- 第一个函数getRandNum()用于生成随机整数，并将生成的整数放进第一个channel ch1中
-			- 第二个函数addRandNum()用于接收ch1中的数据(来自第一个函数)，将其输出，然后对接收的值加1后放进第二个channel ch2中
-			- 第三个函数printRes接收ch2中的数据并将其输出
-			- 如果将函数认为是Linux的命令，则类似于下面的命令行：ch1相当于第一个管道，ch2相当于第二个管道
 ```
-				// getRandNum | addRandNum | printRes
-				var wg sync.WaitGroup
-				func getRandNum(out chan<- int) {
-					defer wg.Done()
-					var random int
-					// 总共生成10个随机数
-					for i := 0; i < 10; i++ {
-						// 生成[0,30)之间的随机整数并放进channel out
-						random = rand.Intn(30)
-						out <- random
-					}
-					close(out)
+			// getRandNum | addRandNum | printRes
+			var wg sync.WaitGroup
+			
+			// getRandNum()用于生成随机整数，并将生成的整数放进第一个channel ch1中
+			func getRandNum(out chan<- int) {
+				defer wg.Done()
+				var random int
+				// 总共生成10个随机数
+				for i := 0; i < 10; i++ {
+					// 生成[0,30)之间的随机整数并放进channel out
+					random = rand.Intn(30)
+					out <- random
 				}
-				func addRandNum(in <-chan int, out chan<- int) {
-					defer wg.Done()
-					for v := range in {
-						// 输出从第一个channel中读取到的数据
-						// 并将值+1后放进第二个channel中
-						fmt.Println("before +1:", v)
-						out <- (v + 1)
-					}
-					close(out)
+				close(out)
+			}
+			
+			// addRandNum()用于接收ch1中的数据(来自第一个函数)，将其输出，然后对接收的值加1后放进第二个channel ch2中
+			func addRandNum(in <-chan int, out chan<- int) {
+				defer wg.Done()
+				for v := range in {
+					// 输出从第一个channel中读取到的数据
+					// 并将值+1后放进第二个channel中
+					fmt.Println("before +1:", v)
+					out <- (v + 1)
 				}
-				func printRes(in <-chan int) {
-					defer wg.Done()
-					for v := range in {
-						fmt.Println("after +1:", v)
-					}
+				close(out)
+			}
+			
+			// printRes() 接收ch2中的数据并将其输出
+			func printRes(in <-chan int) {
+				defer wg.Done()
+				for v := range in {
+					fmt.Println("after +1:", v)
 				}
-				func PipelineMode() {
-					wg.Add(3)
-					// 创建两个channel
-					ch1 := make(chan int)
-					ch2 := make(chan int)
-					// 3个goroutine并行
-					go getRandNum(ch1)
-					go addRandNum(ch1, ch2)
-					go printRes(ch2)
-					wg.Wait()
-				}
+			}
+			
+			// 如果将函数认为是Linux的命令，则类似于下面的命令行: ch1相当于第一个管道，ch2相当于第二个管道
+			func PipelineMode() {
+				wg.Add(3)
+				// 创建两个channel
+				ch1 := make(chan int)
+				ch2 := make(chan int)
+				// 3个goroutine并行
+				go getRandNum(ch1)
+				go addRandNum(ch1, ch2)
+				go printRes(ch2)
+				wg.Wait()
+			}
 ```
 	- Producer/Consumer 模式
 		- 生产者消费者模型，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度
 			- 即生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据
 			- 让生产、消费变成了异步的两个过程、
 ```
-			// 生产者: 生成 factor 整数倍的序列
+			// Producer 生产者: 生成 factor 整数倍的序列
 			func Producer(factor int, out chan<- int) {
 				maxCount := 0
 				for i := 0; ; i++ {
@@ -649,12 +657,14 @@
 					}
 				}
 			}
-			// 消费者
+			
+			// Consumer 消费者
 			func Consumer(in <-chan int) {
 				for v := range in {
 					fmt.Println(v)
 				}
 			}
+			
 			func ProducerConsumerMode() {
 				ch := make(chan int, 64) // 成果队列
 				go Producer(3, ch) // 生成 3 的倍数的序列
@@ -668,12 +678,12 @@
 		- pub/sub 也就是发布订阅模型
 			- 在这个模型中，消息生产者成为发布者(publisher)，而消息消费者则成为订阅者(subscriber)，生产者和消费者是M:N的关系
 			- 在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题
-		- 示例
 ```
 			type (
-				subscriber chan interface{}         // 订阅者为一个管道
-				topicFunc  func(v interface{}) bool // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
+				subscriber chan interface{}          // 订阅者为一个管道
+				topicFunc  func(v interface{}) bool  // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
 			)
+			
 			// 发布者对象
 			type Publisher struct {
 				m           sync.RWMutex             // 读写锁
@@ -681,6 +691,7 @@
 				timeout     time.Duration            // 发布超时时间
 				subscribers map[subscriber]topicFunc // 订阅者信息
 			}
+			
 			// 构建一个发布者对象, 可以设置发布超时时间和缓存队列的长度
 			func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
 				return &Publisher{
@@ -689,10 +700,12 @@
 					subscribers: make(map[subscriber]topicFunc),
 				}
 			}
+			
 			// 添加一个新的订阅者，订阅全部主题
 			func (p *Publisher) Subscribe() chan interface{} {
 				return p.SubscribeTopic(nil)
 			}
+			
 			// 添加一个新的订阅者，订阅过滤器筛选后的主题
 			func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
 				ch := make(chan interface{}, p.buffer)
@@ -701,6 +714,7 @@
 				p.m.Unlock()
 				return ch
 			}
+			
 			// 退出订阅
 			func (p *Publisher) Evict(sub chan interface{}) {
 				p.m.Lock()
@@ -709,6 +723,7 @@
 				delete(p.subscribers, sub)
 				close(sub)
 			}
+			
 			// 发布一个主题
 			func (p *Publisher) Publish(v interface{}) {
 				p.m.RLock()
@@ -721,6 +736,7 @@
 				}
 				wg.Wait()
 			}
+			
 			// 关闭发布者对象，同时关闭所有的订阅者管道。
 			func (p *Publisher) Close() {
 				p.m.Lock()
@@ -731,6 +747,7 @@
 					close(sub)
 				}
 			}
+			
 			// 发送主题，可以容忍一定的超时
 			func (p *Publisher) sendTopic(
 				sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
@@ -745,6 +762,7 @@
 				case <-time.After(p.timeout):
 				}
 			}
+			
 			p := NewPublisher(100*time.Millisecond, 10)
 			defer p.Close()
 			// 订阅所有
@@ -778,7 +796,7 @@
 	- Workers Pool 模式
 		- Go语言中 goroutine 已经足够轻量，甚至 net/http server 的处理方式也是 goroutine-per-connection 的，所以比起其他语言来说可能场景稍微少一些
 			- 每个 goroutine 的初始内存消耗在 2~8kb，当有大批量任务的时候，需要起很多goroutine来处理，这会给系统代理很大的内存开销和GC压力，这个时候就可以考虑一下协程池
-		- 示例 -> 参考Go的老版调度实现一个任务工作队列
+		- 参考Go的老版调度实现一个任务工作队列
 			- 有(最多)4个worker，每个worker是一个goroutine，它们有worker ID
 			- 每个worker都从一个队列中取出待执行的任务(Task)，并发执行
 			- 队列容量为10，即最多只允许10个任务进行排队
@@ -793,12 +811,14 @@
 					Status     string
 					CreateTime time.Time
 				}
+				
 				// Run 执行任务
 				func (t *Task) Run() {
 					sleep := rand.Intn(1000)
 					time.Sleep(time.Duration(sleep) * time.Millisecond)
 					t.Status = "Completed"
 				}
+				
 				// 从buffered channel中读取任务，并执行任务
 				func worker(in <-chan *Task, workID int) {
 					defer wg.Done()
@@ -808,6 +828,7 @@
 						fmt.Printf("Worker%d: Completed for TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
 					}
 				}
+				
 				// 将待执行任务放进buffered channel，共15个任务
 				func produceTask(out chan<- *Task) {
 					for i := 1; i <= 15; i++ {
@@ -819,6 +840,7 @@
 						}
 					}
 				}
+				
 				func RunTaskWithPool() {
 					wg.Add(workerNum)
 					// 创建容量为10的bufferd channel
@@ -906,7 +928,19 @@
 	- 回调函数就是一个被作为参数传递的函数
 	- 使用回调函数进行网页爬虫
 ```
+		var (
+			client = http.Client{
+				Timeout: time.Duration(1 * time.Second),
+			}
+		)
+		type SiteResp struct {
+			Err    error
+			Resp   string
+			Status int
+			Cost   int64
+		}
 		type SiteRespCallBack func(SiteResp)
+		
 		// 构造请求
 		func doSiteRequest(cb SiteRespCallBack, url string) {
 			res := SiteResp{}
@@ -936,6 +970,7 @@
 		
 			// res.Resp = string(byt)
 		}
+		
 		// 主函数完成回调处理逻辑
 		func CallBackMode() {
 			endpoints := []string{
@@ -948,7 +983,8 @@
 			// 一个endpoints返回一个结果, 缓冲可以确定
 			respChan := make(chan SiteResp, len(endpoints))
 			defer close(respChan)
-		
+			
+			// 回调处理逻辑
 			ret := make([]SiteResp, 0, len(endpoints))
 			cb := func(resp SiteResp) {
 				ret = append(ret, resp)

@@ -51,7 +51,7 @@ export default {
   background-color: rgba(48, 210, 190, 0.42);
   color: rgb(20, 105, 105);
   font-size: 12px;
-  padding: 8px 16px;
+  padding: 8px 16px;   // 左右16px 上下8px
 }
 
 .titile {
