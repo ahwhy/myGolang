@@ -6,7 +6,6 @@ import store from "./store";
 // UI 组件
 import Element from 'element-ui'
 import "element-ui/lib/theme-chalk/index.css"
-import './styles/element-variables.scss'
 
 // 加载 svg icons
 import './icons'
@@ -25,6 +24,7 @@ import '@/filters'
 Vue.config.productionTip = false;
 Vue.use(Element, {
   size: Cookies.get('size') || 'mini', // set element-ui default size
+  // size: 'mini'
 })
 
 new Vue({

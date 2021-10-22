@@ -11,8 +11,10 @@ const vuexLocal = new VuexPersistence({
 
 Vue.use(Vuex);
 
+const modules = {user, app}
+
 export default new Vuex.Store({
-  modules: {user, app},
+  modules,
   getters,
   plugins: [vuexLocal.plugin]
 });

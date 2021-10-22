@@ -46,6 +46,11 @@
 	- Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC
 		- 因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
 	- Time是有时区的s通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
+```
+		type Time struct {
+			// Has unexported fields.
+		}
+```
 
 - now() 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
 

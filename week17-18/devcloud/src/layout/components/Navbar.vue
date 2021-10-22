@@ -42,9 +42,7 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
 import Hamburger from '@/components/Hamburger'
-// Vue.component('hamburger', Hamburger)
 
 export default {
   name: 'Navbar',

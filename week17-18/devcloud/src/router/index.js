@@ -1,7 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import {beforeEach, afterEach} from './permission'
-
 /* Layout */
 import Layout from '@/layout'
 
