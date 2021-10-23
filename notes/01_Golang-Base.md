@@ -848,7 +848,287 @@
 		}
 ```
 	- Set的实现
+```
+		type Set struct {
+			sync.RWMutex
+			Mset map[interface{}]interface{}
+		}
+
+		func NewSet(item ...interface{}) *Set {
+			s := &Set{}
+			s.Mset = make(map[interface{}]interface{})
+			s.Add(item...)
+
+			return s
+		}
+
+		// Add 添加元素
+		func (s *Set) Add(items ...interface{}) error {
+			s.Lock()
+			defer s.Unlock()
+
+			for _, item := range items {
+				s.Mset[item] = item
+			}
+
+			return nil
+		}
+
+		// Delete 删除元素
+		func (s *Set) Delete(items ...interface{}) error {
+			s.Lock()
+			defer s.Unlock()
+
+			for _, item := range items {
+				delete(s.Mset, item)
+			}
+
+			return nil
+		}
+
+		// Modify 修改元素
+		func (s *Set) Modify(items ...interface{}) error {
+			s.Lock()
+			defer s.Unlock()
+
+			for _, item := range items {
+				_, ok := s.Mset[item]
+				if !ok {
+					continue
+				}
+
+				switch value := item.(type) {
+				case string:
+					s.Mset[item] = value + "modify"
+				case int:
+					s.Mset[item] = value + 10
+				case bool:
+					s.Mset[item] = true
+				case float64:
+					s.Mset[item] = value + 3.1415926535
+				}
+			}
+
+			return nil
+		}
+
+		// Contains 包含&&查询
+		func (s *Set) Contains(item interface{}) bool {
+			s.RLock()
+			defer s.RUnlock()
+
+			_, ok := s.Mset[item]
+
+			return ok
+		}
+
+		// Size 容量
+		func (s *Set) Size() int {
+			s.RLock()
+			defer s.RUnlock()
+
+			return len(s.Mset)
+		}
+
+		// Clear 清除
+		func (s *Set) Clear() {
+			s.Lock()
+			defer s.Unlock()
+
+			s.Mset = make(map[interface{}]interface{})
+		}
+
+		// Equel 比较
+		func (s *Set) Equel(other *Set) bool {
+			// 如果两者Size不相等，返回false
+			if s.Size() != other.Size() {
+				return false
+			}
+
+			// 迭代查询遍历
+			for key := range s.Mset {
+				// 若不存在返回false
+				if !other.Contains(key) {
+					return false
+				}
+			}
+
+			return true
+		}
+
+		// IsSubset 子集
+		func (s *Set) IsSubset(other *Set) bool {
+			// s的size长于other，返回false
+			if s.Size() > other.Size() {
+				return false
+			}
+
+			// 迭代遍历
+			for key := range s.Mset {
+				if !other.Contains(key) {
+					return false
+				}
+			}
+
+			return true
+		}
+```
 	- k8s-deployment的实现
+```
+		/*
+		- interface
+		- map
+		- 发布系统，能发布k8s node(jtype字段) 不同的类型的任务
+		- 增量更新：开启新的，停掉旧的
+		- 原有的是a,b,c ，b,c,d --> 开启d, 停掉a
+		*/
+
+		type jobManager struct {
+			jobMutex sync.RWMutex
+			// 增量更新
+			activeJobs map[string]deployJob
+		}
+
+		func NewJobManager() *jobManager {
+			return &jobManager{
+				jobMutex:   sync.RWMutex{},
+				activeJobs: map[string]deployJob{},
+			}
+		}
+
+		func (jm *jobManager) sync(jobs []deployJob) {
+			// ***增量更新
+			jb := make(map[string]deployJob)
+
+			for _, v := range jobs {
+				jb[v.GetName()] = v
+			}
+
+			jm.jobMutex.Lock()
+			defer jm.jobMutex.Unlock()
+			for k, jmv := range jm.activeJobs {
+				if jbv, ok := jb[k]; ok && jmv.GetKind() == jbv.GetKind() {
+					delete(jb, k)
+				} else {
+					go jm.activeJobs[k].stop()
+				}
+			}
+			for k, v := range jb {
+				jm.activeJobs[k] = v
+				go jm.activeJobs[k].start()
+			}
+		}
+
+		type deployJob interface {
+			start()
+			stop()
+			SetFlag(b bool)
+			GetName() string
+			GetFlag() bool
+			GetKind() string
+		}
+
+		type k8sD struct {
+			Name string
+			Flag bool
+			Kind string
+		}
+
+		func NewK8sD(name string) *k8sD {
+			return &k8sD{
+				Name: name,
+				Kind: "K8sD",
+			}
+		}
+
+		func (k *k8sD) start() {
+			k.SetFlag(true)
+			log.Printf("Pod %s 开始运行 \n", k.Name)
+			count := 0
+			for {
+				if k.Flag {
+					count++
+					log.Printf("Pod %s 正在运行 %d 秒\n", k.Name, count)
+					time.Sleep(1 * time.Second)
+				} else {
+					log.Printf("Pod %s 退出运行 \n", k.Name)
+					break
+				}
+			}
+		}
+
+		func (k *k8sD) stop() {
+			k.SetFlag(false)
+			log.Printf("Pod %s 退出运行 \n", k.Name)
+		}
+
+		func (k *k8sD) SetFlag(b bool) {
+			k.Flag = b
+		}
+
+		func (k *k8sD) GetName() string {
+			return k.Name
+		}
+
+		func (k *k8sD) GetFlag() bool {
+			return k.Flag
+		}
+
+		func (k *k8sD) GetKind() string {
+			return k.Kind
+		}
+
+		type host struct {
+			Name string
+			Flag bool
+			Kind string
+			// Pod  []k8sD
+		}
+
+		func NewHost(name string) *host {
+			return &host{
+				Name: name,
+				Kind: "Host",
+			}
+		}
+
+		func (h *host) start() {
+			h.SetFlag(true)
+			log.Printf("Host %s 开始运行 \n", h.Name)
+			count := 0
+			for {
+				count++
+				if h.Flag {
+					log.Printf("Host %s 正在运行 %d 秒\n", h.Name, count)
+					time.Sleep(1 * time.Second)
+				} else {
+					log.Printf("Host %s 退出运行 \n", h.Name)
+					break
+				}
+			}
+		}
+
+		func (h *host) stop() {
+			h.SetFlag(false)
+			log.Printf("Host %s 退出运行 \n", h.Name)
+		}
+
+		func (h *host) SetFlag(b bool) {
+			h.Flag = b
+		}
+
+		func (h *host) GetName() string {
+			return h.Name
+		}
+
+		func (h *host) GetFlag() bool {
+			return h.Flag
+		}
+
+		func (h *host) GetKind() string {
+			return h.Kind
+		}
+```
 	- 带过期时间的map
 		- map做缓存用的 垃圾堆积k1、k2 
 		- 希望缓存存活时间 5分钟

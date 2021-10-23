@@ -1,4 +1,4 @@
-package Mset
+package mset
 
 import (
 	"sync"

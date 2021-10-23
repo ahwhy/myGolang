@@ -1,4 +1,4 @@
-package Mset_test
+package mset_test
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/myMap/Mset"
+	"github.com/ahwhy/myGolang/myMap/mset"
 )
 
 func TestMset(t *testing.T) {
 	fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
 	rand.Seed(time.Now().Unix())
-	a := Mset.NewSet()
-	b := Mset.NewSet()
+	a := mset.NewSet()
+	b := mset.NewSet()
 
 	a.Add("aa", 123, false, 456.789, 1000)
 	b.Add("aa", 123, false, 456.789, 1000)
@@ -30,7 +30,7 @@ func TestMset(t *testing.T) {
 
 	log.Println(a.Contains("aa"), a.Size(), a.Equel(b), a.IsSubset(b))
 
-	c := Mset.NewSet()
+	c := mset.NewSet()
 	for i := 0; i < 10000; i++ {
 		v := fmt.Sprintf("KEY_%d", i)
 		go func() {
