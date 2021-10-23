@@ -847,6 +847,8 @@
 			fmt.Printf("%c, %v\n", ch, cnt)
 		}
 ```
+	- Set的实现
+	- k8s-deployment的实现
 	- 带过期时间的map
 		- map做缓存用的 垃圾堆积k1、k2 
 		- 希望缓存存活时间 5分钟
@@ -854,84 +856,137 @@
 		- 耗时的操作在加锁外侧做
 ```
 			type item struct {
-				value int   // 值
-				ts    int64 // 时间戳，item被创建出来的时间,或者被更新的时间
+				value interface{} // 值
+				ts    int64       // 时间戳，item被创建出来的时间，或者被更新的时间
 			}
-			
+
+			func NewItem(i interface{}) *item {
+				return &item{
+					value: i,
+					ts:    time.Now().Unix(),
+				}
+			}
+
+			// 带过期缓存的map
 			type Cache struct {
 				sync.RWMutex
 				mp map[string]*item
 			}
-			
+
+			func NewCache() *Cache {
+				return &Cache{
+					mp: make(map[string]*item),
+				}
+			}
+
 			func (c *Cache) Get(key string) *item {
 				c.RLock()
 				defer c.RUnlock()
+
 				return c.mp[key]
 			}
-			
+
 			func (c *Cache) Set(key string, value *item) {
 				c.Lock()
 				defer c.Unlock()
+
 				c.mp[key] = value
 			}
-			
+
+			// GC 先加读锁 -> 检查确实有需要回收的数据 -> 合并写锁回收
 			func (c *Cache) Gc(timeDelta int64) {
-				// GC 先加读锁 -> 检查确实有需要回收的数据 -> 合并写锁回收
 				for {
 					toDelKeys := make([]string, 0)
 					now := time.Now().Unix()
 					c.RLock()
-			
-					// 变量缓存中的项目，对比时间戳，超过 timeDelta的删除
+
+					// 遍历缓存中的项目，对比时间戳，超过 timeDelta 就删除该项目
 					for k, v := range c.mp {
 						if now-v.ts > timeDelta {
-							log.Printf("[这个项目过期了][key %s]", k)
+							log.Printf("[项目已过期][key %s]", k)
 							toDelKeys = append(toDelKeys, k)
 						}
 					}
 					c.RUnlock()
-			
+
 					c.Lock()
 					for _, k := range toDelKeys {
 						delete(c.mp, k)
 					}
 					c.Unlock()
+
 					time.Sleep(5 * time.Second)
 				}
 			}
-			
-			c := Cache{
-				mp: make(map[string]*item),
-			}
-			// 让删除过期项目的任务，异步执行，
-			go c.Gc(30)
-			
-			// 写入数据 从mysql读取
-			for i := 0; i < 10; i++ {
+
+			c := NewCache()
+			// 异步执行，删除过期项目的任务
+			go c.Gc(10)
+
+			// 写入数据
+			for i := 0; i <= 10; i++ {
 				key := fmt.Sprintf("key_%d", i)
-				ts := time.Now().Unix()
-				im := &item{
-					value: i,
-					ts:    ts,
-				}
-				//设置缓存
-				log.Printf("[设置缓存][项目][key:%s][v:%v]", key, im)
-				c.Set(key, im)
+				item := NewItem(i)
+
+				// 设置缓存
+				log.Printf("[设置项目缓存[key:%s][v:%v]", key, item)
+				c.Set(key, item)
 			}
-			time.Sleep(31 * time.Second)
+
+			time.Sleep(15 * time.Second)
+
 			for i := 0; i < 5; i++ {
 				key := fmt.Sprintf("key_%d", i)
-				ts := time.Now().Unix()
-				im := &item{
-					value: i + 1,
-					ts:    ts,
-				}
-				log.Printf("[更新缓存][项目][key:%s][v:%v]", key, im)
-				c.Set(key, im)
+				item := NewItem(i + 2)
+
+				// 更新缓存
+				log.Printf("[更新项目缓存][key:%s][v:%v]", key, item)
+				c.Set(key, item)
 			}
-			select {} // 阻塞main
+
+			time.Sleep(10 * time.Second)
 ```
-	- 带过期时间的缓存 github.com/patrickmn/go-cache 
+	- 带过期时间的缓存 github.com/patrickmn/go-cache
+```
+		var (
+			defaultInterval = time.Second * 30
+			UserCache       = cache.New(defaultInterval, defaultInterval)
+		)
+
+		type user struct {
+			Name  string
+			Email string		
+			Phone int64
+		}
+
+		// HttpGetUser 初始化user对象
+		func HttpGetUser(name string) user {
+			u := user{
+				Name:  name,
+				Email: "qq.com",
+				Phone: time.Now().Unix(),
+			}
+
+			return u
+		}
+
+		func GetUser(name string) user {
+			res, found := UserCache.Get(name)
+			if found {
+				u := res.(user)
+				log.Printf("[found_user_in_cache][name:%s][value:%v]", name, u)
+
+				return u
+			} else {
+				res := HttpGetUser(name)
+				// 给每个key 单独设置超时时间
+				UserCache.Set(name, res, defaultInterval)
+				log.Printf("[not_found_user_in_cache][query_by_http][name:%s][value:%v]", name, res)
+
+				return res
+			}
+		}
+```
 
 
 ### 4. 结构体 struct
