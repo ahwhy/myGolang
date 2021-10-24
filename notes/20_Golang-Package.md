@@ -49,8 +49,15 @@
 - github上新建一个仓库
 - 推送到远程
 ```
+	// or push an existing repository from the command line
 	git remote add origin https://github.com/ahwhy/myGolang.git
 	git branch -M main
 	git push -u origin main
+```
+- 上传tag
+```
+	git log --oneline
+	git tag -a v0.0.2 -m "updata"
+	git push origin --tags
 ```
 
