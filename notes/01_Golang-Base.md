@@ -1,4 +1,4 @@
-# Golang-Base  基础语法
+# Golang-Base  Golang的基础语法
 
 ## 一、Golang简介
 - Go语言的编译

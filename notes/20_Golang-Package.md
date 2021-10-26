@@ -55,9 +55,180 @@
 	git push -u origin main
 ```
 - 上传tag
+	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
+	- https://www.jianshu.com/p/79ecf4fe5079
 ```
 	git log --oneline
+	// 创建lightweight类型的tag
+	git tag v0.0.2-lw
+	// 创建annotated类型的tag
 	git tag -a v0.0.2 -m "updata"
 	git push origin --tags
 ```
 
+## 十、常用包与函数  
+- 标准库 https://studygolang.com/pkgdoc
+
+### 1. time
+```
+	time.Now()          // 获取当前时间
+	time.Now().Unix()
+	time.Now().Year()   // Month() Day()  Hour()  Minute()  Second()
+	time.Now().Format("2006-01-02 15:04:05")
+	time.Parse()        // 返回转换后的时间格式和一个判断信息（err)
+	time.Sleep(1 * time.Second)
+	time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
+```
+
+### 2. math
+```
+	// 用于测试一个数是否是非数NaN
+	// NaN非数，一般用于表示无效的除法操作结果0/0或Sqrt(-1)
+	func IsNaN(f float64) (is bool)
+
+	// 返回非数对应的值
+	func NaN() float64
+```
+
+- math/rand
+```
+	rand.Seed(time.Now().Unix())  // 使用当前时间设置随机数种子
+	rand.Intn(100)    // 生产[0, 100)的随机数
+```
+
+### 3. reflect
+```
+	//  获取数据类型，同Printf("%T")
+	reflect.TypeOf()
+	reflect.ValueOf()
+```
+
+### 4. os
+```
+	// os文件处理
+	*os.PathError           // PathError records an error and the operation and file path that caused it.
+	*os.LinkError           // LinkError records an error during a link or symlink or rename system call and the paths that caused it.
+	*os.SyscallError        // SyscallError records an error from a specific system call.
+
+	//系统退出
+	os.Esxit(1) 
+	os.Args                 // 接收命令行参数生成切片，从程序本身的路径开始 var os.Args []string
+	os.Stat("test.txt")     // func os.Stat(name string) (fs.FileInfo, error)  Stat returns a FileInfo describing the named file. If there is an error, it will be of type *PathError.
+```
+
+### 5. strings
+```
+	strings.FieldsFunc()  // 将字符串进行分段，返回切片 func strings.FieldsFunc(s string, f func(rune) bool) []string
+	strings.Contains()    // func Contains(s, substr string) bool  判断字符串s中是否存在对应字符substr
+	strings.ToLower()     // func ToLower(s string) string         将字符串统一转成小写
+	strings.NewReader("")     // 从字符串创建一个reader对象
+	strings.Reader.Reader()   // func (*strings.Reader).Read(b []byte) (n int, err error)
+```
+
+### 6. errors
+```
+	errors.New() // 创建错误 或使用 fmt.Errorf()
+```
+
+### 7. sort
+```
+	type StringSlice []string
+	func sort.Strings(x []string)
+	func sort.Sort(data sort.Interface)
+```
+
+### 8. flag
+```
+	flag.Parse()           // 解析命令行参数
+	flag.IntVar()          // 设置int类型参数
+	flag.BoolVar()		   // 设置bool类型参数
+	flag.StringVar()       // 设置string类型参数    func flag.StringVar(p *string, name string, value string, usage string)
+	flag.PrintDefaults()   // 获取自动生成的参数信息
+```
+
+### 9. crypto
+- crypto/md5
+```
+	md5.Sum([]byte(""))     // 计算byte切片中字符的MD5
+	md5.New()               // 解码
+```
+- crypto/sha1
+```
+	sha1.Sum([]byte(""))    // 计算byte切片中字符消息摘要(Hash)
+	sha256.Sum([]byte(""))
+	sha512.Sum([]byte(""))
+	sha256.Sum256([]byte(""))
+```
+
+### 10. encoding/base64
+```
+	base64.stdEncoding.EncodeToString([]byte(""))     // 计算byte切片中字符的base64加密
+	base64.StdEncoding.DecodeString()                 // 计算base64解码
+	base64.RawStdEncoding.EncodeToString([]byte(""))  // 计算byte切片中字符的base64加密且不使用=填充
+	base64.URLEncoding.EncodeToString([]byte(""))     // 计算byte切片中字符的url加密
+	encoding/gob
+	encoding/csv
+	encoding/json
+```
+
+### 11. log
+```
+	log.Printf("aa")  // 2021/07/04 15:32:10 aa
+```
+
+### 12. sync
+```
+	sync.Mutex 互斥锁
+	sync.RWMutex 读写锁
+	sync.Map
+	sync.WaitGroup(计数信号量)
+```
+
+### 13. runtime
+
+### 14. bufio
+```
+	// 提供缓冲流的功能
+	bufio.NewScanner(os.Stdin)
+```
+	
+### 15. io 
+```
+	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
+```
+
+### 16. io/ioutil
+
+### 17. gopkg.in/yaml.v2
+```
+	yaml.Unmarshal()
+```
+
+### 18. net/http
+```
+	http.StatusOK
+```
+
+### 19. github.com/gin-gonic/gin
+- http客户端
+
+### 20. github.com/go-playground/validator
+- 校验参数的包
+
+### 21. github.com/spf13/cobra
+- cmd命令行客户端       
+
+### 22. github.com/AlecAivazis/survey
+- 隐藏密码
+
+### 23. github.com/schollz/progressbar
+- 进度条
+
+### 24. github.com/BurntSushi/toml
+- toml解析库，解析配置文件
+
+### 25. github.com/caarlos0/env
+- 环境变量解析库，解析环境变量
+
+### 26. github.com/rs/xid
+- ID生成器库

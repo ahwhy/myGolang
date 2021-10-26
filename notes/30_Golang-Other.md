@@ -127,4 +127,15 @@
 	- bool转string  ->  strconv.FormatBool(true)
 	- float转string ->  strconv.FormatFloat(3.1415, 'E', -1, 64)  `func FormatFloat(f float64, fmt byte, prec, bitSize int) string`
 	- int转string   ->  strconv.FormatInt(255, 10)
-	- uint转string  ->  strconv.FormatUint(255, 16) 
+	- uint转string  ->  strconv.FormatUint(255, 16)
+
+## 三、进程的内存结构
+```
+	0xc0000000  内核虚拟内存         <-- 内核使用
+	0x40000000      栈区             <-- 程序运行时用于存放局部变量，可向下延伸空间
+	            共享库的内存映像
+	                堆区             <-- 程序运行时用于分配mallco和new申请的区域
+	            可读写区(.data .bss) <-- 存放全局变量和静态变量
+	0x08048000     只读区            <-- 存放程序和常量等
+	        0      未使用
+```
