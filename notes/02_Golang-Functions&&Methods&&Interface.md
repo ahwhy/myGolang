@@ -13,7 +13,7 @@
 
 - 定义语法
 	- 签名
-```
+```go
 		func function_name( [parameter list] ) [return_types] {
 			函数体
 		}
@@ -63,14 +63,14 @@
 	
 ## 三、Golong的函数返回值
 - 多返回值
-```
+```go
 	func calcReturn(x, y int) (int, int, int, int) {
 		return x + y, x - y, x  y, x  y
 	}
 ```
 
 - 命名返回值
-```
+```go
 	func calcReturnNamecalc(x, y int) (sum, difference, product, quotient int) {
 		sum, difference, product, quotient = x + y, x - y, x  y, x  y
 		return
@@ -94,7 +94,7 @@
 
 ### 2. 示例
 - 阶乘
-```
+```go
 	// n*(n-1)...3*2*1
 	func factorial(n int) int {
 		if n = 0 {
@@ -108,7 +108,7 @@
 ```
 
 - 斐波那契数列   
-```
+```go
 	// f(n)=f(n-1)+f(n-2)且f(2)=f(1)=1
 	func fib(n int) int {
 		if n == 1  n == 2 {
@@ -124,7 +124,7 @@
 	- n : a -> c(b) ； 
 	- n = 1 :  a -> c ； 
 	- n > 1 : n - 1 (a -> b(c)) 、 a -> c ；n - 1 (b -> c(a))
-```
+```go
 		func tower(a, b, c string, layer int) {
 			if layer = 0 {
 					return
@@ -147,18 +147,18 @@
 - 函数也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数返回值进行返回
 
 - 声明&&初始化&&调用
-```
+```go
 	var callback func(n1, n2 int) (r1, r2, r3, r4 int)   // 定义函数类型变量，并使用零值nil进行初始化
 	callback = calcReturn                                // 赋值为函数calcReturn
 	callback(5, 2)                                       // 调用函数calcReturn
 ```
 	- 声明函数类型变量f 为函数Add
-```
+```go
 		var f func(int, int) int = Add
 		fmt.Println(f(4, 2))  6
 ```
 	- 声明函数切片
-```
+```go
 		var fs []func(int, int) int
 		fs = append(fs, Add, Sub, Mul, Div)
 		fmt.Printf(%T;n%#vn, fs, fs)         // []func(int, int) int;
@@ -168,7 +168,7 @@
 		}
 ```
 	- 返回值为函数
-```
+```go
 		func genFunc() func() {
 			if rand.Int()%2 == 0 {
 				return sayHi
@@ -181,7 +181,7 @@
 ```
 
 - 声明&&调用参数类型为函数的函数 *高阶函数
-```
+```go
 	func printResult(pf func(...string), list ...string) {    // 定义接收函数类型作为参数的函数
 		pf(list...)
 	}
@@ -198,7 +198,7 @@
 ```
 
 - 自定义函数类型&&调用参数类型为自定义函数类型的函数&&赋值变量并调用
-```
+```go
 	type addFunc func(x, y int) int                // 声明函数类型addFunc
 	func asArg(fn addFunc) int {                   // 创建函数asArg使用声明函数类型addFunc作为参数
 		return fn(2, 2)  2
@@ -213,13 +213,13 @@
 ### 1. 匿名函数
 - 不需要定义名字的函数叫做匿名函数，常用做帮助函数在局部代码块中使用或作为其他函数的参数
 	- 声明匿名函数并直接执行
-```
+```go
 		func(args){
 			...
 		}(parameters)
 ```
 	- 使用匿名函数作为 printResult 的参数
-```
+```go
 		printResult(func(list ...string) {
 			for i, v = range list{
 				fmt.Printf(%d %s, i, v)
@@ -227,7 +227,7 @@
 		}, name...)
 ```
 	- 声明自定义匿名函数类型
-```
+```go
 		type Callback func() error                      // 声明自定义匿名函数类型
 		callback = map[string]Callback{}                // 赋值给map类型变量
 		callback[add] = func(int string) error {        // 初始化为具体的匿名函数
@@ -240,7 +240,7 @@
 ### 2. 闭包
 - 闭包，匿名函数的一种，是指在函数内定义的匿名函数引用外部函数的变量(没有使用传参的方式)，只要匿名函数继续使用则外部函数赋值的变量不被自动销毁
 	- 变量生成周期(内存中存在的时间)发生了变化 ，闭包不仅仅包含函数，还包含函数定义域和函数变量
-```
+```go
 		func addBase(base int) func(int) int {   // 定义闭包函数，返回一个匿名函数用于计算于base元素的和
 			return func (num int) int {
 				return base + num
@@ -254,7 +254,7 @@
 
 ### 1. error 接口
 - error类型是个接口
-```
+```go
 	type error interface {
 		Error() string
 	}
@@ -262,7 +262,7 @@
 
 - 函数调用时判断返回值
 	- `if err != nil { ... }`
-```
+```go
 		for _, v = range [...]int{0, 1, 2, 3} {            // 处理函数返回的错误
 			if r, err = division(6, v); err != nil {
 				fmt.Println(err)
@@ -276,7 +276,7 @@
 
 - error接口的初始化方法
 	- 通过 errors 包的 New 方法创建 `errors.New()`
-```
+```go
 		func division(n1, n2 int) (int, error){            // 定义除法函数，若除数为0则使用error返回错误信息
 			if n2 == 0 {
 				return 0, errors.New(除数为0)
@@ -285,7 +285,7 @@
 		}
 ```
 	- 通过通过fmt.Errorf方法创建方法创建
-```
+```go
 		err1, err2 = errors.New(error 1), fmt.Errorf(error %d, 2)
 		fmt.Printf(%T, %T, %v, %v, err1, err2, err1, err2)               // errors.errorString, errors.errorString, error 1, error 2
 ```
@@ -294,7 +294,7 @@
 - 以os包举例，其提供了 `LinkError、PathError、SyscallError` 的错误类型，这些 error 都是实现了 error接口的错误类型
 
 - 可以用switch err.(type)判断类型
-```
+```go
 	file, err = os.Stat(test.txt)
 	if err != nil {
 		switch err.(type) {
@@ -317,7 +317,7 @@
 
 - 自定义结构体 - 原始错误的基础上再封自己的错误信息
 	- 弊端 要定义很多 error结构体
-```
+```go
 	type MyError struct {
 		err error
 		msg string                      // 自定义的error字符串
@@ -337,7 +337,7 @@
 - 可以扩展error信息，使用 `fmt.ErrorF(newErrorStr %w,e)`
 
 - 优势是不需要像上面一样定义结构体
-```
+```go
 	e = errors.New(原始的错误)
 	w = fmt.Errorf("Wrap了一个新的错误", %w, e)
 ```
@@ -366,7 +366,7 @@
 		- 当未发生panic，且不存在panic，则recover函数得到的结果为nil
 		- 当未发生panic，且存在panic，则recover函数得到的结果为panic传递的参数
 		- recover只能获取到最后一次的panic的信息
-```
+```go
 			defer func() {
 				fmt.Println(recover())
 			}()
@@ -381,14 +381,14 @@
 - 方法是 为特定类型定义，只能由该类型调用的函数
 
 - 方法是 添加了接收者的函数，接收者必须是自定义的类型
-```
+```go
 	func (t Type) method(parameters) returns {
 		...
 	}
 ```
 
 - 示例
-```
+```go
 	type User struct {
 		name string
 	}
@@ -403,7 +403,7 @@
 	
 ### 2. 方法的调用
 - 调用方法通过自定义类型的 `对象.方法名` 进行调用，在调用过程中对象传递(赋值)给方法的接收者(值类型，拷贝)
-```
+```go
 	user := User{"aa"}  // 初始化结构体对象
 	user.Call()         // 调用结构体对象Call方法
 	user.SetName("bb")
@@ -412,7 +412,7 @@
 	
 ### 3. 指针接收者
 - 声明
-```
+```go
 	func (user *User) PSetName(name string) {
 		user.name = name
 	}
@@ -420,7 +420,7 @@
 
 - 调用
 	- 示例
-```
+```go
 		(&user).PSetName("bb")  // 调用结构体指针对象的PSetName
 		user2 := &User{"cc"}
 		(*user2).Call()
@@ -448,7 +448,7 @@
 - 方法值
 	- 在方法值对象赋值时若方法接收者为值类型，则在赋值时会将值类型拷贝
 	- 若调用为指针则自动 解引用拷贝
-```
+```go
 		method01 := user.Call
 		method02 := user.SetName
 		method03 := user2.Call
@@ -458,13 +458,13 @@
 - 方法表达式
 	- 方法表达式在赋值时
 		- 针对接收者为 值类型的方法 使用 类型名或类型指针 访问，go自动为指针变量生成隐式的指针类型接收者方法
-```
+```go
 			method05 := User.Call 
 			method05(&user)
 			method05(user2)
 ```
 		- 针对接收者为 指针类型的方法 使用 类型指针 访问，同时在调用时需要根据参数传递对应的值对象或指针对象
-```
+```go
 			method06 := (*User).PSetName
 			method06(&user, "bb")  // (*User).PSetName(&user, "bb")
 			method06(user2, "bb")  // (*User).PSetName(user2, "bb")
@@ -473,7 +473,7 @@
 - 自动生成指针接收者方法
 	- 为何会根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
 		- 接收者为 值类型 的方法
-```
+```go
 			func (user User) SetName(name string) {
 				user.name = name
 			}
@@ -486,7 +486,7 @@
 			*/
 ```
 		- 接收者为 指针类型 的方法
-```
+```go
 			func (user *User) PSetName(name string) {
 				user.name = name
 			}
@@ -500,7 +500,7 @@
 ```
 
 - 使用反射获取 User 对象和 *User 对象结构
-```
+```go
 	type User struct{
 		Fields(1): 
 			name string,
@@ -538,7 +538,7 @@
 - 接口定义使用interface标识，声明了一系列的函数签名(函数名、函数参数、函数返回值)
 
 - 在定义接口时可以指定接口名称，在后续声明接口变量时使用
-```
+```go
 	type interfaceName interface {
 		方法签名                        // 方法名，参数(数量，顺序，类型)，返回值(数量，顺序，类型)匹配
 	}
@@ -553,13 +553,13 @@
 ### 2. 声明&&初始化&&赋值
 - 声明接口变量
 	- 需要定义变量类型为接口名，此时变量值被初始化为nil，类型也为nil
-```
+```go
 		var name interfaceName
 ```
 
 - 赋值接口变量
 	- 接口无法实例化，即不能直接通过接口类型创建变量，只能由其他实现了接口的对象进行赋值
-```
+```go
 		var useritf Useritf = &User{"aa"}
 		useritf.Call()
 		useritf.SetName("bb")
@@ -589,7 +589,7 @@
 	
 ### 4. 接口匿名嵌入
 - 接口之中也可以嵌入已存在的接口，从而实现接口的扩展
-```
+```go
 	type Useritf2 interface{
 		Useritf
 	}
@@ -598,7 +598,7 @@
 ### 5. 匿名接口
 - 在定义变量时将类型指定为接口的函数签名的接口，此时叫匿名接口
 	- 匿名接口常用于初始化一次接口变量的场景
-```
+```go
 		// 通过匿名接口声明接口变量
 		var closer interface {
 			Close() error
@@ -612,7 +612,7 @@
 - 语法: `interface{}`
 
 - 直接声明空接口并使用
-```
+```go
 	type User struct {
 		Name string
 		Password string
@@ -632,7 +632,7 @@
 - 使用场景
 	- 常声明函数参数类型为 `interface{}` ，用于接收任意类型的变量
 	- 示例
-```
+```go
 		func printType(vs ...interface{}) {
 			for _, v := range vs {
 				switch v.(type) {                           // 类型查询

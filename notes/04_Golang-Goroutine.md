@@ -116,7 +116,7 @@
 			- 主协程结束后工作协程也会随之销毁，即主协程不等待工作协程的结束
 			- 无从属关系，只是两种协程类型
 			- 使用 sync.WaitGroup(计数信号量)来维护执行协程执行状态
-```
+```go
 				func printChars(prefix string, group *sync.WaitGroup) {
 					defer group.Done()                      // 通过信号量通知执行结束  等待信号量 -1
 					for ch := 'A'; ch <= 'Z'; ch++ {
@@ -138,7 +138,7 @@
 	- 过程分析
 		- Go语言中提供trace工具，用于分析程序的运行过程
 			- 执行程序后，会生成trace.out文件，再运行go tool trace trace.out  
-```
+```go
 				// 创建trace文件
 				f, err := os.Create("trace.out")
 				if err != nil {
@@ -160,7 +160,7 @@
 		- go run或go build时添加-race参数检查资源竞争
 	- 闭包陷阱
 		- 闭包使用函数外变量，当协程执行时，外部变量已经发生变化，导致打印内容不正确，可使用在创建协程时通过函数传递参数(值拷贝)方式避免
-```
+```go
 			wg := &sync.WaitGroup{}
 			wg.Add(10)
 			for i := 0; i < 10; i++ {
@@ -191,7 +191,7 @@
 		- 管道底层是一个环形队列(先进先出)，send(插入) 和 recv(取走) 从同一个位置沿同一个方向顺序执行
 		- sendx 表示最后一次插入的元素
 		- recvx 表示最后一次取走元素的位置
-```
+```go
 			// src/runtime/chan.go
 			type hchan struct {
 				qcount   uint           // 队列中的所有数据数
@@ -230,7 +230,7 @@
 - 声明
 	- 管道是声明需要指定管道存放数据的类型，管道可以存放任何类型，但只建议用于存放值类型或者只包含值类型的结构体
 	- 在管道声明后，会被初始化为 nil
-```
+```go
 		var channel chan int
 		fmt.Printf("%T %v", channel, channel)  // chan int <nil>
 ```
@@ -256,9 +256,9 @@
 				- 特点
 					- 未满之前是非阻塞，异步模式
 					- 填满之后是阻塞的，同步模式
-```
-						channel = make(chan int)           // %T chan int;    %v 0xc00001e0c0; len 0
-						channel2 := make(chan string, 10)  // %T chan string; %v 0xc00005c180; len 0
+```go
+			channel = make(chan int)           // %T chan int;    %v 0xc00001e0c0; len 0
+			channel2 := make(chan string, 10)  // %T chan string; %v 0xc00005c180; len 0
 ```
 
 - 读取和写入
@@ -269,7 +269,7 @@
 	- 当管道中无元素时，读取也会阻塞，直到管道被其他协程写入元素
 		- 只有在协程中读取才会阻塞
 		- 在main会直接报错 fatal error，非panic 不能通过recover捕获
-```
+```go
 			channel2 <- "1"
 			fmt.Println(<-channel2)
 ```
@@ -278,12 +278,12 @@
 	- 只读&&只写
 		- 在函数参数时声明管道
 			- `chan<-` 表示管道只写
-```
+```go
 				var wchannel chan<- int
 				func Write(cl chan<- rune) { }
 ```
 			- `<-chan` 表示管道只读
-```
+```go
 				var rchannel <-chan int
 				func Read(cl <-chan rune) { }
 ```
@@ -301,7 +301,7 @@
 
 - `for-range` 遍历管道
 	- 只有当管道关闭时，才能通过range遍历管道里的数据，否则会发生fatal error
-```
+```go
 		channel03 := make(chan int)
 		go func() {
 			for e := range channel03 {
@@ -320,7 +320,7 @@
 
 - Go语言time包实现了Tick函数，可以用于实现定时机制，Tick函数返回一个只读管道
 	- `func Tick(d Duration) <-chan Time`
-```
+```go
 		for now := range time.Tick(3 * time.Second) {
 			fmt.Println(time.Now())      // 每隔3s打印一次时间
 		}
@@ -359,7 +359,7 @@
 	- select会被return、break关键字中断: return是退出整个函数，break是退出当前select
 	- 当所有case都失败，则执行default语句
 	- defalut语句是可选的，不允许fall through行为，但允许case语句块为空块
-```
+```go
 		select {
 		case v, ok := <-channel:
 			fmt.Println("channel", v, ok)
@@ -373,7 +373,7 @@
 ### 3. 超时机制
 - 通过select-case 实现对执行操作超时的控制
 	- select-case语句监听每个case语句中管道的读取，当某个case语句中管道读取成功则执行对应子语句
-```
+```go
 		var timeout chan int           
 		go func() {
 			time.Sleep(3 * time.Second)
@@ -389,7 +389,7 @@
 
 - Go语言中的标准库 "time" 实现了After函数，可以用于实现超时机制，After函数返回一个只读管道
 	- `func After(d Duration) <-chan Time`
-```
+```go
 		select {
 		case v, ok := <-channel:
 			fmt.Println("success:", r)
@@ -400,20 +400,24 @@
 
 - Go语言中的标准库 "context" 实现了timeout
 	- context包常用函数
+```go
 		func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
 		func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
-			type CancelFunc func()    // CancelFunc会告诉操作放弃它的工作
-			type Context interface{ 
-				Deadline() (deadline time.Time, ok bool)
-				Done() <-chan struct{}
-				Err() error
-				Value(key interface{}) interface{}
-			}
+		type CancelFunc func()    // CancelFunc会告诉操作放弃它的工作
+		type Context interface{ 
+			Deadline() (deadline time.Time, ok bool)
+			Done() <-chan struct{}
+			Err() error
+			Value(key interface{}) interface{}
+		}
+```
 	- 调用cancel()将关闭ctx.Done()对应的管道
-		ctx, cancel := context.WithCancel(context.Background())
+		`ctx, cancel := context.WithCancel(context.Background())`
 	- 调用cancel()或到达超时时间都将关闭ctx.Done()对应的管道
+```go
 		ctx, cancel := context.WithTimeout(context.Background (),time.Microsecond*100)
 		ctx.Done()   // 管道关闭后读操作将立即返回
+```
 
 ## 五、Golang的共享数据
 
@@ -440,7 +444,7 @@
 ### 2. sync包
 - `sync.Mutex` 互斥锁，用于对资源加锁和释放锁提供对资源同步方式访问
 	- 获取到锁的任务，阻塞其他任务; 意味着同一时间只有一个任务可以获取锁
-```
+```go
 		var HcMutex sync.Mutex
 		HcMutex.Lock()    // 获取锁
 		HcMutex.UnLock()  // 释放锁
@@ -453,7 +457,7 @@
 		- 同时多个写任务，只可以施加一个写锁，阻塞其他所有锁，并且退化成互斥锁
 		- 读写混合: 若有写锁，等待释放后能施加 读或写
 		- 读写混合: 若有读锁，只能再施加读锁，阻塞写锁
-```
+```go
 			var rwMutex sync.RWMutex
 			rwMutex.Lock      // 获取写入锁
 			rwMutex.Unlock    // 释放写入锁 
@@ -466,7 +470,7 @@
 	- sync.Map 将key和value 按照interface{}存储
 	- 查询出来后要类型断言 x.(int) x.(string)
 	- 遍历使用Range() 方法，需要传入一个匿名函数作为参数，匿名函数的参数为k,v interface{}，每次调用匿名函数将结果返回
-```
+```go
 		m := sync.Map{}
 		m.Store(k,v)  // 读
 		m.Load(k)     // 写
@@ -509,7 +513,7 @@
 			- 多个网络请求并发，聚合结果
 			- 粗粒度任务拆分并发执行，聚合结果
 		- 网页爬虫
-```
+```go
 			var (
 				client = http.Client{
 					Timeout: time.Duration(1 * time.Second),
@@ -593,7 +597,7 @@
 ```
 	- Pipeline 模式
 		- 利用多核的优势把一段粗粒度逻辑分解成多个 goroutine 执行
-```
+```go
 			// getRandNum | addRandNum | printRes
 			var wg sync.WaitGroup
 			
@@ -647,7 +651,7 @@
 		- 生产者消费者模型，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度
 			- 即生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据
 			- 让生产、消费变成了异步的两个过程、
-```
+```go
 			// Producer 生产者: 生成 factor 整数倍的序列
 			func Producer(factor int, out chan<- int) {
 				maxCount := 0
@@ -681,7 +685,7 @@
 		- pub/sub 也就是发布订阅模型
 			- 在这个模型中，消息生产者成为发布者(publisher)，而消息消费者则成为订阅者(subscriber)，生产者和消费者是M:N的关系
 			- 在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题
-```
+```go
 			type (
 				subscriber chan interface{}          // 订阅者为一个管道
 				topicFunc  func(v interface{}) bool  // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
@@ -804,7 +808,7 @@
 			- 每个worker都从一个队列中取出待执行的任务(Task)，并发执行
 			- 队列容量为10，即最多只允许10个任务进行排队
 			- 任务的执行方式: 随机睡眠0-1秒钟，并将任务标记为完成
-```
+```go
 				// worker的数量，即使用多少goroutine执行任务
 				const workerNum = 4
 				var wg sync.WaitGroup
@@ -869,7 +873,7 @@
 		- 由于每个协程都要占用内存，所以协程泄漏也会导致内存泄漏
 	- 排查
 		- go run对应程序
-```
+```go
 			import (
 				"net/http"
 				_ "net/http/pprof"
@@ -899,7 +903,7 @@
 
 - 并发的安全退出
 	- 有时候需要通知goroutine停止它正在干的事情，特别是当它工作在错误的方向上的时候
-```
+```go
 		func worker(wg *sync.WaitGroup, cancel chan bool) {
 			defer wg.Done()
 			for {
@@ -930,7 +934,7 @@
 - 使用回调函数替代channel
 	- 回调函数就是一个被作为参数传递的函数
 	- 使用回调函数进行网页爬虫
-```
+```go
 		var (
 			client = http.Client{
 				Timeout: time.Duration(1 * time.Second),
@@ -981,30 +985,29 @@
 				"https://segmentfault.com/",
 				"https://blog.csdn.net/",
 				"https://www.jd.com/",
-			}
+		}
 		
-			// 一个endpoints返回一个结果, 缓冲可以确定
-			respChan := make(chan SiteResp, len(endpoints))
-			defer close(respChan)
-			
-			// 回调处理逻辑
-			ret := make([]SiteResp, 0, len(endpoints))
-			cb := func(resp SiteResp) {
-				ret = append(ret, resp)
-			}
+		// 一个endpoints返回一个结果, 缓冲可以确定
+		respChan := make(chan SiteResp, len(endpoints))
+		defer close(respChan)
 		
-			// 并行爬取
-			for _, endpoints := range endpoints {
-				wg.Add(1)
-				go doSiteRequest(cb, endpoints)
-			}
+		// 回调处理逻辑
+		ret := make([]SiteResp, 0, len(endpoints))
+		cb := func(resp SiteResp) {
+			ret = append(ret, resp)
+		}
 		
-			// 等待结束
-			wg.Wait()
+		// 并行爬取
+		for _, endpoints := range endpoints {
+			wg.Add(1)
+			go doSiteRequest(cb, endpoints)
+		}
 		
-			for _, v := range ret {
-				fmt.Println(v)
-			}
+		// 等待结束
+		wg.Wait()
+		
+		for _, v := range ret {
+			fmt.Println(v)
 		}
 ```
 
@@ -1017,7 +1020,7 @@
 		- `SIGINT   2`   Ctrl + c触发
 		- `SIGKILL  9`   无条件结束程序，不能捕获、阻塞或忽略
 		- `SIGTERM  15`  结束程序，可以捕获、阻塞或忽略
-```
+```go
 			type Context interface {
 				Deadline() (deadline time.Time, ok bool)
 				Done() <-chan struct{}

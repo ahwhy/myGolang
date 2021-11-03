@@ -18,7 +18,7 @@
 				item2 --map func--> new2
 				item3 --map func--> new3
 			- 示例 -> 使用Map函数将所有的字符串转换成大写
-```
+```go
 				func MapStrToUpper(data []string, fn func(string) string) []string {
 					newData := make([]string, 0, len(data))
 					for _, v := range data {
@@ -37,7 +37,7 @@
 				item2 -- reduce func -->   itme2
 				item3 -- reduce func -->   x
 			- 示例 -> 使用Filter函数将带"f"字段的数据筛选出
-```
+```go
 				func ReduceFilter(data []string, fn func(string) bool) []string {
 					newData := []string{}
 					for _, v := range data {
@@ -59,7 +59,7 @@
 				item2 --|--reduce func--> new item
 				item3 --|
 			- 示例-> 使用Reduce函数进行求和
-```
+```go
 				func ReduceSum(data []string, fn func(string) int) int {
 					sum := 0
 					for _, v := range data {
@@ -81,7 +81,7 @@
 		- Map/Reduce/Filter只是一种控制逻辑，真正的业务逻辑是在传给他们的数据和那个函数来定义的
 			- 示例 -> 班级统计
 				- 数据集合
-```
+```go
 					type Class struct {
 						Name     string     // 班级名称
 						Number   uint8      // 班级编号
@@ -101,14 +101,14 @@
 
 - 修饰器 decorator 
 	- 把一些函数装配到另外一些函数上，可以让代码更为的简单，也可以让一些"小功能型"的代码复用性更高，让代码中的函数可以像乐高玩具那样自由地拼装
-```
+```go
 		func Hello(s string) {
 			fmt.Printf("Hello, %s\n", s)
 		}
 		Hello("World")
 ```
 	- 示例 -> HTTP中间件(net/http包)
-```
+```go
 		func hello(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "hello, http: %s", r.URL.Path)
 		}
@@ -120,7 +120,7 @@
 	- 优化 -> 多个修饰器的管道 Pipeline
 		- 在使用上，需要对函数一层层的套起来，特别在 decorator 比较多的话，影响代码的观感和阅读
 		- 重构时，需要先写一个工具函数 -> 用来遍历并调用各个 decorator
-```
+```go
 			type HttpHandlerDecorator func(http.HandlerFunc) http.HandlerFunc
 			func Handler(h http.HandlerFunc, decors ...HttpHandlerDecorator) http.HandlerFunc {
 				// A, B, C, D, E
@@ -137,7 +137,7 @@
 	- 不需要传入config参数, 函数签名优雅(缺省情况下 传nil很不优雅)
 	- 不需要构建一个builder类来辅助
 	- 示例
-```
+```go
 		func NewServer(addr string, port int, options ...func(*Server)) (*Server, error) {}
 		func WithProtocol(s string) func(s *Server) {}
 		server := &Server{Addr: addr, Port: port}
@@ -149,7 +149,7 @@
 
 - 闭包
 	- go函数编程的特点 -> 主要是闭包，简单来说，闭包就是在函数内使用外部自由变量
-```
+```go
 		func Adder() func(int) int {
 			// 自由变量
 			num := 0
@@ -177,7 +177,7 @@
 
 - 类似流水线，装配模式
 - 可以随时增删流程
-```
+```go
 	func fib() func() int {    // 斐波那契数列
 		a, b := 0, 1
 		return func() int {
@@ -267,7 +267,7 @@
 	- 方法的签名要一致: 参数类型、参数个数，方法名称，函数返回值要一致
 	- 多态的灵魂就是有个承载的容器，先把所有实现了接口的对象加进来，每个实例都要顾及的地方，直接遍历 调用方法即可
 	- 示例一
-```
+```go
 			// 体现多态
 			// 告警通知的函数，根据不同的对象通知
 			// 有共同的通知方法，每种对象自己实现
@@ -328,7 +328,7 @@
 			}
 ```
 	- 示例二
-```
+```go
 			/*
 			1. 多个数据源
 			2. QueryData方法做查数据
