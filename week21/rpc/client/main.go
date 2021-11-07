@@ -7,7 +7,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
-	"github.com/ahwhy/myGolang/week20/rpc/service"
+	"gitee.com/infraboard/go-course/day21/rpc/service"
 )
 
 // 约束客户端

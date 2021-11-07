@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ahwhy/myGolang/week20/rpc/service"
+	"gitee.com/infraboard/go-course/day21/rpc/service"
 )
 
 type TestStruct struct {

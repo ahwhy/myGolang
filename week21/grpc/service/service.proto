@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hello;
+option go_package="gitee.com/infraboard/go-course/day21/grpc/service";
+
+// The HelloService service definition.
+service HelloService {
+    rpc Hello (Request) returns (Response) {}
+
+    rpc Channel (stream Request) returns (stream Response) {}
+}
+
+message Request {
+    string value = 1;
+}
+
+message Response {
+    string value = 1;
+}

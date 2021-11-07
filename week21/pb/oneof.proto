@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hello;
+option go_package="gitee.com/infraboard/go-course/day21/pb";
+
+
+message Sub1 {
+    string name = 1;
+}
+
+message Sub2 {
+    string name = 1;
+}
+
+message SampleMessage {
+    oneof test_oneof {
+        Sub1 sub1 = 1;
+        Sub2 sub2 = 2;
+    }
+}
+

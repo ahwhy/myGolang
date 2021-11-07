@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+// 这里是应用其他的proto文件, 后面会讲 ipmort用法
+import "google/protobuf/any.proto";
+
+package hello;
+option go_package="gitee.com/infraboard/go-course/day21/pb";
+
+message ErrorStatus {
+  string message = 1;
+  repeated google.protobuf.Any details = 2;
+}

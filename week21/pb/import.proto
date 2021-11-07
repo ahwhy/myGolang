@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+import "pb/any.proto";
+
+package hello;
+option go_package="gitee.com/infraboard/go-course/day21/pb";
+
+message ErrorStatusExt {
+   ErrorStatus error_status = 1;
+}

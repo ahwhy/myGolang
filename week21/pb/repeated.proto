@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hello;
+option go_package="gitee.com/infraboard/go-course/day21/pb";
+
+message Result {
+    string value = 1;
+    map<string, int32> a =2;
+}
+
+message SearchResponse {
+    repeated Result results = 1;
+  }
