@@ -1,6 +1,6 @@
 # proto3语法入门
 
-![](./images/proto3-sumary.png)
+![](./pic/proto3-sumary.png)
 
 [Language Guide (proto3) ](https://developers.google.com/protocol-buffers/docs/proto3)
 
@@ -58,8 +58,8 @@ message String {
 
 protobuf 定义了很多Value Types, 他和其他语言的映射关系如下:
 
-![](./images/proto3-lang-map-1.png)
-![](./images/proto3-lang-map-2.png)
+![](./pic/proto3-lang-map-1.png)
+![](./pic/proto3-lang-map-2.png)
 
 上面就是所有的protobuf基础类型, 光有这些基础类型是不够的, 下面是protobuf为我们提供的一些复合类型
 
@@ -70,7 +70,7 @@ protobuf 定义了很多Value Types, 他和其他语言的映射关系如下:
 enum Corpus {
     UNIVERSAL = 0;
     WEB = 1;
-    IMAGES = 2;
+    pic = 2;
     LOCAL = 3;
     NEWS = 4;
     PRODUCTS = 5;

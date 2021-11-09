@@ -1,6 +1,6 @@
 # GRPC 入门
 
-![](./images/grpc.png)
+![](./pic/grpc.png)
 
 gRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。gRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好。本节将讲述gRPC的简单用法
 
@@ -20,7 +20,7 @@ type HelloService interface {
 
 ## GRPC技术栈
 
-![](./images/grpc-go-stack.png)
+![](./pic/grpc-go-stack.png)
 
 + 数据交互格式: protobuf
 + 通信方式: 最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现

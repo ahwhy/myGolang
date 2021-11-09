@@ -2,14 +2,14 @@
 
 RPC是远程过程调用的简称，是分布式系统中不同节点间流行的通信方式。在互联网时代，RPC已经和IPC一样成为一个不可或缺的基础构件。
 
-![](./images/rpc-model.png)
+![](./pic/rpc-model.png)
 
 + RPC传输协议
 + 消息序列化与反序列化
 
 下面是一个基于HTTP的 JSON的 RPC:
 
-![](./images/rpc-http-model.png)
+![](./pic/rpc-http-model.png)
 
 
 ## Go语言RPC
@@ -362,7 +362,7 @@ func main() {
 }
 ```
 
-![](./images/http-json-rpc.png)
+![](./pic/http-json-rpc.png)
 
 
 这种用法常见于你的rpc服务需要暴露多种协议的时候, 其他时候还是老老实实写Restful API

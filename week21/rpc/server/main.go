@@ -6,7 +6,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
-	"gitee.com/infraboard/go-course/day21/rpc/service"
+	"github.com/ahwhy/myGolang/week21/rpc/service"
 )
 
 // 通过接口约束HelloService服务
@@ -16,8 +16,8 @@ type HelloService struct{}
 
 // Hello的逻辑 就是 将对方发送的消息前面添加一个Hello 然后返还给对方
 // 由于我们是一个rpc服务, 因此参数上面还是有约束：
-// 		第一个参数是请求
-// 		第二个参数是响应
+// 	第一个参数是请求
+// 	第二个参数是响应
 // 可以类比Http handler
 func (p *HelloService) Hello(request string, reply *string) error {
 	*reply = "hello:" + request

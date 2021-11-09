@@ -3,6 +3,7 @@ module github.com/ahwhy/myGolang
 go 1.16
 
 require (
+	gitee.com/infraboard/go-course v0.0.0-20211107132134-ef18950c567c
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/BurntSushi/toml v0.3.1
 	github.com/aliyun/aliyun-oss-go-sdk v1.9.8
@@ -14,6 +15,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/golang/snappy v0.0.3
 	github.com/gorilla/websocket v1.4.2
 	github.com/infraboard/mcube v1.4.5
 	github.com/julienschmidt/httprouter v1.3.0
@@ -21,7 +23,7 @@ require (
 	github.com/orcaman/concurrent-map v0.0.0-20210501183033-44dafcb38ecc
 	github.com/parkingwang/go-sqlbuilder v0.0.0-20180607100556-9ecb2bce72ed
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/rs/cors v1.7.0
+	github.com/rs/cors v1.8.0
 	github.com/rs/xid v1.3.0
 	github.com/schollz/progressbar/v3 v3.8.3
 	github.com/sirupsen/logrus v1.8.1
@@ -31,7 +33,8 @@ require (
 	github.com/x-mod/routine v1.3.3
 	go.mongodb.org/mongo-driver v1.7.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+	google.golang.org/grpc v1.38.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/gorm v1.21.15
