@@ -7,6 +7,7 @@ import (
 
 const HelloServiceName = "HelloService"
 
+// 定义hello service的接口
 type HelloService interface {
 	Hello(request string, reply *string) error
 }

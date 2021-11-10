@@ -6,7 +6,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"gitee.com/infraboard/go-course/day21/pb"
+	"github.com/ahwhy/myGolang/week21/pb"
 )
 
 func main() {

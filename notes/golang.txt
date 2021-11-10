@@ -6218,7 +6218,326 @@
 			cursor, err := collection.Find(ctx, filter, findOption)
 	
 
-十、其他类型
+十、RPC与GRPC
+1、RPC
+-  RPC是指远程过程调用，简单的理解是一个节点请求另一个节点提供的服务
+	- 本地过程调用
+		- 如果需要将本地student对象的age+1，可以实现一个addAge()方法，将student对象传入，对年龄进行更新之后返回即可，本地方法调用的函数体通过函数指针来指定
+	- 远程过程调用
+		- 上述操作的过程中，如果addAge()这个方法在服务端，执行函数的函数体在远程机器上
+		- 首先客户端需要告诉服务器，需要调用的函数，这里函数和进程ID存在一个映射，客户端远程调用时，需要查一下函数，找到对应的ID，然后执行函数的代码
+		- 客户端需要把本地参数传给远程函数，本地调用的过程中，直接压栈即可，但是在远程调用过程中不再同一个内存里，无法直接传递函数的参数，因此需要客户端把参数转换成字节流，传给服务端，然后服务端将字节流转换成自身能读取的格式，是一个序列化和反序列化的过程
+		- 数据准备好了之后，网络传输层需要把调用的ID和序列化后的参数传给服务端，然后把计算好的结果序列化传给客户端，因此TCP层即可完成上述过程，gRPC中采用的是HTTP2协议
+
+- 具体调用流程
+	// Client端 
+	// Student student = Call(ServerAddr, addAge, student)
+	1. 将这个调用映射为Call ID
+	2. 将Call ID，student（params）序列化，以二进制形式打包
+	3. 把2中得到的数据包发送给ServerAddr，这需要使用网络传输层
+	4. 等待服务器返回结果
+	5. 如果服务器调用成功，那么就将结果反序列化，并赋给student，年龄更新
+	
+	// Server端
+	1. 在本地维护一个Call ID到函数指针的映射call_id_map，可以用Map<String, Method> callIdMap
+	2. 等待客户端请求
+	3. 得到一个请求后，将其数据包反序列化，得到Call ID
+	4. 通过在callIdMap中查找，得到相应的函数指针
+	5. 将student（params）反序列化后，在本地调用addAge()函数，得到结果
+	6. 将student结果序列化后通过网络返回给Client
+
+- Call ID映射
+	- 在本地调用中，函数体是直接通过函数指针来指定的，当调用函数时，编译器就自动调用它相应的函数指针
+	- 但是在远程调用中，函数指针是不行的，因为两个进程的地址空间是完全不一样的
+	- 在RPC中，所有的函数都必须有自己的一个ID，这个ID在所有进程中都是唯一确定的
+	- 客户端在做远程过程调用时，必须附上这个ID
+	- 然后还需要在客户端和服务端分别维护一个 {函数 <--> Call ID} 的对应表
+	- 两者的表不一定需要完全相同，但相同的函数对应的Call ID必须相同
+	- 当客户端需要进行远程调用时，查询该表找出相应的Call ID，然后把它传给服务端，服务端也通过查表，来确定客户端需要调用的函数，然后执行相应函数的代码
+
+- 序列化和反序列化
+	- 客户端需要参数值传给远程的函数
+	- 在本地调用中，只需要把参数压到栈里，然后让函数自行去栈里读就行
+	- 但是在远程过程调用时，客户端跟服务端是不同的进程，不能通过内存来传递参数
+	- 甚至有时候客户端和服务端使用的都不是同一种语言(比如服务端用C++，客户端用Java或者Python)
+	- 这时候就需要客户端把参数先转成一个字节流，传给服务端后，服务端再把字节流转成能读取的格式，这个过程叫序列化和反序列化
+	- 同理，从服务端返回的值也需要序列化反序列化的过程
+	
+- 网络传输
+	- 远程调用往往用在网络上，客户端和服务端是通过网络连接的
+	- 所有的数据都需要通过网络传输，因此就需要有一个网络传输层
+	- 网络传输层需要把Call ID和序列化后的参数字节流传给服务端，然后再把序列化后的调用结果传回客户端
+	- 只要能完成这两者的，都可以作为传输层使用
+	- 因此，它所使用的协议其实是不限的，能完成传输就行
+	- 尽管大部分RPC框架都使用TCP协议，但其实UDP也可以，而gRPC干脆就用了HTTP2，同Java的Netty
+
+- 而实现一个RPC框架，只需要完成以上三点的实现就可以完成基本的框架
+	- Call ID映射可以直接使用函数字符串，也可以使用整数ID，映射表一般就是一个哈希表
+	- 序列化反序列化可以自行编写，也可以使用Protobuf或者FlatBuffers
+	- 网络传输可以使用socket，或者asio，ZeroMQ，Netty
+
+- Go语言中的RPC
+	- Go语言的标准库也提供了一个简单的RPC实现 net/rpc
+	- RPC Server / Client
+	
+		// RPC Server
+		type HelloService struct {}
+		// Hello的逻辑 将对方发送的消息前面添加一个Hello 然后返还给对方
+		// 由于是一个rpc服务，参数上的约束为
+		// 第一个参数是请求
+		// 第二个参数是响应
+		// 可以类比Http handler
+		func (p *HelloService) Hello(request string, reply *string) error {
+			*reply = "hello:" + request
+			return nil
+		}
+		// 把HelloService对象注册成一个rpc的 receiver
+		// 其中rpc.Register函数调用会将对象类型中所有满足RPC规则的对象方法注册为RPC函数，
+		// 所有注册的方法会放在"HelloService"服务空间之下
+		rpc.RegisterName("HelloService", new(HelloService))
+		// 然后建立一个唯一的TCP链接
+		listener, err := net.Listen("tcp", ":1234")
+		if err != nil {
+			log.Fatal("ListenTCP error:", err)
+		}
+		// 通过rpc.ServeConn函数在该TCP链接上为对方提供RPC服务
+		// 每Accept一个请求，就创建一个goroutie进行处理
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				log.Fatal("Accept error:", err)
+			}
+		
+			// 前面都是tcp的知识，这里之后就是RPC接管
+			// 因此可以认为 rpc 封装消息到函数调用的这个逻辑
+			// 提升了工作效率，逻辑比较简洁
+			go rpc.ServeConn(conn)
+		}
+
+		// RPC Client
+		// 首先通过rpc.Dial拨号RPC服务，建立连接
+		client, err := rpc.Dial("tcp", "localhost:1234")
+		if err != nil {
+			log.Fatal("dialing:", err)
+		}
+		// 然后通过client.Call调用具体的RPC方法
+		// 在调用client.Call时
+		// 第一个参数是用点号链接的RPC服务名字和方法名字
+		// 第二个参数是 请求参数
+		// 第三个是请求响应，必须是一个指针，有底层rpc服务帮你赋值
+		var reply string
+		err = client.Call("HelloService.Hello", "hello", &reply)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(reply)
+	- 基于接口的RPC服务
+		- rpc.client.Call()
+			// Call invokes the named function, waits for it to complete, and returns its error status.
+			func (client *Client) Call(serviceMethod string, args interface{}, reply interface{}) error {
+				call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
+				return call.Error
+			}
+		- 在client的call方法中，3个参数有2个interface{}，当使用的时候会有不知道要传入什么的情况产生
+		- 可以对客户端进行一次封装，使用接口当作文档，明确参数类型
+			// 定义hello service的接口
+			package service
+			const HelloServiceName = "HelloService"
+			type HelloService interface {
+				Hello(request string, reply *string) error
+			}
+			
+			// 约束服务端
+			// 通过接口约束HelloService服务
+			var _ service.HelloService = (*HelloService)(nil)
+			
+			// 封装客户端，让其满足HelloService接口约束
+			// 约束客户端
+			var _ service.HelloService = (*HelloServiceClient)(nil)
+			type HelloServiceClient struct {
+				*rpc.Client
+			}
+			func DialHelloService(network, address string) (*HelloServiceClient, error) {
+				c, err := rpc.Dial(network, address)
+				if err != nil {
+					return nil, err
+				}
+				return &HelloServiceClient{Client: c}, nil
+			}
+			func (p *HelloServiceClient) Hello(request string, reply *string) error {
+				return p.Client.Call(service.HelloServiceName+".Hello", request, reply)
+			}
+			client, err := DialHelloService("tcp", "localhost:1234")
+			if err != nil {
+				log.Fatal("dialing:", err)
+			}
+			var reply string
+			err = client.Hello("hello", &reply)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(reply)
+
+ - gob编码
+	- 标准库的RPC默认采用Go语言特有的gob编码，标准库gob是golang提供的"私有"的编解码方式，它的效率会比json，xml等更高，特别适合在Go语言程序间传递数据
+		// ServeConn runs the server on a single connection.
+		// ServeConn blocks, serving the connection until the client hangs up.
+		// The caller typically invokes ServeConn in a go statement.
+		// ServeConn uses the gob wire format (see package gob) on the
+		// connection. To use an alternate codec, use ServeCodec.
+		// See NewClient's comment for information about concurrent access.
+		func (server *Server) ServeConn(conn io.ReadWriteCloser) {
+			buf := bufio.NewWriter(conn)
+			srv := &gobServerCodec{
+				rwc:    conn,
+				dec:    gob.NewDecoder(conn),
+				enc:    gob.NewEncoder(buf),
+				encBuf: buf,
+			}
+			server.ServeCodec(srv)
+		}
+	- gob的使用
+		// GobEncode
+		func GobEncode(val interface{}) ([]byte, error) {
+			buf := bytes.NewBuffer([]byte{})
+			encoder := gob.NewEncoder(buf)
+			if err := encoder.Encode(val); err != nil {
+				return []byte{}, err
+			}
+			return buf.Bytes(), nil
+		}
+		// GobDecode
+		func GobDecode(data []byte, value interface{}) error {
+			reader := bytes.NewReader(data)
+			decoder := gob.NewDecoder(reader)
+			return decoder.Decode(value)
+		}
+		// 测试用例
+		func TestGobCode(t *testing.T) {
+			t1 := &TestStruct{"name", "value"}
+			resp, err := service.GobEncode(t1)
+			fmt.Println(resp, err)
+		
+			t2 := &TestStruct{}
+			service.GobDecode(resp, t2)
+			fmt.Println(t2, err)
+		}
+
+ - Json ON TCP
+	- gob是golang提供的"私有"的编解码方式，因此从其它语言调用Go语言实现的RPC服务将比较困难
+		- 可以选用所有语言都支持的比较好的一些编码
+			- MessagePack: 高效的二进制序列化格式，它可以在多种语言(如JSON)之间交换数据，并且更快更小
+			- JSON: 文本编码
+			- XML：文本编码
+			- Protobuf 二进制编码
+		- Go语言的RPC框架有两个比较有特色的设计
+			- RPC数据打包时可以通过插件实现自定义的编码和解码
+			- RPC建立在抽象的io.ReadWriteCloser接口之上的，可以将RPC架设在不同的通讯协议之上
+	- 使用Go语言标准库中的 net/rpc/jsonrpc ，扩展实现一个跨语言的RPC
+		- 服务端
+			rpc.RegisterName("HelloService", new(HelloService))
+		
+			listener, err := net.Listen("tcp", ":1234")
+			if err != nil {
+				log.Fatal("ListenTCP error:", err)
+			}
+		
+			for {
+				conn, err := listener.Accept()
+				if err != nil {
+					log.Fatal("Accept error:", err)
+				}
+		
+				// 代码中最大的变化是用rpc.ServeCodec函数替代了rpc.ServeConn函数，
+				// 传入的参数是针对服务端的json编解码器
+				go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+			}
+		- 客户端
+			func DialHelloService(network, address string) (*HelloServiceClient, error) {
+				// 建立链接
+				conn, err := net.Dial(network, address)
+				if err != nil {
+					log.Fatal("net.Dial:", err)
+					return nil, err
+				}
+			
+				// 采用Json编解码的客户端
+				c := rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn))
+				return &HelloServiceClient{Client: c}, nil
+			}
+		- 验证功能
+			$ echo -e '{"method":"HelloService.Hello","params":["hello"],"id":1}' | nc localhost 1234
+			{"id":1,"result":"hello:hello","error":null}
+	- Json ON HTTP
+		- Go语言中内在的RPC框架已经支持在Http协议上提供RPC服务，为了支持跨语言，编码依然需要使用Json
+		- 新的RPC服务其实是一个类似REST规范的接口，接收请求并采用相应处理流程
+		- 首先依然要解决JSON编解码的问题，需要将HTTP接口的Handler参数传递给jsonrpc，
+			- 满足jsonrpc接口，提前构建io.ReadWriteCloser类型的conn通道
+			- Writer是ResponseWriter，ReadCloser是Request的Body，直接内嵌就可以
+				func NewRPCReadWriteCloserFromHTTP(w http.ResponseWriter, r *http.Request) *RPCReadWriteCloser {
+					return &RPCReadWriteCloser{w, r.Body}
+				}
+				
+				type RPCReadWriteCloser struct {
+					io.Writer
+					io.ReadCloser
+				}
+			- 服务端
+				rpc.RegisterName("HelloService", new(HelloService))
+				
+				// RPC的服务架设在"/jsonrpc"路径
+				// 在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道
+				// 然后基于conn构建针对服务端的json编码解码器
+				// 最后通过rpc.ServeRequest函数为每次请求处理一次RPC方法调用
+				http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, r *http.Request) {
+					conn := NewRPCReadWriteCloserFromHTTP(w, r)
+					rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
+				})
+				
+				http.ListenAndServe(":1234", nil)
+			- 验证功能
+				$ curl localhost:1234/jsonrpc -d'{"method":"HelloService.Hello","params":["hello"],"id":1}'
+
+2、Protobuf编解码
+ - Protobuf是Protocol Buffers的简称
+ 	- Google公司开发的一种数据描述语言，并于2008年对外开源
+ 	- Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成代码并实现将结构化数据序列化的功能
+ 	- Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具
+ 
+ - Protobuf特性
+	- 编解码效率
+	- 高压缩比
+	- 多语言支持
+
+ - 数据编码
+	- 在XML或JSON等数据描述语言中，一般通过成员的名字来绑定对应的数据
+	- 但是Protobuf编码却是通过成员的唯一编号来绑定对应的数据，因此Protobuf编码后数据的体积会比较小，但是也非常不便于人类查阅
+	- 目前并不关注Protobuf的编码技术，最终生成的Go结构体可以自由采用JSON或gob等编码格式，因此可以暂时忽略Protobuf的成员编码部分
+
+ - Protobuf使用流程
+	- 首先需要定义数据，通过编译器，来生成不同语言的代码
+	- 安装编译器
+		- protobuf的编译器叫: protoc(protobuf compiler)
+		- 下载地址:  Github Protobuf (https://github.com/protocolbuffers/protobuf/releases)
+		- 
+	- 在rpc中使用probuf
+		- 定义 .proto文件
+			- hello.proto
+				- syntax: 表示采用proto3的语法；第三版的Protobuf对语言进行了提炼简化，所有成员均采用类似Go语言中的零值初始化(不再支持自定义默认值)，因此消息成员也不再需要支持required特性
+				- package：指明当前是main包(这样可以和Go的包名保持一致，简化例子代码)，当然用户也可以针对不同的语言定制对应的包路径和名称
+				- option：protobuf的一些选项参数, 这里指定的是要生成的Go语言package路径, 其他语言参数各不相同
+				- message: 关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员编码时用1编号代替名字
+					syntax = "proto3";
+					package hello;
+					option go_package="gitee.com/infraboard/go-course/day21/pb";
+					message String {
+						string value = 1;
+					}
+
+
+
+
+十一、其他类型
 1、进程的内存结构
 	0xc0000000  内核虚拟内存         <-- 内核使用
 	0x40000000      栈区             <-- 程序运行时用于存放局部变量，可向下延伸空间

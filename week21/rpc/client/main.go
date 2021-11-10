@@ -18,13 +18,14 @@ type HelloServiceClient struct {
 }
 
 func DialHelloService(network, address string) (*HelloServiceClient, error) {
+	// 首先通过rpc.Dial拨号RPC服务，建立连接
 	// c, err := rpc.Dial(network, address)
 	// if err != nil {
 	// 	return nil, err
 	// }
 
 	// 建立链接
-	conn, err := net.Dial("tcp", "localhost:1234")
+	conn, err := net.Dial(network, address)
 	if err != nil {
 		log.Fatal("net.Dial:", err)
 	}
@@ -35,6 +36,11 @@ func DialHelloService(network, address string) (*HelloServiceClient, error) {
 }
 
 func (p *HelloServiceClient) Hello(request string, reply *string) error {
+	// 通过client.Call调用具体的RPC方法
+	// 在调用client.Call时
+	//   第一个参数是用点号链接的RPC服务名字和方法名字
+	//   第二个参数是 请求参数
+	//   第三个是请求响应，必须是一个指针，有底层rpc服务帮你赋值
 	return p.Client.Call(service.HelloServiceName+".Hello", request, reply)
 }
 
@@ -49,5 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
 	fmt.Println(reply)
 }
