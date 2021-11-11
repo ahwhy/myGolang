@@ -7,7 +7,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
-	"gitee.com/infraboard/go-course/day21/rpc/service"
+	"github.com/ahwhy/myGolang/week21/rpc/service"
 )
 
 // 约束客户端
@@ -40,7 +40,7 @@ func (p *HelloServiceClient) Hello(request string, reply *string) error {
 	// 在调用client.Call时
 	//   第一个参数是用点号链接的RPC服务名字和方法名字
 	//   第二个参数是 请求参数
-	//   第三个是请求响应，必须是一个指针，有底层rpc服务帮你赋值
+	//   第三个是请求响应，必须是一个指针，由底层rpc服务进行赋值
 	return p.Client.Call(service.HelloServiceName+".Hello", request, reply)
 }
 
@@ -55,6 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	fmt.Println(reply)
 }

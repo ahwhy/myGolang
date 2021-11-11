@@ -10,7 +10,7 @@ import (
 	"github.com/golang/snappy"
 	"google.golang.org/protobuf/proto"
 
-	"gitee.com/infraboard/go-course/day21/pbrpc/codec/pb"
+	"github.com/ahwhy/myGolang/week21/pbrpc/codec/pb"
 )
 
 func maxUint32(a, b uint32) uint32 {

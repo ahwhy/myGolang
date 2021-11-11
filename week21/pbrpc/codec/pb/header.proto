@@ -28,7 +28,7 @@ syntax = "proto3";
 //	Recv Response: recvFrame(zsock, body, hdr.snappy_compressed_response_len, 0)
 //
 package pb;
-option go_package="gitee.com/infraboard/go-course/day21/pbrpc/codec/pb";
+option go_package="github.com/ahwhy/myGolang/week21/pbrpc/codec/pb";
 
 enum Const {
 	ZERO = 0;
@@ -52,3 +52,5 @@ message ResponseHeader {
 	uint32 snappy_compressed_response_len = 4;
 	uint32 checksum = 5;
 }
+
+// protoc -I=. --go_out=./codec/pb --go_opt=module="github.com/ahwhy/myGolang/week21/pbrpc/codec/pb" codec/pb/header.proto

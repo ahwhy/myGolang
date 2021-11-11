@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package hello;
-option go_package="gitee.com/infraboard/go-course/day21/pbrpc/service";
+option go_package="github.com/ahwhy/myGolang/week21/pbrpc/service";
 
 message Request {
     string value = 1;
@@ -10,3 +10,5 @@ message Request {
 message Response {
     string value = 1;
 }
+
+// protoc -I=. --go_out=./service --go_opt=module="github.com/ahwhy/myGolang/week21/pbrpc/service" service/service.proto

@@ -7,7 +7,7 @@ import (
 	"io"
 	"net"
 
-	"gitee.com/infraboard/go-course/day21/pbrpc/codec/pb"
+	"github.com/ahwhy/myGolang/week21/pbrpc/codec/pb"
 	"github.com/golang/snappy"
 	"google.golang.org/protobuf/proto"
 )

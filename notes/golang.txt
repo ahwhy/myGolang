@@ -6284,18 +6284,18 @@
 		type HelloService struct {}
 		// Hello的逻辑 将对方发送的消息前面添加一个Hello 然后返还给对方
 		// 由于是一个rpc服务，参数上的约束为
-		// 第一个参数是请求
-		// 第二个参数是响应
+		//   第一个参数是请求
+		//   第二个参数是响应
 		// 可以类比Http handler
 		func (p *HelloService) Hello(request string, reply *string) error {
 			*reply = "hello:" + request
 			return nil
 		}
 		// 把HelloService对象注册成一个rpc的 receiver
-		// 其中rpc.Register函数调用会将对象类型中所有满足RPC规则的对象方法注册为RPC函数，
+		// 其中rpc.Register函数调用会将对象类型中所有满足RPC规则的对象方法注册为RPC函数
 		// 所有注册的方法会放在"HelloService"服务空间之下
 		rpc.RegisterName("HelloService", new(HelloService))
-		// 然后建立一个唯一的TCP链接
+		// 然后建立一个唯一的TCP链接，
 		listener, err := net.Listen("tcp", ":1234")
 		if err != nil {
 			log.Fatal("ListenTCP error:", err)
@@ -6322,9 +6322,9 @@
 		}
 		// 然后通过client.Call调用具体的RPC方法
 		// 在调用client.Call时
-		// 第一个参数是用点号链接的RPC服务名字和方法名字
-		// 第二个参数是 请求参数
-		// 第三个是请求响应，必须是一个指针，有底层rpc服务帮你赋值
+		//   第一个参数是用点号链接的RPC服务名字和方法名字
+		//   第二个参数是 请求参数
+		//   第三个是请求响应，必须是一个指针，由底层rpc服务进行赋值
 		var reply string
 		err = client.Call("HelloService.Hello", "hello", &reply)
 		if err != nil {
@@ -6471,7 +6471,7 @@
 	- Json ON HTTP
 		- Go语言中内在的RPC框架已经支持在Http协议上提供RPC服务，为了支持跨语言，编码依然需要使用Json
 		- 新的RPC服务其实是一个类似REST规范的接口，接收请求并采用相应处理流程
-		- 首先依然要解决JSON编解码的问题，需要将HTTP接口的Handler参数传递给jsonrpc，
+		- 首先依然要解决JSON编解码的问题，需要将HTTP接口的Handler参数传递给jsonrpc
 			- 满足jsonrpc接口，提前构建io.ReadWriteCloser类型的conn通道
 			- Writer是ResponseWriter，ReadCloser是Request的Body，直接内嵌就可以
 				func NewRPCReadWriteCloserFromHTTP(w http.ResponseWriter, r *http.Request) *RPCReadWriteCloser {
@@ -6519,9 +6519,29 @@
 	- 安装编译器
 		- protobuf的编译器叫: protoc(protobuf compiler)
 		- 下载地址:  Github Protobuf (https://github.com/protocolbuffers/protobuf/releases)
-		- 
+		- 安装编译器二进制
+			- linux/unix系统直接
+				$ mv bin/protoc usr/bin
+			- windows系统
+				- 注意: Windows 上的 git-bash 上默认的 /usr/bin 目录在：C:\Program Files\Git\usr\bin\
+				- 首先将bin下的 protoc 编译器 移动到C:\Program Files\Git\usr\bin\
+		- 安装编译器库
+			- include 下的库文件需要安装到: /usr/local/include/
+			- linux/unix系统
+				$ mv include/google /usr/local/include
+			- windows系统
+				C:\Program Files\Git\usr\local\include
+		- 验证安装
+			$ protoc --version
+			libprotoc 3.19.1
+		- 安装Go语言插件
+			- Protobuf核心的工具集是C++语言开发的，在官方的protoc编译器中并不支持Go语言
+			- 要想基于 *.proto文件生成相应的Go代码，需要安装相应的插件
+				$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+				$ go get -u google.golang.org/protobuf/cmd/protoc-gen-go@latest
+				$ cp GOPATCH/bin/protoc-gen-go /usr/local/bin
 	- 在rpc中使用probuf
-		- 定义 .proto文件
+		- 定义 *.proto文件
 			- hello.proto
 				- syntax: 表示采用proto3的语法；第三版的Protobuf对语言进行了提炼简化，所有成员均采用类似Go语言中的零值初始化(不再支持自定义默认值)，因此消息成员也不再需要支持required特性
 				- package：指明当前是main包(这样可以和Go的包名保持一致，简化例子代码)，当然用户也可以针对不同的语言定制对应的包路径和名称
@@ -6529,10 +6549,43 @@
 				- message: 关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员编码时用1编号代替名字
 					syntax = "proto3";
 					package hello;
-					option go_package="gitee.com/infraboard/go-course/day21/pb";
+					option go_package="github.com/ahwhy/myGolang/week21/pb";
 					message String {
 						string value = 1;
 					}
+		- 编译 *.proto文件
+			$ cd week21 ## 以week21作为编译的工作目录
+			$ protoc -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/week21/pb" pb/hello.proto
+			// -I: -IPATH, --proto_path=PATH, 指定proto文件搜索的路径, 如果有多个路径 可以多次使用-I 来指定, 如果不指定默认为当前目录
+			// --go_out: --go指插件的名称, 安装的插件为: protoc-gen-go, 而protoc-gen是插件命名规范, go是插件名称, 因此这里是--go, 而--go_out 表示的是 go插件的 out参数, 这里指编译产物的存放目录
+			// --go_opt: protoc-gen-go插件opt参数, 这里的module指定了go module, 生成的go pkg 会去除掉module路径，生成对应pkg
+			// pb/hello.proto: proto文件路径
+		- 在当前目录下生成Go语言对应的pkg
+	- 序列化与反序列化
+		- 使用google.golang.org/protobuf/proto工具提供的API来进行序列化与反序列化:
+			- Marshal: 序列化
+			- Unmarshal: 反序列化
+		- 客户端 ---> 服务端 基于protobuf的数据交互过程
+			clientObj := &pb.String{Value: "hello proto3"}
+			// 序列化
+			out, err := proto.Marshal(clientObj)
+			if err != nil {
+				log.Fatalln("Failed to encode obj:", err)
+			}
+			// 二进制编码
+			// encode bytes:  [10 12 104 101 108 108 111 32 112 114 111 116 111 51]
+			fmt.Println("encode bytes: ", out)
+
+			// 反序列化
+			serverObj := &pb.String{}
+			err = proto.Unmarshal(out, serverObj)
+			if err != nil {
+				log.Fatalln("Failed to decode obj:", err)
+			}
+			// decode obj:  value:"hello proto3"
+			fmt.Println("decode obj: ", serverObj)
+	- 基于protobuf的RPC
+
 
 
 

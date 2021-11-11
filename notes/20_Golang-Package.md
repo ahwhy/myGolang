@@ -39,6 +39,7 @@
 ```
 	$ go env -w GO111MODULE=on
 	$ go env -w GOPROXY=https://goproxy.io,direct`
+	$ go get -u package_name // 下载对应包到GOPATCH\bin
 ```
 
 ## 九、创建git，发布到github
