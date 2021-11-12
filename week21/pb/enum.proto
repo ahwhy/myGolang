@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package hello;
-option go_package="gitee.com/infraboard/go-course/day21/pb";
+option go_package="github.com/ahwhy/myGolang/week21/pb";
 
 enum Corpus {
     UNIVERSAL = 0;
@@ -12,3 +12,5 @@ enum Corpus {
     PRODUCTS = 5;
     VIDEO = 6;
 }
+
+// protoc -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/week21/pb" pb/enum.proto

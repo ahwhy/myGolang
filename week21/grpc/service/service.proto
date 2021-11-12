@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package hello;
-option go_package="gitee.com/infraboard/go-course/day21/grpc/service";
+option go_package="github.com/ahwhy/myGolang/week21/grpc/service";
 
 // The HelloService service definition.
 service HelloService {

@@ -10,3 +10,7 @@ service HelloService {
 message String {
     string value = 1;
 }
+
+// protoc -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/week21/pb" pb/hello.proto
+
+// protoc -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/week21/pb" --go-grpc_out=./pb --go-grpc_opt=module="github.com/ahwhy/myGolang/week21/pb" pb/hello.proto

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"gitee.com/infraboard/go-course/day21/grpc/service"
+	"github.com/ahwhy/myGolang/week21/grpc/service"
 	"google.golang.org/grpc"
 )
 
@@ -19,12 +19,6 @@ func main() {
 	defer conn.Close()
 
 	client := service.NewHelloServiceClient(conn)
-	// req := &service.Request{Value: "hello"}
-	// reply, err := client.Hello(context.Background(), req)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(reply.GetValue())
 
 	// 客户端需要先调用Channel方法获取返回的流对象
 	stream, err := client.Channel(context.Background())
@@ -32,8 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 在客户端我们将发送和接收操作放到两个独立的Goroutine。
-
+	// 客户端将发送和接收操作放到两个独立的Goroutine
 	// 首先是向服务端发送数据
 	go func() {
 		for {

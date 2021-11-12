@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"gitee.com/infraboard/go-course/day21/grpc/service"
+	"github.com/ahwhy/myGolang/week21/grpc/service"
 	"google.golang.org/grpc"
 )
 
@@ -45,7 +45,7 @@ func (p *HelloService) Channel(stream service.HelloService_ChannelServer) error 
 func main() {
 	// 首先是通过grpc.NewServer()构造一个gRPC服务对象
 	grpcServer := grpc.NewServer()
-	// 然后通过gRPC插件生成的RegisterHelloServiceServer函数注册我们实现的HelloServiceImpl服务
+	// 然后通过gRPC插件生成的RegisterHelloServiceServer函数注册实现的HelloServiceImpl服务
 	service.RegisterHelloServiceServer(grpcServer, new(HelloService))
 
 	lis, err := net.Listen("tcp", ":1234")
@@ -53,6 +53,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 然后通过grpcServer.Serve(lis)在一个监听端口上提供gRPC服务
+	// 后通过grpcServer.Serve(lis)在一个监听端口上提供gRPC服务
 	grpcServer.Serve(lis)
 }
