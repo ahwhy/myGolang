@@ -20,6 +20,14 @@ func main() {
 
 	client := service.NewHelloServiceClient(conn)
 
+    // 通过接口定义的方法就可以调用服务端对应的gRPC服务提供的方法
+	// req := &service.Request{Value: "hello"}
+	// reply, err := client.Hello(context.Background(), req)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(reply.GetValue())
+
 	// 客户端需要先调用Channel方法获取返回的流对象
 	stream, err := client.Channel(context.Background())
 	if err != nil {
