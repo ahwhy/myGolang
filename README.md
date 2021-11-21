@@ -1,2 +1,24 @@
 # myGolang
-Record me learning golang  
+
+## Golang-notes
+  * [Golang-Base](./notes/01_Golang-Base.md)
+  * [Golang-Functions&&Methods&&Interface](./notes/02_Golang-Functions&&Methods&&Interface.md')
+  * [Golang-Oop](./notes/03_Golang-Oop.md)
+  * [Golang-Goroutine](./notes/04_Golang-Goroutine.md)
+  * [Golang-Reflect](./notes/05_Golang-Reflect.md)
+  * [Golang-Datastructure](./notes/06_Golang-Datastructure.md)
+  * [Golang-Network](./notes/07_Golang-Network.md)
+  * [Golang-Secret](./notes/08_Golang-Secret.md)
+  * [Golang-Sql](./notes/09_Golang-Sql.md)
+  * [Golang-Package](./notes/20_Golang-Package.md)
+  * [Golang-Test](./notes/21_Golang-Test.md)
+  * [Golang-Time](./notes/21_Golang-Time.md)
+  * [Golang-Log](./notes/22_Golang-Log.md)
+  * [Golang-Time](./notes/22_Golang-Time.md)
+  * [Golang-Strings](./notes/23_Golang-Strings.md)
+  * [Golang-Unsafe](./notes/23_Golang-Unsafe.md)
+  * [Golang-File](./notes/24_Golang-File.md)
+  * [Golang-Strings](./notes/24_Golang-Strings.md)
+  * [Golang-Log](./notes/25_Golang-Log.md)
+  * [Golang-Unsafe](./notes/26_Golang-Unsafe.md)
+  * [Golang-Other](./notes/30_Golang-Other.md)

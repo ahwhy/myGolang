@@ -726,6 +726,7 @@ func GrpcAuthUnaryServerInterceptor(c *Client) grpc.UnaryServerInterceptor {
 func newGrpcAuther(c *Client) *grpcAuther {
 	return &grpcAuther{
 		log: zap.L().Named("Grpc Auther"),
+		keyauth: c,
 	}
 }
 
@@ -805,8 +806,6 @@ type Auther interface {
 	ResponseHook(http.ResponseWriter, *http.Request, httppb.Entry)
 }
 ```
-
-#### 自身认证
 
 httprouter 也就是这样封装的, 可以看看封装后的httprouter
 
@@ -1021,30 +1020,315 @@ func (a *HTTPAuther) SetLogger(l logger.Logger) {
 + grpc认证
 + http认证
 
-我们将基于keyauth 客户端提供的认证中间件来完成认证对接
+我们将基于keyauth 客户端提供的认证中间件来完成认证对接, 因此添加keyauth相关配置
+```go
+// Auth auth 配置
+type keyauth struct {
+	Host         string `toml:"host" env:"KEYAUTH_HOST"`
+	Port         string `toml:"port" env:"KEYAUTH_PORT"`
+	ClientID     string `toml:"client_id" env:"KEYAUTH_CLIENT_ID"`
+	ClientSecret string `toml:"client_secret" env:"KEYAUTH_CLIENT_SECRET"`
+}
+
+func (a *keyauth) Addr() string {
+	return a.Host + ":" + a.Port
+}
+
+func (a *keyauth) Client() (*kc.Client, error) {
+	if kc.C() == nil {
+		conf := kc.NewDefaultConfig()
+		conf.SetAddress(a.Addr())
+		conf.SetClientCredentials(a.ClientID, a.ClientSecret)
+		client, err := kc.NewClient(conf)
+		if err != nil {
+			return nil, err
+		}
+		kc.SetGlobal(client)
+	}
+
+	return kc.C(), nil
+}
+```
+
+并且确保你keyauth服务配置正确并且keyauth服务启动
+```
+[keyauth]
+host = "127.0.0.1"
+port = "18050"
+client_id = "pz3HiVQA3indzSHzFKtLHaJW"
+client_secret = "vDvlAtqN3rS9CZcHugXp6QBuk28zRjud"
+```
+
+添加keyauth 客户端配置
+```go
+type Config struct {
+	App     *app     `toml:"app"`
+	Log     *log     `toml:"log"`
+	MySQL   *mySQL   `toml:"mysql"`
+	Keyauth *keyauth `toml:"keyauth"`
+}
+
+// Auth auth 配置
+type keyauth struct {
+	Host         string `toml:"host" env:"KEYAUTH_HOST"`
+	Port         string `toml:"port" env:"KEYAUTH_PORT"`
+	ClientID     string `toml:"client_id" env:"KEYAUTH_CLIENT_ID"`
+	ClientSecret string `toml:"client_secret" env:"KEYAUTH_CLIENT_SECRET"`
+}
+
+func (a *keyauth) Addr() string {
+	return a.Host + ":" + a.Port
+}
+
+func (a *keyauth) Client() (*kc.Client, error) {
+	if kc.C() == nil {
+		conf := kc.NewDefaultConfig()
+		conf.SetAddress(a.Addr())
+		conf.SetClientCredentials(a.ClientID, a.ClientSecret)
+		client, err := kc.NewClient(conf)
+		if err != nil {
+			return nil, err
+		}
+		kc.SetGlobal(client)
+	}
+
+	return kc.C(), nil
+}
+
+func newDefaultKeyauth() *keyauth {
+	return &keyauth{}
+}
+```
 
 #### GRPC认证对接
 
+加入keyauth提供的grpc中间件即可对接到keyauth
 
+```go
+// NewGRPCService todo
+func NewGRPCService() *GRPCService {
+	log := zap.L().Named("GRPC Service")
 
+	c, err := conf.C().Keyauth.Client()
+	if err != nil {
+		panic(err)
+	}
 
+	rc := recovery.NewInterceptor(recovery.NewZapRecoveryHandler())
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		rc.UnaryServerInterceptor(),
+		interceptor.GrpcAuthUnaryServerInterceptor(c),
+	)))
+
+	return &GRPCService{
+		svr: grpcServer,
+		l:   log,
+		c:   conf.C(),
+	}
+}
+```
+
+使用测试用例进行验证:
+```go
+package client_test
+
+import (
+	"context"
+	"fmt"
+	"testing"
+
+	"github.com/infraboard/cmdb/app/resource"
+	"github.com/infraboard/cmdb/client"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestClient(t *testing.T) {
+	should := assert.New(t)
+	conf := client.NewConfig("localhost:18060")
+	conf.WithClientCredentials("pz3HiVQA3indzSHzFKtLHaJW", "vDvlAtqN3rS9CZcHugXp6QBuk28zRjud")
+	c, err := client.NewClient(conf)
+	if should.NoError(err) {
+		rs, err := c.Resource().Search(context.Background(), resource.NewSearchRequest())
+		should.NoError(err)
+		fmt.Println(rs)
+	}
+}
+
+```
 
 #### HTTP认证对接
 
+使用keyauth提供的auther即可完成 http认证对接
 
-### 测试
+```go
+// NewHTTPService 构建函数
+func NewHTTPService() *HTTPService {
+	c, err := conf.C().Keyauth.Client()
+	if err != nil {
+		panic(err)
+	}
+	auther := interceptor.NewHTTPAuther(c)
 
+	r := httprouter.New()
+	r.Use(recovery.NewWithLogger(zap.L().Named("Recovery")))
+	r.Use(accesslog.NewWithLogger(zap.L().Named("AccessLog")))
+	r.Use(cors.AllowAll())
+	r.EnableAPIRoot()
+	r.SetAuther(auther) // 使用auther
+	r.Auth(true)
+	...
+}
+```
 
+使用Postman或者curl进行验证:
+```sh
+curl -H "x-oauth-token:iEYOX5tvWGd8LQFyhU1iu7eZ"  http://127.0.0.1:8060/cmdb/api/v1/hosts
+```
 
 ## 前端对接
 
+认证添加完成后，我们前端页面就需要完成对接了, 不然访问不了
 
-### 登录页面对接
+#### 登录页面对接
 
+设置keyauth服务的baseurl: settings.js
+```js
+export default {
+  baseURL: "/keyauth/api/v1",
+};
+```
+
+
+配置前端的变量: .env.development
+```
+# just a flag
+NODE_ENV = 'development'
+
+# base api
+VUE_APP_BASE_API = 'http://localhost:8050'
+
+// client
+VUE_APP_CLIENT_ID = 'PMNFVmd0ifMTxjoM0h3RSpYi'
+VUE_APP_CLIENT_SECRET = 'KC3uPv7xQzgttaX0Mfg8wPg1vpJNfFeX'
+```
+
+对接keyuaht服务API
+```js
+export function LOGIN(data, params) {
+  return request({
+    url: `${keyauth.baseURL}/oauth2/tokens`,
+    method: "post",
+    auth: {
+      username: process.env.VUE_APP_CLIENT_ID,
+      password: process.env.VUE_APP_CLIENT_SECRET,
+    },
+    data,
+    params,
+  });
+}
+
+export function LOGOUT(data, params) {
+  return request({
+    url: `${keyauth.baseURL}/oauth2/tokens`,
+    method: "delete",
+    auth: {
+      username: process.env.VUE_APP_CLIENT_ID,
+      password: process.env.VUE_APP_CLIENT_SECRET,
+    },
+    data,
+    params,
+  });
+}
+
+export function GET_PROFILE(params) {
+  return request({
+    url: `${keyauth.baseURL}/profile`,
+    method: "get",
+    params,
+  });
+}
+```
+
+#### 使用代理
+
+这个时候依然会报错, 为啥? 因为我们前端现在要对接2个后端服务, 而我们总的baseurl 只设置了1个: 
+```
+# base api
+VUE_APP_BASE_API = 'http://localhost:8050'
+```
+
++ cmdb:   127.0.0.1:8060
++ keyauth: 127.0.0.1:8050
+
+要解决这个问题可以有2种办法:
++ 使用Nginx代理
++ 使用前端代理
+
+我们使用本地前端代理的方式, 修改: vue.config.js, 在devServer内添加代理配置
+```js
+  devServer: {
+    port: port,
+    open: true,
+    overlay: {
+      warnings: false,
+      errors: true,
+    },
+    proxy: {
+      "/keyauth/api/v1": {
+        target: "localhost:8050",
+        ws: true,
+        secure: false,
+        changeOrigin: true,
+      },
+      "/cmdb/api/v1": {
+        target: "localhost:8060",
+        ws: true,
+        secure: false,
+        changeOrigin: true,
+      },
+    },
+  },
+```
+
+配置了代理后VUE_APP_BASE_API就不能再配置了, 不然代理无法匹配
+```
+# just a flag
+NODE_ENV = 'development'
+
+# base api
+VUE_APP_BASE_API = 'http://localhost:8050'
+
+// client
+VUE_APP_CLIENT_ID = 'PMNFVmd0ifMTxjoM0h3RSpYi'
+VUE_APP_CLIENT_SECRET = 'KC3uPv7xQzgttaX0Mfg8wPg1vpJNfFeX'
+```
+
+#### 请求补充Token
+
+token我们请求回来了, 但是API访问的时候 还没有带上, 修改请求中间件:
+
+```js
+// request中间件
+client.interceptors.request.use(
+  // 成功的处理逻辑
+  (request) => {
+    // 如果有Token, 带上Token访问
+    if (store.getters.accessToken) {
+      request.headers["X-OAUTH-TOKEN"] = store.getters.accessToken;
+    }
+    return request;
+  },
+  // 错误时的处理逻辑
+  (err) => {
+    console.log(err);
+    return Promise.reject(err);
+  }
+);
+```
 
 ### 前端页面验证
 
-
+![](./pic/password-err.jpeg)
 
 
 
