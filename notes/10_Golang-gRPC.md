@@ -132,8 +132,10 @@
 			return call.Error
 		}
 ```
+
 	- 在client的call方法中，3个参数有2个interface{}，当使用的时候会有不知道要传入什么的情况产生
 	- 可以对客户端进行一次封装，使用接口当作文档，明确参数类型
+
 ```go
 		// 定义hello service的接口
 		package service
@@ -437,7 +439,6 @@
 ```
 
 - gRPC流
-
 	- RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间
 		- 因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合
 		- 为此，gRPC框架针对服务器端和客户端分别提供了流特性
@@ -454,7 +455,6 @@
 			}
 			// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" --go-grpc_out=./grpc/service --go-grraboard/go-course/day21/grpc/service" grpc/service/service.proto
 ```
-
 		- gRPC服务端
 			- 逻辑
 				- 接收一个Request
