@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/myMap/cache"
+	"github.com/ahwhy/myGolang/map/cache"
 )
 
 func TestCache(t *testing.T) {

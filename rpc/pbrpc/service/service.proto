@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hello;
+option go_package="github.com/ahwhy/myGolang/rpc/pbrpc/service";
+
+message Request {
+    string value = 1;
+}
+
+message Response {
+    string value = 1;
+}
+
+// protoc -I=. --go_out=./service --go_opt=module="github.com/ahwhy/myGolang/rpc/pbrpc/service" service/service.proto

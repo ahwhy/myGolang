@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/myMap/mset"
+	"github.com/ahwhy/myGolang/map/mset"
 )
 
 func TestMset(t *testing.T) {

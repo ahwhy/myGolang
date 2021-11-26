@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package hello;
+option go_package="github.com/ahwhy/myGolang/rpc/pb";
+
+message Result {
+    string value = 1;
+    map<string, int32> a =2;
+}
+
+message SearchResponse {
+    repeated Result results = 1;
+}
+
+// protoc -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/rpc/pb" pb/repeated.proto
+

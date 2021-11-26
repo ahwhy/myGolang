@@ -12,7 +12,7 @@
 
 ### 1. Golang的标准库unsafe包
 - 非类型安全指针unsafe.Pointer
-```
+```go
 	// ArbitraryType is here for the purposes of documentation only and is not actually part of the unsafe package. It represents the type of an arbitrary Go expression.  
 	// ArbitraryType在这里只是为了文档的目的，实际上并不是unsafe包的一部分。它代表任意的go表达式的类型。
 	type ArbitraryType int
@@ -28,7 +28,7 @@
 ```
 
 - build中内置类型
-```
+```go
 	// uintptr 
     // uintptr is an integer type that is large enough to hold the bit pattern of any pointer.  // uintptr是一个整数类型，它足够大以容纳任何指针的位模式。
 	type uintptr uintptr
@@ -56,7 +56,7 @@
 		- 此函数用来取得一个值的尺寸(亦即此值的类型的尺寸)
 		- 在一个程序中，对于同一个类型的不同值，此函数的返回值总是相同的
 		- `unsafe.Sizeof` 即 在一片内存空间中，开辟的内存大小
-```
+```go
 			m := Man{Name: "John", Age: 20}
 			fmt.Println(unsafe.Sizeof(m.Name), unsafe.Sizeof(m.Age), unsafe.Sizeof(m)) // 4*4=16 8 24
 			fmt.Println(unsafe.Offsetof(m.Name)) // 0
@@ -74,7 +74,7 @@
 	- 在运行时刻，一次新的垃圾回收过程可能在一个不确定的时间启动，并且此过程可能需要一段不确定的时长才能完成
 	- 所以一个不再被使用的内存块的回收时间点是不确定的
 		- 直接使用内存地址访问数组的其他元素
-```
+```go
 			a := [3]int64{1, 2, 3}
 			fmt.Printf("%p\n", &a)
 			
@@ -86,7 +86,7 @@
 			fmt.Println(*p1)
 ```
 		- 如果把 p1 该写成2条语句
-```
+```go
 			// 把 Pointer -> uintptr (一波操作)
 			p1Addr := uintptr(unsafe.Pointer(&a)) + s1 
 			
@@ -106,14 +106,14 @@
 		- math标准库包中的Float64bits函数
 			- 此函数将一个float64值转换为一个uint64值
 			- 在此转换过程中，此float64值在内存中的每个位(bit)都保持不变
-```
+```go
 				// *T1 --> Pointer --> *T2
 				func Float64bits(f *float64) uint64 {
 					return *(*uint64)(unsafe.Pointer(&f))
 				}
 ```
 	- 将一个int8的整数转换成一个string，同样内存中的值保持不变，实现zero copy转换
-```
+```go
 		func bInt8(n int8) string {
 			fmt.Println(*(*uint8)(unsafe.Pointer(&n))) // 1111 1111
 			return strconv.FormatUint(uint64(*(*uint8)(unsafe.Pointer(&n))), 2)
@@ -124,7 +124,7 @@
 	- 模式: Pointer --> uintptr
 		- 该模式运用不是很广泛
 		- 一般将最终的转换结果uintptr值输出到日志中用来调试，但是有很多其它安全并且简洁的途径也可以实现此目的
-```
+```go
 			type T struct{ a int }
 			var t1 T
 			fmt.Printf("%p\n", &t1)                          // 0xc0000a0200
@@ -137,7 +137,7 @@
 	- 模式: Pointer --> uintptr --> (一波计算) --> uintptr --> Pointer
 		- p = unsafe.Pointer(uintptr(p) + offset)
 		- 直接通过指针访问结构体的属性，如: 直接通过地址访问y的第3个元素
-```
+```go
 		type T struct {
 			x bool
 			y [3]int16
@@ -160,7 +160,7 @@
 - 系统调用
 	- 将非类型安全指针值转换为uintptr值并传递给syscall.Syscall函数调用
 	- 模式: Pointer --> uintptr --> syscall.Syscall 
-```
+```go
 		// syscall.Syscall(SYS_READ, uintptr(fd), uintptr(unsafe.Pointer(p)), uintptr(n))
 		// INVALID: uintptr cannot be stored in variable
 		// before implicit conversion back to Pointer during system call.

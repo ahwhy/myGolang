@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/myMap/k8sJob"
+	"github.com/ahwhy/myGolang/map/k8sJob"
 )
 
 func TestJobManager(t *testing.T) {

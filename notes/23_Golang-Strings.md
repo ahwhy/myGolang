@@ -9,7 +9,7 @@
 	- 字符串是由字符组成的数组[]byte
 	- 数组会占用一片连续的内存空间，而内存空间存储的字节共同组成了字符串
 	- Go语言中的字符串只是一个只读的字节数组
-```
+```go
 		// runtime/string.go
 		type stringStruct struct {
 			str unsafe.Pointer
@@ -64,7 +64,8 @@
 
 ## 二、ASCII && Unicode && UTF-8 
 - ASCII编码
-	- 英文和数字  // https://blog.csdn.net/qq_39397165/article/details/116178566
+	- 英文和数字
+	- [Go语言字符串的字节长度和字符个数](https://blog.csdn.net/qq_39397165/article/details/116178566)
 
 - Unicode 
 	- 称为Unicode字符集或者万国码, 就是将全球所有语言的字符通过编码
@@ -121,7 +122,7 @@
 
 - 字符切分
 	- 通过分隔符来切割字符串
-```
+```go
 		func Split(s, sep string) []string { return genSplit(s, sep, 0, -1) }               // Split 会将 s 中的 sep 去掉，而 SplitAfter 会保留 sep
 		func SplitAfter(s, sep string) []string { return genSplit(s, sep, len(sep), -1) }
 		func SplitN(s, sep string, n int) []string { return genSplit(s, sep, 0, n) } 
@@ -152,7 +153,7 @@
 
 - 计算子串位置
 	- 查询子串的开始Index的函数有:
-```
+```go
 		func Index(s, sep string) int                   // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引
 		func LastIndex(s, substr string) int
 		func IndexByte(s string, c byte) int            // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
@@ -161,7 +162,7 @@
 ```
 	- 查找字串的结束Index的函数
 		- 有三个对应的查找最后一次出现的位置
-```
+```go
 			func LastIndex(s, sep string) int
 			func LastIndexByte(s string, c byte) int
 			func LastIndexAny(s, chars string) int
@@ -185,18 +186,18 @@
 
 - 大小写转换
 	- ToLower，ToUpper 用于大小写转换
-```
+```go
 		func ToLower(s string) string
 		func ToUpper(s string) string
 ```
 	- ToLowerSpecial，ToUpperSpecial 可以转换特殊字符的大小写
-```
+```go
 		func ToLowerSpecial(c unicode.SpecialCase, s string) string 
 		func ToUpperSpecial(c unicode.SpecialCase, s string) string
 ```
 
 - 剔除子串
-```
+```go
 	func Trim(s string, cutset string) string              // 将 s 左侧和右侧中匹配 cutset 中的任一字符的字符去掉
 	func TrimLeft(s string, cutset string) string          // 将 s 左侧的匹配 cutset 中的任一字符的字符去掉
 	func TrimRight(s string, cutset string) string         // 将 s 右侧的匹配 cutset 中的任一字符的字符去掉

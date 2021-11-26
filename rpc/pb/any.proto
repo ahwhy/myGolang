@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+// 这里是应用其他的proto文件, 后面会讲 ipmort用法
+import "google/protobuf/any.proto";
+
+package hello;
+option go_package="github.com/ahwhy/myGolang/rpc/pb";
+
+message ErrorStatus {
+  string message = 1;
+  repeated google.protobuf.Any details = 2;
+}
+
+// protoc -I=/usr/local/include  -I=. --go_out=./pb --go_opt=module="github.com/ahwhy/myGolang/rpc/pb" pb/any.proto

@@ -7,7 +7,7 @@
 
 - 简单使用
 	- 输出文件，只要实现接口io.Writer的类型都可以作为文件的输出
-```
+```go
 		func logPrinta(baseStr string) {
 			for i := 0; i < 10; i++ {
 				msg := fmt.Sprintf("%s_%d", baseStr, i)
@@ -28,7 +28,7 @@
 ```
 
 - 自定义的logger
-```
+```go
 	var (
 		WarningLogger *log.Logger          // type Logger struct { // Has unexported fields. }
 		InfoLogger    *log.Logger
@@ -53,7 +53,7 @@
 ```
 
 - log.flag && iota
-```
+```go
 	// itoa枚举依次是 1，2，4，8，16，32
 	const (
 		Ldate         = 1 << iota     // the date in the local time zone: 2009/01/23
@@ -75,7 +75,7 @@
 
 ### 1. github.com/sirupsen/logrus
 - 实现利用logrus包，通过钉钉机器人发送日志
-```
+```go
 	// ogrus源码
 	type Hook interface {
 		Levels() []Level

@@ -5,7 +5,7 @@
  
 ### 1. 打印当前时间
 - 方法: `time.Now()`
-```
+```go
 	func numLen(n int64) int {
 		return len(strconv.Itoa(int(n)))
 	}
@@ -83,7 +83,7 @@
 ```
 
 - 时间戳(Timestamp) 转成 time.Time 类型 再格式化成日期格式
-```
+```go
 	// Time -> Timestamp  方法: time.Now().Unix()
 	ts := time.Now().Unix()             // 时间戳
 	layout := "2006-01-02 15:04:05"
@@ -94,7 +94,7 @@
 ```
 
 - 日期格式字符串 转成 time.Time 类型 再转成时间戳
-```
+```go
 	// time.Parse()                 func Parse(layout, value string) (Time, error)  返回转换后的时间格式和判断信息(err) 
 	d1, err := time.Parse("2006-01-02 15:04:05", "2021-06-18 12:12:12")
 	log.Println(d1.Unix())
@@ -111,7 +111,7 @@
 
 ### 5. 时间的比较
 - Before、After 和 Equal
-```
+```go
 	now := time.Now()
 	t1, _ := time.ParseDuration("1h")
 	m1 := now.Add(t1)
@@ -132,7 +132,7 @@
 ### 7. 时长计算
 - Add
 	- 让一个时间点加上一个时间段，生成一个新的 Time 类型时间点
-```
+```go
 	// func (t Time) Add(d Duration) Time
 	now := time.Now()
 	after := now.Add(time.Hour * 24)
@@ -141,13 +141,13 @@
 
 - Sub
 	- 让两个时间点相减，生成一个 Duration 类型值(代表时间段)
-```
+```go
 	// func (t Time) Sub(u Time) Duration
 	fmt.Println(now.Sub(after))    // 2021/07/19 17:33:21 -24h0m0s
 ```
 
 - ParseDuration 时间差
-```
+```go
 	// func ParseDuration(s string) (Duration, error)
 	now := time.Now()
 	var layout = "2006-01-02 15:04:05"
@@ -176,7 +176,7 @@
 
 ### 8. Sleep
 - 方法: `time.Sleep()`
-```
+```go
 	time.Sleep(time.Hour * 24)
 ```
 
@@ -186,20 +186,20 @@
 - 定时器有2种:
 	- 单次触发: `Timer`
 		- Timer数据结构
-```
+```go
 			type Timer struct {
 				C <-chan Time   // C: 一个存放Time对象的Channel
 				r runtimeTimer  // runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
 			}
 ```
 		- 通过 `time.After` 实现同步等待
-```
+```go
 			m := time.NewTimer(5 * time.Second)
 			fmt.Println(<-m.C)
 			fmt.Println("exit")
 ```
 		- 通过 `time.AfterFunc` 中断循环，触发自定义函数
-```
+```go
 			stop := false
 			time.AfterFunc(5*time.Second, func() {          // func AfterFunc(d Duration, f func()) *Timer
 				stop = true
@@ -221,14 +221,14 @@
 			- 返回值和 Stop 一样
 	- 周期性触发: `Ticker`
 		- Ticker数据结构
-```
+```go
 			type Ticker struct {
 				C <-chan Time // The channel on which the ticks are delivered.
 				r runtimeTimer
 			}
 ```
 		- 通过 `time.NewTicker` 实现同步等待
-```
+```go
 			tk := time.NewTicker(2 * time.Second)
 			count := 1
 			for {

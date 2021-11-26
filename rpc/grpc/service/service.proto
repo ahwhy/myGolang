@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hello;
+option go_package="github.com/ahwhy/myGolang/rpc/grpc/service";
+
+// The HelloService service definition.
+service HelloService {
+    rpc Hello (Request) returns (Response) {}
+
+    rpc Channel (stream Request) returns (stream Response) {}
+}
+
+message Request {
+    string value = 1;
+}
+
+message Response {
+    string value = 1;
+}
