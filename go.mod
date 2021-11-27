@@ -4,10 +4,8 @@ go 1.16
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
-	github.com/BurntSushi/toml v0.3.1
 	github.com/aliyun/aliyun-oss-go-sdk v1.9.8
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
-	github.com/caarlos0/env/v6 v6.7.1
 	github.com/didi/gendry v1.7.0
 	github.com/ethereum/go-ethereum v1.10.8
 	github.com/gin-gonic/gin v1.7.4
@@ -22,8 +20,6 @@ require (
 	github.com/orcaman/concurrent-map v0.0.0-20210501183033-44dafcb38ecc
 	github.com/parkingwang/go-sqlbuilder v0.0.0-20180607100556-9ecb2bce72ed
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/rs/cors v1.8.0
-	github.com/rs/xid v1.3.0
 	github.com/schollz/progressbar/v3 v3.8.3
 	github.com/sirupsen/logrus v1.8.1
 	github.com/smartystreets/goconvey v1.6.4
@@ -34,6 +30,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.27.1
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/gorm v1.21.15

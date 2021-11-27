@@ -17,3 +17,5 @@ message Request {
 message Response {
     string value = 1;
 }
+
+// protoc -I=. --go_out=./grpc --go_opt=module="github.com/ahwhy/myGolang/rpc/grpc" --go-grpc_out=./grpc --go-grpc_opt=module="github.com/ahwhy/myGolang/rpc/grpc" grpc/service/service.proto

@@ -1,5 +1,7 @@
 # myGolang
 
+个人笔记整理，以及demo记录
+
 ## Golang-notes
   * [Golang-Base](./notes/01_Golang-Base.md)
   * [Golang-Functions&&Methods&&Interface](./notes/02_Golang-Functions&&Methods&&Interface.md')

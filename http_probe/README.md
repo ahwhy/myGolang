@@ -1,0 +1,24 @@
+- 实现一个简单的http探测的web
+    - 运用gin运行一个web
+        - https://github.com/gin-gonic/gin
+    - 使用url: /api/probe/http?host=baidu.com&is_https=1
+        - host代表探测的地址或ip http://baidu.com
+        - is_https=1代表探测 https://baidu.com
+    - 返回探测的结果
+        - 域名的ip
+        - status_code
+        - http各阶段的耗时
+        - https://brantou.github.io/2017/05/24/go-http-trace/
+    - 需要一个yaml解析的配置
+        - http的listen的地址
+        - 探测超时时间
+
+- 要点
+    - 了解怎么组织一个简单的工程
+    - gin的简单使用
+    - 解析yaml
+    - http探测
+        - 钩子函数
+        - 统计时间差t1.sub(t0)
+        - 理解http都包含哪些阶段
+        - 查看最慢的阶段，优化

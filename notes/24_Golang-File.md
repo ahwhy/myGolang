@@ -430,8 +430,24 @@
 					copy(p, buf)
 					return n, nil
 				}
+				func alpha(r byte) byte {
+					// r在 A-Z 或者 a-z
+					if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
+						return r
+					}
+					return 0
+				}
 				myReader := alphaReader{
 					strings.NewReader("mage jiaoyu 2021 go !!!"),
+				}
+				p := make([]byte, 4)
+				for {
+					n, err := myReader.Read(p)
+					if err == io.EOF {
+						log.Printf("[EOF错误]")
+						break
+					}
+					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
 				}
 ```
 		- os.File 结合
@@ -446,6 +462,15 @@
 				defer file.Close()
 				myReader := alphaReader{
 					file,
+				}
+				p := make([]byte, 4)
+				for {
+					n, err := myReader.Read(p)
+					if err == io.EOF {
+						log.Printf("[EOF错误]")
+						break
+					}
+					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
 				}
 ```
 		- 读取文件 `ioutil.ReadFile` vs `bufio`
@@ -521,6 +546,7 @@
 				fileName := "test.txt"
 				err := ioutil.WriteFile(fileName, []byte("123\n456"), 0644)
 				fmt.Println(err)
+
 				// ReadDir 读取目录下的文件元信息
 				// func ReadDir(dirname string) ([]fs.FileInfo, error)
 				fs, err := ioutil.ReadDir("./")
@@ -675,3 +701,10 @@
 		}
 		fmt.Println(rusers)
 ```
+
+## 五、参考范例
+
+- 真实生产应用 
+	- 夜莺监控发送告警，调用python的send.py脚本，将发送的内容作为stdin传过去
+    - [go代码](https://github.com/didi/nightingale/blob/master/alert/consume.go#L183)
+    - [python 脚本](https://github.com/didi/nightingale/blob/master/etc/script/notify.py)

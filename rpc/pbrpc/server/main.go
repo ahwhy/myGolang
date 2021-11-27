@@ -5,8 +5,8 @@ import (
 	"net"
 	"net/rpc"
 
-	"github.com/ahwhy/myGolang/week21/pbrpc/codec/server"
-	"github.com/ahwhy/myGolang/week21/pbrpc/service"
+	"github.com/ahwhy/myGolang/rpc/pbrpc/codec/server"
+	"github.com/ahwhy/myGolang/rpc/pbrpc/service"
 )
 
 // 通过接口约束HelloService服务
