@@ -64,6 +64,7 @@
 	// 创建annotated类型的tag
 	git tag -a v0.0.2 -m "updata"
 	git push origin --tags
+	git push -u origin --tags v0.0.2
 ```
 
 ## 十、常用包与函数  

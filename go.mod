@@ -1,4 +1,4 @@
-module github.com/ahwhy/myGolang
+module github.com/ahwhy/myGolang+
 
 go 1.16
 
@@ -26,6 +26,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	github.com/x-mod/routine v1.3.3
+	go.etcd.io/etcd/client/v3 v3.5.1
 	go.mongodb.org/mongo-driver v1.7.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	google.golang.org/grpc v1.38.0
