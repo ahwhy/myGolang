@@ -13,6 +13,7 @@
   * [Golang-Secret](./notes/08_Golang-Secret.md)
   * [Golang-Sql](./notes/09_Golang-Sql.md)
   * [Golang-gRPC](./notes/10_Golang-gRPC.md)
+  * [Golang-Etcd](./notes/11_Golang-Etcd)
   * [Golang-Package](./notes/20_Golang-Package.md)
   * [Golang-Test](./notes/21_Golang-Test.md)
   * [Golang-Time](./notes/22_Golang-Time.md)

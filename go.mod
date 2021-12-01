@@ -1,4 +1,4 @@
-module github.com/ahwhy/myGolang+
+module github.com/ahwhy/myGolang
 
 go 1.16
 

@@ -49,5 +49,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	
 	client = c
 }

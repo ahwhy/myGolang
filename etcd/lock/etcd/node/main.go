@@ -17,6 +17,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	lock.Lock()
 	time.Sleep(10 * time.Second)
 	lock.Unlock()
@@ -30,5 +31,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	
 	client = c
 }
