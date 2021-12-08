@@ -2,7 +2,7 @@
 
 为了和其他系统更好的继承, 这里专门添加了webhook机制, 我们可以参考下 gitlab的webhook界面
 
-![](./images/gitlab.webhook.png)
+![](./pic/gitlab.webhook.png)
 
 ## WebHook 结构定义
 
@@ -328,7 +328,7 @@ func (r *request) Push() {
 
 我们采用飞书的卡片消息进行推送，因为这种格式很好看
 
-![](./images/feishu-msg.png)
+![](./pic/feishu-msg.png)
 
 下面是我封装后得消息格式(具体看hook里面飞书模块, 代码比较多):
 ```go
@@ -372,11 +372,11 @@ func TestFeishuWebHook(t *testing.T) {
 
 接下面我们添加一个飞书机器人:
 
-![](./images/feishu-robot.png)
+![](./pic/feishu-robot.png)
 
 测试下发生通知:
 
-![](./images/feishu-test.png)
+![](./pic/feishu-test.png)
 
 是不是发现emoji字符不错，那么搜索喃: https://emojipedia.org/light-bulb/
 

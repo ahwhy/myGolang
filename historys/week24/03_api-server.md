@@ -1,6 +1,6 @@
 # API Server 开发
 
-![](./images/workflow-arch.png)
+![](./pic/workflow-arch.png)
 
 ## 开发环境
 
@@ -33,7 +33,7 @@ db.createUser({user: "workflow", pwd: "workflow", roles: [{ role: "dbOwner", db:
 # 验证账号， 1为登录成功
 use workflow
 db.auth("workflow", "workflow")
-s
+
 # 退出shell
 quit()
 ```
@@ -42,7 +42,7 @@ quit()
 
 这里我们通过前端来创建:
 
-![](./images/workflow-keyauth.png)
+![](./pic/workflow-keyauth.png)
 
 创建成功后 配置到workflow配置文件:
 ```toml
@@ -237,7 +237,7 @@ $ make run-api
 
 ## Pipeline action app开发
 
-![](./images/step-def.png)
+![](./pic/step-def.png)
 
 在开发pipeline模块之前，我们需要提前开发action模块, 因为pipeline在定义step的时候, 需要指定action
 
@@ -355,7 +355,7 @@ windows环境下 不知道为啥 无法找到额外的路径: /usr/local/include
 
 ### windows vscode 配置
 
-![](./images/vscode-win-proto.png)
+![](./pic/vscode-win-proto.png)
 
 vscode 编辑器的protobuf插件依然无法正常找到我们的依赖, 搜索了下官方的配置:[vscode-proto3 插件配置](https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3)
 
@@ -377,7 +377,7 @@ vscode 编辑器的protobuf插件依然无法正常找到我们的依赖, 搜索
 
 打开vscode 配置界面
 
-![](./images/windows-proto.png)
+![](./pic/windows-proto.png)
 
 
 通过 --proto_path 全局添加include文件位置
@@ -557,7 +557,7 @@ import (
 
 启动成功后 可以看到当前workflow 开发完成后的接口，已经注册到了keyauth
 
-![](./images/workflow-registry.png)
+![](./pic/workflow-registry.png)
 
 
 ### 测试API
@@ -566,7 +566,7 @@ import (
 
 登录devcloud项目对应前端, 注意是你workflow当前配置的那个 devcloud的keyauth服务
 
-![](./images/create-token.png)
+![](./pic/create-token.png)
 
 
 ## Pipeline app 开发

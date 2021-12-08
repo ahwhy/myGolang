@@ -4,7 +4,7 @@ Pipeline调度器的核心逻辑:
 + Watch Pipeline对象, 监听变化事件
 + 当有新的Pipeline对象被创建时, 修改Pipeline对象的 Scheduler属性, 为其挑选一个可以Scheduler Node来处理Pipline
 
-![](./images/k8s-watch-list.png)
+![](./pic/k8s-watch-list.png)
 
 因此第一步是编写Informer, Watch Pipeline对象的变化
 
@@ -1092,7 +1092,7 @@ func (c *Controller) runPipeline(p *pipeline.Pipeline) error {
 ### 创建Step任务
 
 我们首先要挑选出 第一批需要运行的Step 任务来进行创建, 如何挑选喃?
-![](./images/pipeline-flow.png)
+![](./pic/pipeline-flow.png)
 
 + 如果是并行的任务需要一批同时运行, 我们把这个并行运行的概念定义为一个flow, 一个flow运行完后，才会运行下一个flow
 + 如何判断哪些step是一个flow喃?

@@ -468,7 +468,7 @@ func (s *Store) NewFileUploader(key string) Uploader {
 
 默认采用文件模式实现: 就是把日志保存在 runner_log下，按照时间做文件夹，以step命名, 比如
 
-![](./images/runner_log.png)
+![](./pic/runner_log.png)
 
 ```go
 func NewUploader(id string) *Uploader {

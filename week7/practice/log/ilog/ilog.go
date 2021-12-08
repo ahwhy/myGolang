@@ -20,6 +20,7 @@ func InitLogger(level string) {
 	case "error":
 		Logger.SetLevel(logrus.ErrorLevel)
 	}
+	
 	// 设置日志输出路径
 	Logger.SetOutput(os.Stdout)
 	// 设置filename
