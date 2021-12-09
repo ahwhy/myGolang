@@ -20,7 +20,7 @@ import (
 func AddHook(hook Hook) {
 	std.AddHook(hook)
 }
-
++++++++
 type Hook interface {
 	Levels() []Level
 	Fire(*Entry) error
@@ -55,6 +55,7 @@ func (dh *dingHook) Levels() []logger.Level {
 func (dh *dingHook) Fire(e *logger.Entry) error {
 	msg, _ := e.String()
 	dh.DirectSend(msg)
+
 	return nil
 }
 
@@ -92,13 +93,14 @@ func (dh *dingHook) DirectSend(msg string) error {
 		MsgType: "text",
 	}
 	dm.Text.Content = fmt.Sprintf("[日志告警log]\n[app=%s]\n"+"[日志详情:%s]", dh.appName, msg)
-
 	dm.At.AtMobiles = dh.atMobiles
+
 	bs, err := json.Marshal(dm)
 	if err != nil {
 		logger.Errorf("[消息json.marshal失败][error:%v][msg:%v]", err, msg)
 		return err
 	}
+
 	res, err := http.Post(dh.apiUrl, "application/json", bytes.NewBuffer(bs))
 	if err != nil {
 		logger.Errorf("[消息发送失败][error:%v][msg:%v]", err, msg)
@@ -106,8 +108,8 @@ func (dh *dingHook) DirectSend(msg string) error {
 	}
 	if res != nil || res.StatusCode != 200 {
 		logger.Println(res, res.StatusCode)
-
 		logger.Errorf("[钉钉返回错误][StatusCode:%v][msg:%v]", res.StatusCode, msg)
+
 		return err
 	}
 	return nil
@@ -115,7 +117,7 @@ func (dh *dingHook) DirectSend(msg string) error {
 
 func main() {
 	dh := &dingHook{
-		apiUrl:     "https://oapi.dingtalk.com/robot/send?access_token=xxxxx",
+		apiUrl:     "https://oapi.dingtalk.com/robot/send?access_token=438a6ae04b3abf3cd7834f2d294c3c4cf6ffae2e956fabc64751f62b766e1e16",
 		levels:     []logger.Level{logger.WarnLevel, logger.InfoLevel},
 		atMobiles:  []string{"xxxx"},
 		appName:    "live",

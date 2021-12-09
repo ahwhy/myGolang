@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ahwhy/myGolang/week7/practice/log/ilog"
+	"github.com/ahwhy/myGolang/historys/week07/practice/log/ilog"
 )
 
 type User struct {
