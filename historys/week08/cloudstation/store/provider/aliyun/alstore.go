@@ -3,7 +3,7 @@ package aliyun
 import (
 	"fmt"
 
-	"github.com/ahwhy/myGolang/week8/cloudstation/store"
+	"github.com/ahwhy/myGolang/historys/week08/cloudstation/store"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/go-playground/validator"
 )

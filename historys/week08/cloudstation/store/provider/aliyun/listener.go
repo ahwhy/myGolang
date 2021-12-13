@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ahwhy/myGolang/week8/cloudstation/tool"
+	"github.com/ahwhy/myGolang/historys/week08/cloudstation/tool"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"

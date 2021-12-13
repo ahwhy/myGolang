@@ -3,7 +3,7 @@ package aliyun_test
 import (
 	"testing"
 
-	"github.com/ahwhy/myGolang/week8/cloudstation/store/provider/aliyun"
+	"github.com/ahwhy/myGolang/historys/week08/cloudstation/store/provider/aliyun"
 	"github.com/stretchr/testify/assert"
 )
 

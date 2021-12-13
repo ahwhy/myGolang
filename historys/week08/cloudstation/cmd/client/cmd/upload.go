@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/ahwhy/myGolang/week8/cloudstation/store"
-	"github.com/ahwhy/myGolang/week8/cloudstation/store/provider/aliyun"
+	"github.com/ahwhy/myGolang/historys/week08/cloudstation/store"
+	"github.com/ahwhy/myGolang/historys/week08/cloudstation/store/provider/aliyun"
 	"github.com/spf13/cobra"
 )
 
