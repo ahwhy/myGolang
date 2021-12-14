@@ -4,7 +4,7 @@
 
 ## Golang-notes
   * [Golang-Base](./notes/01_Golang-Base.md)
-  * [Golang-Functions&&Methods&&Interface](./notes/02_Golang-Functions&&Methods&&Interface.md')
+  * [Golang-Functions&&Methods&&Interface](./notes/02_Golang-Functions&&Methods&&Interface.md)
   * [Golang-Oop](./notes/03_Golang-Oop.md)
   * [Golang-Goroutine](./notes/04_Golang-Goroutine.md)
   * [Golang-Reflect](./notes/05_Golang-Reflect.md)
@@ -13,7 +13,7 @@
   * [Golang-Secret](./notes/08_Golang-Secret.md)
   * [Golang-Sql](./notes/09_Golang-Sql.md)
   * [Golang-gRPC](./notes/10_Golang-gRPC.md)
-  * [Golang-Etcd](./notes/11_Golang-Etcd)
+  * [Golang-Etcd](./notes/11_Golang-Etcd.md)
   * [Golang-Package](./notes/20_Golang-Package.md)
   * [Golang-Test](./notes/21_Golang-Test.md)
   * [Golang-Time](./notes/22_Golang-Time.md)
