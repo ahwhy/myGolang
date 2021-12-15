@@ -36,7 +36,7 @@ func main() {
 	fmt.Printf("upload file %s success\n", uploadFile)
 }
 
-// 定义loadParam函数 读取并分析用户从命令行传入的参数
+// loadParam 读取并分析用户从命令行传入的参数
 func loadParam() {
 	// 解析参数
 	flag.Parse()
@@ -48,7 +48,7 @@ func loadParam() {
 	}
 }
 
-// 使用说明
+// usage 使用说明
 func usage() {
 	fmt.Fprintf(os.Stderr, `cloud-station version: 0.0.1
 Usage: cloud-station [-h] -f <uplaod_file_path>
@@ -57,7 +57,7 @@ Options:
 	flag.PrintDefaults()
 }
 
-// 定义validate函数 校验程序入参
+// validate 校验程序入参
 func validate() error {
 	if endpint == "" {
 		return fmt.Errorf("endpoint missed")
@@ -74,7 +74,7 @@ func validate() error {
 	return nil
 }
 
-// 阿里云SDK 抽象变量与核心函数
+// upload 调用阿里云SDK 抽象变量与核心函数
 func upload(filePath string) error {
 	client, err := oss.New(endpint, acessKey, secretKey)
 	if err != nil {
@@ -101,10 +101,7 @@ func upload(filePath string) error {
 	return nil
 }
 
-// 定义init函数
 func init() {
-	// 为cli添加使用说明
 	flag.BoolVar(&help, "h", false, "this is help")
-	// 使用flag从命令行接收用户输入的参数
 	flag.StringVar(&uploadFile, "f", "test.txt", "指定本地文件路径")
 }
