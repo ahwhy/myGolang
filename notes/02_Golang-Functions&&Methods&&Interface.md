@@ -1,6 +1,7 @@
 # Golang-Functions&&Methods&&Interface  Golong的函数、方法和接口
 
 ## 一、Golong的函数定义
+
 - 函数用于对代码块的逻辑封装，是提供代码复用的最基本方式，Go语言中有3种函数
 	- 普通函数
 	- 匿名函数(没有名称的函数)
@@ -14,31 +15,29 @@
 - 定义语法
 	- 签名
 ```go
-		func function_name( [parameter list] ) [return_types] {
-			函数体
-		}
+	// func 函数由 `func` 开始声明
+	// `function_name` 函数名称，函数名和参数列表一起构成了函数签名(signature)
+	// `parameter list` 参数列表，参数就像一个占位符，当函数被调用时，可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数
+	// `return_types` 返回类型，函数返回一列值。return_types 是该列值的数据类型；有些功能不需要返回值，这种情况下 return_types 不是必须的
+	// 函数体 函数定义的代码集合
+	func function_name( [parameter list] ) [return_types] {
+		// 函数体
+	}
 ```
-	- func 函数由 `func` 开始声明
-	- `function_name` 函数名称，函数名和参数列表一起构成了函数签名(signature)
-	- `parameter list` 参数列表，参数就像一个占位符，当函数被调用时，可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数
-	- `return_types` 返回类型，函数返回一列值。return_types 是该列值的数据类型；有些功能不需要返回值，这种情况下 return_types 不是必须的
-	- 函数体 函数定义的代码集合
-	
+
 ## 二、Golong的函数参数
+
 - 形参&&入参
 	- 形参 定义函数时的参数
 	- 入参 传递给函数的变量
 
 - 类型合并
-	- 在声明函数中若存在多个连续形参类型相同可只保留最后一个参数类型名
-		func sum(x, y int) int {}
+	- 在声明函数中若存在多个连续形参类型相同可只保留最后一个参数类型名 `func sum(x, y int) int {}`
 
 - 可变参数
 	- 某些情况下函数需要处理形参数量可变，需要运算符 ARGS...TYPE 的方式声明可变参数函数或在调用时传递可变参数
-	- 可变参数只能定义一个且只能在参数列表末端；在调用函数后，可变参数则被初始化为对应类型的切片(名为ARGS的slice，参数的数据类型都是TYPE)
-		func max(a, b int, args ...int) int {}
-	- 在调用函数时，也可以使用运算符 ... 将切片解包传递到可变参数函数中
-		max(1, 2, slice[3]...)
+	- 可变参数只能定义一个且只能在参数列表末端；在调用函数后，可变参数则被初始化为对应类型的切片(名为ARGS的slice，参数的数据类型都是TYPE) `func max(a, b int, args ...int) int {}`
+	- 在调用函数时，也可以使用运算符 ... 将切片解包传递到可变参数函数中 `max(1, 2, slice[3]...)`
 
 - 值传递
 	- 函数如果使用参数，该变量可称为函数的形参，形参就像定义在函数体内的局部变量
@@ -51,17 +50,18 @@
 
 - 值类型&引用类型     
 	- 值类型和引用类型的差异在于赋值同类型新变量后，对新变量进行修改是否能够影响原来的变量，若不能影响则为值类型，若能影响则为引用类型
-	- 值类型 数值、布尔、字符串、指针、数组、结构体等
-	- 引用类型 切片、映射、接口等
+	- 值类型 数值、布尔、字符串、数组、结构体等
+	- 引用类型 切片、映射、接口、指针等
 	- 针对值类型可以借助指针修改原值
 	- 针对值类型和引用类型在赋值后新旧变量的地址并不相同，只是引用类型在底层共享数据结构(其中包含指针类型元素)
 
 - 其他
 	- 变量是一个地址，也是一个引用
 	- 引用表达的是关系，指针表达的是类型；  
-	- A -- B 是引用关系，而 A 是指针
+	- `A -- B` 是引用关系，而 A 是指针
 	
 ## 三、Golong的函数返回值
+
 - 多返回值
 ```go
 	func calcReturn(x, y int) (int, int, int, int) {
@@ -125,67 +125,71 @@
 	- n = 1 :  a -> c ； 
 	- n > 1 : n - 1 (a -> b(c)) 、 a -> c ；n - 1 (b -> c(a))
 ```go
-		func tower(a, b, c string, layer int) {
-			if layer = 0 {
-					return
-			}
-			if layer == 1 {
-					fmt.Printf(%s -  %sn, a, c)
-					return
-			}
-			tower(a, c, b, layer-1)
-			fmt.Printf(%s -  %sn, a, c)
-			tower(b, a, c, layer-1)
+	func tower(a, b, c string, layer int) {
+		if layer = 0 {
+				return
 		}
-		tower(A, B, C, 3)
+		if layer == 1 {
+				fmt.Printf(%s -  %sn, a, c)
+				return
+		}
+		tower(a, c, b, layer-1)
+		fmt.Printf(%s -  %sn, a, c)
+		tower(b, a, c, layer-1)
+	}
+	tower(A, B, C, 3)
 ```
 
 - 递归目录
 	- 递归基点是文件，只要是文件就返回，只要是目录就进入
  
 ## 五、Golong的函数类型
+
 - 函数也可以赋值给变量，存储在数组、切片、映射中，也可作为参数传递给函数或作为函数返回值进行返回
 
 - 声明&&初始化&&调用
 ```go
-	var callback func(n1, n2 int) (r1, r2, r3, r4 int)   // 定义函数类型变量，并使用零值nil进行初始化
-	callback = calcReturn                                // 赋值为函数calcReturn
-	callback(5, 2)                                       // 调用函数calcReturn
-```
-	- 声明函数类型变量f 为函数Add
-```go
-		var f func(int, int) int = Add
-		fmt.Println(f(4, 2))  6
-```
-	- 声明函数切片
-```go
-		var fs []func(int, int) int
-		fs = append(fs, Add, Sub, Mul, Div)
-		fmt.Printf(%T;n%#vn, fs, fs)         // []func(int, int) int;
-		                                     // []func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
-		for _, f = range fs{
-			fmt.Println(f(4,2))
+	// 定义函数类型变量，并使用零值nil进行初始化
+	var callback func(n1, n2 int) (r1, r2, r3, r4 int)
+	
+	// 赋值为函数calcReturn
+	callback = calcReturn
+	
+	// 调用函数calcReturn
+	callback(5, 2)
+	
+	// 声明函数类型变量f 为函数Add
+	var f func(int, int) int = Add
+	fmt.Println(f(4, 2))  6
+	
+	// 声明函数切片
+	var fs []func(int, int) int
+	fs = append(fs, Add, Sub, Mul, Div)
+	fmt.Printf(%T;n%#vn, fs, fs)         // []func(int, int) int;[]func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
+	for _, f = range fs{
+		fmt.Println(f(4,2))
+	}
+
+	// 返回值为函数
+	func genFunc() func() {
+		if rand.Int()%2 == 0 {
+			return sayHi
+		} else {
+			return sayHolle
 		}
-```
-	- 返回值为函数
-```go
-		func genFunc() func() {
-			if rand.Int()%2 == 0 {
-				return sayHi
-			} else {
-				return sayHolle
-			}
-		}
-		rand.Seed(time.Now().Unix())
-		genFunc()
+	}
+	rand.Seed(time.Now().Unix())
+	genFunc()
 ```
 
 - 声明&&调用参数类型为函数的函数 *高阶函数
 ```go
-	func printResult(pf func(...string), list ...string) {    // 定义接收函数类型作为参数的函数
+	// 定义接收函数类型作为参数的函数
+	func printResult(pf func(...string), list ...string) {
 		pf(list...)
 	}
-	func line(list ...string) {                               // 回调函数，作为参数被传递的函数
+	// 回调函数，作为参数被传递的函数
+	func line(list ...string) {
 		fmt.Print()
 		for _, e = range list {
 			fmt.Print(e)
@@ -199,11 +203,14 @@
 
 - 自定义函数类型&&调用参数类型为自定义函数类型的函数&&赋值变量并调用
 ```go
-	type addFunc func(x, y int) int                // 声明函数类型addFunc
-	func asArg(fn addFunc) int {                   // 创建函数asArg使用声明函数类型addFunc作为参数
-		return fn(2, 2)  2
+	// 声明函数类型addFunc
+	type addFunc func(x, y int) int
+	// 创建函数asArg使用声明函数类型addFunc作为参数
+	func asArg(fn addFunc) int {
+		return fn(2, 2)
 	}
-	ret = asArg(func(x, y int) int {               // 调用函数asArg并使用匿名函数传参
+    // 调用函数asArg并使用匿名函数传参
+	ret = asArg(func(x, y int) int {
 		return x + y
 	}
 ```
@@ -212,42 +219,40 @@
 
 ### 1. 匿名函数
 - 不需要定义名字的函数叫做匿名函数，常用做帮助函数在局部代码块中使用或作为其他函数的参数
-	- 声明匿名函数并直接执行
 ```go
-		func(args){
-			...
-		}(parameters)
-```
-	- 使用匿名函数作为 printResult 的参数
-```go
-		printResult(func(list ...string) {
-			for i, v = range list{
-				fmt.Printf(%d %s, i, v)
-			}
-		}, name...)
-```
-	- 声明自定义匿名函数类型
-```go
-		type Callback func() error                      // 声明自定义匿名函数类型
-		callback = map[string]Callback{}                // 赋值给map类型变量
-		callback[add] = func(int string) error {        // 初始化为具体的匿名函数
-			fmt.Println(add)
-			return nil
+	// 声明匿名函数并直接执行
+	func(args){
+		...
+	}(parameters)
+
+	// 使用匿名函数作为 printResult 的参数
+	printResult(func(list ...string) {
+		for i, v = range list{
+			fmt.Printf(%d %s, i, v)
 		}
-		callback[add]()
+	}, name...)
+
+	// 声明自定义匿名函数类型
+	type Callback func() error                      // 声明自定义匿名函数类型
+	callback = map[string]Callback{}                // 赋值给map类型变量
+	callback[add] = func(int string) error {        // 初始化为具体的匿名函数
+		fmt.Println(add)
+		return nil
+	}
+	callback[add]()
 ```
 
 ### 2. 闭包
 - 闭包，匿名函数的一种，是指在函数内定义的匿名函数引用外部函数的变量(没有使用传参的方式)，只要匿名函数继续使用则外部函数赋值的变量不被自动销毁
 	- 变量生成周期(内存中存在的时间)发生了变化 ，闭包不仅仅包含函数，还包含函数定义域和函数变量
 ```go
-		func addBase(base int) func(int) int {   // 定义闭包函数，返回一个匿名函数用于计算于base元素的和
-			return func (num int) int {
-				return base + num
-			}
+	func addBase(base int) func(int) int {   // 定义闭包函数，返回一个匿名函数用于计算于base元素的和
+		return func (num int) int {
+			return base + num
 		}
-		base2 = addBase(2)                       // 使用闭包函数
-		fmt.Println(base2(3))
+	}
+	base2 = addBase(2)                       // 使用闭包函数
+	fmt.Println(base2(3))
 ```
 
 ## 七、Golong的错误处理
@@ -261,15 +266,14 @@
 ```
 
 - 函数调用时判断返回值
-	- `if err != nil { ... }`
 ```go
-		for _, v = range [...]int{0, 1, 2, 3} {            // 处理函数返回的错误
-			if r, err = division(6, v); err != nil {
-				fmt.Println(err)
-			} else {
-				fmt.Println(r)
-			}
+	for _, v = range [...]int{0, 1, 2, 3} {            // 处理函数返回的错误
+		if r, err = division(6, v); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(r)
 		}
+	}
 ```
 
 - Go语言通过 error 接口实现错误处理的标准模式，通过使用函数返回值列表中的最后一个值返回错误信息，将错误的处理交由程序员主动进行处理
@@ -277,23 +281,23 @@
 - error接口的初始化方法
 	- 通过 errors 包的 New 方法创建 `errors.New()`
 ```go
-		func division(n1, n2 int) (int, error){            // 定义除法函数，若除数为0则使用error返回错误信息
-			if n2 == 0 {
-				return 0, errors.New(除数为0)
-			}
-			return n1n2 , nil
+	// 定义除法函数，若除数为0则使用error返回错误信息
+	func division(n1, n2 int) (int, error){
+		if n2 == 0 {
+			return 0, errors.New(除数为0)
 		}
-```
-	- 通过通过fmt.Errorf方法创建方法创建
-```go
-		err1, err2 = errors.New(error 1), fmt.Errorf(error %d, 2)
-		fmt.Printf(%T, %T, %v, %v, err1, err2, err1, err2)               // errors.errorString, errors.errorString, error 1, error 2
+		return n1n2 , nil
+	}
+
+	// 通过通过fmt.Errorf方法创建方法创建
+	err1, err2 = errors.New(error 1), fmt.Errorf(error %d, 2)
+	fmt.Printf(%T, %T, %v, %v, err1, err2, err1, err2)               // errors.errorString, errors.errorString, error 1, error 2
 ```
 
 ### 2. 复杂的错误类型
 - 以os包举例，其提供了 `LinkError、PathError、SyscallError` 的错误类型，这些 error 都是实现了 error接口的错误类型
 
-- 可以用switch err.(type)判断类型
+- 可以用`switch err.(type)`判断类型
 ```go
 	file, err = os.Stat(test.txt)
 	if err != nil {
@@ -334,7 +338,7 @@
 ```
 
 ### 4. Error Wrapping 错误嵌套    golang 1.13
-- 可以扩展error信息，使用 `fmt.ErrorF(newErrorStr %w,e)`
+- 可以扩展error信息，使用 `fmt.Errorf(newErrorStr %w,e)`
 
 - 优势是不需要像上面一样定义结构体
 ```go
@@ -366,14 +370,14 @@
 		- 当未发生panic，且不存在panic，则recover函数得到的结果为nil
 		- 当未发生panic，且存在panic，则recover函数得到的结果为panic传递的参数
 		- recover只能获取到最后一次的panic的信息
-```go
-			defer func() {
-				fmt.Println(recover())
-			}()
-			var x, y int
-			sum(x, y)
-```
 		- 在并发的场景中，需要在goroutine的启动函数里面专门编写recover，用于捕获当前goroutine的异常
+```go
+	defer func() {
+		fmt.Println(recover())
+	}()
+	var x, y int
+	sum(x, y)
+```
 
 ## 八、Golong的方法 Methods
 
@@ -419,21 +423,20 @@
 ```
 
 - 调用
-	- 示例
-```go
-		(&user).PSetName("bb")  // 调用结构体指针对象的PSetName
-		user2 := &User{"cc"}
-		(*user2).Call()
-```
-		- 当使用结构体指针对象调用值接收者的方法时，Go编译器会自动将指针对象"解引用"为值调用方法，此为GO的语法糖
-		- 当使用结构体对象调用指针接收者的方法时，Go编译器会自动将值对象"取引用"为指针调用方法
+	- 当使用结构体指针对象调用值接收者的方法时，Go编译器会自动将指针对象"解引用"为值调用方法，此为GO的语法糖
+	- 当使用结构体对象调用指针接收者的方法时，Go编译器会自动将值对象"取引用"为指针调用方法
 	- 注意
 		- 取引用和解引用发生在接收者中，对于函数方法的参数必须保持变量类型一一对应
 		- 该使用值接收者还是指针接收者，取决于是否现需要修改原始结构体
 			- 若不需要修改则使用值，若需要修改则使用指针
 			- 若存在指针接收者，则所有方法使用指针接收者
 		- 对于接收者为指针类型的方法，需要注意在运行时若接收者为nil时会发生错误
-	
+```go
+	(&user).PSetName("bb")  // 调用结构体指针对象的PSetName
+	user2 := &User{"cc"}
+	(*user2).Call()
+```
+
 ### 4. 匿名嵌入
 - 若结构体匿名嵌入带有方法的结构体时，则在外部结构体可以调用嵌入结构体的方法，并且在调用时只有嵌入的字段会传递给嵌入结构体方法的接收者
 
@@ -449,54 +452,53 @@
 	- 在方法值对象赋值时若方法接收者为值类型，则在赋值时会将值类型拷贝
 	- 若调用为指针则自动 解引用拷贝
 ```go
-		method01 := user.Call
-		method02 := user.SetName
-		method03 := user2.Call
-		method04 := user2.PSetName
+	method01 := user.Call
+	method02 := user.SetName
+	method03 := user2.Call
+	method04 := user2.PSetName
 ```
 
 - 方法表达式
 	- 方法表达式在赋值时
 		- 针对接收者为 值类型的方法 使用 类型名或类型指针 访问，go自动为指针变量生成隐式的指针类型接收者方法
-```go
-			method05 := User.Call 
-			method05(&user)
-			method05(user2)
-```
 		- 针对接收者为 指针类型的方法 使用 类型指针 访问，同时在调用时需要根据参数传递对应的值对象或指针对象
 ```go
-			method06 := (*User).PSetName
-			method06(&user, "bb")  // (*User).PSetName(&user, "bb")
-			method06(user2, "bb")  // (*User).PSetName(user2, "bb")
+	// 接收者为值类型的方法
+	method05 := User.Call 
+	method05(&user)
+	method05(user2)
+	// 接收者为指针类型的方法
+	method06 := (*User).PSetName
+	method06(&user, "bb")  // (*User).PSetName(&user, "bb")
+	method06(user2, "bb")  // (*User).PSetName(user2, "bb")
 ```
 
 - 自动生成指针接收者方法
 	- 为何会根据接收者为值类型生成对应指针类型接收者方法，而不根据接收者为指针类型生成对应值接收者方法
-		- 接收者为 值类型 的方法
 ```go
-			func (user User) SetName(name string) {
-				user.name = name
-			}
-			/* 隐式
-			- func (user *User) SetName(name string) { user.name = name }
-			- (*user).SetName("bb")
-			- 获取user地址的值，并拷贝调用SetId；只影响拷贝(*user)的值，并不影响调用者的值
-			- 与(user User) SetName方法 行为一致
-			- 使用 值和指针都不改变调用者，行为一致
-			*/
-```
-		- 接收者为 指针类型 的方法
-```go
-			func (user *User) PSetName(name string) {
-				user.name = name
-			}
-			/* 隐式
-			func (user User) PSetName(name string) { user.name = name }
-			- (&user).SetName("bb")
-			- user为值接收者，先拷贝值，再调用(&user).SetName只会影响接收者(user)的值，并不影响调用者的值
-			- 与(user *User) PSetName方法 行为不一致
-			- 使用 值 不改变调用者，使用指针改变调用者，行为不一致
-			*/
+	// 接收者为 值类型 的方法
+	func (user User) SetName(name string) {
+		user.name = name
+	}
+	/* 隐式
+	- func (user *User) SetName(name string) { user.name = name }
+	- (*user).SetName("bb")
+	- 获取user地址的值，并拷贝调用SetId；只影响拷贝(*user)的值，并不影响调用者的值
+	- 与(user User) SetName方法 行为一致
+	- 使用 值和指针都不改变调用者，行为一致
+	*/
+
+	// 接收者为 指针类型 的方法
+	func (user *User) PSetName(name string) {
+		user.name = name
+	}
+	/* 隐式
+	func (user User) PSetName(name string) { user.name = name }
+	- (&user).SetName("bb")
+	- user为值接收者，先拷贝值，再调用(&user).SetName只会影响接收者(user)的值，并不影响调用者的值
+	- 与(user *User) PSetName方法 行为不一致
+	- 使用 值 不改变调用者，使用指针改变调用者，行为不一致
+	*/
 ```
 
 - 使用反射获取 User 对象和 *User 对象结构
@@ -554,16 +556,16 @@
 - 声明接口变量
 	- 需要定义变量类型为接口名，此时变量值被初始化为nil，类型也为nil
 ```go
-		var name interfaceName
+	var name interfaceName
 ```
 
 - 赋值接口变量
 	- 接口无法实例化，即不能直接通过接口类型创建变量，只能由其他实现了接口的对象进行赋值
 ```go
-		var useritf Useritf = &User{"aa"}
-		useritf.Call()
-		useritf.SetName("bb")
-		useritf.PSetName("bb")
+	var useritf Useritf = &User{"aa"}
+	useritf.Call()
+	useritf.SetName("bb")
+	useritf.PSetName("bb")
 ```
 
 - 类型对象
@@ -599,11 +601,11 @@
 - 在定义变量时将类型指定为接口的函数签名的接口，此时叫匿名接口
 	- 匿名接口常用于初始化一次接口变量的场景
 ```go
-		// 通过匿名接口声明接口变量
-		var closer interface {
-			Close() error
-		}
-		closer.Close()
+	// 通过匿名接口声明接口变量
+	var closer interface {
+		Close() error
+	}
+	closer.Close()
 ```
 	
 ### 6. 空接口
@@ -633,26 +635,26 @@
 	- 常声明函数参数类型为 `interface{}` ，用于接收任意类型的变量
 	- 示例
 ```go
-		func printType(vs ...interface{}) {
-			for _, v := range vs {
-				switch v.(type) {                           // 类型查询
-				case nil:                                   // - 使用switch时，若符合多个case项，则匹配最近的一个，因此勿将default放在最上方
-					fmt.Println("nil")                      // - 语法: 接口变量.(Type) 只能用在switch语句中，是类型查询的特定语法，无法直接 Println 打印
-				case int:                                   // - 或者在switch语句中直接赋值 data := v.(type)
-					fmt.Println("int")
-				case bool:
-					fmt.Println("bool")
-				case string:
-					fmt.Println("string")
-				case [5]int:
-					fmt.Println("[5]int")
-				case []int:
-					fmt.Println("[]int")
-				case map[string]string:
-					fmt.Println("map[string]string")
-				default:
-					fmt.Println("unknow")
-				}
+	func printType(vs ...interface{}) {
+		for _, v := range vs {
+			switch v.(type) {                           // 类型查询
+			case nil:                                   // - 使用switch时，若符合多个case项，则匹配最近的一个，因此勿将default放在最上方
+				fmt.Println("nil")                      // - 语法: 接口变量.(Type) 只能用在switch语句中，是类型查询的特定语法，无法直接 Println 打印
+			case int:                                   // - 或者在switch语句中直接赋值 data := v.(type)
+				fmt.Println("int")
+			case bool:
+				fmt.Println("bool")
+			case string:
+				fmt.Println("string")
+			case [5]int:
+				fmt.Println("[5]int")
+			case []int:
+				fmt.Println("[]int")
+			case map[string]string:
+				fmt.Println("map[string]string")
+			default:
+				fmt.Println("unknow")
 			}
 		}
+	}
 ```	
