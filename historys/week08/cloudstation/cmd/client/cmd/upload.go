@@ -42,7 +42,7 @@ func getAccessKeyFromInput() {
 func getProvider() (p store.Uploader, err error) {
 	switch ossProvider {
 	case "aliyun":
-		fmt.Printf("上传云厂商：阿里云[%s]\n", defaultEndpoint)
+		fmt.Printf("上传云厂商: 阿里云[%s]\n", defaultEndpoint)
 		if aliAccessID == "" {
 			aliAccessID = defaultALIAK
 		}
