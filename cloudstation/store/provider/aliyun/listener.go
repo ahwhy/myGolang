@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ahwhy/myGolang/historys/week08/cloudstation/tool"
+	"github.com/ahwhy/myGolang/utils"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
@@ -41,7 +41,7 @@ func (p *OssProgressListener) ProgressChanged(event *oss.ProgressEvent) {
 		)
 		p.startAt = time.Now()
 		fmt.Println()
-		fmt.Printf("文件大小: %s\n", tool.HumanBytesLoaded(event.TotalBytes))
+		fmt.Printf("文件大小: %s\n", utils.HumanBytesLoaded(event.TotalBytes))
 	case oss.TransferDataEvent:
 		p.bar.Add64(event.ConsumedBytes)
 	case oss.TransferCompletedEvent:

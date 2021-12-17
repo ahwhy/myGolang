@@ -214,7 +214,7 @@
 - http客户端
 
 ### 20. github.com/go-playground/validator
-- 校验参数的包
+- 校验参数
 
 ### 21. github.com/spf13/cobra
 - cmd命令行客户端       
@@ -233,3 +233,6 @@
 
 ### 26. github.com/rs/xid
 - ID生成器库
+
+### 27. github.com/stretchr/testify/assert
+- 测试
