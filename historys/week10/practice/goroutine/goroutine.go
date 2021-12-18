@@ -19,7 +19,7 @@ func runTask(id int) {
 func asyncRun() {
 	for i := 0; i < 10; i++ {
 		go runTask(i + 1)
-		// 没启动一个go routine 就+1
+		// 每启动一个go routine 就+1
 		wg.Add(1)
 	}
 }

@@ -36,7 +36,7 @@
 
 ## 八、设置 go mod 和 go proxy
 - 设置两个环境变量
-```
+```shell
 	$ go env -w GO111MODULE=on
 	$ go env -w GOPROXY=https://goproxy.io,direct`
 ```
@@ -48,16 +48,17 @@
 - git add . && git commit -m "Record me learning golang"
 - github上新建一个仓库
 - 推送到远程
-```
+- 上传tag
+	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
+	- https://www.jianshu.com/p/79ecf4fe5079
+```shell
+	// 推送到远程
 	// or push an existing repository from the command line
 	git remote add origin https://github.com/ahwhy/myGolang.git
 	git branch -M main
 	git push -u origin main
-```
-- 上传tag
-	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
-	- https://www.jianshu.com/p/79ecf4fe5079
-```
+
+	// 上传tag
 	git log --oneline
 	// 创建lightweight类型的tag
 	git tag v0.0.2-lw
@@ -71,7 +72,7 @@
 - 标准库 https://studygolang.com/pkgdoc
 
 ### 1. time
-```
+```go
 	time.Now()          // 获取当前时间
 	time.Now().Unix()
 	time.Now().Year()   // Month() Day()  Hour()  Minute()  Second()
@@ -82,7 +83,7 @@
 ```
 
 ### 2. math
-```
+```go
 	// 用于测试一个数是否是非数NaN
 	// NaN非数，一般用于表示无效的除法操作结果0/0或Sqrt(-1)
 	func IsNaN(f float64) (is bool)
@@ -92,20 +93,20 @@
 ```
 
 - math/rand
-```
+```go
 	rand.Seed(time.Now().Unix())  // 使用当前时间设置随机数种子
 	rand.Intn(100)    // 生产[0, 100)的随机数
 ```
 
 ### 3. reflect
-```
+```go
 	//  获取数据类型，同Printf("%T")
 	reflect.TypeOf()
 	reflect.ValueOf()
 ```
 
 ### 4. os
-```
+```go
 	// os文件处理
 	*os.PathError           // PathError records an error and the operation and file path that caused it.
 	*os.LinkError           // LinkError records an error during a link or symlink or rename system call and the paths that caused it.
@@ -118,7 +119,7 @@
 ```
 
 ### 5. strings
-```
+```go
 	strings.FieldsFunc()  // 将字符串进行分段，返回切片 func strings.FieldsFunc(s string, f func(rune) bool) []string
 	strings.Contains()    // func Contains(s, substr string) bool  判断字符串s中是否存在对应字符substr
 	strings.ToLower()     // func ToLower(s string) string         将字符串统一转成小写
@@ -127,19 +128,19 @@
 ```
 
 ### 6. errors
-```
+```go
 	errors.New() // 创建错误 或使用 fmt.Errorf()
 ```
 
 ### 7. sort
-```
+```go
 	type StringSlice []string
 	func sort.Strings(x []string)
 	func sort.Sort(data sort.Interface)
 ```
 
 ### 8. flag
-```
+```go
 	flag.Parse()           // 解析命令行参数
 	flag.IntVar()          // 设置int类型参数
 	flag.BoolVar()		   // 设置bool类型参数
@@ -149,12 +150,12 @@
 
 ### 9. crypto
 - crypto/md5
-```
+```go
 	md5.Sum([]byte(""))     // 计算byte切片中字符的MD5
 	md5.New()               // 解码
 ```
 - crypto/sha1
-```
+```go
 	sha1.Sum([]byte(""))    // 计算byte切片中字符消息摘要(Hash)
 	sha256.Sum([]byte(""))
 	sha512.Sum([]byte(""))
@@ -162,7 +163,7 @@
 ```
 
 ### 10. encoding/base64
-```
+```go
 	base64.stdEncoding.EncodeToString([]byte(""))     // 计算byte切片中字符的base64加密
 	base64.StdEncoding.DecodeString()                 // 计算base64解码
 	base64.RawStdEncoding.EncodeToString([]byte(""))  // 计算byte切片中字符的base64加密且不使用=填充
@@ -173,12 +174,12 @@
 ```
 
 ### 11. log
-```
+```go
 	log.Printf("aa")  // 2021/07/04 15:32:10 aa
 ```
 
 ### 12. sync
-```
+```go
 	sync.Mutex 互斥锁
 	sync.RWMutex 读写锁
 	sync.Map
@@ -186,27 +187,30 @@
 ```
 
 ### 13. runtime
+```go
+	func runtime.Gosched()
+```
 
 ### 14. bufio
-```
+```go
 	// 提供缓冲流的功能
 	bufio.NewScanner(os.Stdin)
 ```
 	
 ### 15. io 
-```
+```go
 	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
 ```
 
 ### 16. io/ioutil
 
 ### 17. gopkg.in/yaml.v2
-```
+```go
 	yaml.Unmarshal()
 ```
 
 ### 18. net/http
-```
+```go
 	http.StatusOK
 ```
 

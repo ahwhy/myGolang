@@ -91,6 +91,7 @@
 				- 代表M所需的上下文环境，是处理用户级代码逻辑的处理器
 				- P的数量由环境变量中的GOMAXPROCS决定，默认情况下就是核数
 				- 所有的P都在程序启动时创建，并保存在数组中，最多有GOMAXPROCS(可配置)个
+				- `func runtime.GOMAXPROCS(n int) int`
 			- M(Machine)
 				- M对应一个内核线程(Thread)，并且这个对应关系是确定的
 				- 线程想运行任务就得获取P，从P的本地队列获取G
