@@ -79,3 +79,12 @@ func ProblemV2() {
 	wg.Wait()
 	fmt.Println(sumCount)
 }
+
+/*
+$ go run -race rwlock.go      监测是否存在资源竞争
+==================
+WARNING: DATA RACE
+===========================
+Found 1 data race(s)
+exit status 66
+*/

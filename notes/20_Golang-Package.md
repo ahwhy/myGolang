@@ -182,8 +182,9 @@
 ```go
 	sync.Mutex 互斥锁
 	sync.RWMutex 读写锁
-	sync.Map
+	sync.Map 线程安全的Map
 	sync.WaitGroup(计数信号量)
+	sync.Once
 ```
 
 ### 13. runtime

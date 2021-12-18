@@ -19,6 +19,10 @@ func TestSyncAB(t *testing.T) {
 	channel.SyncAB()
 }
 
+func TestRunTaskWithPool(t *testing.T) {
+	channel.RunTaskWithPool()
+}
+
 func TestDeadLockV1(t *testing.T) {
 	ch := make(chan string)
 
@@ -45,8 +49,4 @@ func TestDeadLockV2(t *testing.T) {
 	{
 		fmt.Println(<-ch)
 	}
-}
-
-func TestRunTaskWithPool(t *testing.T) {
-	channel.RunTaskWithPool()
 }

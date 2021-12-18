@@ -299,6 +299,17 @@
 		- `e, ok := <-channel2`
 			- `ok == true` 代表管道还没有关闭
 			- 读取到最后一个元素返回false
+```go
+	for {
+		if ele, ok := <-channel2; ok {                                    //ok==true代表管道还没有close
+			fmt.Printf("receive %d\n", ele)
+		} else {                                                        //管道关闭后，读操作会立即返回"0值"
+			fmt.Printf("channel have been closed, receive %d\n", ele)
+			break
+		}
+	}
+```
+
 
 - `for-range` 遍历管道
 	- 只有当管道关闭时，才能通过range遍历管道里的数据，否则会发生fatal error
@@ -466,7 +477,8 @@
 			rwMutex.RUnlock   // 释放读取锁
 ```
 
-- sync.Map 
+- sync.Map
+	- 并发修改map会发生panic，因为map的value是不可寻址的
 	- go 1.9引入的内置方法，并发线程安全的map
 	- sync.Map 将key和value 按照interface{}存储
 	- 查询出来后要类型断言 x.(int) x.(string)

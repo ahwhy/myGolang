@@ -2,8 +2,10 @@ package goroutine_test
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/ahwhy/myGolang/concurrent/goroutine"
 )
@@ -45,4 +47,25 @@ func TestCloser(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
+}
+
+
+func TestOnce(t *testing.T){
+	go goroutine.LoadResource()
+	go goroutine.LoadResource()
+
+	inst1 := goroutine.GetSingletonInstance()
+	inst2 := goroutine.GetSingletonInstance()
+
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Printf("inst1 address %v\n", []*goroutine.Singleton{inst1})
+	fmt.Printf("inst2 address %v\n", []*goroutine.Singleton{inst2})
+} 
+
+func TestRuntime(t *testing.T) {
+	fmt.Printf("逻辑处理器数目:%d\n", runtime.NumCPU())
+	fmt.Printf("NumGoroutine:%d\n", runtime.NumGoroutine())
+	fmt.Printf("NumCgoCall:%d\n", runtime.NumCgoCall())
+	fmt.Printf("GOROOT:%s\n", runtime.GOROOT())
 }

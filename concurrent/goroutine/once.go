@@ -1,9 +1,8 @@
-package main
+package goroutine
 
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 var globalResource map[string]string = make(map[string]string)
@@ -29,15 +28,6 @@ func GetSingletonInstance() *Singleton {
 		fmt.Println("init Singleton")
 		singleton = &Singleton{Name: "Tom"}
 	})
+	
 	return singleton
-}
-
-func main() {
-	go LoadResource()
-	go LoadResource()
-	inst1 := GetSingletonInstance()
-	inst2 := GetSingletonInstance()
-	fmt.Printf("inst1 address %v\n", []*Singleton{inst1})
-	fmt.Printf("inst2 address %v\n", []*Singleton{inst2})
-	time.Sleep(100 * time.Millisecond)
 }
