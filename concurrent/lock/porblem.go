@@ -33,8 +33,13 @@ func atomicAdd() {
 }
 
 func ProblemV1() {
-	var sum int
+	// 记录程序消耗时间
+	start := time.Now()
+	defer func() {
+		fmt.Println(time.Since(start))
+	}()
 
+	var sum int
 	// 使用WaitGroup等待1000个goroutine完成
 	var wg sync.WaitGroup
 	wg.Add(1000)
@@ -43,14 +48,14 @@ func ProblemV1() {
 		go func() {
 			defer wg.Done()
 			// 对变量count执行1000次加1
-			for j := 0; j < 10; j++ {
+			for j := 0; j < 1000; j++ {
 				lock.Lock()
 				sum++
 				lock.Unlock()
 			}
 		}()
 	}
-	// 等待10个goroutine完成
+	// 等待1000个goroutine完成
 	wg.Wait()
 
 	// 结果出错，而且不稳定。
@@ -58,7 +63,7 @@ func ProblemV1() {
 }
 
 func ProblemV2() {
-	// 目的是 记录程序消耗时间
+	// 记录程序消耗时间
 	start := time.Now()
 	defer func() {
 		fmt.Println(time.Since(start))
@@ -66,6 +71,7 @@ func ProblemV2() {
 
 	for i := 0; i < 1000000; i++ {
 		wg.Add(1)
+		// go add()
 		// go mutexAdd() // 互斥锁的 add函数 是并发安全的，因为拿不到互斥锁会阻塞，所以加锁性能开销大
 		go atomicAdd() // 原子操作的 add函数 是并发安全，性能优于加锁的
 	}

@@ -3,8 +3,8 @@ package channel_test
 import (
 	"fmt"
 	"testing"
-	
-	"github.com/ahwhy/myGolang/week10/practice/channel"
+
+	"github.com/ahwhy/myGolang/historys/week10/practice/channel"
 )
 
 func TestBasic(t *testing.T) {

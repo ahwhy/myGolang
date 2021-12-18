@@ -44,12 +44,15 @@ func (dh *dingHook) Levels() []logger.Level {
 
 // Fire 发送日志的具体逻辑 异步
 func (dh *dingHook) Fire(e *logger.Entry) error {
+	defer func() {
+		<-dh.closeChan
+	}()
+
 	msg, _ := e.Bytes()
 	dh.JsonBodies <- msg
 	defer close(dh.JsonBodies)
 
 	go dh.Asynchronous()
-	<-dh.closeChan
 
 	return nil
 }

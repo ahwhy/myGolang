@@ -3,8 +3,7 @@ package selectio
 import "fmt"
 
 func SelectOrder() {
-	// 我们只在一个执行体(Goroutine)中完成
-	// 所以需要channel是带缓冲的
+	// 一个执行体(Goroutine)中完成，需要channel带缓冲
 	a := make(chan string, 100)
 	b := make(chan string, 100)
 	c := make(chan string, 100)

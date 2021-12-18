@@ -7,22 +7,23 @@ import (
 	"time"
 )
 
-// worker的数量，即使用多少goroutine执行任务
+// worker数量，即Goroutine数
 const workerNum = 4
 
 var wg sync.WaitGroup
 
 type Task struct {
-	ID         int
-	JobID      int
-	Status     string
+	ID     int
+	JobID  int
+	Status string
+
 	CreateTime time.Time
 }
 
 // Run 执行任务
 func (t *Task) Run() {
 	sleep := rand.Intn(1000)
-	time.Sleep(time.Duration(sleep) * time.Millisecond)
+	time.Sleep(time.Duration(sleep) * time.Microsecond)
 	t.Status = "Completed"
 }
 
@@ -47,9 +48,10 @@ func RunTaskWithPool() {
 	wg.Wait()
 }
 
-// 从buffered channel中读取任务，并执行任务
+// worker 从buffered channel中读取任务，并执行任务
 func worker(in <-chan *Task, workID int) {
 	defer wg.Done()
+
 	for v := range in {
 		fmt.Printf("Worker%d: recv a request: TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
 		v.Run()
@@ -57,10 +59,9 @@ func worker(in <-chan *Task, workID int) {
 	}
 }
 
-// 将待执行任务放进buffered channel，共15个任务
+// produceTask 将待执行任务放进buffered channel，共15个任务
 func produceTask(out chan<- *Task) {
 	for i := 1; i <= 15; i++ {
-		// fmt.Println(i)
 		out <- &Task{
 			ID:         i,
 			JobID:      100 + i,

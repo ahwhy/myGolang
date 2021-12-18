@@ -1,16 +1,15 @@
 package channel
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func sender(ch chan string) {
 	ch <- "hello"
 	ch <- "this"
 	ch <- "is"
 	ch <- "alice"
-	// 发送通话结束
+	// 通话结束
 	ch <- "EOF"
+
 	close(ch)
 }
 
@@ -21,7 +20,6 @@ func recver(ch chan string, down chan struct{}) {
 	}()
 
 	for v := range ch {
-		// 处理通话结束
 		if v == "EOF" {
 			return
 		}
@@ -29,12 +27,12 @@ func recver(ch chan string, down chan struct{}) {
 	}
 }
 
-func Basic() {
+func BasicChan() {
 	ch := make(chan string)
+	down := make(chan struct{})
 
-	down := make(chan struct{}) // bool string struct{}{}
-	go sender(ch)               // sender goroutine
-	go recver(ch, down)         // recver goroutine
+	go sender(ch)       // sender goroutine
+	go recver(ch, down) // recver goroutine
 
 	<-down
 }

@@ -3,12 +3,12 @@ package channel_test
 import (
 	"fmt"
 	"testing"
-	
-	"github.com/ahwhy/myGolang/week10/practice/channel"
+
+	"github.com/ahwhy/myGolang/concurrent/channel"
 )
 
 func TestBasic(t *testing.T) {
-	channel.Basic()
+	channel.BasicChan()
 }
 
 func TestBufferedChan(t *testing.T) {
@@ -21,11 +21,11 @@ func TestSyncAB(t *testing.T) {
 
 func TestDeadLockV1(t *testing.T) {
 	ch := make(chan string)
-	
+
 	// send
-	{
+	go func() {
 		ch <- "hello"
-	}
+	}()
 
 	// receive
 	{

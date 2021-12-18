@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+func TimeAfter() {
+	fmt.Println(time.Now())
+
+	a := time.After(6 * time.Second)
+	fmt.Println(<-a)
+}
+
 func SelectTimeout() {
 	ch1 := make(chan string)
 
