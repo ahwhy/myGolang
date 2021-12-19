@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func ProducerConsumerMode() {
+func ProducerConsumerMode() {         
 	ch := make(chan int, 64) // 成果队列
 
 	go Producer(3, ch) // 生成 3 的倍数的序列
@@ -20,7 +20,9 @@ func ProducerConsumerMode() {
 	time.Sleep(5 * time.Second)
 }
 
-// 生产者: 生成 factor 整数倍的序列， 3， 0, 3, 6, 9,  5, 0, 5, 10, 15
+// 生产者: 生成 factor 整数倍的序列
+// 3: 0, 3, 6, 9
+// 5: 0, 5, 10, 15
 func Producer(factor int, out chan<- int) {
 	maxCount := 0
 

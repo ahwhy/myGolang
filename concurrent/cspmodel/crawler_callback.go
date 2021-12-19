@@ -1,35 +1,13 @@
-package tips
+package cspmodel
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"io"
 	"time"
 )
 
-var (
-	client = http.Client{
-		Timeout: time.Duration(1 * time.Second),
-	}
-)
-
-type SiteResp struct {
-	Site   string
-	Err    error
-	Resp   string
-	Status int
-	Cost   int64
-}
-
+// 使用回调函数 代替 Goroutine
 func CallBackMode() {
-	endpoints := []string{
-		"https://www.baidu.com",
-		"https://segmentfault.com/",
-		"https://blog.csdn.net/",
-		"https://www.jd.com/",
-	}
-
-	// 一个endpoints返回一个结果, 缓冲可以确定
 	respChan := make(chan SiteResp, len(endpoints))
 	defer close(respChan)
 
@@ -40,23 +18,24 @@ func CallBackMode() {
 	}
 
 	// 并行爬取
-	for _, endpoints := range endpoints {
+	for _, endpoint := range endpoints {
 		wg.Add(1)
-		go doSiteRequest(cb, endpoints)
+		go doSiteRequestCallback(cb, endpoint)
 	}
 
 	// 等待结束
 	wg.Wait()
 
 	for _, v := range ret {
-		fmt.Println(v)
+		fmt.Printf("【爬取网址】%s\n【花费时间】%dms\n【状态码】%d\n【网页内容】%v\n", v.Site, v.Cost, v.Status, v.Resp)
+		fmt.Println("-----------------")
 	}
 }
 
 type SiteRespCallback func(SiteResp)
 
-// 构造请求
-func doSiteRequest(cb SiteRespCallback, url string) {
+// doSiteRequest 访问网站，response信息存入SiteResp
+func doSiteRequestCallback(cb SiteRespCallback, url string) {
 	res := SiteResp{
 		Site: url,
 	}
@@ -67,6 +46,7 @@ func doSiteRequest(cb SiteRespCallback, url string) {
 		wg.Done()
 	}()
 
+	// 爬取网页
 	resp, err := client.Get(url)
 	if resp != nil {
 		res.Status = resp.StatusCode
@@ -76,13 +56,11 @@ func doSiteRequest(cb SiteRespCallback, url string) {
 		return
 	}
 
-	// 暂不处理结果
-	_, err = ioutil.ReadAll(resp.Body)
+	byt, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		res.Err = err
 		return
 	}
-
-	// res.Resp = string(byt)
+	res.Resp = string(byt)
 }

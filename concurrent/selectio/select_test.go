@@ -38,3 +38,15 @@ func TestSelectTimeout(t *testing.T) {
 func TestSelectTimeoutV2(t *testing.T) {
 	selectio.SelectTimeoutV2()
 }
+
+func TestCancelWithChannel(t *testing.T) {
+	selectio.CancelWithChannel()
+}
+
+func TestCancelWithDown(t *testing.T) {
+	selectio.CancelWithDown()
+}
+
+func TestCancelWithCtx(t *testing.T) {
+	selectio.CancelWithCtx()
+}

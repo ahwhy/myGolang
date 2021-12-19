@@ -11,11 +11,9 @@ var wg sync.WaitGroup
 func PipelineMode() {
 	wg.Add(3)
 
-	// 创建两个channel
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 
-	// 3个goroutine并行
 	go getRandNum(ch1)
 	go addRandNum(ch1, ch2)
 	go printRes(ch2)
@@ -24,7 +22,6 @@ func PipelineMode() {
 }
 
 func getRandNum(out chan<- int) {
-	// defer the wg.Done()
 	defer wg.Done()
 
 	var random int
@@ -39,6 +36,7 @@ func getRandNum(out chan<- int) {
 
 func addRandNum(in <-chan int, out chan<- int) {
 	defer wg.Done()
+
 	for v := range in {
 		// 输出从第一个channel中读取到的数据
 		// 并将值+1后放进第二个channel中
@@ -50,6 +48,7 @@ func addRandNum(in <-chan int, out chan<- int) {
 
 func printRes(in <-chan int) {
 	defer wg.Done()
+	
 	for v := range in {
 		fmt.Println("after +1:", v)
 	}

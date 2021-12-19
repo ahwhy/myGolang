@@ -57,7 +57,7 @@ func (dm *dingMsg) DirectSend(url string) error {
 		logger.Errorf("[消息发送失败][error:%v][msg:%v]", err, dm.Text.Content)
 		return err
 	}
-	if res.StatusCode != 200 {
+	if res != nil || res.StatusCode != 200 {
 		logger.Println(res, res.StatusCode)
 		logger.Errorf("[钉钉返回错误][StatusCode:%v][msg:%v]", res.StatusCode, dm.Text.Content)
 		return err

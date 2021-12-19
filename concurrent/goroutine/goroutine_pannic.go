@@ -1,4 +1,4 @@
-package tips
+package goroutine
 
 import (
 	"fmt"
@@ -29,14 +29,14 @@ func DealPanicInG() {
 
 	wg.Add(1)
 	go work()
-
 	wg.Wait()
 }
 
 func work() {
+	defer wg.Done()
+
 	arr := []int{0}
 	_ = arr[2]
-	wg.Done()
 }
 
 func DealPanicInGV2() {
@@ -49,7 +49,6 @@ func DealPanicInGV2() {
 
 	wg.Add(1)
 	go workV2()
-
 	wg.Wait()
 }
 
@@ -57,7 +56,6 @@ func workV2() {
 	// 处理协程的异常
 	defer func() {
 		wg.Done()
-
 		if err := recover(); err != nil {
 			fmt.Println(err)
 		}

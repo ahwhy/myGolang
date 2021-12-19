@@ -241,3 +241,6 @@
 
 ### 27. github.com/stretchr/testify/assert
 - 测试
+
+### 28. net/http/pprof
+- http://127.0.0.1:8080/debug/pprof/goroutine?debug=1

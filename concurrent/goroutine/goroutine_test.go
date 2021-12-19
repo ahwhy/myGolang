@@ -62,13 +62,45 @@ func TestOnce(t *testing.T) {
 	fmt.Printf("inst2 address %v\n", []*goroutine.Singleton{inst2})
 }
 
+func TestLimit(t *testing.T) {
+	go func() {
+		ticker := time.NewTicker(1 * time.Second) //每隔1秒打印一次协程数量
+		for {
+			<-ticker.C
+			fmt.Printf("当前协程数: %d\n", runtime.NumGoroutine())
+		}
+	}()
+
+	work := func() {
+		//do something
+		time.Sleep(100 * time.Millisecond)
+	}
+	glimit := goroutine.NewGlimit(10) //限制协程数为10
+	for i := 0; i < 10000; i++ {
+		glimit.Run(work) //不停地通过Run创建子协程
+	}
+	time.Sleep(10 * time.Second)
+}
+
 func TestRuntime(t *testing.T) {
 	fmt.Printf("逻辑处理器数目:%d\n", runtime.NumCPU())
-	fmt.Printf("NumGoroutine:%d\n", runtime.NumGoroutine())
+	fmt.Printf("当前协程数:%d\n", runtime.NumGoroutine())
 	fmt.Printf("NumCgoCall:%d\n", runtime.NumCgoCall())
 	fmt.Printf("GOROOT:%s\n", runtime.GOROOT())
 }
 
 func TestApplication(t *testing.T) {
 	goroutine.Application()
+}
+
+func TestDealPanic(t *testing.T) {
+	goroutine.DealPanic()
+}
+
+func TestDealPanicInG(t *testing.T) {
+	goroutine.DealPanicInG()
+}
+
+func TestDealPanicInGV2(t *testing.T) {
+	goroutine.DealPanicInGV2()
 }

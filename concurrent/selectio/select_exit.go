@@ -1,4 +1,4 @@
-package tips
+package selectio
 
 import (
 	"context"
@@ -53,10 +53,8 @@ func CancelWithDown() {
 	}
 
 	time.Sleep(time.Second)
-
 	// 发送退出信号
 	close(cancel)
-
 	// 等待goroutine 安全退出
 	wg.Wait()
 }

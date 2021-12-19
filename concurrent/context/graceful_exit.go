@@ -56,7 +56,7 @@ func listenHttp(port int) {
 	fmt.Printf("stop listen on port %d\n", port)
 }
 
-func main20() {
+func main2() {
 	//下面3个协程关联到了同一个context，通过cancle()可以通知彼此
 	go listenSignal()
 	go listenHttp(8080)
