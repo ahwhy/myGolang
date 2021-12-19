@@ -20,6 +20,10 @@ func TestBinaryFormat(t *testing.T) {
 	fmt.Println(utils.BinaryFormat(4095))
 }
 
+func TestCalculateString(t *testing.T) {
+	fmt.Println(utils.CalculateString("Golang"))
+}
+
 func TestHumanBytesLoaded(t *testing.T) {
 	fmt.Println(utils.HumanBytesLoaded(1024))
 	fmt.Println(utils.HumanBytesLoaded(1024 * 1024))

@@ -1,6 +1,3 @@
-13. channel_application.go
-16. select_channel.go
-17. select_timeout.go
 18. routine_leaky.go
 19. leaky_debug.go
 20. routine_limit.go

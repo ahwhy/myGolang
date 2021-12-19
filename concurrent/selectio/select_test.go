@@ -17,6 +17,11 @@ func TestBasic2(t *testing.T) {
 	selectio.Basic2()
 }
 
+func TestSelectChannel(t *testing.T) {
+	fmt.Println("don't cache")
+	selectio.SelectChannel()
+}
+
 func TestSelectOrder(t *testing.T) {
 	fmt.Println("don't cache")
 	selectio.SelectOrder()
@@ -28,4 +33,8 @@ func TestTimeAfter(t *testing.T) {
 
 func TestSelectTimeout(t *testing.T) {
 	selectio.SelectTimeout()
+}
+
+func TestSelectTimeoutV2(t *testing.T) {
+	selectio.SelectTimeoutV2()
 }

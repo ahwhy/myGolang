@@ -49,8 +49,7 @@ func TestCloser(t *testing.T) {
 	wg.Wait()
 }
 
-
-func TestOnce(t *testing.T){
+func TestOnce(t *testing.T) {
 	go goroutine.LoadResource()
 	go goroutine.LoadResource()
 
@@ -61,11 +60,15 @@ func TestOnce(t *testing.T){
 
 	fmt.Printf("inst1 address %v\n", []*goroutine.Singleton{inst1})
 	fmt.Printf("inst2 address %v\n", []*goroutine.Singleton{inst2})
-} 
+}
 
 func TestRuntime(t *testing.T) {
 	fmt.Printf("逻辑处理器数目:%d\n", runtime.NumCPU())
 	fmt.Printf("NumGoroutine:%d\n", runtime.NumGoroutine())
 	fmt.Printf("NumCgoCall:%d\n", runtime.NumCgoCall())
 	fmt.Printf("GOROOT:%s\n", runtime.GOROOT())
+}
+
+func TestApplication(t *testing.T) {
+	goroutine.Application()
 }
