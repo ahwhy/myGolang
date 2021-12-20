@@ -50,3 +50,7 @@ func TestCancelWithDown(t *testing.T) {
 func TestCancelWithCtx(t *testing.T) {
 	selectio.CancelWithCtx()
 }
+
+func TestGraceful_exit(t *testing.T) {
+	selectio.Graceful_exit()
+}
