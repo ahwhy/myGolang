@@ -75,12 +75,13 @@
 		return nil
 	}
 ```
-	- 缺陷
-		- 单向链表的情况下(单方向的)，要获取之前Node 需要遍历整个List
-		- 以下功能并没有在单向链表中实现
-			- 插入到指定Node的前面
-			- 删除链表中的元素
-		- 要高效解决这个问题，需要一个Previos指针，直接知道前一个Node的信息，而不是遍历
+
+- 缺陷
+	- 单向链表的情况下(单方向的)，要获取之前Node 需要遍历整个List
+	- 以下功能并没有在单向链表中实现
+		- 插入到指定Node的前面
+		- 删除链表中的元素
+	- 要高效解决这个问题，需要一个Previos指针，直接知道前一个Node的信息，而不是遍历
 
 ### 2. 双向链表
 - 支持两个方向，每个结点除一个后继指针 next 指向后面的结点外，还有一个前驱指针 prev 指向前面的结点
@@ -165,6 +166,7 @@
 		return nil
 	}
 ```
+
 - 应用场景
 	- LRU缓存淘汰 -> LRU(Least Recently Used)最近最少使用
 		- 实现思路: 缓存的key放到链表中，头部的元素表示最近刚使用
@@ -173,42 +175,42 @@
 				- 如果缓存容量没超，放入缓存，并把key放到链表头部
 				- 如果超出缓存容量，删除链表尾部元素，再把key放到链表头部
 ```go
-					cache = make(map[int]string, 10)
-					lst = list.New()
-					func read(key int) string {
-						if v, exists := cache[key]; exists { //命中缓存
-							head := lst.Front()
-							notFound := false
-							for {
-								if head == nil {
-									notFound = true
-									break
-								}
-								// fmt.Printf("%v\n", notFound)
-								if head.Value.(int) == key { //从链表里找到相应的key
-									lst.MoveToFront(head) //把key移到链表头部
-									break
-								} else {
-									head = head.Next()
-								}
-							}
-							if !notFound { //正常情况下不会发生这种情况
-								lst.PushFront(key)
-							}
-							return v
-						} else { //没有命中缓存
-							v = readFromDisk(key) //从磁盘中读取数据
-							cache[key] = v        //放入缓存
-							lst.PushFront(key) //放入链表头部
-							if len(cache) > CAP { //缓存已满
-								tail := lst.Back()
-								delete(cache, tail.Value.(int)) //从缓存是移除很久不使用的元素
-								lst.Remove(tail)                //从链表中删除最后一个元素
-								fmt.Printf("remove %d from cache\n", tail.Value.(int))
-							}
-							return v
-						}
-					}
+	cache = make(map[int]string, 10)
+	lst = list.New()
+	func read(key int) string {
+		if v, exists := cache[key]; exists { //命中缓存
+			head := lst.Front()
+			notFound := false
+			for {
+				if head == nil {
+					notFound = true
+					break
+				}
+				// fmt.Printf("%v\n", notFound)
+				if head.Value.(int) == key { //从链表里找到相应的key
+					lst.MoveToFront(head) //把key移到链表头部
+					break
+				} else {
+					head = head.Next()
+				}
+			}
+			if !notFound { //正常情况下不会发生这种情况
+				lst.PushFront(key)
+			}
+			return v
+		} else { //没有命中缓存
+			v = readFromDisk(key) //从磁盘中读取数据
+			cache[key] = v        //放入缓存
+			lst.PushFront(key) //放入链表头部
+			if len(cache) > CAP { //缓存已满
+				tail := lst.Back()
+				delete(cache, tail.Value.(int)) //从缓存是移除很久不使用的元素
+				lst.Remove(tail)                //从链表中删除最后一个元素
+				fmt.Printf("remove %d from cache\n", tail.Value.(int))
+			}
+			return v
+		}
+	}
 ```
 
 ### 3. 循环链表 -> ring
@@ -288,89 +290,89 @@
 		- Pop
 	- 实现代码 -> 使用slice
 ```go
-		// 定义需要存入的元素对象
-		// 这里Item是范型, 指代任意类型
-		type Item interface{}
-		
-		type Stack struct {
-			items []Item
+	// 定义需要存入的元素对象
+	// 这里Item是范型, 指代任意类型
+	type Item interface{}
+	
+	type Stack struct {
+		items []Item
+	}
+	// 构建函数
+	func NewStack() *Stack {
+		return &Stack{
+			items: []Item{},
 		}
-		// 构建函数
-		func NewStack() *Stack {
-			return &Stack{
-				items: []Item{},
+	}
+	// Push adds an Item to the top of the stack
+	func (s *Stack) Push(item Item) {
+		s.items = append(s.items, item)
+	}
+	// Pop removes an Item from the top of the stack
+	func (s *Stack) Pop() Item {
+		if s.IsEmpty() {
+			return nil
+		}
+		item := s.items[len(s.items)-1]
+		s.items = s.items[0 : len(s.items)-1]
+		return item
+	}
+	// Len 栈的大小 
+	func (s *Stack) Len() int {
+		return len(s.items)
+	}
+	// IsEmpty 判断是否为空 
+	func (s *Stack) IsEmpty() bool {
+		return len(s.items) == 0
+	}
+	// Peek 获取栈顶元素的值 Peek
+	func (s *Stack) Peek() Item {
+		if s.IsEmpty() {
+			return nil
+		}
+		return s.items[len(s.items)-1]
+	}
+	// Clear 清空栈 
+	func (s *Stack) Clear() {
+		s.items = []Item{}
+	}
+	// Search 查询某个值 距离栈顶的距离 
+	func (s *Stack) Search(item Item) (pos int, err error) {
+		for i := range s.items {
+			if item == s.items[i] {
+				return i, nil
 			}
 		}
-		// Push adds an Item to the top of the stack
-		func (s *Stack) Push(item Item) {
-			s.items = append(s.items, item)
+		return 0, fmt.Errorf("item %s not found", item)
+	}
+	// 遍历栈 ForEach
+	func (s *Stack) ForEach(fn func(Item)) {
+		for i := range s.items {
+			fn(i)
 		}
-		// Pop removes an Item from the top of the stack
-		func (s *Stack) Pop() Item {
-			if s.IsEmpty() {
-				return nil
-			}
-			item := s.items[len(s.items)-1]
-			s.items = s.items[0 : len(s.items)-1]
-			return item
-		}
-		// Len 栈的大小 
-		func (s *Stack) Len() int {
-			return len(s.items)
-		}
-		// IsEmpty 判断是否为空 
-		func (s *Stack) IsEmpty() bool {
-			return len(s.items) == 0
-		}
-		// Peek 获取栈顶元素的值 Peek
-		func (s *Stack) Peek() Item {
-			if s.IsEmpty() {
-				return nil
-			}
-			return s.items[len(s.items)-1]
-		}
-		// Clear 清空栈 
-		func (s *Stack) Clear() {
-			s.items = []Item{}
-		}
-		// Search 查询某个值 距离栈顶的距离 
-		func (s *Stack) Search(item Item) (pos int, err error) {
-			for i := range s.items {
-				if item == s.items[i] {
-					return i, nil
-				}
-			}
-			return 0, fmt.Errorf("item %s not found", item)
-		}
-		// 遍历栈 ForEach
-		func (s *Stack) ForEach(fn func(Item)) {
-			for i := range s.items {
-				fn(i)
-			}
-		}
-		// Sort 插入排序 把stack的元素从大到小进行排序 插入排序
-		func (s *Stack) Sort() {
-			// 准备一个辅助的stack, 另一个容器
-			orderdStack := NewStack()
-		
-			for !s.IsEmpty() {
-				// 然后开始的排序流程
-				current := s.Pop()
-		
-				// orderdStack顶端大于current，应该将orderdStack顶端移至s，直到orderdStack顶端小于current
-				for !orderdStack.IsEmpty() && current.(int) > orderdStack.Peek().(int) {
-					s.Push(orderdStack.Pop())
-				}
-		
-				// 此时 当前current 一定是 <= orderdStack顶端
-				orderdStack.Push(current)
-			}
-		
-			// 倒过来
-			for !orderdStack.IsEmpty() {
+	}
+	// Sort 插入排序 把stack的元素从大到小进行排序 插入排序
+	func (s *Stack) Sort() {
+		// 准备一个辅助的stack, 另一个容器
+		orderdStack := NewStack()
+	
+		for !s.IsEmpty() {
+			// 然后开始的排序流程
+			current := s.Pop()
+	
+			// orderdStack顶端大于current，应该将orderdStack顶端移至s，直到orderdStack顶端小于current
+			for !orderdStack.IsEmpty() && current.(int) > orderdStack.Peek().(int) {
 				s.Push(orderdStack.Pop())
 			}
+	
+			// 此时 当前current 一定是 <= orderdStack顶端
+			orderdStack.Push(current)
 		}
+	
+		// 倒过来
+		for !orderdStack.IsEmpty() {
+			s.Push(orderdStack.Pop())
+		}
+	}
 ```
 		
 ## 四、堆
@@ -381,6 +383,7 @@
 		- 在任意一颗非空树中，有且仅有一个特定的称为根(Root)的结点
 	- 当n>1时，其余结点可分为m(m>0)个互不相交的有限集T1、T2、......、Tn
 		- 其中每一个集合本身又是一棵树，并且称为根的子树
+
 - 二叉树
 	- 在计算机科学中，二叉树是每个结点最多有两个子树的树结构
 		- 通常子树被称作"左子树"(left subtree)和"右子树"(right subtree)
@@ -411,6 +414,7 @@
 	- 堆中每一个节点的值都必须大于等于(或小于等于)其子树中每个节点的值
 		- 大顶堆: 堆中每一个节点的值都必须大于等于其子树中每个节点的值
 		- 小顶堆: 堆中每一个节点的值都必须小于等于其子树中每个节点的值
+
 - 应用场景
 	- 堆排序(Heapsort)是指利用堆这种数据结构所设计的一种排序算法
 		- 构建堆O(n)
@@ -445,47 +449,49 @@
 		- Go语言中，由container/heap包实现
 			- 需要实现五个方法，来定义一个堆
 ```go
-				type Interface interface {
-					sort.Interface
-					Push(x interface{}) // add x as element Len()
-					Pop() interface{}   // remove and return element Len() - 1.
-				}
-				// sort.Interface
-				type Interface interface {
-					Less(i, j int) bool
-					Len() int		
-					Swap(i, j int)
-				}
+	type Interface interface {
+		sort.Interface
+		Push(x interface{}) // add x as element Len()
+		Pop() interface{}   // remove and return element Len() - 1.
+	}
+	// sort.Interface
+	type Interface interface {
+		Less(i, j int) bool
+		Len() int		
+		Swap(i, j int)
+	}
 ```
-		- 官方示例 `/usr/local/go/src/container/heap/example_intheap_test.go`
+
+- 官方示例 `/usr/local/go/src/container/heap/example_intheap_test.go`
 ```go
-			type IntHeap []int
-			func (h IntHeap) Len() int              { return len(h) }
-			// func (h IntHeap) Less(i, j int) bool { return h[i] > h[j] }       // 大顶堆 
-			func (h IntHeap) Less(i, j int) bool    { return h[i] < h[j] }       // 小顶堆
-			func (h IntHeap) Swap(i, j int)         { h[i], h[j] = h[j], h[i] }
-			func (h *IntHeap) Push(x interface{})   { *h = append(*h, x.(int)) }	
-			func (h *IntHeap) Pop() interface{} {
-				old := *h
-				n := len(old)
-				x := old[n-1]
-				*h = old[0 : n-1]
-				return x
-			}
-			h := &IntHeap{2, 1, 5}
-			heap.Init(h)
-			heap.Push(h, 3)
-			fmt.Printf("minimum: %d\n", (*h)[0])
-			for h.Len() > 0 {
-				fmt.Printf("%d ", heap.Pop(h))
-			}
-			// Output:
-			// minimum: 1
-			// 1 2 3 5
+	type IntHeap []int
+	func (h IntHeap) Len() int              { return len(h) }
+	// func (h IntHeap) Less(i, j int) bool { return h[i] > h[j] }       // 大顶堆 
+	func (h IntHeap) Less(i, j int) bool    { return h[i] < h[j] }       // 小顶堆
+	func (h IntHeap) Swap(i, j int)         { h[i], h[j] = h[j], h[i] }
+	func (h *IntHeap) Push(x interface{})   { *h = append(*h, x.(int)) }	
+	func (h *IntHeap) Pop() interface{} {
+		old := *h
+		n := len(old)
+		x := old[n-1]
+		*h = old[0 : n-1]
+		return x
+	}
+	h := &IntHeap{2, 1, 5}
+	heap.Init(h)
+	heap.Push(h, 3)
+	fmt.Printf("minimum: %d\n", (*h)[0])
+	for h.Len() > 0 {
+		fmt.Printf("%d ", heap.Pop(h))
+	}
+	// Output:
+	// minimum: 1
+	// 1 2 3 5
 ```
-		- 高性能定时器
-						
-						
+
+- 高性能定时器
+
+	
 ## 五、Trie树
 
 - trie树又叫字典权
@@ -497,85 +503,85 @@
 	- 从根节点到叶节点的完整路径是一个term
 	- 从根节点到某个中间节点也可能是一个term，即一个term可能是另一个term的前缀
 ```go
-		type TrieNode struct {
-			Word     rune                                                        // 当前节点存储的字符；byte只能表示英文字符，rune可以表示任意字符
-			Children map[rune]*TrieNode                                          // 孩子节点，用一个map存储
-			Term     string
+	type TrieNode struct {
+		Word     rune                                                        // 当前节点存储的字符；byte只能表示英文字符，rune可以表示任意字符
+		Children map[rune]*TrieNode                                          // 孩子节点，用一个map存储
+		Term     string
+	}
+	type TrieTree struct {
+		root *TrieNode
+	}
+	// add 把words[beginIndex:]插入到Trie树中
+	func (node *TrieNode) add(words []rune, term string, beginIndex int) {
+		if beginIndex >= len(words) {                                        // words已经遍历完了
+			node.Term = term
+			return
 		}
-		type TrieTree struct {
-			root *TrieNode
+		if node.Children == nil {
+			node.Children = make(map[rune]*TrieNode)
 		}
-		// add 把words[beginIndex:]插入到Trie树中
-		func (node *TrieNode) add(words []rune, term string, beginIndex int) {
-			if beginIndex >= len(words) {                                        // words已经遍历完了
-				node.Term = term
-				return
-			}
-			if node.Children == nil {
-				node.Children = make(map[rune]*TrieNode)
-			}
-			word := words[beginIndex]                                            //把这个word放到node的子节点中
-			if child, exists := node.Children[word]; !exists {
-				newNode := &TrieNode{Word: word}
-				node.Children[word] = newNode
-				newNode.add(words, term, beginIndex+1)                           //递归
-			} else {                                                             
-				child.add(words, term, beginIndex+1)                             //递归
-			}
+		word := words[beginIndex]                                            //把这个word放到node的子节点中
+		if child, exists := node.Children[word]; !exists {
+			newNode := &TrieNode{Word: word}
+			node.Children[word] = newNode
+			newNode.add(words, term, beginIndex+1)                           //递归
+		} else {                                                             
+			child.add(words, term, beginIndex+1)                             //递归
 		}
-		// AddTerm 增加一个Term
-		func (tree *TrieTree) AddTerm(term string) {
-			if len(term) <= 1 {
-				return
-			}
-			words := []rune(term)
-			if tree.root == nil {
-				tree.root = new(TrieNode)
-			}
-			tree.root.add(words, term, 0)
+	}
+	// AddTerm 增加一个Term
+	func (tree *TrieTree) AddTerm(term string) {
+		if len(term) <= 1 {
+			return
 		}
-		// walk words[0]就是当前节点上存储的字符，按照words的指引顺着树往下走，最终返回words最后一个字符对应的节点
-		func (node *TrieNode) walk(words []rune, beginIndex int) *TrieNode {
-			if beginIndex == len(words)-1 {
-				return node
-			}
-			beginIndex += 1
-			word := words[beginIndex]
-			if child, exists := node.Children[word]; exists {
-				return child.walk(words, beginIndex)
+		words := []rune(term)
+		if tree.root == nil {
+			tree.root = new(TrieNode)
+		}
+		tree.root.add(words, term, 0)
+	}
+	// walk words[0]就是当前节点上存储的字符，按照words的指引顺着树往下走，最终返回words最后一个字符对应的节点
+	func (node *TrieNode) walk(words []rune, beginIndex int) *TrieNode {
+		if beginIndex == len(words)-1 {
+			return node
+		}
+		beginIndex += 1
+		word := words[beginIndex]
+		if child, exists := node.Children[word]; exists {
+			return child.walk(words, beginIndex)
+		} else {
+			return nil
+		}
+	}
+	// traverseTerms 遍历一个Node下面所有的Term，注意要传数组的指针，才能真正修改这个数组
+	func (node *TrieNode) traverseTerms(terms *[]string) {
+		if len(node.Term) > 0 {
+			*terms = append(*terms, node.Term)
+		}
+		for _, child := range node.Children {
+			child.traverseTerms(terms)
+		}
+	}
+	// Retrieve 检索一个Term
+	func (tree *TrieTree) Retrieve(prefix string) []string {
+		if tree.root == nil || len(tree.root.Children) == 0 {
+			return nil
+		}
+		words := []rune(prefix)
+		firstWord := words[0]
+		if child, exists := tree.root.Children[firstWord]; exists {
+			end := child.walk(words, 0)
+			if end == nil {
+				return nil
 			} else {
-				return nil
+				terms := make([]string, 0, 100)
+				end.traverseTerms(&terms)
+				return terms
 			}
+		} else {
+			return nil
 		}
-		// traverseTerms 遍历一个Node下面所有的Term，注意要传数组的指针，才能真正修改这个数组
-		func (node *TrieNode) traverseTerms(terms *[]string) {
-			if len(node.Term) > 0 {
-				*terms = append(*terms, node.Term)
-			}
-			for _, child := range node.Children {
-				child.traverseTerms(terms)
-			}
-		}
-		// Retrieve 检索一个Term
-		func (tree *TrieTree) Retrieve(prefix string) []string {
-			if tree.root == nil || len(tree.root.Children) == 0 {
-				return nil
-			}
-			words := []rune(prefix)
-			firstWord := words[0]
-			if child, exists := tree.root.Children[firstWord]; exists {
-				end := child.walk(words, 0)
-				if end == nil {
-					return nil
-				} else {
-					terms := make([]string, 0, 100)
-					end.traverseTerms(&terms)
-					return terms
-				}
-			} else {
-				return nil
-			}
-		}
+	}
 ```
 
 ## 六、算法的评估
@@ -586,85 +592,89 @@
 ### 2. 排序算法
 - 冒泡排序: 两个数比较大小，较大的数下沉，较小的数冒起来
 ```go
-		func BubbleSort(numbers []int) []int {
-			for i := range numbers {
-				for j := 0; j < len(numbers)-1; j++ {
-					// 当前值 numbers[i], 后一个值是多少 numbers[j+1]
-					fmt.Printf("数据: 当前: %d, 比对: %d\n", numbers[j], numbers[j+1])
-		
-					// 比较2个数, 交换顺序, 大数沉底, 小数冒出
-					if numbers[j+1] < numbers[j] {
-						numbers[j], numbers[j+1] = numbers[j+1], numbers[j]
-					}
+	func BubbleSort(numbers []int) []int {
+		for i := range numbers {
+			for j := 0; j < len(numbers)-1; j++ {
+				// 当前值 numbers[i], 后一个值是多少 numbers[j+1]
+				fmt.Printf("数据: 当前: %d, 比对: %d\n", numbers[j], numbers[j+1])
+	
+				// 比较2个数, 交换顺序, 大数沉底, 小数冒出
+				if numbers[j+1] < numbers[j] {
+					numbers[j], numbers[j+1] = numbers[j+1], numbers[j]
 				}
-				fmt.Printf("第%d趟: %v\n", i+1, numbers)
 			}
-			return numbers
+			fmt.Printf("第%d趟: %v\n", i+1, numbers)
 		}
+		return numbers
+	}
 ```
+
 - 选择排序: 在长度为N的无序数组中，第一次遍历n-1个数，找到最小的数值与第一个元素交换，第二次遍历n-2个数，找到最小的数值与第二个元素交换...第n-1次遍历，找到最小的数值与第n-1个元素交换，排序完成
 ```go
-		func SelectSort(numbers []int) []int {
-			for i := range numbers {
-				// 拿到第一个的数, 就是numbers[i], 比如 3
-				fmt.Printf("第%d趟: %d\n", i+1, numbers[i])
-		
-				// 依次和后面相邻的数比较
-				for j := i + 1; j < len(numbers); j++ {
-					fmt.Printf("数据 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
-					if numbers[i] > numbers[j] {
-						// 如果当前数 > 后面的数据, 则交换位置
-						numbers[i], numbers[j] = numbers[j], numbers[i]
-						fmt.Printf("交换 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
-					}
+	func SelectSort(numbers []int) []int {
+		for i := range numbers {
+			// 拿到第一个的数, 就是numbers[i], 比如 3
+			fmt.Printf("第%d趟: %d\n", i+1, numbers[i])
+	
+			// 依次和后面相邻的数比较
+			for j := i + 1; j < len(numbers); j++ {
+				fmt.Printf("数据 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
+				if numbers[i] > numbers[j] {
+					// 如果当前数 > 后面的数据, 则交换位置
+					numbers[i], numbers[j] = numbers[j], numbers[i]
+					fmt.Printf("交换 -->  当前数据: %d, 比对数据: %d\n", numbers[i], numbers[j])
 				}
-		
-				fmt.Println("结果: ", numbers)
 			}
-		
-			fmt.Println("最终结果", numbers)
-			return numbers
+	
+			fmt.Println("结果: ", numbers)
 		}
+	
+		fmt.Println("最终结果", numbers)
+		return numbers
+	}
 ```
+
 - 插入排序: 在要排序的一组数中，假定前n-1个数已经排好序，现在将第n个数插到前面的有序数列中，使得这n个数也是排好顺序的。如此反复循环，直到全部排号顺序
 ```go
-		func NewNumberStack(numbers []int) *Stack {
-			items := make([]Item, 0, len(numbers))
-			for i := range numbers {
-				items = append(items, numbers[i])
-			}
-			return &Stack{
-				items: items,
-			}
+	func NewNumberStack(numbers []int) *Stack {
+		items := make([]Item, 0, len(numbers))
+		for i := range numbers {
+			items = append(items, numbers[i])
 		}
+		return &Stack{
+			items: items,
+		}
+	}
 ```
+
 - 快速排序: 快速排序是对冒泡排序的一种改进，也属于交换类的排序算法
+
 - 其他 
 	- Go语言中内置排序 -> sort包，用于对象的排序, 参与排序的对象必须实现比较方法
 ```go
-		// Sort sorts data.
-		// It makes one call to data.Len to determine n and O(n*log(n)) calls to
-		// data.Less and data.Swap. The sort is not guaranteed to be stable.
-		func Sort(data Interface) {
-			...
-		}
-		// 实现一个IntSlice结构
-		func NewIntSlice(numbers []int) IntSlice {
-			return IntSlice(numbers)
-		}
-		
-		type IntSlice []int
-		
-		func (s IntSlice) Len() int { return len(s) }
-		
-		func (s IntSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-		
-		func (s IntSlice) Less(i, j int) bool { return s[i] < s[j] }
-		// 比较函数
-		func BuildInSort(numbers []int) []int {
-			sort.Sort(IntSlice(numbers))
-			return numbers
-		}
+	// Sort sorts data.
+	// It makes one call to data.Len to determine n and O(n*log(n)) calls to
+	// data.Less and data.Swap. The sort is not guaranteed to be stable.
+	func Sort(data Interface) {
+		...
+	}
+	// 实现一个IntSlice结构
+	func NewIntSlice(numbers []int) IntSlice {
+		return IntSlice(numbers)
+	}
+	
+	type IntSlice []int
+	
+	func (s IntSlice) Len() int { return len(s) }
+	
+	func (s IntSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+	
+	func (s IntSlice) Less(i, j int) bool { return s[i] < s[j] }
+	// 比较函数
+	func BuildInSort(numbers []int) []int {
+		sort.Sort(IntSlice(numbers))
+		return numbers
+	}
 ```
 			
 ### 3. 算法评估的维度
@@ -672,6 +682,7 @@
 	- 时间频度: T(n) 通常，一个算法所花费的时间与代码语句执行的次数成正比，算法执行语句越多，消耗的时间也就越多
 	- 渐进时间复杂度: 算法的时间复杂度函数为 T(n)=O(f(n))
 	- 常见的算法时间复杂度由小到大依次为: Ο(1)＜Ο(log n)＜Ο(n)＜Ο(nlog n)＜Ο(n2)＜Ο(n3)＜…＜Ο(2^n)＜Ο(n!)
+
 - 空间维度: 是指执行当前算法需要占用多少内存空间，通常用「空间复杂度」来描述，可以估算出程序对计算机内存的使用程度
 	- 空间复杂度 O(1)
 		- 不开辟额外空间，程序运行时，使用的空间是个常数
@@ -679,4 +690,3 @@
 	- 空间复杂度 O(n)
 		- 程序使用的额外空间, 这个额外空间的大小和数据规模成线性关系
 		- Map 的空间负责度 就介于0(1) ~ O(n)，不会因为一个元素就开辟一个bucket
-

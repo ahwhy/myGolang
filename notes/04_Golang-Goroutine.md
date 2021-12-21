@@ -116,70 +116,72 @@
 		- main函数也是由一个协程来启动执行，这个协程称为主协程，其他协程叫工作协程
 			- 主协程结束后工作协程也会随之销毁，即主协程不等待工作协程的结束
 			- 无从属关系，只是两种协程类型
-			- 使用 sync.WaitGroup(计数信号量)来维护执行协程执行状态
-```go
-				func printChars(prefix string, group *sync.WaitGroup) {
-					defer group.Done()                      // 通过信号量通知执行结束  等待信号量 -1
-					for ch := 'A'; ch <= 'Z'; ch++ {
-						fmt.Printf("%s:%c\n", prefix, ch)
-						runtime.Gosched()                   // 让出CPU的调度 同time.Sleep(1 * time.Microsecond)
-					}
-				}
-				group := &sync.WaitGroup{}                  // 定义信号量  启动协程之前 +1，协程结束时 -1
-				n := 10
-				group.Add(n)                                // 定义信号量 10
-		
-				for i := 0; i < n; i++ {                    // 创建协程
-					go printChars(fmt.Sprintf("gochars%0d\n", i), group)
-				}
-				group.Wait()                                // 等待所有协程执行结束
-				fmt.Println("over")
-```
+			- 通过 sync.WaitGroup(计数信号量)来维护执行协程执行状态
 			- 通过 runtime包中的GoSched让协程主动让出CPU，或通过 time.Sleep让协程休眠从而让出CPU
 	- 过程分析
 		- Go语言中提供trace工具，用于分析程序的运行过程
 			- 执行程序后，会生成trace.out文件，再运行go tool trace trace.out  
-```go
-				// 创建trace文件
-				f, err := os.Create("trace.out")
-				if err != nil {
-					panic(err)
-				}
-				defer f.Close()
-				
-				// 启动trace goroutine
-				err = trace.Start(f)
-				if err != nil {
-					panic(err)
-				}
-				defer trace.Stop()
-				
-				// 启动goroutine
-				asyncRun()
-				wg.Wait()
-```
 		- go run或go build时添加-race参数检查资源竞争
 	- 闭包陷阱
 		- 闭包使用函数外变量，当协程执行时，外部变量已经发生变化，导致打印内容不正确，可使用在创建协程时通过函数传递参数(值拷贝)方式避免
+
 ```go
-			wg := &sync.WaitGroup{}
-			wg.Add(10)
-			for i := 0; i < 10; i++ {
-					go func() {
-							fmt.Println(i)        //  全部打印10
-							wg.Done()
-					}()
-			}
-			wg.Wait()
-			fmt.Println("-----------------------")
-			wg.Add(10)
-			for i := 0; i < 10; i++ {
-					go func(i int) {
-							fmt.Println(i)        //  打印0 ~ 9
-							wg.Done()
-					}(i)
-			}
-			wg.Wait()
+	// 使用 sync.WaitGroup(计数信号量)来维护执行协程执行状态
+	func printChars(prefix string, group *sync.WaitGroup) {
+		defer group.Done()                      // 通过信号量通知执行结束  等待信号量 -1
+		for ch := 'A'; ch <= 'Z'; ch++ {
+			fmt.Printf("%s:%c\n", prefix, ch)
+			runtime.Gosched()                   // 让出CPU的调度 同time.Sleep(1 * time.Microsecond)
+		}
+	}
+	group := &sync.WaitGroup{}                  // 定义信号量  启动协程之前 +1，协程结束时 -1
+	n := 10
+	group.Add(n)                                // 定义信号量 10
+	
+	for i := 0; i < n; i++ {                    // 创建协程
+		go printChars(fmt.Sprintf("gochars%0d\n", i), group)
+	}
+	group.Wait()                                // 等待所有协程执行结束
+	fmt.Println("over")
+
+	// trace工具
+	// 创建trace文件
+	f, err := os.Create("trace.out")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	
+	// 启动trace goroutine
+	err = trace.Start(f)
+	if err != nil {
+		panic(err)
+	}
+	defer trace.Stop()
+	
+	// 启动goroutine
+	asyncRun()
+	wg.Wait()
+
+	// 闭包陷阱
+	wg := &sync.WaitGroup{}
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+			go func() {
+					fmt.Println(i)        //  全部打印10
+					wg.Done()
+			}()
+	}
+	wg.Wait()
+	fmt.Println("-----------------------")
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+			go func(i int) {
+					fmt.Println(i)        //  打印0 ~ 9
+					wg.Done()
+			}(i)
+	}
+	wg.Wait()
 ```
 
 ## 三、Golang的管道(channel) 
@@ -192,26 +194,6 @@
 		- 管道底层是一个环形队列(先进先出)，send(插入) 和 recv(取走) 从同一个位置沿同一个方向顺序执行
 		- sendx 表示最后一次插入的元素
 		- recvx 表示最后一次取走元素的位置
-```go
-			// src/runtime/chan.go
-			type hchan struct {
-				qcount   uint           // 队列中的所有数据数
-				dataqsiz uint           // 环形队列的大小
-				buf      unsafe.Pointer // 指向大小为 dataqsiz 的数组
-				elemsize uint16         // 元素大小
-				closed   uint32         // 是否关闭
-				elemtype *_type         // 元素类型
-				sendx    uint           // 发送索引
-				recvx    uint           // 接收索引
-				recvq    waitq          // recv 等待列表，即( <-ch )
-				sendq    waitq          // send 等待列表，即( ch<- )
-				lock mutex
-			}
-			type waitq struct {         // 等待队列 sudog 双向队列
-				first *sudog
-				last  *sudog
-			}
-```
 	- 发送过程包含三个步骤
 		- 持有锁
 		- 入队，拷贝要发送的数据
@@ -225,11 +207,32 @@
 			- 如果 Channel 已被关闭，且 Channel 没有数据，立刻返回
 			- 如果存在正在阻塞的发送方，说明缓存已满，从缓存队头取一个数据，再复始一个阻塞的发送方
 			- 否则，检查缓存，如果缓存中仍有数据，则从缓存中读取，读取过程会将队列中的数据拷贝一份到接收方的执行栈中
-			- 没有能接受的数据，阻塞当前的接收方 Goroutine
+			- 没有能接收的数据，阻塞当前的接收方 Goroutine
 		- 解锁
+```go
+	// src/runtime/chan.go
+	type hchan struct {
+		qcount   uint           // 队列中的所有数据数
+		dataqsiz uint           // 环形队列的大小
+		buf      unsafe.Pointer // 指向大小为 dataqsiz 的数组
+		elemsize uint16         // 元素大小
+		closed   uint32         // 是否关闭
+		elemtype *_type         // 元素类型
+		sendx    uint           // 发送索引
+		recvx    uint           // 接收索引
+		recvq    waitq          // recv 等待列表，即( <-ch )
+		sendq    waitq          // send 等待列表，即( ch<- )
+		lock mutex
+	}
+	type waitq struct {         // 等待队列 sudog 双向队列
+		first *sudog
+		last  *sudog
+	}
+```
 
 - 声明
-	- 管道是声明需要指定管道存放数据的类型，管道可以存放任何类型，但只建议用于存放值类型或者只包含值类型的结构体
+	- channel 管道，声明时需要指定管道存放数据的类型
+	- 管道可以存放任何类型，但只建议用于存放值类型或者只包含值类型的结构体
 	- 在管道声明后，会被初始化为 nil
 ```go
 		var channel chan int
@@ -270,23 +273,25 @@
 	- 当管道中无元素时，读取也会阻塞，直到管道被其他协程写入元素
 		- 只有在协程中读取才会阻塞
 		- 在main会直接报错 fatal error，非panic 不能通过recover捕获
-```go
-			channel2 <- "1"
-			fmt.Println(<-channel2)
-```
 	- `channel <- struct{}{}` 起通知作用
 		- 空结构体变量的内存占用为0，因此struct{}类型的管道比bool类型的管道还要省内存
 	- 只读&&只写
 		- 在函数参数时声明管道
 			- `chan<-` 表示管道只写
-```go
-				var wchannel chan<- int
-				func Write(cl chan<- rune) { }
-```
 			- `<-chan` 表示管道只读
+
 ```go
-				var rchannel <-chan int
-				func Read(cl <-chan rune) { }
+	// 协程中读取才会阻塞，在main会直接报错 fatal error
+	channel2 <- "1"
+	fmt.Println(<-channel2)
+
+	// 管道只写
+	var wchannel chan<- int
+	func Write(cl chan<- rune) { }
+	
+	/// 管道只读
+	var rchannel <-chan int
+	func Read(cl <-chan rune) { }
 ```
 
 - 关闭管道
@@ -301,9 +306,9 @@
 			- 读取到最后一个元素返回false
 ```go
 	for {
-		if ele, ok := <-channel2; ok {                                    //ok==true代表管道还没有close
+		if ele, ok := <-channel2; ok {                                  // ok==true代表管道还没有close
 			fmt.Printf("receive %d\n", ele)
-		} else {                                                        //管道关闭后，读操作会立即返回"0值"
+		} else {                                                        // 管道关闭后，读操作会立即返回"0值"
 			fmt.Printf("channel have been closed, receive %d\n", ele)
 			break
 		}
@@ -372,63 +377,66 @@
 	- 当所有case都失败，则执行default语句
 	- defalut语句是可选的，不允许fall through行为，但允许case语句块为空块
 ```go
-		select {
-		case v, ok := <-channel:
-			fmt.Println("channel", v, ok)
-		case v, ok := <-channel02:
-			fmt.Println("channel02", v, ok)
-		default:
-			fmt.Println("default")
-		}
+	select {
+	case v, ok := <-channel:
+		fmt.Println("channel", v, ok)
+	case v, ok := <-channel02:
+		fmt.Println("channel02", v, ok)
+	default:
+		fmt.Println("default")
+	}
 ```
 
 ### 3. 超时机制
 - 通过select-case 实现对执行操作超时的控制
 	- select-case语句监听每个case语句中管道的读取，当某个case语句中管道读取成功则执行对应子语句
 ```go
-		var timeout chan int           
-		go func() {
-			time.Sleep(3 * time.Second)
-			close(timeout)                         // 设定3s后关闭管道
-		}()
-		select {
-		case v, ok := <-channel:
-			fmt.Println("success:", r)
-		case <-timeout:                            // 3s后关闭管道，读取timeout成功
-			fmt.Println("timeout")
-		}
+	var timeout chan int           
+	go func() {
+		time.Sleep(3 * time.Second)
+		close(timeout)                         // 设定3s后关闭管道
+	}()
+	select {
+	case v, ok := <-channel:
+		fmt.Println("success:", r)
+	case <-timeout:                            // 3s后关闭管道，读取timeout成功
+		fmt.Println("timeout")
+	}
 ```
 
 - Go语言中的标准库 "time" 实现了After函数，可以用于实现超时机制，After函数返回一个只读管道
 	- `func After(d Duration) <-chan Time`
 ```go
-		select {
-		case v, ok := <-channel:
-			fmt.Println("success:", r)
-		case <-time.After(3 * time.Second):    // 3s后关闭管道，读取管道成功
-			fmt.Println("timeout")
-		}
+	select {
+	case v, ok := <-channel:
+		fmt.Println("success:", r)
+	case <-time.After(3 * time.Second):    // 3s后关闭管道，读取管道成功
+		fmt.Println("timeout")
+	}
 ```
 
 - Go语言中的标准库 "context" 实现了timeout
-	- context包常用函数
-```go
-		func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
-		func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
-		type CancelFunc func()    // CancelFunc会告诉操作放弃它的工作
-		type Context interface{ 
-			Deadline() (deadline time.Time, ok bool)
-			Done() <-chan struct{}
-			Err() error
-			Value(key interface{}) interface{}
-		}
-```
 	- 调用cancel()将关闭ctx.Done()对应的管道
-		`ctx, cancel := context.WithCancel(context.Background())`
 	- 调用cancel()或到达超时时间都将关闭ctx.Done()对应的管道
+
 ```go
-		ctx, cancel := context.WithTimeout(context.Background (),time.Microsecond*100)
-		ctx.Done()   // 管道关闭后读操作将立即返回
+	// context包常用函数
+	func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+	func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
+	type CancelFunc func()    // CancelFunc会告诉操作放弃它的工作
+	type Context interface{ 
+		Deadline() (deadline time.Time, ok bool)
+		Done() <-chan struct{}
+		Err() error
+		Value(key interface{}) interface{}
+	}
+	
+	// 关闭管道
+	ctx, cancel := context.WithCancel(context.Background())
+	
+	// 设置超时时间
+	ctx, cancel := context.WithTimeout(context.Background (),time.Microsecond*100)
+	ctx.Done()   // 管道关闭后读操作将立即返回
 ```
 
 ## 五、Golang的共享数据
@@ -509,6 +517,8 @@
 		- `CompareAndSwap*`: 比较第一个参数引用值是否与第二个参数值相同，若相同则将第一个参数值更新为第三个参数
 
 ## 六、Golang的CSP并发设计模式
+
+### 1. CSP
 - Go语言是采用CSP编程思想的典范，它将CSP发挥到了极致，而Goroutine和Channel 就是这种思想的体现
 
 - Go语言的设计者 Rob Pike: *Do not communicate by sharing memory; instead, share memory by communicating.
@@ -518,364 +528,373 @@
 		- 使用发送消息来同步信息相比于直接使用共享内存和互斥锁是一种更高级的抽象，使用更高级的抽象能够为程序设计上提供更好的封装，让程序的逻辑更加清晰
 		- 消息发送在解耦方面与共享内存相比也有一定优势，将线程的职责分成生产者和消费者，并通过消息传递的方式将它们解耦，不需要再依赖共享内存
 
-- 基于CSP的常见设计模式
-	- Barrier 模式
-		- barrier 屏障模式是一种屏障，用来阻塞直到聚合所有 goroutine 返回结果
-		- 使用 channel 来实现
-		- 使用场景
-			- 多个网络请求并发，聚合结果
-			- 粗粒度任务拆分并发执行，聚合结果
-		- 网页爬虫
+### 2. 基于CSP的常见设计模式
+- Barrier 模式
+	- barrier 屏障模式是一种屏障，用来阻塞直到聚合所有 goroutine 返回结果
+	- 使用 channel 来实现
+	- 使用场景
+		- 多个网络请求并发，聚合结果
+		- 粗粒度任务拆分并发执行，聚合结果
+	- 网页爬虫
+
 ```go
-			var (
-				client = http.Client{
-					Timeout: time.Duration(1 * time.Second),
-				}
-			)
-			type SiteResp struct {
-				Err    error
-				Resp   string
-				Status int
-				Cost   int64
+	var (
+		client = http.Client{
+			Timeout: time.Duration(1 * time.Second),
+		}
+	)
+	type SiteResp struct {
+		Err    error
+		Resp   string
+		Status int
+		Cost   int64
+	}
+	
+	// 构造请求
+	func doSiteRequest(out chan<- SiteResp, url string) {
+		res := SiteResp{}
+		startAt := time.Now()
+		defer func() {
+			res.Cost = time.Since(startAt).Milliseconds()
+			out <- res
+		}()
+		resp, err := client.Get(url)
+		if resp != nil {
+			res.Status = resp.StatusCode
+		}
+		if err != nil {
+			res.Err = err
+			return
+		}
+		// 暂不处理结果
+		_, err = ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		if err != nil {
+			res.Err = err
+			return
+		}
+		// res.Resp = string(byt)
+	}
+	
+	// 聚合返回
+	func mergeResponse(resp <-chan SiteResp, ret *[]SiteResp, down chan struct{}) {
+		defer func() {
+			down <- struct{}{}
+		}()
+		count := 0
+		for v := range resp {
+			*ret = append(*ret, v)
+			count++
+			// 填充完成,  返回
+			if count == cap(*ret) {
+				return
 			}
-			
-			// 构造请求
-			func doSiteRequest(out chan<- SiteResp, url string) {
-				res := SiteResp{}
-				startAt := time.Now()
-				defer func() {
-					res.Cost = time.Since(startAt).Milliseconds()
-					out <- res
-				}()
-				resp, err := client.Get(url)
-				if resp != nil {
-					res.Status = resp.StatusCode
-				}
-				if err != nil {
-					res.Err = err
-					return
-				}
-				// 暂不处理结果
-				_, err = ioutil.ReadAll(resp.Body)
-				defer resp.Body.Close()
-				if err != nil {
-					res.Err = err
-					return
-				}
-				// res.Resp = string(byt)
-			}
-			
-			// 聚合返回
-			func mergeResponse(resp <-chan SiteResp, ret *[]SiteResp, down chan struct{}) {
-				defer func() {
-					down <- struct{}{}
-				}()
-				count := 0
-				for v := range resp {
-					*ret = append(*ret, v)
-					count++
-					// 填充完成,  返回
-					if count == cap(*ret) {
-						return
-					}
-				}
-			}
-			
-			// 执行请求
-			func BatchSiteReqeust() {
-				endpoints := []string{
-					"https://www.baidu.com",
-					"https://segmentfault.com/",
-					"https://blog.csdn.net/",
-					"https://www.jd.com/",
-				}
-				// 每个endpoints返回一个结果，缓冲数根据len确定
-				respChan := make(chan SiteResp, len(endpoints))
-				defer close(respChan)
-				// 并行爬取
-				for _, endpoints := range endpoints {
-					go doSiteRequest(respChan, endpoints)
-				}
-				// 聚合结果, 返回结束事件, 避免轮询
-				down := make(chan struct{})
-				ret := make([]SiteResp, 0, len(endpoints))
-				go mergeResponse(respChan, &ret, down)
-				// 等待结束
-				<-down
-				// 打印爬取信息
-				for _, v := range ret {
-					fmt.Println(v)
-				}
-			}
+		}
+	}
+	
+	// 执行请求
+	func BatchSiteReqeust() {
+		endpoints := []string{
+			"https://www.baidu.com",
+			"https://segmentfault.com/",
+			"https://blog.csdn.net/",
+			"https://www.jd.com/",
+		}
+		// 每个endpoints返回一个结果，缓冲数根据len确定
+		respChan := make(chan SiteResp, len(endpoints))
+		defer close(respChan)
+		// 并行爬取
+		for _, endpoints := range endpoints {
+			go doSiteRequest(respChan, endpoints)
+		}
+		// 聚合结果, 返回结束事件, 避免轮询
+		down := make(chan struct{})
+		ret := make([]SiteResp, 0, len(endpoints))
+		go mergeResponse(respChan, &ret, down)
+		// 等待结束
+		<-down
+		// 打印爬取信息
+		for _, v := range ret {
+			fmt.Println(v)
+		}
+	}
 ```
-	- Pipeline 模式
-		- 利用多核的优势把一段粗粒度逻辑分解成多个 goroutine 执行
+
+- Pipeline 模式
+	- 利用多核的优势把一段粗粒度逻辑分解成多个 goroutine 执行
+
 ```go
-			// getRandNum | addRandNum | printRes
-			var wg sync.WaitGroup
-			
-			// getRandNum()用于生成随机整数，并将生成的整数放进第一个channel ch1中
-			func getRandNum(out chan<- int) {
-				defer wg.Done()
-				var random int
-				// 总共生成10个随机数
-				for i := 0; i < 10; i++ {
-					// 生成[0,30)之间的随机整数并放进channel out
-					random = rand.Intn(30)
-					out <- random
-				}
-				close(out)
-			}
-			
-			// addRandNum()用于接收ch1中的数据(来自第一个函数)，将其输出，然后对接收的值加1后放进第二个channel ch2中
-			func addRandNum(in <-chan int, out chan<- int) {
-				defer wg.Done()
-				for v := range in {
-					// 输出从第一个channel中读取到的数据
-					// 并将值+1后放进第二个channel中
-					fmt.Println("before +1:", v)
-					out <- (v + 1)
-				}
-				close(out)
-			}
-			
-			// printRes() 接收ch2中的数据并将其输出
-			func printRes(in <-chan int) {
-				defer wg.Done()
-				for v := range in {
-					fmt.Println("after +1:", v)
-				}
-			}
-			
-			// 如果将函数认为是Linux的命令，则类似于下面的命令行: ch1相当于第一个管道，ch2相当于第二个管道
-			func PipelineMode() {
-				wg.Add(3)
-				// 创建两个channel
-				ch1 := make(chan int)
-				ch2 := make(chan int)
-				// 3个goroutine并行
-				go getRandNum(ch1)
-				go addRandNum(ch1, ch2)
-				go printRes(ch2)
-				wg.Wait()
-			}
+	// getRandNum | addRandNum | printRes
+	var wg sync.WaitGroup
+	
+	// getRandNum()用于生成随机整数，并将生成的整数放进第一个channel ch1中
+	func getRandNum(out chan<- int) {
+		defer wg.Done()
+		var random int
+		// 总共生成10个随机数
+		for i := 0; i < 10; i++ {
+			// 生成[0,30)之间的随机整数并放进channel out
+			random = rand.Intn(30)
+			out <- random
+		}
+		close(out)
+	}
+	
+	// addRandNum()用于接收ch1中的数据(来自第一个函数)，将其输出，然后对接收的值加1后放进第二个channel ch2中
+	func addRandNum(in <-chan int, out chan<- int) {
+		defer wg.Done()
+		for v := range in {
+			// 输出从第一个channel中读取到的数据
+			// 并将值+1后放进第二个channel中
+			fmt.Println("before +1:", v)
+			out <- (v + 1)
+		}
+		close(out)
+	}
+	
+	// printRes() 接收ch2中的数据并将其输出
+	func printRes(in <-chan int) {
+		defer wg.Done()
+		for v := range in {
+			fmt.Println("after +1:", v)
+		}
+	}
+	
+	// 如果将函数认为是Linux的命令，则类似于下面的命令行: ch1相当于第一个管道，ch2相当于第二个管道
+	func PipelineMode() {
+		wg.Add(3)
+		// 创建两个channel
+		ch1 := make(chan int)
+		ch2 := make(chan int)
+		// 3个goroutine并行
+		go getRandNum(ch1)
+		go addRandNum(ch1, ch2)
+		go printRes(ch2)
+		wg.Wait()
+	}
 ```
-	- Producer/Consumer 模式
-		- 生产者消费者模型，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度
-			- 即生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据
-			- 让生产、消费变成了异步的两个过程、
+
+- Producer/Consumer 模式
+	- 生产者消费者模型，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度
+		- 即生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据
+		- 让生产、消费变成了异步的两个过程
+
 ```go
-			// Producer 生产者: 生成 factor 整数倍的序列
-			func Producer(factor int, out chan<- int) {
-				maxCount := 0
-				for i := 0; ; i++ {
-					out <- i * factor
-					// 最多生成10个
-					maxCount++
-					if maxCount > 10 {
-						break
-					}
-				}
+	// Producer 生产者: 生成 factor 整数倍的序列
+	func Producer(factor int, out chan<- int) {
+		maxCount := 0
+		for i := 0; ; i++ {
+			out <- i * factor
+			// 最多生成10个
+			maxCount++
+			if maxCount > 10 {
+				break
 			}
-			
-			// Consumer 消费者
-			func Consumer(in <-chan int) {
-				for v := range in {
-					fmt.Println(v)
-				}
-			}
-			
-			func ProducerConsumerMode() {
-				ch := make(chan int, 64) // 成果队列
-				go Producer(3, ch) // 生成 3 的倍数的序列
-				go Producer(5, ch) // 生成 5 的倍数的序列
-				go Consumer(ch)    // 消费 生成的队列
-				// 运行一定时间后退出
-				time.Sleep(5 * time.Second)
-			}
+		}
+	}
+	
+	// Consumer 消费者
+	func Consumer(in <-chan int) {
+		for v := range in {
+			fmt.Println(v)
+		}
+	}
+	
+	func ProducerConsumerMode() {
+		ch := make(chan int, 64) // 成果队列
+		go Producer(3, ch) // 生成 3 的倍数的序列
+		go Producer(5, ch) // 生成 5 的倍数的序列
+		go Consumer(ch)    // 消费 生成的队列
+		// 运行一定时间后退出
+		time.Sleep(5 * time.Second)
+	}
 ```
-	- Pub/Sub 模式
-		- pub/sub 也就是发布订阅模型
-			- 在这个模型中，消息生产者成为发布者(publisher)，而消息消费者则成为订阅者(subscriber)，生产者和消费者是M:N的关系
-			- 在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题
+
+- Pub/Sub 模式
+	- pub/sub 也就是发布订阅模型
+		- 在这个模型中，消息生产者成为发布者(publisher)，而消息消费者则成为订阅者(subscriber)，生产者和消费者是M:N的关系
+		- 在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题
+
 ```go
-			type (
-				subscriber chan interface{}          // 订阅者为一个管道
-				topicFunc  func(v interface{}) bool  // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
-			)
-			
-			// 发布者对象
-			type Publisher struct {
-				m           sync.RWMutex             // 读写锁
-				buffer      int                      // 订阅队列的缓存大小
-				timeout     time.Duration            // 发布超时时间
-				subscribers map[subscriber]topicFunc // 订阅者信息
-			}
-			
-			// 构建一个发布者对象, 可以设置发布超时时间和缓存队列的长度
-			func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
-				return &Publisher{
-					buffer:      buffer,
-					timeout:     publishTimeout,
-					subscribers: make(map[subscriber]topicFunc),
-				}
-			}
-			
-			// 添加一个新的订阅者，订阅全部主题
-			func (p *Publisher) Subscribe() chan interface{} {
-				return p.SubscribeTopic(nil)
-			}
-			
-			// 添加一个新的订阅者，订阅过滤器筛选后的主题
-			func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
-				ch := make(chan interface{}, p.buffer)
-				p.m.Lock()
-				p.subscribers[ch] = topic
-				p.m.Unlock()
-				return ch
-			}
-			
-			// 退出订阅
-			func (p *Publisher) Evict(sub chan interface{}) {
-				p.m.Lock()
-				defer p.m.Unlock()
-			
-				delete(p.subscribers, sub)
-				close(sub)
-			}
-			
-			// 发布一个主题
-			func (p *Publisher) Publish(v interface{}) {
-				p.m.RLock()
-				defer p.m.RUnlock()
-			
-				var wg sync.WaitGroup
-				for sub, topic := range p.subscribers {
-					wg.Add(1)
-					go p.sendTopic(sub, topic, v, &wg)
-				}
-				wg.Wait()
-			}
-			
-			// 关闭发布者对象，同时关闭所有的订阅者管道。
-			func (p *Publisher) Close() {
-				p.m.Lock()
-				defer p.m.Unlock()
-			
-				for sub := range p.subscribers {
-					delete(p.subscribers, sub)
-					close(sub)
-				}
-			}
-			
-			// 发送主题，可以容忍一定的超时
-			func (p *Publisher) sendTopic(
-				sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
-			) {
-				defer wg.Done()
-				if topic != nil && !topic(v) {
-					return
-				}
-			
-				select {
-				case sub <- v:
-				case <-time.After(p.timeout):
-				}
-			}
-			
-			p := NewPublisher(100*time.Millisecond, 10)
-			defer p.Close()
-			// 订阅所有
-			all := p.Subscribe()
-			// 通过过滤订阅一部分信息
-			golang := p.SubscribeTopic(func(v interface{}) bool {
-				if s, ok := v.(string); ok {
-					return strings.Contains(s, "golang")
-				}
-				return false
-			})
-			// 发布者 发布信息
-			p.Publish("hello,   python!")
-			p.Publish("godbybe, python!")
-			p.Publish("hello,   golang!")
-			// 订阅者查看消息
-			go func() {
-				for msg := range all {
-					fmt.Println("all:", msg)
-				}
-			}()
-			// 订阅者查看消息
-			go func() {
-				for msg := range golang {
-					fmt.Println("golang:", msg)
-				}
-			}()
-			// 运行一定时间后退出
-			time.Sleep(3 * time.Second)
+	type (
+		subscriber chan interface{}          // 订阅者为一个管道
+		topicFunc  func(v interface{}) bool  // 订阅者处理消息的函数, bool是方便判断是否处理成功, 这里不作retry实现
+	)
+	
+	// 发布者对象
+	type Publisher struct {
+		m           sync.RWMutex             // 读写锁
+		buffer      int                      // 订阅队列的缓存大小
+		timeout     time.Duration            // 发布超时时间
+		subscribers map[subscriber]topicFunc // 订阅者信息
+	}
+	
+	// 构建一个发布者对象, 可以设置发布超时时间和缓存队列的长度
+	func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
+		return &Publisher{
+			buffer:      buffer,
+			timeout:     publishTimeout,
+			subscribers: make(map[subscriber]topicFunc),
+		}
+	}
+	
+	// 添加一个新的订阅者，订阅全部主题
+	func (p *Publisher) Subscribe() chan interface{} {
+		return p.SubscribeTopic(nil)
+	}
+	
+	// 添加一个新的订阅者，订阅过滤器筛选后的主题
+	func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
+		ch := make(chan interface{}, p.buffer)
+		p.m.Lock()
+		p.subscribers[ch] = topic
+		p.m.Unlock()
+		return ch
+	}
+	
+	// 退出订阅
+	func (p *Publisher) Evict(sub chan interface{}) {
+		p.m.Lock()
+		defer p.m.Unlock()
+	
+		delete(p.subscribers, sub)
+		close(sub)
+	}
+	
+	// 发布一个主题
+	func (p *Publisher) Publish(v interface{}) {
+		p.m.RLock()
+		defer p.m.RUnlock()
+	
+		var wg sync.WaitGroup
+		for sub, topic := range p.subscribers {
+			wg.Add(1)
+			go p.sendTopic(sub, topic, v, &wg)
+		}
+		wg.Wait()
+	}
+	
+	// 关闭发布者对象，同时关闭所有的订阅者管道。
+	func (p *Publisher) Close() {
+		p.m.Lock()
+		defer p.m.Unlock()
+	
+		for sub := range p.subscribers {
+			delete(p.subscribers, sub)
+			close(sub)
+		}
+	}
+	
+	// 发送主题，可以容忍一定的超时
+	func (p *Publisher) sendTopic(
+		sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
+	) {
+		defer wg.Done()
+		if topic != nil && !topic(v) {
+			return
+		}
+	
+		select {
+		case sub <- v:
+		case <-time.After(p.timeout):
+		}
+	}
+	
+	p := NewPublisher(100*time.Millisecond, 10)
+	defer p.Close()
+	// 订阅所有
+	all := p.Subscribe()
+	// 通过过滤订阅一部分信息
+	golang := p.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, "golang")
+		}
+		return false
+	})
+	// 发布者 发布信息
+	p.Publish("hello,   python!")
+	p.Publish("godbybe, python!")
+	p.Publish("hello,   golang!")
+	// 订阅者查看消息
+	go func() {
+		for msg := range all {
+			fmt.Println("all:", msg)
+		}
+	}()
+	// 订阅者查看消息
+	go func() {
+		for msg := range golang {
+			fmt.Println("golang:", msg)
+		}
+	}()
+	// 运行一定时间后退出
+	time.Sleep(3 * time.Second)
 ```
-	- Workers Pool 模式
-		- Go语言中 goroutine 已经足够轻量，甚至 net/http server 的处理方式也是 goroutine-per-connection 的，所以比起其他语言来说可能场景稍微少一些
-			- 每个 goroutine 的初始内存消耗在 2~8kb，当有大批量任务的时候，需要起很多goroutine来处理，这会给系统代理很大的内存开销和GC压力，这个时候就可以考虑一下协程池
-		- 参考Go的老版调度实现一个任务工作队列
-			- 有(最多)4个worker，每个worker是一个goroutine，它们有worker ID
-			- 每个worker都从一个队列中取出待执行的任务(Task)，并发执行
-			- 队列容量为10，即最多只允许10个任务进行排队
-			- 任务的执行方式: 随机睡眠0-1秒钟，并将任务标记为完成
+
+- Workers Pool 模式
+	- Go语言中 goroutine 已经足够轻量，甚至 net/http server 的处理方式也是 goroutine-per-connection 的，所以比起其他语言来说可能场景稍微少一些
+		- 每个 goroutine 的初始内存消耗在 2~8kb，当有大批量任务的时候，需要起很多goroutine来处理，这会给系统代理很大的内存开销和GC压力，这个时候就可以考虑一下协程池
+	- 参考Go的老版调度实现一个任务工作队列
+		- 有(最多)4个worker，每个worker是一个goroutine，它们有worker ID
+		- 每个worker都从一个队列中取出待执行的任务(Task)，并发执行
+		- 队列容量为10，即最多只允许10个任务进行排队
+		- 任务的执行方式: 随机睡眠0-1秒钟，并将任务标记为完成
+
 ```go
-				// worker的数量，即使用多少goroutine执行任务
-				const workerNum = 4
-				var wg sync.WaitGroup
-				type Task struct {
-					ID         int
-					JobID      int
-					Status     string
-					CreateTime time.Time
-				}
-				
-				// Run 执行任务
-				func (t *Task) Run() {
-					sleep := rand.Intn(1000)
-					time.Sleep(time.Duration(sleep) * time.Millisecond)
-					t.Status = "Completed"
-				}
-				
-				// 从buffered channel中读取任务，并执行任务
-				func worker(in <-chan *Task, workID int) {
-					defer wg.Done()
-					for v := range in {
-						fmt.Printf("Worker%d: recv a request: TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
-						v.Run()
-						fmt.Printf("Worker%d: Completed for TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
-					}
-				}
-				
-				// 将待执行任务放进buffered channel，共15个任务
-				func produceTask(out chan<- *Task) {
-					for i := 1; i <= 15; i++ {
-						// fmt.Println(i)
-						out <- &Task{
-							ID:         i,
-							JobID:      100 + i,
-							CreateTime: time.Now(),
-						}
-					}
-				}
-				
-				func RunTaskWithPool() {
-					wg.Add(workerNum)
-					// 创建容量为10的bufferd channel
-					taskQueue := make(chan *Task, 10)
-					// 激活goroutine，执行任务
-					for workID := 1; workID <= workerNum; workID++ {
-						go worker(taskQueue, workID)
-					}
-					// 生成消息
-					produceTask(taskQueue)
-					// 5秒后 关闭管道，通知所有worker退出
-					time.Sleep(5 * time.Second)
-					close(taskQueue)
-					wg.Wait()
-				}
+	// worker的数量，即使用多少goroutine执行任务
+	const workerNum = 4
+	var wg sync.WaitGroup
+	type Task struct {
+		ID         int
+		JobID      int
+		Status     string
+		CreateTime time.Time
+	}
+	
+	// Run 执行任务
+	func (t *Task) Run() {
+		sleep := rand.Intn(1000)
+		time.Sleep(time.Duration(sleep) * time.Millisecond)
+		t.Status = "Completed"
+	}
+	
+	// 从buffered channel中读取任务，并执行任务
+	func worker(in <-chan *Task, workID int) {
+		defer wg.Done()
+		for v := range in {
+			fmt.Printf("Worker%d: recv a request: TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
+			v.Run()
+			fmt.Printf("Worker%d: Completed for TaskID:%d, JobID:%d\n", workID, v.ID, v.JobID)
+		}
+	}
+	
+	// 将待执行任务放进buffered channel，共15个任务
+	func produceTask(out chan<- *Task) {
+		for i := 1; i <= 15; i++ {
+			// fmt.Println(i)
+			out <- &Task{
+				ID:         i,
+				JobID:      100 + i,
+				CreateTime: time.Now(),
+			}
+		}
+	}
+	
+	func RunTaskWithPool() {
+		wg.Add(workerNum)
+		// 创建容量为10的bufferd channel
+		taskQueue := make(chan *Task, 10)
+		// 激活goroutine，执行任务
+		for workID := 1; workID <= workerNum; workID++ {
+			go worker(taskQueue, workID)
+		}
+		// 生成消息
+		produceTask(taskQueue)
+		// 5秒后 关闭管道，通知所有worker退出
+		time.Sleep(5 * time.Second)
+		close(taskQueue)
+		wg.Wait()
+	}
 ```
 
 ## 七、Golang的并发注意事项
@@ -886,26 +905,27 @@
 		- 由于每个协程都要占用内存，所以协程泄漏也会导致内存泄漏
 	- 排查
 		- go run对应程序
-```go
-			import (
-				"net/http"
-				_ "net/http/pprof"
-			)
-			func main() {
-				go func() {
-					if err := http.ListenAndServe("localhost:8080", nil); err != nil {
-						panic(err)
-					}
-				}()
-			}
-```
 		- 在浏览器访问 `http://127.0.0.1:8080/debug/pprof/goroutine?debug=1 `
 		- 在终端执行 `go tool pprof http://0.0.0.0:8080/debug/pprof/goroutine`
 			- 通过list查看函数每行代码产生了多少协程 `list + 对应函数`
 		- 通过traces打印调用堆栈 `traces`
 			- 在pprof中输入web命令 web
-		- 终端执行 `go tool pprof --http=:8081 /Users/zhangchaoyang/pprof/pprof.goroutine.001.pb.gz  `
+		- 终端执行 `go tool pprof --http=:8081 /Users/zhangchaoyang/pprof/pprof.goroutine.001.pb.gz`
 			- 在source view下可看到哪行代码生成的协程最多
+```go
+	// 示例
+	import (
+		"net/http"
+		_ "net/http/pprof"
+	)
+	func main() {
+		go func() {
+			if err := http.ListenAndServe("localhost:8080", nil); err != nil {
+				panic(err)
+			}
+		}()
+	}
+```
 
 - 控制并发数
 	- Goroutine会以一个很小的栈启动(可能是2KB或4KB)，但是系统和调度器的能力总是有上限的，在面对大规模的并发请求时(千万或者亿)是要考虑goroutine的销毁成本的
@@ -917,111 +937,111 @@
 - 并发的安全退出
 	- 有时候需要通知goroutine停止它正在干的事情，特别是当它工作在错误的方向上的时候
 ```go
-		func worker(wg *sync.WaitGroup, cancel chan bool) {
-			defer wg.Done()
-			for {
-				select {
-				default:
-					fmt.Println("hello")
-					time.Sleep(100 * time.Millisecond)
-				case <-cancel:
-					return
-				}
+	func worker(wg *sync.WaitGroup, cancel chan bool) {
+		defer wg.Done()
+		for {
+			select {
+			default:
+				fmt.Println("hello")
+				time.Sleep(100 * time.Millisecond)
+			case <-cancel:
+				return
 			}
 		}
-		func CancelWithDown() {
-			cancel := make(chan bool)
-			var wg sync.WaitGroup
-			for i := 0; i < 10; i++ {
-				wg.Add(1)
-				go workerv2(&wg, cancel)
-			}
-			time.Sleep(time.Second)
-			// 发送退出信号
-			close(cancel)
-			// 等待goroutine 安全退出
-			wg.Wait()
+	}
+	func CancelWithDown() {
+		cancel := make(chan bool)
+		var wg sync.WaitGroup
+		for i := 0; i < 10; i++ {
+			wg.Add(1)
+			go workerv2(&wg, cancel)
 		}
+		time.Sleep(time.Second)
+		// 发送退出信号
+		close(cancel)
+		// 等待goroutine 安全退出
+		wg.Wait()
+	}
 ```
 
 - 使用回调函数替代channel
 	- 回调函数就是一个被作为参数传递的函数
 	- 使用回调函数进行网页爬虫
 ```go
-		var (
-			client = http.Client{
-				Timeout: time.Duration(1 * time.Second),
-			}
-		)
-		type SiteResp struct {
-			Err    error
-			Resp   string
-			Status int
-			Cost   int64
+	var (
+		client = http.Client{
+			Timeout: time.Duration(1 * time.Second),
 		}
-		type SiteRespCallBack func(SiteResp)
-		
-		// 构造请求
-		func doSiteRequest(cb SiteRespCallBack, url string) {
-			res := SiteResp{}
-			startAt := time.Now()
-			defer func() {
-				res.Cost = time.Since(startAt).Milliseconds()
-				cb(res)
-				wg.Done()
-			}()
-		
-			resp, err := client.Get(url)
-			if resp != nil {
-				res.Status = resp.StatusCode
-			}
-			if err != nil {
-				res.Err = err
-				return
-			}
-		
-			// 暂不处理结果
-			_, err = ioutil.ReadAll(resp.Body)
-			defer resp.Body.Close()
-			if err != nil {
-				res.Err = err
-				return
-			}
-		
-			// res.Resp = string(byt)
+	)
+	type SiteResp struct {
+		Err    error
+		Resp   string
+		Status int
+		Cost   int64
+	}
+	type SiteRespCallBack func(SiteResp)
+	
+	// 构造请求
+	func doSiteRequest(cb SiteRespCallBack, url string) {
+		res := SiteResp{}
+		startAt := time.Now()
+		defer func() {
+			res.Cost = time.Since(startAt).Milliseconds()
+			cb(res)
+			wg.Done()
+		}()
+	
+		resp, err := client.Get(url)
+		if resp != nil {
+			res.Status = resp.StatusCode
 		}
-		
-		// 主函数完成回调处理逻辑
-		func CallBackMode() {
-			endpoints := []string{
-				"https://www.baidu.com",
-				"https://segmentfault.com/",
-				"https://blog.csdn.net/",
-				"https://www.jd.com/",
+		if err != nil {
+			res.Err = err
+			return
 		}
-		
-		// 一个endpoints返回一个结果, 缓冲可以确定
-		respChan := make(chan SiteResp, len(endpoints))
-		defer close(respChan)
-		
-		// 回调处理逻辑
-		ret := make([]SiteResp, 0, len(endpoints))
-		cb := func(resp SiteResp) {
-			ret = append(ret, resp)
+	
+		// 暂不处理结果
+		_, err = ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		if err != nil {
+			res.Err = err
+			return
 		}
-		
-		// 并行爬取
-		for _, endpoints := range endpoints {
-			wg.Add(1)
-			go doSiteRequest(cb, endpoints)
-		}
-		
-		// 等待结束
-		wg.Wait()
-		
-		for _, v := range ret {
-			fmt.Println(v)
-		}
+	
+		// res.Resp = string(byt)
+	}
+	
+	// 主函数完成回调处理逻辑
+	func CallBackMode() {
+		endpoints := []string{
+			"https://www.baidu.com",
+			"https://segmentfault.com/",
+			"https://blog.csdn.net/",
+			"https://www.jd.com/",
+	}
+	
+	// 一个endpoints返回一个结果, 缓冲可以确定
+	respChan := make(chan SiteResp, len(endpoints))
+	defer close(respChan)
+	
+	// 回调处理逻辑
+	ret := make([]SiteResp, 0, len(endpoints))
+	cb := func(resp SiteResp) {
+		ret = append(ret, resp)
+	}
+	
+	// 并行爬取
+	for _, endpoints := range endpoints {
+		wg.Add(1)
+		go doSiteRequest(cb, endpoints)
+	}
+	
+	// 等待结束
+	wg.Wait()
+	
+	for _, v := range ret {
+		fmt.Println(v)
+	}
 ```
 
 - 使用守护进程优雅退出
@@ -1033,14 +1053,14 @@
 		- `SIGINT   2`   Ctrl + c触发
 		- `SIGKILL  9`   无条件结束程序，不能捕获、阻塞或忽略
 		- `SIGTERM  15`  结束程序，可以捕获、阻塞或忽略
+			- 当Context的deadline到期或调用了CancelFunc后，Context的Done()管道会关闭，该管道上关联的读操作会解除阻塞，然后执行协程退出前的清理工作
 ```go
-			type Context interface {
-				Deadline() (deadline time.Time, ok bool)
-				Done() <-chan struct{}
-			}l
-			func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+	type Context interface {
+		Deadline() (deadline time.Time, ok bool)
+		Done() <-chan struct{}
+	}l
+	func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
 ```
-		- 当Context的deadline到期或调用了CancelFunc后，Context的Done()管道会关闭，该管道上关联的读操作会解除阻塞，然后执行协程退出前的清理工作
 
 - 协程管理组件 `github.com/x-mod/routine`
 	- 封装了常规的业务逻辑: 初始化、收尾清理、工作协程、守护协程、监听term信号
