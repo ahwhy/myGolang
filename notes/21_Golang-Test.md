@@ -42,21 +42,6 @@
 			- 正则过滤函数名 `go test -run=TestM.* -v .`
 			- 指定func/sub跑子测试 `go test -run=TestMul/正数 -v`
 		- 子测试 t.Run
-```go
-			func TestMul(t *testing.T) {
-				t.Run("正数", func(t *testing.T) {
-					if Mul(4, 5) != 20 {
-						t.Fatal("muli.zhengshu.error")
-					}
-				})
-			
-				t.Run("负数", func(t *testing.T) {
-					if Mul(2, -3) != -6 {
-						t.Fatal("muli.fusshu.error")
-					}
-				})
-			}
-```
 		- table-driven tests
 			- 所有用例的数据组织在切片 cases 中，看起来就像一张表，借助循环创建子测试
 			- 益处
@@ -65,7 +50,23 @@
 				- 用例失败时，报错信息的格式比较统一，测试报告易于阅读
 				- 如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取
 			- [prometheus的api_test](https://github.com/prometheus/prometheus/blob/main/web/api/v1/api_test.go)
-			
+```go
+	// 子测试 t.Run
+	func TestMul(t *testing.T) {
+		t.Run("正数", func(t *testing.T) {
+			if Mul(4, 5) != 20 {
+				t.Fatal("muli.zhengshu.error")
+			}
+		})
+	
+		t.Run("负数", func(t *testing.T) {
+			if Mul(2, -3) != -6 {
+				t.Fatal("muli.fusshu.error")
+			}
+		})
+	}
+```
+
 - 参考示例
 	- GoConvey 测试框架 `go get github.com/smartystreets/goconvey`
 	- testify 测试框架 `go get github.com/stretchr/testify/assert`
@@ -103,82 +104,83 @@
 	- benchtime指定运行秒数 
 		- `go test -bench=. -benchtime=5s -benchmem -run=none  // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次`
 
-- 示例
-	- 斐波那契数列
+
+- 斐波那契数列
 ```go
-		func fib(n int) int {                   // fib.go
-			if n == 0 || n == 1 {
-				return n
-			}
-			return fib(n-2) + fib(n-1)
+	func fib(n int) int {                   // fib.go
+		if n == 0 || n == 1 {
+			return n
 		}
-		func BenchmarkFib(b *testing.B) {       // fib_test.go
-			for n := 0; n < b.N; n++ {
-				fib(30)
-			}
+		return fib(n-2) + fib(n-1)
+	}
+	func BenchmarkFib(b *testing.B) {       // fib_test.go
+		for n := 0; n < b.N; n++ {
+			fib(30)
 		}
-		// ResetTimer 如果基准测试在循环前需要一些耗时的配置，则可以先重置定时器
-		func BenchmarkFib(b *testing.B) {
-			time.Sleep(3 * time.Second)
-			b.ResetTimer()
-			for n := 0; n < b.N; n++ {
-				fib(30)
-			}
+	}
+	// ResetTimer 如果基准测试在循环前需要一些耗时的配置，则可以先重置定时器
+	func BenchmarkFib(b *testing.B) {
+		time.Sleep(3 * time.Second)
+		b.ResetTimer()
+		for n := 0; n < b.N; n++ {
+			fib(30)
 		}
+	}
 ```
-	- benchmem 展示内存消耗情况
-		- G
-		- 测试大cap的切片，直接用cap初始化，然后动态扩容
-		- 结论: 用cap初始化好的性能可以高一个数据量级
+
+- benchmem 展示内存消耗情况
+	- G
+	- 测试大cap的切片，直接用cap初始化，然后动态扩容
+	- 结论: 用cap初始化好的性能可以高一个数据量级
 ```go
-		// 制定大的cap的切片
-		func generateWithCap(n int) []int {
-			rand.Seed(time.Now().UnixNano())
-			nums := make([]int, 0, n)
-			for i := 0; i < n; i++ {
-				nums = append(nums, rand.Int())
-			}
-			return nums
+	// 制定大的cap的切片
+	func generateWithCap(n int) []int {
+		rand.Seed(time.Now().UnixNano())
+		nums := make([]int, 0, n)
+		for i := 0; i < n; i++ {
+			nums = append(nums, rand.Int())
 		}
-		
-		// 动态扩容的slice
-		func generateDynamic(n int) []int {
-			rand.Seed(time.Now().UnixNano())
-			nums := make([]int, 0)
-			for i := 0; i < n; i++ {
-				nums = append(nums, rand.Int())
-			}
-			return nums
+		return nums
+	}
+	
+	// 动态扩容的slice
+	func generateDynamic(n int) []int {
+		rand.Seed(time.Now().UnixNano())
+		nums := make([]int, 0)
+		for i := 0; i < n; i++ {
+			nums = append(nums, rand.Int())
 		}
-		func BenchmarkGenerateWithCap(b *testing.B) {
-			for n := 0; n < b.N; n++ {
-				generateWithCap(100000)
-			}
+		return nums
+	}
+	func BenchmarkGenerateWithCap(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			generateWithCap(100000)
 		}
-		func BenchmarkGenerateDynamic(b *testing.B) {
-			for n := 0; n < b.N; n++ {
-				generateDynamic(100000)
-			}
+	}
+	func BenchmarkGenerateDynamic(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			generateDynamic(100000)
 		}
+	}
 ```
-	- 测试函数复杂度 不带cap的slice 动态扩容
-		- 结论: 输入变为原来的10倍，单次耗时也差不多是上一级的10倍，说明这个函数的复杂度是线性的
-```go
-		func benchmarkGenerate(i int, b *testing.B) {
-			for n := 0; n < b.N; n++ {
-				generateDynamic(i)
-			}
-		}
-		func BenchmarkGenerateDynamic1000(b *testing.B)     { benchmarkGenerate(1000, b) }
-		func BenchmarkGenerateDynamic10000(b *testing.B)    { benchmarkGenerate(10000, b) }
-		func BenchmarkGenerateDynamic100000(b *testing.B)   { benchmarkGenerate(100000, b) }
-		func BenchmarkGenerateDynamic1000000(b *testing.B)  { benchmarkGenerate(1000000, b) }
-		func BenchmarkGenerateDynamic10000000(b *testing.B) { benchmarkGenerate(10000000, b) }
-```
+
+- 测试函数复杂度 不带cap的slice 动态扩容
+	- 结论: 输入变为原来的10倍，单次耗时也差不多是上一级的10倍，说明这个函数的复杂度是线性的
 	- string拼接的 bench
 		- `const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"`
 		- `"+"`
 		- `[]byte`
 		- `strings.Builder`
 		- `bytes.Buffer`
-		
+```go
+	func benchmarkGenerate(i int, b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			generateDynamic(i)
+		}
+	}
+	func BenchmarkGenerateDynamic1000(b *testing.B)     { benchmarkGenerate(1000, b) }
+	func BenchmarkGenerateDynamic10000(b *testing.B)    { benchmarkGenerate(10000, b) }
+	func BenchmarkGenerateDynamic100000(b *testing.B)   { benchmarkGenerate(100000, b) }
+	func BenchmarkGenerateDynamic1000000(b *testing.B)  { benchmarkGenerate(1000000, b) }
+	func BenchmarkGenerateDynamic10000000(b *testing.B) { benchmarkGenerate(10000000, b) }
+```

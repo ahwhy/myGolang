@@ -235,8 +235,8 @@
 	- 管道可以存放任何类型，但只建议用于存放值类型或者只包含值类型的结构体
 	- 在管道声明后，会被初始化为 nil
 ```go
-		var channel chan int
-		fmt.Printf("%T %v", channel, channel)  // chan int <nil>
+	var channel chan int
+	fmt.Printf("%T %v", channel, channel)  // chan int <nil>
 ```
 
 - 初始化
@@ -261,8 +261,8 @@
 					- 未满之前是非阻塞，异步模式
 					- 填满之后是阻塞的，同步模式
 ```go
-			channel = make(chan int)           // %T chan int;    %v 0xc00001e0c0; len 0
-			channel2 := make(chan string, 10)  // %T chan string; %v 0xc00005c180; len 0
+	channel = make(chan int)           // %T chan int;    %v 0xc00001e0c0; len 0
+	channel2 := make(chan string, 10)  // %T chan string; %v 0xc00005c180; len 0
 ```
 
 - 读取和写入
@@ -319,28 +319,28 @@
 - `for-range` 遍历管道
 	- 只有当管道关闭时，才能通过range遍历管道里的数据，否则会发生fatal error
 ```go
-		channel03 := make(chan int)
-		go func() {
-			for e := range channel03 {
-					fmt.Println(e)
-			}
-			channel <- 0                     // 利用chan的特性进行阻塞
-		}()
-		go func() {
-			for i := 0; i < 100; i++ {
-					channel03 <- i
-			}
-			close(channel03)
-		}()
-		<-channel
+	channel03 := make(chan int)
+	go func() {
+		for e := range channel03 {
+				fmt.Println(e)
+		}
+		channel <- 0                     // 利用chan的特性进行阻塞
+	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+				channel03 <- i
+		}
+		close(channel03)
+	}()
+	<-channel
 ```
 
 - Go语言time包实现了Tick函数，可以用于实现定时机制，Tick函数返回一个只读管道
 	- `func Tick(d Duration) <-chan Time`
 ```go
-		for now := range time.Tick(3 * time.Second) {
-			fmt.Println(time.Now())      // 每隔3s打印一次时间
-		}
+	for now := range time.Tick(3 * time.Second) {
+		fmt.Println(time.Now())      // 每隔3s打印一次时间
+	}
 ```
 
 ## 四、Golang的多路复用(select-case)
@@ -465,9 +465,9 @@
 - `sync.Mutex` 互斥锁，用于对资源加锁和释放锁提供对资源同步方式访问
 	- 获取到锁的任务，阻塞其他任务; 意味着同一时间只有一个任务可以获取锁
 ```go
-		var HcMutex sync.Mutex
-		HcMutex.Lock()    // 获取锁
-		HcMutex.UnLock()  // 释放锁
+	var HcMutex sync.Mutex
+	HcMutex.Lock()    // 获取锁
+	HcMutex.UnLock()  // 释放锁
 ```
 
 - `sync.RWMutex` 读写锁 
@@ -478,11 +478,11 @@
 		- 读写混合: 若有写锁，等待释放后能施加 读或写
 		- 读写混合: 若有读锁，只能再施加读锁，阻塞写锁
 ```go
-			var rwMutex sync.RWMutex
-			rwMutex.Lock      // 获取写入锁
-			rwMutex.Unlock    // 释放写入锁 
-			rwMutex.RLock     // 获取读取锁
-			rwMutex.RUnlock   // 释放读取锁
+	var rwMutex sync.RWMutex
+	rwMutex.Lock      // 获取写入锁
+	rwMutex.Unlock    // 释放写入锁 
+	rwMutex.RLock     // 获取读取锁
+	rwMutex.RUnlock   // 释放读取锁
 ```
 
 - sync.Map
@@ -492,18 +492,18 @@
 	- 查询出来后要类型断言 x.(int) x.(string)
 	- 遍历使用Range() 方法，需要传入一个匿名函数作为参数，匿名函数的参数为k,v interface{}，每次调用匿名函数将结果返回
 ```go
-		m := sync.Map{}
-		m.Store(k,v)  // 读
-		m.Load(k)     // 写
-		m.Delete(k)   // 删除
-		m.Range(func(k,v interface{}bool{   // 遍历
-			k := k.(string)
-			v := v.(string)
-			log.Printf("[找到了][%s=%d]", key, value)
-			return true
-		})
-		m.LoadOrstore(k,v)   // 若没有key，则添加
-		m.LoadAndDelete("key")  // 加载并删除
+	m := sync.Map{}
+	m.Store(k,v)  // 读
+	m.Load(k)     // 写
+	m.Delete(k)   // 删除
+	m.Range(func(k,v interface{}bool{   // 遍历
+		k := k.(string)
+		v := v.(string)
+		log.Printf("[找到了][%s=%d]", key, value)
+		return true
+	})
+	m.LoadOrstore(k,v)   // 若没有key，则添加
+	m.LoadAndDelete("key")  // 加载并删除
 ```
 
 ### 3. 原子操作

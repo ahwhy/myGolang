@@ -125,66 +125,67 @@
 
 - 基于接口的RPC服务
 	- `rpc.client.Call()`
-```go
-		// Call invokes the named function, waits for it to complete, and returns its error status.
-		func (client *Client) Call(serviceMethod string, args interface{}, reply interface{}) error {
-			call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
-			return call.Error
-		}
-```
-
 	- 在client的call方法中，3个参数有2个interface{}，当使用的时候会有不知道要传入什么的情况产生
 	- 可以对客户端进行一次封装，使用接口当作文档，明确参数类型
 
 ```go
-		// 定义hello service的接口
-		package service
+	// rpc.client.Call()
+	// Call invokes the named function, waits for it to complete, and returns its error status.
+	func (client *Client) Call(serviceMethod string, args interface{}, reply interface{}) error {
+		call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
+		return call.Error
+	}
+```
 
-		const HelloServiceName = "HelloService"
+```go
+	// 定义hello service的接口
+	package service
 
-		type HelloService interface {
-			Hello(request string, reply *string) error
-		}
-		
-		// 约束服务端
-		// 通过接口约束HelloService服务
-		var _ service.HelloService = (*HelloService)(nil)
-		
-		// 封装客户端，让其满足HelloService接口约束
-		// 约束客户端
-		var _ service.HelloService = (*HelloServiceClient)(nil)
+	const HelloServiceName = "HelloService"
 
-		type HelloServiceClient struct {
-			*rpc.Client
-		}
+	type HelloService interface {
+		Hello(request string, reply *string) error
+	}
+	
+	// 约束服务端
+	// 通过接口约束HelloService服务
+	var _ service.HelloService = (*HelloService)(nil)
+	
+	// 封装客户端，让其满足HelloService接口约束
+	// 约束客户端
+	var _ service.HelloService = (*HelloServiceClient)(nil)
 
-		func DialHelloService(network, address string) (*HelloServiceClient, error) {
-			c, err := rpc.Dial(network, address)
-			if err != nil {
-				return nil, err
-			}
+	type HelloServiceClient struct {
+		*rpc.Client
+	}
 
-			return &HelloServiceClient{Client: c}, nil
-		}
-
-		func (p *HelloServiceClient) Hello(request string, reply *string) error {
-			return p.Client.Call(service.HelloServiceName+".Hello", request, reply)
-		}
-
-		client, err := DialHelloService("tcp", "localhost:1234")
-
+	func DialHelloService(network, address string) (*HelloServiceClient, error) {
+		c, err := rpc.Dial(network, address)
 		if err != nil {
-			log.Fatal("dialing:", err)
+			return nil, err
 		}
 
-		var reply string
+		return &HelloServiceClient{Client: c}, nil
+	}
 
-		err = client.Hello("hello", &reply)
-		if err != nil {
-			log.Fatal(err)
-		}
+	func (p *HelloServiceClient) Hello(request string, reply *string) error {
+		return p.Client.Call(service.HelloServiceName+".Hello", request, reply)
+	}
 
-		fmt.Println(reply)
+	client, err := DialHelloService("tcp", "localhost:1234")
+
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+
+	var reply string
+
+	err = client.Hello("hello", &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(reply)
 ```
 
 ### 3. gob编码
@@ -295,32 +296,34 @@
 	- 首先依然要解决JSON编解码的问题，需要将HTTP接口的Handler参数传递给jsonrpc
 		- 满足jsonrpc接口，提前构建`io.ReadWriteCloser`类型的conn通道
 		- Writer 是 ResponseWriter，ReadCloser 是 Request的Body，直接内嵌就可以
-```go
-			func NewRPCReadWriteCloserFromHTTP(w http.ResponseWriter, r *http.Request) *RPCReadWriteCloser {
-				return &RPCReadWriteCloser{w, r.Body}
-			}
-			
-			type RPCReadWriteCloser struct {
-				io.Writer
-				io.ReadCloser
-			}
-```
 		- 服务端
-```go
-			rpc.RegisterName("HelloService", new(HelloService))
-			
-			// RPC的服务架设在"/jsonrpc"路径
-			// 在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道
-			// 然后基于conn构建针对服务端的json编码解码器
-			// 最后通过rpc.ServeRequest函数为每次请求处理一次RPC方法调用
-			http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, r *http.Request) {
-				conn := NewRPCReadWriteCloserFromHTTP(w, r)
-				rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
-			})
-			
-			http.ListenAndServe(":1234", nil)
 
-			// $ curl localhost:1234/jsonrpc -d'{"method":"HelloService.Hello","params":["hello"],"id":1}'
+```go
+	func NewRPCReadWriteCloserFromHTTP(w http.ResponseWriter, r *http.Request) *RPCReadWriteCloser {
+		return &RPCReadWriteCloser{w, r.Body}
+	}
+	
+	type RPCReadWriteCloser struct {
+		io.Writer
+		io.ReadCloser
+	}
+```
+		
+```go
+	rpc.RegisterName("HelloService", new(HelloService))
+	
+	// RPC的服务架设在"/jsonrpc"路径
+	// 在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道
+	// 然后基于conn构建针对服务端的json编码解码器
+	// 最后通过rpc.ServeRequest函数为每次请求处理一次RPC方法调用
+	http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, r *http.Request) {
+		conn := NewRPCReadWriteCloserFromHTTP(w, r)
+		rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
+	})
+	
+	http.ListenAndServe(":1234", nil)
+
+	// $ curl localhost:1234/jsonrpc -d'{"method":"HelloService.Hello","params":["hello"],"id":1}'
 ```
 
 ## 二、Go语言中的gRPC
@@ -329,15 +332,15 @@
 
 - GRPC技术栈
 ```
-		// 数据交互格式: protobuf
-		// 通信方式: 最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现
-		// 核心库: 在HTTP/2协议之上又构建了针对Go语言的gRPC核心库
-		// Stub: 应用程序通过gRPC插件生产的Stub代码和gRPC核心库通信，也可以直接和gRPC核心库通信
-		Application
-		Generated Stubs
-		gRPC GO Core + Interceptors
-		HTTP/2 (Security: TLS/SSL or ALTS, etc)
-		Unix Domain Sockets; TCP
+	// 数据交互格式: protobuf
+	// 通信方式: 最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现
+	// 核心库: 在HTTP/2协议之上又构建了针对Go语言的gRPC核心库
+	// Stub: 应用程序通过gRPC插件生产的Stub代码和gRPC核心库通信，也可以直接和gRPC核心库通信
+	Application
+	Generated Stubs
+	gRPC GO Core + Interceptors
+	HTTP/2 (Security: TLS/SSL or ALTS, etc)
+	Unix Domain Sockets; TCP
 ```
 
 - gRPC-demo
@@ -345,13 +348,14 @@
 	- Protobuf grpc插件
 		- 从Protobuf的角度看，gRPC只不过是一个针对service接口生成代码的生成器，需要提前安装grpc的代码生成插件
 ```shell
-		# protoc-gen-go
-		$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-		
-		# 安装protoc-gen-go-grpc插件
-		$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-		$ protoc-gen-go-grpc --version                                   
-		protoc-gen-go-grpc 1.1.0
+	# 安装Protobuf grpc插件
+	# protoc-gen-go
+	$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	
+	# 安装protoc-gen-go-grpc插件
+	$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	$ protoc-gen-go-grpc --version                                   
+	protoc-gen-go-grpc 1.1.0
 ```
 	- 生成代码
 		- protobuf 定义接口的语法
