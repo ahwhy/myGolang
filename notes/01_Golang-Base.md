@@ -1502,9 +1502,7 @@
 	- `make{makeslice, makemap, makechannel}` make返回创建对象的内存地址  
 	以slice为例，unsafe.Pointer --> slince struct --- {member: pointer ---> array}  表现为: []int  
 	
-	|函数类型 |适用范围|返回值|填充类型|
+	|函数类型|适用范围|返回值|填充类型|
 	|:------:|:------:|:------:|:------:|
 	|new|new可以对所有类型进行分配|new返回指针|new填充零值|
 	|make|make只能创建类型(slice、map、channel)|make返回引用|make填充非零值|  
-
-

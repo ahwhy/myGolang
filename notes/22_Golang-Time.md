@@ -5,6 +5,11 @@
  
 ### 1. 打印当前时间
 - 方法: `time.Now()`
+	- 时间戳返回 int64
+	- 10位数时间戳 是秒单位
+	- 13位数时间戳 是毫秒单位，毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
+	- 19位数时间戳 是纳秒单位
+
 ```go
 	func numLen(n int64) int {
 		return len(strconv.Itoa(int(n)))
@@ -30,11 +35,7 @@
 	2021/07/17 16:44:57 [直接获取时区  CST，和东utc时区差 8 个小时]
 	*/
 ```
-	- 结论
-		时间戳返回 int64
-		10位数时间戳 是秒单位
-		13位数时间戳 是毫秒单位  // 毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
-		19位数时间戳 是纳秒单位
+
 
 ### 2. Time结构体
 - Now()返回的是个Time结构体，这也是Go内部表示时间的数据结构
@@ -47,9 +48,9 @@
 		- 因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
 	- Time是有时区的s通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
 ```
-		type Time struct {
-			// Has unexported fields.
-		}
+	type Time struct {
+		// Has unexported fields.
+	}
 ```
 
 - now() 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
@@ -58,16 +59,18 @@
 - 方法: time.Now().Format()
 
 - 格式
-   模板   占位
-	年  ->  2006
-	月  ->  01
-	日  ->  02
-	时  ->  03(12h) / 15(24h)
-	分  ->  04
-	秒  ->  05
-```
-	format := "2006-01-02 15:04:05"   // string
-	fmt.Printf("%T %#v\n", now.Format(format), now.Format(format))   // string "2021-06-20 20:08:45"
+```go
+	/*
+	模板   占位
+	 年  ->  2006
+	 月  ->  01
+	 日  ->  02
+	 时  ->  03(12h) / 15(24h)
+	 分  ->  04
+	 秒  ->  05
+	*/
+	format := "2006-01-02 15:04:05"                                // string
+	fmt.Printf("%T %#v\n", now.Format(format), now.Format(format)) // string "2021-06-20 20:08:45"
 ```
 
 ### 4. 时间戳转换
@@ -181,62 +184,62 @@
 ```
 
 ### 9. 定时器
-- 定时器是进程规划自己在未来某一时刻接获通知的一种机制
+- 定时器是进程规划自己在未来某一时刻接获通知的一种机制，共有2种
 
-- 定时器有2种:
-	- 单次触发: `Timer`
-		- Timer数据结构
-```go
-			type Timer struct {
-				C <-chan Time   // C: 一个存放Time对象的Channel
-				r runtimeTimer  // runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
-			}
-```
-		- 通过 `time.After` 实现同步等待
-```go
-			m := time.NewTimer(5 * time.Second)
-			fmt.Println(<-m.C)
-			fmt.Println("exit")
-```
-		- 通过 `time.AfterFunc` 中断循环，触发自定义函数
-```go
-			stop := false
-			time.AfterFunc(5*time.Second, func() {          // func AfterFunc(d Duration, f func()) *Timer
-				stop = true
-			})
-			for {
-				if stop {
-					fmt.Println("exit")
-					break
-				}
-				time.Sleep(1 * time.Second)
-			}
-```
-			- Timer的stop
-				- 如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false
-				- 后续再对该 Timer 调用 Stop，直接返回 false
+- 单次触发: `Timer`
+	- 通过 `time.After` 实现同步等待
+	- 通过 `time.AfterFunc` 中断循环，触发自定义函数
+		- Timer的stop
+			- 如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false
+			- 后续再对该 Timer 调用 Stop，直接返回 false
 		- Timer的Reset
 			- Reset 先调用 stopTimer 再调用 startTimer
 			- 类似于废弃之前的定时器，重新启动一个定时器
 			- 返回值和 Stop 一样
-	- 周期性触发: `Ticker`
-		- Ticker数据结构
 ```go
-			type Ticker struct {
-				C <-chan Time // The channel on which the ticks are delivered.
-				r runtimeTimer
-			}
+	// Timer数据结构
+	type Timer struct {
+		C <-chan Time   // C: 一个存放Time对象的Channel
+		r runtimeTimer  // runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
+	}
+
+	// 通过 time.After 实现同步等待
+	m := time.NewTimer(5 * time.Second)
+	fmt.Println(<-m.C)
+	fmt.Println("exit")
+
+	// 通过 time.AfterFunc 中断循环，触发自定义函数
+	stop := false
+	time.AfterFunc(5*time.Second, func() {          // func AfterFunc(d Duration, f func()) *Timer
+		stop = true
+	})
+	for {
+		if stop {
+			fmt.Println("exit")
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
 ```
-		- 通过 `time.NewTicker` 实现同步等待
+
+
+- 周期性触发: `Ticker`
 ```go
-			tk := time.NewTicker(2 * time.Second)
-			count := 1
-			for {
-				if count > 2 {
-					tk.Stop()
-					break
-				}
-				fmt.Println(<-tk.C)
-				count++
-			}
+	// Ticker数据结构	
+	type Ticker struct {
+		C <-chan Time // The channel on which the ticks are delivered.
+		r runtimeTimer
+	}
+
+	// time.NewTicker 实现同步等待
+	tk := time.NewTicker(2 * time.Second)
+	count := 1
+	for {
+		if count > 2 {
+			tk.Stop()
+			break
+		}
+		fmt.Println(<-tk.C)
+		count++
+	}
 ```
