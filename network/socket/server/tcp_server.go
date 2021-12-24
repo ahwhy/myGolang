@@ -176,5 +176,3 @@ func handleLongRequest(conn net.Conn) {
 		fmt.Printf("Write response %s\n", string(responseBytes))
 	}
 }
-
-
