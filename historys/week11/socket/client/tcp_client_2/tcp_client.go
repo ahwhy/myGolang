@@ -24,7 +24,7 @@ func main() {
 	requestBytes, _ := json.Marshal(request)
 	_, err = conn.Write(requestBytes)
 	socket.CheckError(err)
-	fmt.Printf("Write request %s bytes\n", string(requestBytes))
+	fmt.Printf("Write request %s\n", string(requestBytes))
 
 	// 接收服务端发送Response
 	responseBytes := make([]byte, 256) // 设定一个最大长度，防止 flood attack；初始化后byte数组每个元素都是0

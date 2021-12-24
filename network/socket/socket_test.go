@@ -14,3 +14,23 @@ func TestTCPServer_SimpleMessage(t *testing.T) {
 func TestTCPClient_SimpleMessage(t *testing.T) {
 	client.TCPClient_SimpleMessage()
 }
+
+func TestTCPServer_StructMessage(t *testing.T) {
+	server.TCPServer_StructMessage()
+}
+
+func TestTCPServer_MoreStructMessage(t *testing.T) {
+	server.TCPServer_MoreStructMessage()
+}
+
+func TestTCPClient_StructMessage(t *testing.T) {
+	client.TCPClient_StructMessage()
+}
+
+func TestTCPServer_MoreLongStructMessage(t *testing.T) {
+	server.TCPServer_MoreLongStructMessage()
+}
+
+func TestTCPClient_LongStructMessage(t *testing.T) {
+	client.TCPClient_LongStructMessage()
+}
