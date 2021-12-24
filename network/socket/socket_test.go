@@ -34,3 +34,5 @@ func TestTCPServer_MoreLongStructMessage(t *testing.T) {
 func TestTCPClient_LongStructMessage(t *testing.T) {
 	client.TCPClient_LongStructMessage()
 }
+
+
