@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	IP   = "127.0.0.1" // ip也可设置成 0.0.0.0 和 空字符串
-	Port = 5656        // 改成 1023，会报错 bind: permission denied
+	ListenAddr = "0.0.0.0"
+	IP         = "127.0.0.1" // ip也可设置成 0.0.0.0 和 空字符串
+	Port       = 5656        // 改成 1023，会报错 bind: permission denied
 )
 
 type (

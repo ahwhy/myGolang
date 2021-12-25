@@ -80,7 +80,7 @@ func (ws *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/add" {
 		httpCode := http.StatusInternalServerError // 返回一个内部错误的信息
 		rePhrase := http.StatusText(httpCode)      // 组织错误信息
-		fmt.Println("path error ", rePhrase)       // 把错误信息写到ResponseWriter里
+		fmt.Println("Path error ", rePhrase)       // 把错误信息写到ResponseWriter里
 		http.Error(w, rePhrase, httpCode)
 		return
 	}

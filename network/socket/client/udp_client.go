@@ -11,7 +11,7 @@ import (
 	"github.com/ahwhy/myGolang/network/socket"
 )
 
-// 设置建立UDP连接数量
+// 设置建立连接数量
 const P = 10
 
 // 建立多个UDP连接
