@@ -10,11 +10,11 @@
 	- 数组会占用一片连续的内存空间，而内存空间存储的字节共同组成了字符串
 	- Go语言中的字符串只是一个只读的字节数组
 ```go
-		// runtime/string.go
-		type stringStruct struct {
-			str unsafe.Pointer
-			len int
-		}
+	// runtime/string.go
+	type stringStruct struct {
+		str unsafe.Pointer
+		len int
+	}
 ```
 
 - 一个字符串是一个不可改变的字节序列
@@ -122,12 +122,6 @@
 
 - 字符切分
 	- 通过分隔符来切割字符串
-```go
-		func Split(s, sep string) []string { return genSplit(s, sep, 0, -1) }               // Split 会将 s 中的 sep 去掉，而 SplitAfter 会保留 sep
-		func SplitAfter(s, sep string) []string { return genSplit(s, sep, len(sep), -1) }
-		func SplitN(s, sep string, n int) []string { return genSplit(s, sep, 0, n) } 
-		func SplitAfterN(s, sep string, n int) []string { return genSplit(s, sep, len(sep), n) }
-```
 		- 带 N 的方法可以通过最后一个参数 n 控制返回的结果中的 slice 中的元素个数
 			- 当 n < 0 时，返回所有的子字符串
 			- 当 n == 0 时，返回的结果是 nil
@@ -135,6 +129,12 @@
 		- 这4个函数都是通过genSplit内部函数来实现的, 通过 sep 进行分割，返回[]string
 		- 如果 sep 为空，相当于分成一个个的 UTF-8 字符，如 `Split("abc","")`，得到的是`[a b c]`
 		- `func genSplit(s, sep string, sepSave, n int) []string `
+```go
+	func Split(s, sep string) []string { return genSplit(s, sep, 0, -1) }               // Split 会将 s 中的 sep 去掉，而 SplitAfter 会保留 sep
+	func SplitAfter(s, sep string) []string { return genSplit(s, sep, len(sep), -1) }
+	func SplitN(s, sep string, n int) []string { return genSplit(s, sep, 0, n) } 
+	func SplitAfterN(s, sep string, n int) []string { return genSplit(s, sep, len(sep), n) }
+```
 
 - 判断前缀和后缀
 	- s 中是否以 prefix 开始
@@ -152,21 +152,20 @@
 		- bytes.Buffer
 
 - 计算子串位置
-	- 查询子串的开始Index的函数有:
 ```go
-		func Index(s, sep string) int                   // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引
-		func LastIndex(s, substr string) int
-		func IndexByte(s string, c byte) int            // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
-		func IndexAny(s, chars string) int              // chars 中任何一个 Unicode 代码点在 s 中首次出现的位置
-		func IndexRune(s string, r rune) int            // Unicode 代码点 r 在 s 中第一次出现的位置
-```
-	- 查找字串的结束Index的函数
-		- 有三个对应的查找最后一次出现的位置
-```go
-			func LastIndex(s, sep string) int
-			func LastIndexByte(s string, c byte) int
-			func LastIndexAny(s, chars string) int
-			func LastIndexFunc(s string, f func(rune) bool) int
+	// 查询子串的开始Index的函数有
+	func Index(s, sep string) int                   // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引
+	func LastIndex(s, substr string) int
+	func IndexByte(s string, c byte) int            // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
+	func IndexAny(s, chars string) int              // chars 中任何一个 Unicode 代码点在 s 中首次出现的位置
+	func IndexRune(s string, r rune) int            // Unicode 代码点 r 在 s 中第一次出现的位置
+
+	// 查找字串的结束Index的函数
+	// 有三个对应的查找最后一次出现的位置
+	func LastIndex(s, sep string) int
+	func LastIndexByte(s string, c byte) int
+	func LastIndexAny(s, chars string) int
+	func LastIndexFunc(s string, f func(rune) bool) int
 ```
 
 - 子串Count
@@ -185,15 +184,14 @@
 			- `func ReplaceAll(s, old, new string) string`
 
 - 大小写转换
-	- ToLower，ToUpper 用于大小写转换
 ```go
-		func ToLower(s string) string
-		func ToUpper(s string) string
-```
-	- ToLowerSpecial，ToUpperSpecial 可以转换特殊字符的大小写
-```go
-		func ToLowerSpecial(c unicode.SpecialCase, s string) string 
-		func ToUpperSpecial(c unicode.SpecialCase, s string) string
+	// ToLower，ToUpper 用于大小写转换
+	func ToLower(s string) string
+	func ToUpper(s string) string
+
+	// ToLowerSpecial，ToUpperSpecial 可以转换特殊字符的大小写
+	func ToLowerSpecial(c unicode.SpecialCase, s string) string 
+	func ToUpperSpecial(c unicode.SpecialCase, s string) string
 ```
 
 - 剔除子串

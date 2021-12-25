@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"encoding/json"
@@ -8,42 +8,39 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ahwhy/myGolang/historys/week11/socket"
+	"github.com/ahwhy/myGolang/network/socket"
 )
 
 // 设置建立UDP连接数量
 const P = 10
 
-// 建立UDP长连接
-func main() {
+// 建立多个UDP连接
+func UDPClient_MoreLongStructMessage() {
 	// 设置UDP端点的地址并向服务端建立UDP连接
-	ip := "127.0.0.1" // ip也可设置成 0.0.0.0 和 空字符串
-	port := 5656      // 改成 1023，会报错 bind: permission denied
-	//跟tcp_client的唯一区别
-	conn, err := net.DialTimeout("udp", ip+":"+strconv.Itoa(port), 30*time.Minute) // 30s 后连接超时，一个conn绑定一个本地端口
+	conn, err := net.DialTimeout("udp", socket.IP+":"+strconv.Itoa(socket.Port), 30*time.Second) // 30s 后连接超时，一个conn绑定一个本地端口
 	socket.CheckError(err)
 	fmt.Printf("LocalAddr: %s\nEstablish connection to server %s\n", conn.LocalAddr().String(), conn.RemoteAddr().String())
-
-	// 中断UDP连接
+	// 中断TCP连接
 	defer conn.Close()
 
 	wg := sync.WaitGroup{}
 	wg.Add(P)
 	for i := 0; i < P; i++ {
 		// 向服务端发送Request
-
 		//多协程，共用一个conn
 		go func() {
 			defer wg.Done()
 
-			for { //长连接，即连接建立后进行多轮的读写交互
+			// 长连接，即连接建立后进行多轮的读写交互
+			for {
+				// 向服务端发送Request
 				request := socket.Request{A: 7, B: 5}
 				requestBytes, _ := json.Marshal(request)
 				_, err = conn.Write(requestBytes)
 				socket.CheckError(err)
-				fmt.Printf("Write request %s bytes\n", string(requestBytes))
+				fmt.Printf("Write request %s\n", string(requestBytes))
 
-				// 接收服务端发送Response
+				// 接收服务端发送的Response
 				responseBytes := make([]byte, 256) // 设定一个最大长度，防止 flood attack；初始化后byte数组每个元素都是0
 				read_len, err := conn.Read(responseBytes)
 				socket.CheckError(err)

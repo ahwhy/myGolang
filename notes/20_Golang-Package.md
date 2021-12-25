@@ -79,6 +79,7 @@
 	time.Now().Format("2006-01-02 15:04:05")
 	time.Parse()        // 返回转换后的时间格式和一个判断信息（err)
 	time.Sleep(1 * time.Second)
+	time.Now().Add(30 * time.Second)
 	time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
 ```
 

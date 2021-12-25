@@ -35,4 +35,10 @@ func TestTCPClient_LongStructMessage(t *testing.T) {
 	client.TCPClient_LongStructMessage()
 }
 
+func TestUDPerver_MoreLongStructMessage(t *testing.T) {
+	server.UDPServer_MoreLongStructMessage()
+}
 
+func TestUDPClient_LongStructMessage(t *testing.T) {
+	client.UDPClient_MoreLongStructMessage()
+}

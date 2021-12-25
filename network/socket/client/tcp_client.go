@@ -67,7 +67,7 @@ func TCPClient_StructMessage() {
 // 序列化请求和响应的结构体
 func TCPClient_LongStructMessage() {
 	// 设置TCP端点的地址并向服务端建立TCP连接
-	conn, err := net.DialTimeout("tcp4", socket.IP+":"+strconv.Itoa(socket.Port), 30*time.Second) // 30s 后连接超时
+	conn, err := net.DialTimeout("tcp", socket.IP+":"+strconv.Itoa(socket.Port), 30*time.Second) // 30s 后连接超时，一个conn绑定一个本地端口
 	socket.CheckError(err)
 	fmt.Printf("LocalAddr: %s\nEstablish connection to server %s\n", conn.LocalAddr().String(), conn.RemoteAddr().String())
 	// 中断TCP连接
