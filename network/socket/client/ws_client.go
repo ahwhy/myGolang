@@ -45,7 +45,7 @@ func (ws *WsClient) Start() {
 
 	for i := 0; i < P; i++ {
 		// 发送Request
-		request := socket.Request{A: 7, B: 4}
+		request := socket.Request{A: 7, B: 5}
 		err = conn.WriteJSON(request) //websocket.Conn直接提供发json序列化和反序列化方法
 		socket.CheckError(err)
 		requestBytes, _ := json.Marshal(request)

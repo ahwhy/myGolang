@@ -13,7 +13,7 @@ import (
 
 func NewWsServer(port int) *WsServer {
 	return &WsServer{
-		addr: socket.ListenAddr + strconv.Itoa(port),
+		addr: socket.ListenAddr + ":" + strconv.Itoa(port),
 		upgrade: &websocket.Upgrader{
 			HandshakeTimeout: 5 * time.Second, // 握手超时时间
 			ReadBufferSize:   2048,            // 读缓冲大小

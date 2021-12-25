@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>聊天室</title>
+    <script type="text/javascript">
+        window.onload = function () {//页面打开时执行以下初始化内容
+            var conn;
+            var msg = document.getElementById("msg");
+            var log = document.getElementById("log");
+
+            function appendLog(item) {
+                var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+                log.appendChild(item);
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+
+            document.getElementById("form").onsubmit = function () {
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.value) {
+                    return false;
+                }
+                conn.send(msg.value);
+                msg.value = "";
+                return false;
+            };
+
+            if (window["WebSocket"]) {//如果支持websockte就尝试连接
+                //从浏览器的开发者工具里看一下ws的请求头
+                conn = new WebSocket("ws://127.0.0.1:5657/ws");//请求跟websocket服务端建立连接(注意端口要一致)。关闭浏览器页面时会自动断开连接
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div")
+                    item.innerHTML = "<b>Connection closed.</b>";//连接关闭时打印一条信息
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {//如果conn里有消息
+                    var messages = evt.data.split('\n');//用换行符分隔每条消息
+                    for (var i = 0; i < messages.length; i++) {
+                        var item = document.createElement("div");
+                        item.innerText = messages[i];//把消息逐条显示在屏幕上
+                        appendLog(item);
+                    }
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+        };
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+
+        #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0px;
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="log"></div>
+    <form id="form">
+        <input type="submit" value="发送" />
+        <input type="text" id="msg" size="100" autofocus />
+    </form>
+</body>
+
+</html>
