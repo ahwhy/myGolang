@@ -26,7 +26,7 @@ func ServeWs(hub *module.Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("connect to client %s\n", conn.RemoteAddr().String())
 	// 每来一个前端请求，就会创建一个client
-	client := module.NewClient(conn)
+	client := module.NewClient(conn, hub)
 	client.Hub.Register <- client
 
 	// 启动子协程，运行ServeWs的协程退出后子协程也不会能出

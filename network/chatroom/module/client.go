@@ -8,9 +8,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func NewClient(conn *websocket.Conn) *Client {
+func NewClient(conn *websocket.Conn, hub *Hub) *Client {
 	return &Client{
-		Hub:  NewHub(),
+		Hub:  hub,
 		Conn: conn,
 		Send: make(chan []byte, 256),
 	}
