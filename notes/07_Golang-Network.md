@@ -2,27 +2,29 @@
 
 ## 一、网络通信
 
-- 网络请求过程
-	- 流程图
+- 网络请求流程图
 ```
 	                                     内核空间                               用户空间
 			1).网络请求 ->        2).copy(I/O模型、DMA)->        3).copy(MMAP) ->      4-1).处理请求
 	client                   网卡                         内核缓冲区            web服务进程    |
 			7).返回数据 <-               6).copy <-                  6).copy <-        4-2).构建Respense
 ```
+
+- 网络请求过程
+	- I/O模型
+		- 阻塞式网络I/O
+		- 非阻塞式网络I/O
+		- 多路复用网络I/O
 	- DMA
 		- 网卡和磁盘数据拷贝到内存流程比较固定，不涉及到运算操作，且非常耗时
 		- 在磁盘嵌入一个DMA芯片，完成上述拷贝工作，把CPU解脱出来，让CPU专注于运算
 	- MMAP
 		- 用户空间和内核空间映射同一块内存空间，从而达到省略将数据从内核缓冲区拷贝到用户空间的操作，用户空间通过映射直接操作内核缓冲区的数据
-	- I/O模型
-		- 阻塞式网络I/O
-		- 非阻塞式网络I/O
-		- 多路复用网络I/O
-	- socket
-		- 用户进程(复数，即应用层) -> socket抽象层 -> TCP/UDP(传输层)
-		- socket把复杂的传输层协议封装成简单的接口，使应用层可以像读写文件一样进行网络数据的传输
-		- socket通信过程
+
+- socket
+	- 用户进程(复数，即应用层) -> socket抽象层 -> TCP/UDP(传输层)
+	- socket把复杂的传输层协议封装成简单的接口，使应用层可以像读写文件一样进行网络数据的传输
+	- socket通信过程
 ```
 							   设置监听端口|设置监听队列|阻塞，循环等待客户端连接
 	Server端        Socket() -> Bind() -> Listen() -> Accept() -> Receive() -> Send()    -> Close()
@@ -39,22 +41,24 @@
 - 端口: `0~1023` 被熟知的应用程序占用(普通应用程序不可以使用)，`49152~65535` 客户端程序运行时动态选择使用
 
 ### 2. TCP/CS架构
+- TCP报文结构
+```
+	|      源端口(2Bytes)          |         目的端口(2Bytes)       |
+	|                             序号                              |
+	|                            确认号                             |
+	| 数据偏移 | 保留位 |           tcp flags            |   窗口   | 
+	|  (4bit)  | (6bit) | (URG、ACK、PSH、RST、SYN、FIN) | (2Bytes) |
+	|      检验和(2Bytes)          |         紧急指针(2Bytes)       |
+	|                           TCP选项                             |
+```
+
 - TCP协议
 	- 传输层协议
 	- `MSS = MTU - ip首部 - tcp首部`，MTU视网络接口层的不同而不同
 	- TCP在建立连接时通常需要协商双方的MSS值
 	- 应用层传输的数据大于MSS时需要分段
 	- TCP首部
-		- 报文结构
-```
-			|      源端口(2Bytes)          |         目的端口(2Bytes)       |
-			|                             序号                              |
-			|                            确认号                             |
-			| 数据偏移 | 保留位 |           tcp flags            |   窗口   | 
-			|  (4bit)  | (6bit) | (URG、ACK、PSH、RST、SYN、FIN) | (2Bytes) |
-			|      检验和(2Bytes)          |         紧急指针(2Bytes)       |
-			|                           TCP选项                             |
-```
+		- 报文结构(见下)
 		- 一位=1bit，8bit=1Byte(字节)
 		- 前20个字节是固定的，后面还有4N个可选字节(TCP选项)
 		- 端口在 TCP层指定，ip在 IP层指定
@@ -138,7 +142,7 @@
 	- net.ResolveTCPAddr
 		- `func ResolveTCPAddr(network, address string) (*TCPAddr, error)`
 		- net参数是"tcp4"、"tcp6"、"tcp"中的任意一个，分别表示TCP4(IPv4-only)，TCP6(IPv6-only)或者TCP(IPv4,、IPv6的任意一个)
-		- addr表示域名或者IP地址，例如" www.qq.com:80" 或者"127.0.0.1:22"
+		- addr表示域名或者IP地址，例如"www.qq.com:80" 或者"127.0.0.1:22"
 	- net.ListenTCP
 		- `func ListenTCP(network string, laddr *TCPAddr) (*TCPListener, error)`
 		- 监听端口
@@ -190,9 +194,9 @@
 	- UDP首部
 		- 报文结构
 ```
-			| 源端口(2Bytes) | 目的端口(2Bytes) |  // UDP首部
-			|  UDP报文长度   |       检验和     |
-			|           用户数据部分            |
+	| 源端口(2Bytes) | 目的端口(2Bytes) |  // UDP首部
+	|  UDP报文长度   |       检验和     |
+	|           用户数据部分            |
 ```
 
 - Go语言中的UDP编程接口
@@ -265,27 +269,26 @@
 					`openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key  -CAcreateserial -out server.crt -days 365  -extensions v3_ext -extfile csr.conf`
 	- 服务端安装TLS证书
 		- 编辑Nginx配置文件 
-```shell
-			$ vim /etc/nginx/nginx.conf 
-			# Settings for a TLS enabled server.
-			server {
-				listen       443;
-				server_name  july.go.edu;                     // 填写自己的域名
-				ssl_certificate "/path/to/server.crt";        // 填写刚生成的TLS证书（包含公钥）
-				ssl_certificate_key "/path/to/server.key";    // 填写刚生成的TLS证书私钥
-			}
-```
 		- 使Nginx重新加载配置文件 `nginx -s reload`
 	- 客户端安装TLS证书
 		- 将服务端的TLS证书添加到 OS 的默认证书列表中
 			- linux
-```shell
-				sudo cp server.crt /usr/local/share/ca-certificates/server.crt 
-				sudo update-ca-certificates
-```
+				- `sudo cp server.crt /usr/local/share/ca-certificates/server.crt`
+				- `sudo update-ca-certificates`
 			- mac
 				- 打开钥匙串，把刚刚生成的server.crt 拖到证书一栏里
 		- 使用 HTTPS 客户端的 api 指定使用的 TLS 证书
+```shell
+	// 编辑Nginx配置文件 
+	$ vim /etc/nginx/nginx.conf 
+	# Settings for a TLS enabled server.
+	server {
+		listen       443;
+		server_name  july.go.edu;                     // 填写自己的域名
+		ssl_certificate "/path/to/server.crt";        // 填写刚生成的TLS证书（包含公钥）
+		ssl_certificate_key "/path/to/server.key";    // 填写刚生成的TLS证书私钥
+	}
+```
 
 ### 5. WebSocket协议
 - 与http的异同
@@ -304,22 +307,25 @@
 		- http长连接中每次请求都要带上header，而websocket在传输数据阶段不需要带header
 
 - websocket握手协议
-	- Request Header
-		Sec-Websocket-Version:13
-		Upgrade:websocket
-		Connection:Upgrade
-		Sec-Websocket-Key:duR0pUQxNgBJsRQKj2Jxsw==
-	- Response Header
-		Upgrade:websocket
-		Connection:Upgrade
-		Sec-Websocket-Accept:a1y2oy1zvgHsVyHMx+hZ1AYrEHI=
-	- 特点
-		- Upgrade:websocket 和 Connection:Upgrade 指明使用WebSocket协议
-		- Sec-WebSocket-Version 指定Websocket协议版本
-		- Sec-WebSocket-Key是一个Base64 encode的值，是浏览器随机生成的
-		- 服务端收到Sec-WebSocket-Key后拼接上一个固定的GUID，进行一次SHA-1摘要，再转成Base64编码，得到Sec-WebSocket-Accept返回给客户端
-			- 客户端对本地的Sec-WebSocket-Key执行同样的操作跟服务端返回的结果进行对比，如果不一致会返回错误关闭连接
-			- 该操作把websocket header跟http header区分开
+	- Upgrade:websocket 和 Connection:Upgrade 指明使用WebSocket协议
+	- Sec-WebSocket-Version 指定Websocket协议版本
+	- Sec-WebSocket-Key是一个Base64 encode的值，是浏览器随机生成的
+	- 服务端收到Sec-WebSocket-Key后拼接上一个固定的GUID，进行一次SHA-1摘要，再转成Base64编码，得到Sec-WebSocket-Accept返回给客户端
+		- 客户端对本地的Sec-WebSocket-Key执行同样的操作跟服务端返回的结果进行对比，如果不一致会返回错误关闭连接
+		- 该操作把websocket header跟http header区分开
+
+```
+	// Request Header
+	Sec-Websocket-Version:13
+	Upgrade:websocket
+	Connection:Upgrade
+	Sec-Websocket-Key:duR0pUQxNgBJsRQKj2Jxsw==
+
+	// Response Header
+	Upgrade:websocket
+	Connection:Upgrade
+	Sec-Websocket-Accept:a1y2oy1zvgHsVyHMx+hZ1AYrEHI=
+```
 
 - WebSocket/CS架构
 	- 引用第三方包
@@ -330,44 +336,27 @@
 		`func (*websocket.Dialer) Dial(urlStr string, requestHeader http.Header) (*websocket.Conn, *http.Response, error)`
 
 - Go语言中的标准库 "net/http"
-	- http.Serve
 ```go
-		// 启动http服务
-		func Serve(l net.Listener, handler Handler) error
-```
-	- http.ListenAndServe
-```go	
-		// net.Listen和 http.Serve两步合成一步
-		func ListenAndServe(addr string, handler Handler) error
-```
-	- http.Handler   
-```go
-		// 需要实现Handler接口
-		type Handler interface {
-			ServeHTTP(ResponseWriter, *Request)
-		}
-		func (ws *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request)
-```
-	- http.HandleFunc
-```go
-		func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
-```
-	- http.ServeFile
-```go
-		// ServeFile用命名文件或者目录的内容，回复请求
-		func ServeFile(w ResponseWriter, r *Request, name string)
+	// http.Serve 启动http服务
+	func Serve(l net.Listener, handler Handler) error
+
+	// http.ListenAndServe net.Listen和http.Serve两步合成一步
+	func ListenAndServe(addr string, handler Handler) error
+
+	// http.Handler 需要实现Handler接口
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+	func (ws *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request)
+
+	// http.HandleFunc
+	func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+
+	// http.ServeFile 命名文件或者目录的内容，回复请求
+	func ServeFile(w ResponseWriter, r *Request, name string)
 ```
 
 - Go语言中的第三方库 `github.com/gorilla/websocket`
-	- Upgrader结构体
-```go
-		type Upgrader struct {
-			HandshakeTimeout time.Duration                                                 // websocket握手超时时间
-			ReadBufferSize, WriteBufferSize int                                            // io操作的缓存大小
-			Error func(w http.ResponseWriter, r *http.Request, status int, reason error)   // http错误响应函数
-			CheckOrigin func(r *http.Request) bool                                         // 用于统一的链接检查，以防止跨站点请求伪造
-		}
-```
 	- websocket发送的消息类型有5种: TextMessag, BinaryMessage, CloseMessag, PingMessage, PongMessage
 	- TextMessag 和 BinaryMessage 分别表示发送文本消息和二进制消息
 	- CloseMessage 关闭帧，接收方收到这个消息就关闭连接
@@ -375,8 +364,17 @@
 		- 发送方 -> 接收方是PingMessage
 		- 接收方 -> 发送方是PongMessage
 		- 目前浏览器没有相关api发送ping给服务器，只能由服务器发ping给浏览器，浏览器返回pong消息
+```go
+	// Upgrader结构体
+	type Upgrader struct {
+		HandshakeTimeout time.Duration                                                 // websocket握手超时时间
+		ReadBufferSize, WriteBufferSize int                                            // io操作的缓存大小
+		Error func(w http.ResponseWriter, r *http.Request, status int, reason error)   // http错误响应函数
+		CheckOrigin func(r *http.Request) bool                                         // 用于统一的链接检查，以防止跨站点请求伪造
+	}
+```
 
-- 示例 聊天室实现
+- 示例 [聊天室实现](https://github.com/ahwhy/myGolang/tree/main/network/chatroom/doc)
 	
 ## 三、Http编程
 
@@ -389,16 +387,18 @@
 		- 早期带宽和计算资源有限，这么做是为了追求传输速度快，后来通过`Connection: Keep-Alive`实现长连接
 		- http1.1废弃了Keep-Alive，默认支持长连接
 
+### 2. Http-Request
+- Request报文结构
+```
+	| 请求方法 | 空格 | URL | 空格 | 协议版本 | \r | \n |      // 请求行
+	|      字段名     |  :  |        值       | \r | \n |      // 请求头
+	                         ...
+	|      字段名     |  :  |        值       | \r | \n |
+	| \r | \n |                                                // 空行
+	|                        正文                       |
+```
+
 - Http Request
-	- Request报文结构
-```
-		| 请求方法 | 空格 | URL | 空格 | 协议版本 | \r | \n |      // 请求行
-		|      字段名     |  :  |        值       | \r | \n |      // 请求头
-		                         ...
-		|      字段名     |  :  |        值       | \r | \n |
-		| \r | \n |                                                // 空行
-		|                        正文                       |
-```
 	- 请求方法
 		- http 1.0
 			- GET      请求获取Request-URI所标识的资源 
@@ -419,12 +419,7 @@
 	- URL
 		- URI: uniform resource identifier，统一资源标识符，用来标识唯一的一个资源
 		- URL: uniform resource locator，统一资源定位器，它是一种具体的URI，指明了如何locate这个资源
-```
-			https://baijiahao.baidu.com/s?id=1603848351636567407&wfr=spider&for=pc
-			协议    域名                  参数
-			http://www.qq.com:8080/news/tech/43253.html?id=432&name=f43s#pic
-			协议   域名       端口 路径      文件名     参数             锚点
-```
+		- 示例见下
 	- 协议版本
 		- HTTP/1.0
 		- HTTP/1.1
@@ -451,7 +446,7 @@
 				- 正文示例: name="text"name="file"; filename="chrome.png"Content-Type: image/png... content of chrome.png
 			- application/json
 				- JSON数据格式
-				- 正文示例: {"title":"test","sub":[1,2,3]}
+				- 正文示例: `{"title":"test","sub":[1,2,3]}`
 			- application/xhtml+xml
 				- XHTML格式
 			- application/xml
@@ -463,15 +458,7 @@
 			- application/octet-stream
 				- 二进制流数据
 			- text/xml
-				- 正文示例
-```xml
-					<?xml version="1.0"?>
-					<methodCall>
-						<methodName>
-							examples.getStateName
-						</methodName>
-					</methodCall>`
-```
+				- 示例见下
 			- text/html
 				- HTML格式
 			- text/plain
@@ -484,13 +471,7 @@
 				- png图片格式
 	- 请求正文
 		- GET请求没有请求正文
-		- POST可以包含GET
-```
-			POST /post?id=1234&page=1 HTTP/1.1
-			Content-Type: application/x-www-form-urlencoded
-			
-			name=manu&message=this_is_great
-```
+		- POST可以包含GET，示例见下
 		- GET和POST的区别
 			- get的请求参数全部在url里，参数变时url就变
 				- post可以把参数放到请求正文里，参数变时url不变
@@ -498,16 +479,40 @@
 				- 所以post可以提交的数据比get要大得多
 			- get比post更容易受到攻击(源于get的参数直接暴露在url里)
 
+```xml
+	// url
+	https://baijiahao.baidu.com/s?id=1603848351636567407&wfr=spider&for=pc
+	协议    域名                  参数
+	http://www.qq.com:8080/news/tech/43253.html?id=432&name=f43s#pic
+	协议   域名       端口 路径      文件名     参数             锚点
+	
+	// text/xml
+	<?xml version="1.0"?>
+	<methodCall>
+		<methodName>
+			examples.getStateName
+		</methodName>
+	</methodCall>`
+	
+	// POST请求
+	POST /post?id=1234&page=1 HTTP/1.1
+	Content-Type: application/x-www-form-urlencoded
+	
+	name=manu&message=this_is_great
+```
+
+### 3. Http-Response
+- Response报文结构
+```
+	| 协议版本 | 状态码 | 原因话术 | \r | \n |      // 相应行
+	|  字段名  |    :   |    值    | \r | \n |      // 相应头
+					    ...
+	|  字段名  |    :   |    值    | \r | \n |
+	| \r | \n |                                     // 空行
+	|                响应正文                |
+```
+
 - Http Response
-	- Response报文结构
-```
-		| 协议版本 | 状态码 | 原因话术 | \r | \n |      // 相应行
-		|  字段名  |    :   |    值    | \r | \n |      // 相应头
-						    ...
-		|  字段名  |    :   |    值    | \r | \n |
-		| \r | \n |                                     // 空行
-		|                响应正文                |
-```
 	- 状态码及话术
 		- Code\Phrase
 			- 200 Ok                      请求成功
@@ -541,236 +546,251 @@
 			</html>
 ```
 
+### 3. Https
 - Https
 	- http:  (应用层)HTTP -> TCP -> IP
 	- https: (应用层)HTTP -> SSL/TCP -> TCP -> IP
 		- HTTP + 加密 + 认证 + 完整性保护 = HTTPS(HTTP Secure)
 
+### 4. Http-Response
 - Go语言中的标准库 `net/http`
-	- http server
 ```go
-		// 把返回的内容写入http.ResponseWriter
-		func HelloHandler(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, "Hello Boy") 
-		}
-		
-		// 路由，请求要目录时去执行HelloHandler  
-		http.HandleFunc("/", HelloHandler)  
-		// ListenAndServe如果不发生error会一直阻塞
-		// 为每一个请求创建一个协程去处理
-		http.ListenAndServe(":5656", nil)
-```
-	- http client
-```go
-		if resp, err := http.Get("http://127.0.0.1:5656"); err != nil {
-			panic(err)
-		} else {
-			// 注意一定要调用resp.Body.Close()，否则会协程泄漏(同时引发内存泄漏)
-			defer resp.Body.Close()
-			// 把resp.Body输出到标准输出流
-			io.Copy(os.Stdout, resp.Body) 
-		}
-```
-	- http router
-		- Go语言中的第三方库 `github.com/julienschmidt/httprouter`
-			- `go get -u github.com/julienschmidt/httprouter`
-			- Router实现了`http.Handler`接口
-			- 为各种request method提供了便捷的路由方式
-			- 支持restful请求方式
-			- 支持ServeFiles访问静态文件
-			- 可以自定义捕获panic的方法
-	- 关于请求校验的常见问题
-		- XSS
-			- 跨站脚本攻击(Cross-site scripting，XSS)是一种安全漏洞，即通过注入脚本获取敏感信息
-				- 攻击者可以利用这种漏洞在网站上注入恶意的客户端代码
-				- 当被攻击者登陆网站时就会自动运行这些恶意代码，从而攻击者可以突破网站的访问权限，冒充受害者
-		- CSRF
-			- 跨站请求伪造(Cross-site request forgery，CSRF)是一种冒充受信任用户，向服务器发送非预期请求的攻击方式
-			- 例如，这些非预期请求可能是通过在跳转链接后的 URL 中加入恶意参数来完成
-		- jsonp 跨域
-			- 主流浏览器不允许跨域访问数据(端口不同也属于跨域)
-			- `<script>`标签的src属性不受同源策略限制
-			- 通过script的src请求返回的数据，浏览器会当成js脚本去处理
-				- 所以服务端可以返回一个在客户端存在的js函数
-			- [跨域资源共享 CORS 详解](https://www.ruanyifeng.com/blog/2016/04/cors.html)
-		- validator
-			- Go语言中的第三方库 `github.com/go-playground/validator`
-				- `go get github.com/go-playground/validator`
-```go
-					type RegistRequest struct {
-						UserName string `validate:"gt=0"`                // >0 长度大于0
-						PassWord string `validate:"min=6,max=12"`        //密码长度[6, 12]
-						PassRepeat string `validate:"eqfield=PassWord"`  //跨字段相等校验
-						Email string `validate:"email"`                  //需要满足email的格式
-					}
-```
-			- 范围约束
-				- 对于字符串、切片、数组和map，约束其长度: len=10, min=6, max=10, gt=10
-				- 对于数值，约束其取值: min, max, eq, ne, gt, gte, lt, lte, oneof=6 8
-			- 跨字段约束
-				- 跨字段就在范围约束的基础上加field后缀
-				- 如果还跨结构体(cross struct)就在跨字段的基础上在field前面加cs
-					- 范围约束 cs, field
-			- 字符串约束
-				- contains包含子串
-				- containsany包含任意unicode字符，containsany=abcd
-				- containsrune包含rune字符，containsrune=☻
-				- excludes不包含子串
-				- excludesall不包含任意的unicode字符，excludesall=abcd
-				- excludesrune不包含rune字符，excludesrune=☻
-				- startswith以子串为前缀
-				- endswith以子串为后缀
-			- 唯一性uniq
-				- 对于数组和切片，约束没有重复的元素
-				- 对于map，约束没的重复的value
-				- 对于元素类型为结构体的切片，unique约束结构体对象的某个字段不重复，通过unqiue=field指定这个字段名
-				- ``` Friends []User `validate:"unique=Name"` ```
-			- 自定义约束
-```go
-				func validateEmail(fl validator.FieldLevel) bool {
-					input := fl.Field().String()
-					if pass, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,})\.([a-z]{2,4})$`, input); pass {
-						return true
-					}
-					return false
-				}
-				
-				//注册一个自定义的validator
-				val.RegisterValidation("my_email", validateEmail)
-				Email string `validate:"my_email"`
-```
-	- http中间件
-		- 中间件的作用
-			- 将业务代码和非业务代码解耦
-			- 非业务代码: 限流、超时控制、打日志等等
-		- 中间件的实现原理
-			- 传入一个http.Handler，外面套上一些非业务功能代码，再返回一个http.Handler
-			- 支持中间件层层嵌套
-			- 通过HandlerFunc把一个`func(rw http.ResponseWriter, r *http.Request)`函数转为Handler
-```go
-				func timeMiddleWare(next http.Handler) http.Handler {
-					return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-						begin := time.Now()
-						next.ServeHTTP(rw, r)
-						timeElapsed := time.Since(begin)
-						log.Printf("request %s use %d ms\n", r.URL.Path, timeElapsed.Milliseconds())
-					})
-				}
+	// http-server
+	// 把返回的内容写入http.ResponseWriter
+	func HelloHandler(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Hello Boy") 
+	}
+	
+	// 路由，请求要目录时去执行HelloHandler  
+	http.HandleFunc("/", HelloHandler)  
+	// ListenAndServe如果不发生error会一直阻塞
+	// 为每一个请求创建一个协程去处理
+	http.ListenAndServe(":5656", nil)
+
+	// http-client
+	if resp, err := http.Get("http://127.0.0.1:5656"); err != nil {
+		panic(err)
+	} else {
+		// 注意一定要调用resp.Body.Close()，否则会协程泄漏(同时引发内存泄漏)
+		defer resp.Body.Close()
+		// 把resp.Body输出到标准输出流
+		io.Copy(os.Stdout, resp.Body) 
+	}
 ```
 
-- Go语言中的Http框架
-	- 自定义Web框架
-		- 框架的作用
-			- 节省封装的开发时间，统一各团队的编码风格，节省沟通和排查问题的时间
-		- Web框架需要具备的功能
-			- request参数获取
-			- 参数校验 validator
-			- 路由 httprouter
-			- response生成和渲染
-			- 中间件
-			- 会话管理
-		- Gorilla工具集
-			- mux       一款强大的HTTP路由和URL匹配器
-			- websocket 一个快速且被广泛应用的WebSocket实现
-			- sessions  支持将会话跟踪信息保存到Cookie或文件系统
-			- handler   为http服务提供很多有用的中间件
-			- schema    表单数据和go struct互相转换
-			- csrf      提供防止跨站点请求攻击的中间件
-	- Gin框架
-		- Gin是一款高性能的、简单轻巧的Http Web框架
-			`go get -u github.com/gin-gonic/gin`
-		- 路由
-			- Gin的路由是基于httprouter做的
-			- 支持GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
-			- 支持路由分组，不用重复写上级路径
-		- 参数获取
-			- `c.Query()`         从GET请求的URL中获取参数
-			- `c.Param()`         从Restful风格的url中获取参数
-			- `c.PostForm()`      从post表单中获取参数
-			- `c.FormFile()`      获取上传的文件，消息类型为form-data
-			- `c.MultipartForm()` multipart/form-data可以上传多个form-data 并且用分隔符进行分割
-		- 参数绑定
+### 5. http-router
+- Go语言中的第三方库 `github.com/julienschmidt/httprouter`
+	- `go get -u github.com/julienschmidt/httprouter`
+	- Router实现了`http.Handler`接口
+	- 为各种request method提供了便捷的路由方式
+	- 支持restful请求方式
+	- 支持ServeFiles访问静态文件
+	- 可以自定义捕获panic的方法
+
+### 6. 关于请求校验的常见问题
+- XSS
+	- 跨站脚本攻击(Cross-site scripting，XSS)是一种安全漏洞，即通过注入脚本获取敏感信息
+		- 攻击者可以利用这种漏洞在网站上注入恶意的客户端代码
+		- 当被攻击者登陆网站时就会自动运行这些恶意代码，从而攻击者可以突破网站的访问权限，冒充受害者
+
+- CSRF
+	- 跨站请求伪造(Cross-site request forgery，CSRF)是一种冒充受信任用户，向服务器发送非预期请求的攻击方式
+	- 例如，这些非预期请求可能是通过在跳转链接后的 URL 中加入恶意参数来完成
+
+- jsonp 跨域
+	- 主流浏览器不允许跨域访问数据(端口不同也属于跨域)
+	- `<script>`标签的src属性不受同源策略限制
+	- 通过script的src请求返回的数据，浏览器会当成js脚本去处理
+		- 所以服务端可以返回一个在客户端存在的js函数
+	- [跨域资源共享 CORS 详解](https://www.ruanyifeng.com/blog/2016/04/cors.html)
+
+- validator
+	- Go语言中的第三方库 `github.com/go-playground/validator`
+		- `go get github.com/go-playground/validator`
+	- 范围约束
+		- 对于字符串、切片、数组和map，约束其长度: len=10, min=6, max=10, gt=10
+		- 对于数值，约束其取值: min, max, eq, ne, gt, gte, lt, lte, oneof=6 8
+	- 跨字段约束
+		- 跨字段就在范围约束的基础上加field后缀
+		- 如果还跨结构体(cross struct)就在跨字段的基础上在field前面加cs
+			- 范围约束 cs, field
+	- 字符串约束
+		- contains包含子串
+		- containsany包含任意unicode字符，containsany=abcd
+		- containsrune包含rune字符，containsrune=☻
+		- excludes不包含子串
+		- excludesall不包含任意的unicode字符，excludesall=abcd
+		- excludesrune不包含rune字符，excludesrune=☻
+		- startswith以子串为前缀
+		- endswith以子串为后缀
+	- 唯一性uniq
+		- 对于数组和切片，约束没有重复的元素
+		- 对于map，约束没的重复的value
+		- 对于元素类型为结构体的切片，unique约束结构体对象的某个字段不重复，通过unqiue=field指定这个字段名
+		- ``` Friends []User `validate:"unique=Name"` ```
+	- 自定义约束
+
 ```go
-			type Student struct {
-				Name string `form:"username" json:"name" uri:"user" xml:"user" yaml:"user" binding:"required"`
-				Addr string `form:"addr" json:"addr" uri:"addr" xml:"addr" yaml:"addr" binding:"required"`
-			}
-			var stu Student
-			ctx.ShouldBindJSON(&stu)
+	// 范围约束
+	type RegistRequest struct {
+		UserName string `validate:"gt=0"`                // >0 长度大于0
+		PassWord string `validate:"min=6,max=12"`        //密码长度[6, 12]
+		PassRepeat string `validate:"eqfield=PassWord"`  //跨字段相等校验
+		Email string `validate:"email"`                  //需要满足email的格式
+	}
+
+	// 自定义约束
+	func validateEmail(fl validator.FieldLevel) bool {
+		input := fl.Field().String()
+		if pass, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,})\.([a-z]{2,4})$`, input); pass {
+			return true
+		}
+		return false
+	}
+	
+	//注册一个自定义的validator
+	val.RegisterValidation("my_email", validateEmail)
+	Email string `validate:"my_email"`
 ```
-		- Gin生成response
-			- `c.String()`   response Content-Type= text/plain
-			- `c.JSON()`     response Content-Type= application/json
-			- `c.XML()`      response Content-Type= application/xml
-			- `c.HTML()`     前端写好模板，后端往里面填值
-			- `c.Redirect()` 重定向
-		- Gin参数校验
-			- 基于`go-playground/validator`
+
+### 7. http中间件
+- 中间件的作用
+	- 将业务代码和非业务代码解耦
+	- 非业务代码: 限流、超时控制、打日志等等
+
+- 中间件的实现原理
+	- 传入一个http.Handler，外面套上一些非业务功能代码，再返回一个http.Handler
+	- 支持中间件层层嵌套
+	- 通过HandlerFunc把一个`func(rw http.ResponseWriter, r *http.Request)`函数转为Handler
 ```go
-				type Student struct {
-					Name string `form:"name" binding:"required"` // required:必须上传name参数
-					Score int `form:"score" binding:"gt=0"` // score必须为正数
-					Enrollment time.Time `form:"enrollment" binding:"required,before_today" time_format:"2006-01-02" time_utc:"8"` // 自定义验证before_today，日期格式东8区
-					Graduation time.Time `form:"graduation" binding:"required,gtfield=Enrollment" time_format:"2006-01-02" time_utc:"8"` // 毕业时间要晚于入学时间
-				}
+	func timeMiddleWare(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			begin := time.Now()
+			next.ServeHTTP(rw, r)
+			timeElapsed := time.Since(begin)
+			log.Printf("request %s use %d ms\n", r.URL.Path, timeElapsed.Milliseconds())
+		})
+	}
 ```
+
+### 8. Go语言中的Http框架
+- 自定义Web框架
+	- 框架的作用
+		- 节省封装的开发时间，统一各团队的编码风格，节省沟通和排查问题的时间
+	- Web框架需要具备的功能
+		- request参数获取
+		- 参数校验 validator
+		- 路由 httprouter
+		- response生成和渲染
+		- 中间件
+		- 会话管理
+	- Gorilla工具集
+		- mux       一款强大的HTTP路由和URL匹配器
+		- websocket 一个快速且被广泛应用的WebSocket实现
+		- sessions  支持将会话跟踪信息保存到Cookie或文件系统
+		- handler   为http服务提供很多有用的中间件
+		- schema    表单数据和go struct互相转换
+		- csrf      提供防止跨站点请求攻击的中间件
+
+- Gin框架
+	- Gin是一款高性能的、简单轻巧的Http Web框架
+		`go get -u github.com/gin-gonic/gin`
+	- 路由
+		- Gin的路由是基于httprouter做的
+		- 支持GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+		- 支持路由分组，不用重复写上级路径
+	- 参数获取
+		- `c.Query()`         从GET请求的URL中获取参数
+		- `c.Param()`         从Restful风格的url中获取参数
+		- `c.PostForm()`      从post表单中获取参数
+		- `c.FormFile()`      获取上传的文件，消息类型为form-data
+		- `c.MultipartForm()` multipart/form-data可以上传多个form-data 并且用分隔符进行分割
+	- 参数绑定
+	- Gin生成response
+		- `c.String()`   response Content-Type= text/plain
+		- `c.JSON()`     response Content-Type= application/json
+		- `c.XML()`      response Content-Type= application/xml
+		- `c.HTML()`     前端写好模板，后端往里面填值
+		- `c.Redirect()` 重定向
+	- Gin参数校验
+		- 基于`go-playground/validator`
 		- Gin中间件
 			- 丰富的第三方中间件 `gin-gonic/contrib (github.com)`
-```go
-			// 全局MiddleWare
-			engine.Use(timeMiddleWare()) 
-			// 局部MiddleWare
-			engine.GET("/girl", limitMiddleWare(), func(c *gin.Context) {
-				c.String(http.StatusOK, "hi girl")
-			})
-```
 		- Gin会话
 			- http是无状态的，即服务端不知道两次请求是否来自于同一个客户端
 			- Cookie由服务端生成，发送给客户端，客户端保存在本地
 			- 客户端每次发起请求时把Cookie带上，以证明自己的身份
 			- HTTP请求中的Cookie头只会包含name和value信息(服务端只能取到name和value)，domain、path、expires等cookie属性是由浏览器使用的，对服务器来说没有意义
 			- Cookie可以被浏览器禁用
-	- Beego框架
-		- beego简介
-			- beego是一个大而全的http框架，用于快速开发go应用程序
-			- bee工具提供诸多命令，帮助进行 beego 项目的创建、热编译、开发、测试、和部署
-			- beego的八大模块互相独立，高度解耦，开发者可任意选取
-			- 日志模块
-			- ORM模块
-			- Context模块  封装了request和response
-			- Cache模块    封装了memcache、redis、ssdb
-			- Config模块   解析.ini、.yaml、.xml、.json、.env等配置文件
-			- httplib模块
-			- Session模块  session保存在服务端，用于标识客户身份，跟踪会话
-			- toolbox模块  健康检查、性能调试、访问统计、计划任务
-		- 用bee工具创建web项目
-```shell
-			go get github.com/astaxie/beego
-			go get github.com/beego/bee
-			cd $GOPATH/src
-			bee new myweb
-			cd myweb
-			go build -mod=mod
-			bee run
-```
-		- MainController
+			
 ```go
-			type MainController struct { //继承自beego.Controller
-				beego.Controller //beego.Controller里有Get、Post、Put等方法
-			}
-			func (c *MainController) Get() {
-				c.Data["Website"] = "github.com/Orisun"
-				c.Data["Email"] = zhchya@gmail.com
-				//TplName是需要渲染的模板  .tpl经常被用来表示PHP模板
-				c.TplName = "index.tpl”
-				//Resquest和ResponseWriter都在beego.Controller.Ctx里
-				fmt.Println("remote addr", c.Ctx.Request.RemoteAddr)
-				//如果指定了response正文，就不会去渲染index.tpl了
-				c.Ctx.WriteString("Hi boy") 
-			}
+	// Gin参数绑定
+	type Student struct {
+		Name string `form:"username" json:"name" uri:"user" xml:"user" yaml:"user" binding:"required"`
+		Addr string `form:"addr" json:"addr" uri:"addr" xml:"addr" yaml:"addr" binding:"required"`
+	}
+	var stu Student
+	ctx.ShouldBindJSON(&stu)
+
+	// Gin参数校验
+	type Student struct {
+		Name string `form:"name" binding:"required"` // required:必须上传name参数
+		Score int `form:"score" binding:"gt=0"` // score必须为正数
+		Enrollment time.Time `form:"enrollment" binding:"required,before_today" time_format:"2006-01-02" time_utc:"8"` // 自定义验证before_today，日期格式东8区
+		Graduation time.Time `form:"graduation" binding:"required,gtfield=Enrollment" time_format:"2006-01-02" time_utc:"8"` // 毕业时间要晚于入学时间
+	}
+	
+	// 全局MiddleWare
+	engine.Use(timeMiddleWare()) 
+	// 局部MiddleWare
+	engine.GET("/girl", limitMiddleWare(), func(c *gin.Context) {
+		c.String(http.StatusOK, "hi girl")
+	})
 ```
+
+- Beego框架
+	- beego简介
+		- beego是一个大而全的http框架，用于快速开发go应用程序
+		- bee工具提供诸多命令，帮助进行 beego 项目的创建、热编译、开发、测试、和部署
+		- beego的八大模块互相独立，高度解耦，开发者可任意选取
+		- 日志模块
+		- ORM模块
+		- Context模块  封装了request和response
+		- Cache模块    封装了memcache、redis、ssdb
+		- Config模块   解析.ini、.yaml、.xml、.json、.env等配置文件
+		- httplib模块
+		- Session模块  session保存在服务端，用于标识客户身份，跟踪会话
+		- toolbox模块  健康检查、性能调试、访问统计、计划任务
+	- 用bee工具创建web项目
+		- MainController
 		- MVC
 			- View 前端页面
 			- Controller 处理业务逻辑
 			- Model 把Controller层重复的代码抽象出来
 				- 在Model层可以使用beego提供的ORM功能
+
+```go
+	// 使用方法
+	$ go get github.com/astaxie/beego
+	$ go get github.com/beego/bee
+	$ cd $GOPATH/src
+	$ bee new myweb
+	$ cd myweb
+	$ go build -mod=mod
+	$ bee run
+	
+	// MainController
+	type MainController struct { //继承自beego.Controller
+		beego.Controller //beego.Controller里有Get、Post、Put等方法
+	}
+	func (c *MainController) Get() {
+		c.Data["Website"] = "github.com/Orisun"
+		c.Data["Email"] = zhchya@gmail.com
+		//TplName是需要渲染的模板  .tpl经常被用来表示PHP模板
+		c.TplName = "index.tpl”
+		//Resquest和ResponseWriter都在beego.Controller.Ctx里
+		fmt.Println("remote addr", c.Ctx.Request.RemoteAddr)
+		//如果指定了response正文，就不会去渲染index.tpl了
+		c.Ctx.WriteString("Hi boy") 
+	}
+``
