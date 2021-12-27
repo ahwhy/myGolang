@@ -47,5 +47,5 @@ func TestMiddleWare(t *testing.T) {
 }
 
 func TestAuthLogin(t *testing.T) {
-	client.RequestFood()
+	client.AuthLogin()
 }

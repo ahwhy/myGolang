@@ -209,19 +209,19 @@ func RequestFood() {
 }
 
 func MiddleWare() {
-	const P = 130
+	const P = 160
 	wg := sync.WaitGroup{}
 	wg.Add(P)
 
 	for i := 0; i < P; i++ {
 		go func() {
 			defer wg.Done()
-			if resp, err := http.Get("http://127.0.0.1:5656"); err == nil {
+			if resp, err := http.Get("http://127.0.0.1:5656/init"); err == nil {
 				resp.Body.Close()
 			}
 		}()
 	}
-	
+
 	wg.Wait()
 }
 
