@@ -534,16 +534,16 @@
 	- 响应正文
 		- Http Response示例
 ```html
-			HTTP/1.1 200 OK 
-			Date: Fri, 22 May 2009 06:07:21 GMT 
-			Content-Type: text/html; charset=UTF-8 
+	HTTP/1.1 200 OK 
+	Date: Fri, 22 May 2009 06:07:21 GMT 
+	Content-Type: text/html; charset=UTF-8 
 			
-			<html>                                  // 响应正文
-				<head></head>
-				<body>
-					<!--body goes here--> 
-				</body> 
-			</html>
+	<html>                                  // 响应正文
+		<head></head>
+		<body>
+			<!--body goes here--> 
+		</body> 
+	</html>
 ```
 
 ### 3. Https
