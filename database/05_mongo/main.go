@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ahwhy/myGolang/historys/week12/database"
+	"github.com/ahwhy/myGolang/database"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

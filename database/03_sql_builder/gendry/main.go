@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/ahwhy/myGolang/historys/week12/database"
+	"github.com/ahwhy/myGolang/database"
 
 	"github.com/didi/gendry/builder"
 	"github.com/didi/gendry/manager"

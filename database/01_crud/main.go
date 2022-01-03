@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/ahwhy/myGolang/historys/week12/database"
+	"github.com/ahwhy/myGolang/database"
 
 	_ "github.com/go-sql-driver/mysql"
 )

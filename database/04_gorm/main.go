@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ahwhy/myGolang/historys/week12/database"
+	"github.com/ahwhy/myGolang/database"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
