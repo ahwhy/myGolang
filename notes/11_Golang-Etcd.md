@@ -82,23 +82,32 @@
 
 ### 3. Etcdctl集群管理
 ```shell
+	# Etcd集群启动参数
+	ExecStart=/usr/bin/etcd --election-timeout=3000 --auto-compaction-retention=1 --auto-compaction-mode=revision --heartbeat-interval=500 --cert-file=/var/lib/etcd/cert/etcd-server.pem --key-file=/var/lib/etcd/cert/etcd-server-key.pem --peer-client-cert-auth --peer-trusted-ca-file=/var/lib/etcd/cert/peer-ca.pem --peer-cert-file=/var/lib/etcd/cert/192.168.22.12-name-2.pem --peer-key-file=/var/lib/etcd/cert/192.168.22.12-name-2-key.pem --initial-advertise-peer-urls https://192.168.22.12:2380 --listen-peer-urls https://192.168.22.12:2380 --advertise-client-urls https://192.168.22.12:2379 --listen-client-urls https://192.168.22.12:2379 --initial-cluster 192.168.22.11-name-1=https://192.168.22.11:2380,192.168.22.12-name-2=https://192.168.22.12:2380,192.168.22.13-name-3=https://192.168.22.13:2380 --initial-cluster-state new --initial-cluster-token e21a2460-2096-49a9-b5d0-650362539766
+
 	# Etcd集群健康检测
-	$ export NODE_IPS="192.168.137.51 192.168.137.52 192.168.137.53" 
+	$ export NODE_IPS="192.168.22.11 192.168.22.12 192.168.22.13" 
 	$ for ip in ${NODE_IPS}; do ETCDCTL_API=3  etcdctl  --endpoints=https://${ip}:2379  --cacert=/etc/etcd/pki/ca.crt --cert=/etc/etcd/pki/client.crt --key=/etc/etcd/pki/client.key   endpoint health; done 
-	https://192.168.137.51:2379 is healthy: successfully committed proposal: took = 2.487239ms
-	https://192.168.137.52:2379 is healthy: successfully committed proposal: took = 1.77157ms
-	https://192.168.137.53:2379 is healthy: successfully committed proposal: took = 3.064988ms
-	
+	https://192.168.22.11:2379 is healthy: successfully committed proposal: took = 2.487239ms
+	https://192.168.22.12:2379 is healthy: successfully committed proposal: took = 1.77157ms
+	https://192.168.22.13:2379 is healthy: successfully committed proposal: took = 3.064988ms
+
+	# 集群密钥校验
+	ETCDCTL_API=3 etcdctl --endpoints="https://192.168.22.11:2379,https://192.168.22.12:2379,https://192.168.22.13:2379" --cacert=/etc/kubernetes/pki/etcd/ca.pem --cert=/etc/kubernetes/pki/etcd/etcd-client.pem --key=/etc/kubernetes/pki/etcd/etcd-client-key.pem -h
+
+	# 集群metrics数据获取
+	curl -k --cert /etc/kubernetes/pki/etcd/etcd-client.pem --key /etc/kubernetes/pki/etcd/etcd-client-key.pem https://192.168.22.13:2379/metrics
+
 	# 以下命令若不条件对应证书路径，需在配置文件中添加：http://127.0.0.1:2379
 	# --endpoints=https://${ip}:2379  --cacert=/etc/etcd/pki/ca.crt --cert=/etc/etcd/pki/client.crt --key=/etc/etcd/pki/client.key
-	# docker exec 容器ID sh -c "ETCDCTL_API=3 etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --endpoints="https://192.168.137.101:2379,https://192.168.137.102:2379,https://192.168.137.103:2379" endpoint health" 
-	# docker exec 容器ID sh -c "ETCDCTL_API=3 etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --endpoints="https://192.168.137.101:2379,https://192.168.137.102:2379,https://192.168.137.103:2379" endpoint status" 
+	# docker exec 容器ID sh -c "ETCDCTL_API=3 etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --endpoints="https://192.168.22.11:2379,https://192.168.22.12:2379,https://192.168.22.13:2379" endpoint health" 
+	# docker exec 容器ID sh -c "ETCDCTL_API=3 etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --endpoints="https://192.168.22.11:2379,https://192.168.22.12:2379,https://192.168.22.13:2379" endpoint status" 
 	# https://blog.csdn.net/weixin_30469895/article/details/99194344
 	# docker cp $(docker ps |grep k8s_etcd_etcd |awk '{print $NF}'):/usr/local/bin/etcdctl  /usr/local/bin
 	$ ETCDCTL_API=3  etcdctl  --help
 	$ ETCDCTL_API=3  etcdctl  member list   --
 	$ ETCDCTL_API=3  etcdctl  member remove id
-	$ ETCDCTL_API=3  etcdctl  member add infra2 --peer-urls="https://192.168.137.103:2380"   #先加入再启动节点
+	$ ETCDCTL_API=3  etcdctl  member add infra2 --peer-urls="https://192.168.22.13:2380"   #先加入再启动节点
 	
 	# 集群数据备份 https://www.cnblogs.com/chenqionghe/p/10622859.html
 	$ ETCDCTL_API=3  etcdctl  snapshot save     snapshot.db                              #数据备份
@@ -123,9 +132,10 @@
 	OK
 	
 	# 读取数据
-	$ docker exec -it -e "ETCDCTL_API=3" etcd  etcdctl get  /registry/configs/default/cmdb
+	$ docker exec -it -e "ETCDCTL_API=3" etcd  etcdctl get  /registry/configs/default/cmdb -w json
 	C:/Program Files/Git/registry/configs/default/cmdb
-	cmdb config object v2
+	{"header":{"cluster_id":14841639068965178418,"member_id":10276657743932975437,"revision":47,"raft_term":2},"kvs":[{"key":"L3JlZ2lzdHJ5L2NvbmZpZ3MvZGVmYXVsdC9jbWRi","create_revision":37,"mod_revision":47,"version":11,"value":"Y21kYiBjb25maWcgb2JqZWN0djk="}],"count":1}
+
 ```
 
 - 读取数据
@@ -480,3 +490,5 @@
 		
 - 参考文档
 	- [etcd 问题、调优、监控](https://www.kubernetes.org.cn/7569.html)
+	- [etcdv3.4 官网启动参数](https://etcd.io/docs/v3.4/op-guide/configuration/)
+	- [etcdv3.4 CHANGELOG-3.4](https://github.com/etcd-io/etcd/blob/main/CHANGELOG-3.4.md)
