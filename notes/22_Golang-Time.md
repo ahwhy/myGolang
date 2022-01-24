@@ -102,7 +102,7 @@
 	d1, err := time.Parse("2006-01-02 15:04:05", "2021-06-18 12:12:12")
 	log.Println(d1.Unix())
 	
-	// time.ParseInLocation()       func ParseInLocation(layout, value string, loc *Location) (Time, error) 可以指定时区
+	// time.ParseInLocation()       func ParseInLocation(layout, value string, loc *Location) (Time, error)  可以指定时区
 	tStr := "2021-07-17 16:52:59"
 	layout := "2006-01-02 15:04:05"
 	t1, _ := time.ParseInLocation(layout, tStr, time.Local)
