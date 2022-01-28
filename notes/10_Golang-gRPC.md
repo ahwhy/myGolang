@@ -327,10 +327,12 @@
 ```
 
 ## 二、Go语言中的gRPC
+
+### 1. gRPC简介
 - gRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架
 	- gRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好
 
-- GRPC技术栈
+- gRPC技术栈
 ```
 	// 数据交互格式: protobuf
 	// 通信方式: 最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现
@@ -343,10 +345,10 @@
 	Unix Domain Sockets; TCP
 ```
 
-- gRPC-demo
-	- 安装Protobuf
+### 2. gRPC-demo
+- 安装Protobuf
 	- Protobuf grpc插件
-		- 从Protobuf的角度看，gRPC只不过是一个针对service接口生成代码的生成器，需要提前安装grpc的代码生成插件
+	- 从Protobuf的角度看，gRPC只不过是一个针对service接口生成代码的生成器，需要提前安装grpc的代码生成插件
 ```shell
 	# 安装Protobuf grpc插件
 	# protoc-gen-go
@@ -357,180 +359,186 @@
 	$ protoc-gen-go-grpc --version                                   
 	protoc-gen-go-grpc 1.1.0
 ```
-	- 生成代码
-		- protobuf 定义接口的语法
+
+- protobuf 定义接口的语法
 ```
-			service <service_name> {
-				rpc <function_name> (<request>) returns (<response>);
-			}
-			// service: 用于申明这是个服务的接口
-			// service_name: 服务的名称,接口名称
-			// function_name: 函数的名称
-			// request: 函数参数， 必须的
-			// response: 函数返回， 必须的, 不能没有
+	service <service_name> {
+		rpc <function_name> (<request>) returns (<response>);
+	}
+	// service: 用于申明这是个服务的接口
+	// service_name: 服务的名称,接口名称
+	// function_name: 函数的名称
+	// request: 函数参数， 必须的
+	// response: 函数返回， 必须的, 不能没有
 ```
-		- grpc.proto
+
+- grpc.proto
 ```proto
-			syntax = "proto3";
-			
-			package hello;
-			option go_package="gitee.com/infraboard/go-course/day21/pbrpc/service";
-			
-			// The HelloService service definition.
-			service HelloService {
-				rpc Hello (Request) returns (Response);
-			}
-			
-			message Request {
-				string value = 1;
-			}
-			
-			message Response {
-				string value = 1;
-			}
-
-		// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
-		//  --go-grpc_out=./grpc/service --go-grpc_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
-		//  grpc/service/service.proto
+	syntax = "proto3";
+	
+	package hello;
+	option go_package="gitee.com/infraboard/go-course/day21/pbrpc/service";
+	
+	// The HelloService service definition.
+	service HelloService {
+		rpc Hello (Request) returns (Response);
+	}
+	
+	message Request {
+		string value = 1;
+	}
+	
+	message Response {
+		string value = 1;
+	}
+	
+	// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
+	//  --go-grpc_out=./grpc/service --go-grpc_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
+	//  grpc/service/service.proto
 ```
-		- gRPC服务端
+
+- gRPC服务端
 ```go
-			var _ service.HelloServiceServer = (*HelloService)(nil)
-			
-			type HelloService struct {
-				service.UnimplementedHelloServiceServer
-			}
-			
-			func (p *HelloService) Hello(ctx context.Context, req *service.Request) (*service.Response, error) {
-				resp := &service.Response{}
-				resp.Value = "hello:" + req.Value
-				return resp, nil
-			}
-			
-			// 首先是通过grpc.NewServer()构造一个gRPC服务对象
-			grpcServer := grpc.NewServer()
-			// 然后通过gRPC插件生成的RegisterHelloServiceServer函数注册实现的HelloServiceImpl服务
-			service.RegisterHelloServiceServer(grpcServer, new(HelloService))
-		
-			lis, err := net.Listen("tcp", ":1234")
-			if err != nil {
-				log.Fatal(err)
-			}
-		
-			// 最后通过grpcServer.Serve(lis)在一个监听端口上提供gRPC服务
-			grpcServer.Serve(lis)
+	var _ service.HelloServiceServer = (*HelloService)(nil)
+	
+	type HelloService struct {
+		service.UnimplementedHelloServiceServer
+	}
+	
+	func (p *HelloService) Hello(ctx context.Context, req *service.Request) (*service.Response, error) {
+		resp := &service.Response{}
+		resp.Value = "hello:" + req.Value
+		return resp, nil
+	}
+	
+	// 首先是通过grpc.NewServer()构造一个gRPC服务对象
+	grpcServer := grpc.NewServer()
+	// 然后通过gRPC插件生成的RegisterHelloServiceServer函数注册实现的HelloServiceImpl服务
+	service.RegisterHelloServiceServer(grpcServer, new(HelloService))
+	
+	lis, err := net.Listen("tcp", ":1234")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// 最后通过grpcServer.Serve(lis)在一个监听端口上提供gRPC服务
+	grpcServer.Serve(lis)
 ```
-		- gRPC客户端
+
+- gRPC客户端
 ```go
-			// grpc.Dial负责和gRPC服务建立链接
-			conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer conn.Close()
-			
-			// NewHelloServiceClient函数基于已经建立的链接构造HelloServiceClient对象,
-			// 返回的client其实是一个HelloServiceClient接口对象
-			client := service.NewHelloServiceClient(conn)
-			
-			// 通过接口定义的方法就可以调用服务端对应的gRPC服务提供的方法
-			req := &service.Request{Value: "hello"}
-			reply, err := client.Hello(context.Background(), req)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println(reply.GetValue())
+	// grpc.Dial负责和gRPC服务建立链接
+	conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	
+	// NewHelloServiceClient函数基于已经建立的链接构造HelloServiceClient对象,
+	// 返回的client其实是一个HelloServiceClient接口对象
+	client := service.NewHelloServiceClient(conn)
+	
+	// 通过接口定义的方法就可以调用服务端对应的gRPC服务提供的方法
+	req := &service.Request{Value: "hello"}
+	reply, err := client.Hello(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(reply.GetValue())
 ```
 
-- gRPC流
-	- RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间
-		- 因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合
-		- 为此，gRPC框架针对服务器端和客户端分别提供了流特性
-	- 服务端或客户端的单向流是双向流的特例，在HelloService增加一个支持双向流的Channel方法
-		- 定义streaming RPC 的语法
-```
-			// The HelloService service definition.
-			service HelloService {
-				rpc Hello (Request) returns (Response) {}
+### 3. gRPC流
+- RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间
+	- 因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合
+	- 为此，gRPC框架针对服务器端和客户端分别提供了流特性
 
-				// rpc <function_name> (stream <type>) returns (stream <type>) {}
-				// 关键字stream指定启用流特性，参数部分是接收客户端参数的流，返回值是返回给客户端的流
-				rpc Channel (stream Request) returns (stream Response) {}
-			}
-			// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" --go-grpc_out=./grpc/service --go-grraboard/go-course/day21/grpc/service" grpc/service/service.proto
-```
+- 服务端或客户端的单向流是双向流的特例，在HelloService增加一个支持双向流的Channel方法
+	- 定义streaming RPC 的语法
 		- gRPC服务端
 			- 逻辑
 				- 接收一个Request
 				- 响应一个Response
 			- 双向流数据的发送和接收都是完全独立的行为
 				- 需要注意的是，发送和接收的操作并不需要一一对应，用户可以根据真实场景进行组织代码
-```go
-					func (p *HelloService) Channel(stream service.HelloService_ChannelServer) error {
-						// 服务端在循环中接收客户端发来的数据
-						for {
-							// 接收一个请求
-							args, err := stream.Recv()
-							if err != nil {
-								// 如果遇到io.EOF表示客户端流被关闭
-								if err == io.EOF {
-									return nil
-								}
-								return err
-							}
-					
-							// 响应一个请求
-							// 生成返回的数据通过流发送给客户端
-							resp := &service.Response{Value: "hello:" + args.GetValue()}
-							err = stream.Send(resp)
-							if err != nil {
-								// 服务端发送异常, 函数退出, 服务端流关闭
-								return err
-							}
-						}
-					}
-```
 		- gRPC客户端
 ```go
-			conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
+	// 定义streaming RPC 的语法
+	// The HelloService service definition.
+	service HelloService {
+		rpc Hello (Request) returns (Response) {}
+
+		// rpc <function_name> (stream <type>) returns (stream <type>) {}
+		// 关键字stream指定启用流特性，参数部分是接收客户端参数的流，返回值是返回给客户端的流
+		rpc Channel (stream Request) returns (stream Response) {}
+	}
+	// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" --go-grpc_out=./grpc/service --go-grraboard/go-course/day21/grpc/service" grpc/service/service.proto
+
+	// gRPC服务端
+	func (p *HelloService) Channel(stream service.HelloService_ChannelServer) error {
+		// 服务端在循环中接收客户端发来的数据
+		for {
+			// 接收一个请求
+			args, err := stream.Recv()
 			if err != nil {
+				// 如果遇到io.EOF表示客户端流被关闭
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+	
+			// 响应一个请求
+			// 生成返回的数据通过流发送给客户端
+			resp := &service.Response{Value: "hello:" + args.GetValue()}
+			err = stream.Send(resp)
+			if err != nil {
+				// 服务端发送异常, 函数退出, 服务端流关闭
+				return err
+			}
+		}
+	}
+	
+	// gRPC客户端
+	conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	
+	client := service.NewHelloServiceClient(conn)
+	
+	// 客户端需要先调用Channel方法获取返回的流对象
+	stream, err := client.Channel(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// 在客户端我们将发送和接收操作放到两个独立的Goroutine。
+	
+	// 首先是向服务端发送数据
+	go func() {
+		for {
+			if err := stream.Send(&service.Request{Value: "hi"}); err != nil {
 				log.Fatal(err)
 			}
-			defer conn.Close()
-		
-			client := service.NewHelloServiceClient(conn)
-		
-			// 客户端需要先调用Channel方法获取返回的流对象
-			stream, err := client.Channel(context.Background())
-			if err != nil {
-				log.Fatal(err)
+			time.Sleep(time.Second)
+		}
+	}()
+	
+	// 然后在循环中接收服务端返回的数据
+	for {
+		reply, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
 			}
-		
-			// 在客户端我们将发送和接收操作放到两个独立的Goroutine。
-		
-			// 首先是向服务端发送数据
-			go func() {
-				for {
-					if err := stream.Send(&service.Request{Value: "hi"}); err != nil {
-						log.Fatal(err)
-					}
-					time.Sleep(time.Second)
-				}
-			}()
-		
-			// 然后在循环中接收服务端返回的数据
-			for {
-				reply, err := stream.Recv()
-				if err != nil {
-					if err == io.EOF {
-						break
-					}
-					log.Fatal(err)
-				}
-				fmt.Println(reply.GetValue())
-			}
+			log.Fatal(err)
+		}
+		fmt.Println(reply.GetValue())
+	}
 ```
 
-- 参考文档
-	- [GRPC Quick Start](https://grpc.io/docs/languages/go/quickstart/)
-	- [GRPC Examples](https://github.com/grpc/grpc-go/tree/master/examples)
+### 4. 参考文档
+- [GRPC Quick Start](https://grpc.io/docs/languages/go/quickstart/)
+
+- [GRPC Examples](https://github.com/grpc/grpc-go/tree/master/examples)
