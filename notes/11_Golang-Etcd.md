@@ -44,7 +44,8 @@
 	- 每一个节点均可以读写，但是写到任意一个节点的数据，都要同步到同一个集群的另外的节点，而且确保数据是强一致的
 	- 特性: leader election 、 数据强一致
 
-- raft协议是简装版的paxos协议，功能并不比其弱
+- raft协议是用于维护一组服务节点数据一致性的协议
+	- raft协议是简装版的paxos协议，功能并不比其弱
 	- 在今天各种分布式协作逻辑中，出现很多协议，都沿用paxos协议的思想，或简化、或另辟蹊径，都或多或少受到paxos协议的影响
 	- 原作者穷10年之功，才设计出paxos
 	- java开发分布式程序，就会使用paxos协议或 google研发的paxos变种zab协议(Zookeeper Atomic Broadcast)
@@ -479,6 +480,120 @@
 	// func (m *Mutex) TryLock(ctx context.Context) error
 ```
 
+### 6. Etcd集群选主
+- 这一组服务节点构成一个Etcd集群，并且有一个Etcd主节点来对外提供服务
+	- 当集群初始化，或者主节点挂掉后，面临一个选主问题
+	- 集群中每个节点，任意时刻处于Leader（主）, Follower（从）, Candidate（候选）这三个角色之一
+
+- 选举特点如下
+	- 当集群初始化时候，每个节点都是Follower角色
+	- 集群中存在至多1个有效的主节点，通过心跳与其他节点同步数据
+	- 当Follower在一定时间内没有收到来自主节点的心跳，会将自己角色改变为Candidate，并发起一次选主投票；当收到包括自己在内超过半数节点赞成后，选举成功；当收到票数不足半数选举失败，或者选举超时。若本轮未选出主节点，将进行下一轮选举(出现这种情况，是由于多个节点同时选举，所有节点均为获得过半选票)
+	- Candidate节点收到来自主节点的信息后，会立即终止选举过程，进入Follower角色
+	- 为了避免陷入选主失败循环，每个节点未收到心跳发起选举的时间是一定范围内的随机值，这样能够避免2个节点同时发起选主
+	
+- 相关逻辑代码
+```
+	/*
+	* 发起竞选
+	* 未当选leader前，会一直阻塞在Campaign调用
+	* 当选leader后，等待SIGINT、SIGTERM或session过期而退出
+	* https://cloud.tencent.com/developer/article/1458456
+	* https://github.com/etcd-io/etcd/blob/master/etcdctl/ctlv3/command/elect_command.go
+	*/
+	
+	func campaign(c *clientv3.Client, election string, prop string) error {
+		// NewSession函数中创建了一个lease，默认是60s TTL，并会调用KeepAlive，永久为这个lease自动续约(2/3生命周期的时候执行续约操作)
+		s, err := concurrency.NewSession(c)
+		if err != nil {
+			return err
+		}
+		e := concurrency.NewElection(s, election)
+		ctx, cancel := context.WithCancel(context.TODO())
+		
+		donec := make(chan struct{})
+		sigc := make(chan os.Signal, 1)
+		signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
+		go func() {
+			<-sigc
+			cancel()
+			close(donec)
+		}()
+		
+		// 竞选逻辑，将展开分析
+		if err = e.Campaign(ctx, prop); err != nil {
+			return err
+		}
+		
+		// print key since elected
+		resp, err := c.Get(ctx, e.Key())
+		if err != nil {
+			return err
+		}
+		display.Get(*resp)
+		
+		select {
+		case <-donec:
+		case <-s.Done():
+			return errors.New("elect: session expired")
+		}
+		
+		return e.Resign(context.TODO())
+	}
+
+	/*
+	* 类似于zookeeper的临时有序节点，etcd的选举也是在相应的prefix path下面创建key，该key绑定了lease并根据lease id进行命名
+	* key创建后就有revision号，这样使得在prefix path下的key也都是按revision有序
+	* https://github.com/etcd-io/etcd/blob/master/clientv3/concurrency/election.go
+	*/
+	func (e *Election) Campaign(ctx context.Context, val string) error {
+		s := e.session
+		client := e.session.Client()
+		
+		// 真正创建的key名为：prefix + lease id
+		k := fmt.Sprintf("%s%x", e.keyPrefix, s.Lease())
+		// Txn：transaction，依靠Txn进行创建key的CAS操作，当key不存在时才会成功创建
+		txn := client.Txn(ctx).If(v3.Compare(v3.CreateRevision(k), "=", 0))
+		txn = txn.Then(v3.OpPut(k, val, v3.WithLease(s.Lease())))
+		txn = txn.Else(v3.OpGet(k))
+		resp, err := txn.Commit()
+		if err != nil {
+			return err
+		}
+		e.leaderKey, e.leaderRev, e.leaderSession = k, resp.Header.Revision, s
+		// 如果key已存在，则创建失败
+		// 当key的value与当前value不等时，如果自己为leader，则不用重新执行选举直接设置value
+		// 否则报错
+		if !resp.Succeeded {
+			kv := resp.Responses[0].GetResponseRange().Kvs[0]
+			e.leaderRev = kv.CreateRevision
+			if string(kv.Value) != val {
+				if err = e.Proclaim(ctx, val); err != nil {
+					e.Resign(ctx)
+					return err
+				}
+			}
+		}
+		
+		// 一直阻塞，直到确认自己的create revision为当前path中最小，从而确认自己当选为leader
+		_, err = waitDeletes(ctx, client, e.keyPrefix, e.leaderRev-1)
+		if err != nil {
+			// clean up in case of context cancel
+			select {
+			case <-ctx.Done():
+				e.Resign(client.Ctx())
+			default:
+				e.leaderSession = nil
+			}
+			return err
+		}
+		e.hdr = resp.Header
+	
+		return nil
+	}
+```
+
+### 7. 其他
 - 注意事项
 	- 关于k/v设计
 		- etcd 是kv数据库，没有where之类的操作
@@ -492,3 +607,4 @@
 	- [etcd 问题、调优、监控](https://www.kubernetes.org.cn/7569.html)
 	- [etcdv3.4 官网启动参数](https://etcd.io/docs/v3.4/op-guide/configuration/)
 	- [etcdv3.4 CHANGELOG-3.4](https://github.com/etcd-io/etcd/blob/main/CHANGELOG-3.4.md)
+	- [ETCD-内部原理](https://www.cnblogs.com/seattle-xyt/p/10366131.html)
