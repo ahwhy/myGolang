@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/infraboard/mpaas/provider/k8s"
+	"github.com/ahwhy/myGolang/k8s"
 )
 
 var (
