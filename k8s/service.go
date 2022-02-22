@@ -15,6 +15,7 @@ func (c *Client) ListService(ctx context.Context, req *ListServiceRequest) (*v1.
 	if req.Namespace == "" {
 		req.Namespace = v1.NamespaceDefault
 	}
+	
 	return c.client.CoreV1().Services(req.Namespace).List(ctx, metav1.ListOptions{})
 }
 

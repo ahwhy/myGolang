@@ -8,9 +8,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (c *Client) ListDaemonSet(ctx context.Context, req *ListDeploymentRequest) (*appsv1.DaemonSetList, error) {
+type ListDaemonSetRequest struct {
+	Namespace string
+}
+
+func (c *Client) ListDaemonSet(ctx context.Context, req *ListDaemonSetRequest) (*appsv1.DaemonSetList, error) {
 	if req.Namespace == "" {
 		req.Namespace = apiv1.NamespaceDefault
 	}
+
 	return c.client.AppsV1().DaemonSets(req.Namespace).List(ctx, metav1.ListOptions{})
 }
