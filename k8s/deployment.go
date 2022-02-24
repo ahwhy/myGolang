@@ -18,6 +18,12 @@ func NewListDeploymentRequestFromHttp(r *http.Request) *ListDeploymentRequest {
 	}
 }
 
+func NewListDeploymentRequest(namespace string) *ListDeploymentRequest {
+	return &ListDeploymentRequest{
+		Namespace: namespace,
+	}
+}
+
 type ListDeploymentRequest struct {
 	Namespace string
 }
@@ -26,7 +32,7 @@ func (c *Client) ListDeployment(ctx context.Context, req *ListDeploymentRequest)
 	if req.Namespace == "" {
 		req.Namespace = apiv1.NamespaceDefault
 	}
-	
+
 	return c.client.AppsV1().Deployments(req.Namespace).List(ctx, metav1.ListOptions{})
 }
 

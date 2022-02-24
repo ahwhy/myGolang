@@ -8,6 +8,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func NewListDaemonSetRequest(namespace string) *ListDaemonSetRequest {
+	return &ListDaemonSetRequest{
+		Namespace: namespace,
+	}
+}
+
 type ListDaemonSetRequest struct {
 	Namespace string
 }

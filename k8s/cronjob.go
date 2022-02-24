@@ -8,6 +8,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func NewListCronJobRequest(namespace string) *ListCronJobRequest {
+	return &ListCronJobRequest{
+		Namespace: namespace,
+	}
+}
+
 type ListCronJobRequest struct {
 	Namespace string
 }
