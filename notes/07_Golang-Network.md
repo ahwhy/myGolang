@@ -130,14 +130,94 @@
 				- 特殊情况: 客户端发起SYN的同时接收到服务端的SYN，客户端会由SYN-sent转为SYN-rcvd状态
 			- ESTABLISHED: 可以传输数据的状态
 			- FIN_WAIT1: 主动关闭连接，发送FIN，由ESTABLISHED转为此状态
-			- FIN_WAIT2: 主动关闭连接，接收到对方的FIN+ACK，由FIN_WAIT1转为此状态
 			- CLOSE_WAIT: 收到FIN，发送ACK，被动关闭的一方关闭连接进入此状态
 			- LAST_ACK: 发送FIN，同时在接受ACK时，由CLOSE_WAIT进入此状态；被关闭的一方发起关闭请求
+			- FIN_WAIT2: 主动关闭连接，接收到对方的FIN+ACK，由FIN_WAIT1转为此状态
+			- CLOSED: 终止点，tcp连接 超时或关闭时进入此状态
 			- CLOSING: 两边同时发送关闭请求，由FIN_WAIT1进入此状态，收到FIN请求，同时响应一个ACK
 			- TIME_WAIT
+				- [记一次time_wait & close_wait的讨论总结](https://developer.aliyun.com/article/745776)
 				- FIN_WAIT2到此状态: 双方不同时发送FIN的情况下，主动关闭的一方在完成自己的请求后，收到对方的FIN后的状态
 				- CLOSING到此状态: 双方同时发起关闭，都发送了FIN，同时接受FIN并发送ACK后的状态
 				- FIN_WAIT2到此状态: 对方发来的FIN的ACK同时到达后的状态，与上一条的区别是本身发送的FIN回应的ACK先于对方的FIN到达，而上一条是FIN先到达
+				- 具体形成
+					- 主动关闭端A: 发FIN，进入FIN-WAIT-1状态，并等待......
+					- 被动关闭端P: 收到FIN后必须立即发ACK，进入CLOSE_WAIT状态，并等待......
+					- 主动关闭端A: 收到ACK后进入FIN-WAIT-2状态，并等待......
+					- 被动关闭端P: 发FIN，进入LAST_ACK状态，并等待......
+					- 主动关闭端A: 收到FIN后必须立即发ACK，进入TIME_WAIT状态，等待2MSL后结束Socket
+					- 被动关闭端P: 收到ACK后结束Socket
+				- 因此，TIME_WAIT状态是出现在主动发起连接关闭的一点，和是谁发起的连接无关，可以是client端，也可以是server端
+				- 而从TIME_WAIT状态到CLOSED状态，有一个超时设置，这个超时设置是 `2*MSL (RFC793定义了MSL为2分钟，Linux设置成了30s)`
+				- TIME_WAIT的作用
+					- 为了确保两端能完全关闭连接
+						- 假设A服务器是主动关闭连接方，B服务器是被动方
+						- 如果没有TIME_WAIT状态，A服务器发出最后一个ACK就进入关闭状态，如果这个ACK对端没有收到，对端就不能完成关闭
+						- 对端没有收到ACK，会重发FIN，此时连接关闭，这个FIN也得不到ACK，而有TIME_WAIT，则会重发这个ACK，确保对端能正常关闭连接
+					- 为了确保后续的连接不会收到"脏数据"
+						- 刚才提到主动端进入TIME_WAIT后，等待2MSL后CLOSE，这里的MSL是指(maximum segment lifetime，内核一般是30s，2MSL就是1分钟)，网络上数据包最大的生命周期
+						- 这是为了使网络上由于重传出现的old duplicate segment都消失后，才能创建参数(四元组，源IP/PORT，目标IP/PORT)相同的连接
+						- 如果等待时间不够长，又创建好了一样的连接，再收到old duplicate segment，数据就错乱了
+				- TIME_WAIT 会导致的问题
+					- 新建连接失败
+						- TIME_WAIT到CLOSED，需要2MSL=60s的时间
+						- 这个时间非常长，每个连接在业务结束之后，需要60s的时间才能完全释放
+						- 如果业务上采用的是短连接的方式，会导致非常多的TIME_WAIT状态的连接，会占用一些资源，主要是本地端口资源
+					- 一台服务器的本地可用端口是有限的，也就几万个端口，由这个参数控制
+						- `$ sysctl net.ipv4.ip_local_port_range # net.ipv4.ip_local_port_range = 32768 61000`
+						- 当服务器存在非常多的TIME_WAIT连接，将本地端口都占用了，就不能主动发起新的连接去连其他服务器
+					- 这里需要注意，是主动发起连接，又是主动发起关闭的一方才会遇到这个问题
+					- 如果是server端主动关闭client端建立的连接产生了大量的TIME_WAIT连接，这是不会出现这个问题的
+					- 除非是其中涉及到的某个客户端的TIME_WAIT连接都有好几万个
+				- TIME_WAIT条目超出限制
+					- 这个限制，是由一个内核参数控制的 `$ sysctl net.ipv4.tcp_max_tw_buckets # net.ipv4.tcp_max_tw_buckets = 5000`
+						- 超出了这个限制会报一条INFO级别的内核日志，然后继续关闭掉连接
+						- 并没有什么特别大的影响，只是增加了刚才提到的收到脏数据的风险而已。
+					- 另外的风险就是，关闭掉TIME_WAIT连接后，刚刚发出的ACK如果对端没有收到，重发FIN包出来时，不能正确回复ACK，只是回复一个RST包，导致对端程序报错，说connection reset
+					- 因此net.ipv4.tcp_max_tw_buckets这个参数是建议不要改小的，改小会带来风险，没有什么收益，只是表面上通过netstat看到的TIME_WAIT少了些而已		
+					- 并且，建议是当遇到条目不够，增加这个值，仅仅是浪费一点点内存而已
+				- 如何处理time_wait
+					- 最佳方案是应用改造长连接，但是一般不太适用
+					- 修改系统回收参数
+						- 设置以下参数
+							- `net.ipv4.tcp_timestamps = 1`
+							- `net.ipv4.tcp_tw_recycle = 1`
+						- 但如果这两个参数同时开启，会校验源ip过来的包携带的timestamp是否递增，如果不是递增的话，则会导致三次握手建联不成功，具体表现为抓包的时候看到syn发出，server端不响应syn ack
+						- 通俗一些来讲就是，一个局域网有多个客户端访问服务端，如果有客户端的时间比别的客户端时间慢，就会建连不成功
+					- 治标不治本的方式
+						- 放大端口范围 `$ sysctl net.ipv4.ip_local_port_range # net.ipv4.ip_local_port_range = 32768 61000`
+						- 放大time_wait的buckets `$ sysctl net.ipv4.tcp_max_tw_buckets # net.ipv4.tcp_max_tw_buckets = 180000`
+				- 特殊场景
+					- 本机会发起大量短链接
+						- nginx结合php-fpm需要本地起端口
+						- nginx反代，如：java，容器等
+					- 解决方案
+						- tcp_tw_reuse参数需要结合`net.ipv4.tcp_timestamps = 1`一起来用即 服务器即做客户端，也做server端的时候
+						- tcp_tw_reuse参数用来设置是否可以在新的连接中重用TIME_WAIT状态的套接字
+							- 注意，重用的是TIME_WAIT套接字占用的端口号，而不是TIME_WAIT套接字的内存等
+							- 这个参数对客户端有意义，在主动发起连接的时候会在调用的inet_hash_connect()中会检查是否可以重用TIME_WAIT状态的套接字
+							- 如果在服务器段设置这个参数的话，则没有什么作用，因为服务器端ESTABLISHED状态的套接字和监听套接字的本地IP、端口号是相同的，没有重用的概念
+							- 但并不是说服务器端就没有TIME_WAIT状态套接字。
+						- 该类场景最终建议
+							- `net.ipv4.tcp_tw_recycle = 0` 关掉快速回收
+							- `net.ipv4.tcp_tw_reuse = 1`   开启tw状态的端口复用（客户端角色）
+							- `net.ipv4.tcp_timestamps = 1` 复用需要timestamp校验为1 
+							- `net.ipv4.tcp_max_tw_buckets = 30000` 放大bucket
+							- `net.ipv4.ip_local_port_range = 15000 65000` 放大本地端口范围
+					- 内存开销测试
+```shell
+	# ss -s
+	# 15000个socket消耗30多m内存
+	Total: 15254 (kernel 15288)
+	TCP:   15169 (estab 5, closed 15158, orphaned 0, synrecv 0, timewait 3/0), ports 0
+	Transport Total     IP        IPv6
+	*         15288     -         -        
+	RAW       0         0         0        
+	UDP       5         4         1        
+	TCP       11        11        0        
+	INET      16        15        1        
+	FRAG      0         0         0        
+```
 
 - Go语言中的TCP编程接口
 	- net.ResolveTCPAddr
