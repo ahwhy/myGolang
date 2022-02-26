@@ -15,6 +15,12 @@ var (
 	validate = validator.New()
 )
 
+func NewListPodtRequest(namespace string) *ListPodtRequest {
+	return &ListPodtRequest{
+		Namespace: namespace,
+	}
+}
+
 type ListPodtRequest struct {
 	Namespace string
 }
@@ -25,6 +31,13 @@ func (c *Client) ListPod(ctx context.Context, req *ListPodtRequest) (*v1.PodList
 	}
 
 	return c.client.CoreV1().Pods(req.Namespace).List(ctx, metav1.ListOptions{})
+}
+
+func NewGetPodRequest(namespace, pod string) *GetPodRequest {
+	return &GetPodRequest{
+		Namespace: namespace,
+		Name:      pod,
+	}
 }
 
 type GetPodRequest struct {
@@ -40,8 +53,20 @@ func (c *Client) GetPod(ctx context.Context, req *GetPodRequest) (*v1.Pod, error
 	return c.client.CoreV1().Pods(req.Namespace).Get(ctx, req.Name, metav1.GetOptions{})
 }
 
-func (c *Client) DeletePod(ctx context.Context) error {
-	return c.client.CoreV1().Pods("").Delete(ctx, "", metav1.DeleteOptions{})
+func NewDeletePodRequest(namespace, pod string) *DeletePodRequest {
+	return &DeletePodRequest{
+		Namespace: namespace,
+		Name:      pod,
+	}
+}
+
+type DeletePodRequest struct {
+	Namespace string
+	Name      string
+}
+
+func (c *Client) DeletePod(ctx context.Context, req *DeletePodRequest) error {
+	return c.client.CoreV1().Pods(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{})
 }
 
 func NewLoginContainerRequest(cmd []string, ce ContainerExecutor) *LoginContainerRequest {
