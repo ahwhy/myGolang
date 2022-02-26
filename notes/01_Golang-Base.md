@@ -544,7 +544,44 @@
 	array[start:end:end_cap]    // 用于限制新切片的容量值(end<=cap<=src_cap)；新创建切片长度和容量计算 new_len: end-start, new_cap: end_cap-start
 ```
 
-- 遍历切片 (同数组)
+- 遍历切片 
+	- 同数组
+	- 关于Golang遍历中存在的问题
+		- 因为for range在遍历值类型时，其中的v变量是一个值的拷贝
+		- 当使用&获取指针时，实际上是获取到v这个临时变量的指针，而v变量在for range中只会创建一次，之后循环中会被一直重复使用
+		- 所以在arr2赋值的时候其实都是v变量的指针，而&v最终会指向arr1最后一个元素的值拷贝
+		- [Go语言中for range的"坑"](https://www.jianshu.com/p/3bef2c245102)
+		- [Go官方 CommonMistakes](https://github.com/golang/go/wiki/CommonMistakes#using-reference-to-loop-iterator-variable)
+
+```
+	// 结果 3, 3, 3
+	arr1 := []int{1, 2, 3}
+	arr2 := make([]*int, len(arr1))
+	for i, v := range arr1 {
+		arr2[i] = &v
+	}
+	for _, v := range arr2 {
+		fmt.Println(*v)
+	}
+	
+	// 改进 - 传递原始指针
+	for i := range arr1 {
+		arr2[i] = &arr1[i]
+	}
+	
+	// 改进 - 使用临时变量
+	for i, v := range arr1 {
+		t := v
+		arr2[i] = &t
+	}
+	
+	// 改进 - 使用闭包
+	for i, v := range arr1 {
+		func(v int){
+			arr2[i] = &v
+		}(v)
+	}
+```
 
 - 增加元素 
 	- 使用append函数对切片增加一个或多个元素并返回修改后切片，当长度在容量范围内时只增加长度，容量和底层数组不变。
