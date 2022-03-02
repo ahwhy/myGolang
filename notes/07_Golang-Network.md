@@ -148,7 +148,7 @@
 					- 主动关闭端A: 收到FIN后必须立即发ACK，进入TIME_WAIT状态，等待2MSL后结束Socket
 					- 被动关闭端P: 收到ACK后结束Socket
 				- 因此，TIME_WAIT状态是出现在主动发起连接关闭的一点，和是谁发起的连接无关，可以是client端，也可以是server端
-				- 而从TIME_WAIT状态到CLOSED状态，有一个超时设置，这个超时设置是 `2*MSL (RFC793定义了MSL为2分钟，Linux设置成了30s)`
+				- 而从TIME_WAIT状态到CLOSED状态，有一个超时设置，这个超时设置是 `2*MSL (Maximum Segment Lifetime  RFC793定义了MSL为2分钟，Linux设置成了30s)`
 				- TIME_WAIT的作用
 					- 为了确保两端能完全关闭连接
 						- 假设A服务器是主动关闭连接方，B服务器是被动方
@@ -206,17 +206,17 @@
 							- `net.ipv4.ip_local_port_range = 15000 65000` 放大本地端口范围
 					- 内存开销测试
 ```shell
-	# ss -s
-	# 15000个socket消耗30多m内存
-	Total: 15254 (kernel 15288)
-	TCP:   15169 (estab 5, closed 15158, orphaned 0, synrecv 0, timewait 3/0), ports 0
-	Transport Total     IP        IPv6
-	*         15288     -         -        
-	RAW       0         0         0        
-	UDP       5         4         1        
-	TCP       11        11        0        
-	INET      16        15        1        
-	FRAG      0         0         0        
+			# ss -s
+			# 15000个socket消耗30多m内存
+			Total: 15254 (kernel 15288)
+			TCP:   15169 (estab 5, closed 15158, orphaned 0, synrecv 0, timewait 3/0), ports 0
+			Transport Total     IP        IPv6
+			*         15288     -         -        
+			RAW       0         0         0        
+			UDP       5         4         1        
+			TCP       11        11        0        
+			INET      16        15        1        
+			FRAG      0         0         0        
 ```
 
 - Go语言中的TCP编程接口
