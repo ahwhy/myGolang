@@ -14,6 +14,7 @@
   * [Golang-Sql](./notes/09_Golang-Sql.md)
   * [Golang-gRPC](./notes/10_Golang-gRPC.md)
   * [Golang-Etcd](./notes/11_Golang-Etcd.md)
+  * [Golang-Gc](./notes/12_Golang-Gc.md)
   * [Golang-Package](./notes/20_Golang-Package.md)
   * [Golang-Test](./notes/21_Golang-Test.md)
   * [Golang-Time](./notes/22_Golang-Time.md)
