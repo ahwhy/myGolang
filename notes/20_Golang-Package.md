@@ -41,6 +41,19 @@
 	$ go env -w GOPROXY=https://goproxy.io,direct`
 ```
 
+- [安装 Go语言扩展需要的工具集](https://gitee.com/infraboard/go-course/blob/master/zh-cn/base/install.md#%E5%AE%89%E8%A3%85go-%E8%AF%AD%E8%A8%80%E6%89%A9%E5%B1%95%E9%9C%80%E8%A6%81%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86)
+```shell
+	$ go install -v golang.org/x/tools/gopls@latest
+	$ go install -v honnef.co/go/tools/cmd/staticcheck@latest
+	$ go install -v github.com/go-delve/delve/cmd/dlv@latest
+	$ go install -v github.com/haya14busa/goplay/cmd/goplay@latest
+	$ go install -v github.com/josharian/impl@latest
+	$ go install -v github.com/fatih/gomodifytags@latest
+	$ go install -v github.com/cweill/gotests/gotests@latest
+	$ go install -v github.com/ramya-rao-a/go-outline@latest
+	$ go install -v github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest
+```
+
 ## 九、创建git，发布到github
 - 项目目录下 go mod init github.com/ahwhy/myGolang
 - git init 
