@@ -38,7 +38,8 @@
 - 设置两个环境变量
 ```shell
 	$ go env -w GO111MODULE=on
-	$ go env -w GOPROXY=https://goproxy.io,direct`
+	$ go env -w GOPROXY=https://goproxy.io,direct
+	$ go env -w GOPROXY=https://goproxy.cn
 ```
 
 - [安装 Go语言扩展需要的工具集](https://gitee.com/infraboard/go-course/blob/master/zh-cn/base/install.md#%E5%AE%89%E8%A3%85go-%E8%AF%AD%E8%A8%80%E6%89%A9%E5%B1%95%E9%9C%80%E8%A6%81%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86)
