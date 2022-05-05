@@ -32,12 +32,10 @@
 
 - 内置函数: `make、len、cap、new、append、copy、close、delete、complex、real、imag、panic、recover`
 
-- 25 关键字
-
-	Go语言中类似if和switch的关键字有25个，且关键字不能用于自定义名字，只能在特定语法结构中使用
-		- 引用包: `import、package`
-		- 实体声明和定义: `const、var、type、func、interface、map、struct、chan`
-		- 流程控制: `break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select、switch`
+- 25 关键字，Go语言中类似if和switch的关键字有25个，且关键字不能用于自定义名字，只能在特定语法结构中使用
+	- 引用包: `import、package`
+	- 实体声明和定义: `const、var、type、func、interface、map、struct、chan`
+	- 流程控制: `break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select、switch`
 
 ### 2. 变量
 - 在声明变量时，如果初始化表达式被省略，那么将用零值初始化该变量
@@ -209,7 +207,7 @@
 	|int8, uint8|1|0|取值范围[-128, 127], [0, 255]|
 	|int16, uint16|2|0|取值范围[-32768, 32767], [0, 65535]|
 	|int32, uint32|4|0|取值范围[-21亿, 21亿], [0, 42亿], rune 是 int32 的别名|
-	|int64, uint64|8|0|2^64|
+	|int64, uint64|8|0|取值范围[-42亿, 42亿], [0, 2^64]|
 	|float32|4|0.0|uint8，取值范围[0, 255]，2^8|
 	|float64|8|0.0|uint8，取值范围[0, 255]，2^8|
 	|complex64|8|||
@@ -365,10 +363,10 @@
 ```go
 	// 正三角
 	for i := 1; i < 10; i++ {
-			for j := 1; j <= i; j++ {
-					fmt.Printf("%-2d * %-2d = %-2d\t", j, i, i*j)
-			}
-			fmt.Println()
+		for j := 1; j <= i; j++ {
+			fmt.Printf("%-2d * %-2d = %-2d\t", j, i, i*j)
+		}
+		fmt.Println()
 	}
 
 	// 倒三角
@@ -390,21 +388,21 @@
 	i := 2
 	var isP bool
 	for i < 101 {
-			isP = true
-			j := 2
-			for j <= (i / j) {
-					if i%j == 0 {
-							// fmt.Printf("%d不是素数\n",i)
-							isP = false
-							break
-					}
-					j++
+		isP = true
+		j := 2
+		for j <= (i / j) {
+			if i%j == 0 {
+				// fmt.Printf("%d不是素数\n",i)
+				isP = false
+				break
 			}
-			if isP {
-					fmt.Printf("%d是素数\n", i)
-					sum += i
-			}
-			i++
+			j++
+		}
+		if isP {
+			fmt.Printf("%d是素数\n", i)
+			sum += i
+		}
+		i++
 	}
 	fmt.Println(sum)
 	}
