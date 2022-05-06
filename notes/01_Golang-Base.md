@@ -251,12 +251,12 @@
 			/* bool2 = true */
 		} else {
 			if bool3 {
-			/* bool3 = true */
+				/* bool3 = true */
 			} else {
 				/* bool3 = false */
-				}
 			}
 		}
+	}
 ```
 
 - 多重判断
@@ -350,7 +350,7 @@
 
 - 嵌套循环:
 ```go
-	for [condition |  ( init; condition; increment ) | Range] {
+	for [condition | ( init; condition; increment ) | Range] {
 		for [condition |  ( init; condition; increment ) | Range]{
 			statement(s);
 		}
@@ -452,8 +452,8 @@
 
 - 数组的比较
 	- 如果一个数组的元素类型是可以相互比较的，那么数组类型也是可以相互比较的
-	- 可以直接通过 ==比较运算符 来比较两个数组，只有当两个数组的所有元素都是相等的时候数组才是相等的
-	- 不相等 比较运算符!= 遵循同样的规则
+	- 可以直接通过 == 比较运算符 来比较两个数组，只有当两个数组的所有元素都是相等的时候，数组才是相等的
+	- 不相等比较运算符 != 遵循同样的规则
 	- 切片为引用类型，不能比较
 ```go
 	a := [2]int{1, 2}
@@ -482,11 +482,11 @@
 - 遍历数组
 ```go
 	for i := 0; i < len(name); i++ {
-			fmt.Println(i, name[i])
+		fmt.Println(i, name[i])
 	}
 	
 	for i, j := range name {
-			fmt.Printf("%d %q\n", i, j)
+		fmt.Printf("%d %q\n", i, j)
 	}
 ```
 
@@ -499,15 +499,15 @@
 
 	// 遍历
 	for i := 0; i < len(name); i++ {
-			for j := 0; j < len(name[i]); j++ {
-					fmt.Printf("[%d ,%d]: %q\n", i, j, name[i][j]) 
-			}
+		for j := 0; j < len(name[i]); j++ {
+			fmt.Printf("[%d ,%d]: %q\n", i, j, name[i][j]) 
+		}
 	}
 	
 	for i, line := range name {
-			for n, m := range line {
-					fmt.Printf("[%d ,%d]: %q\n", i, n, m)
-			}
+		for n, m := range line {
+			fmt.Printf("[%d ,%d]: %q\n", i, n, m)
+		}
 	}
 ```
 
@@ -1540,4 +1540,4 @@
 	|函数类型|适用范围|返回值|填充类型|
 	|:------:|:------:|:------:|:------:|
 	|new|new可以对所有类型进行分配|new返回指针|new填充零值|
-	|make|make只能创建类型(slice、map、channel)|make返回引用|make填充非零值|  
+	|make|make只能创建类型(slice、map、channel)|make返回引用|make填充非零值|
