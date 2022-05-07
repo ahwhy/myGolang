@@ -551,7 +551,7 @@
 		- [Go语言中for range的"坑"](https://www.jianshu.com/p/3bef2c245102)
 		- [Go官方 CommonMistakes](https://github.com/golang/go/wiki/CommonMistakes#using-reference-to-loop-iterator-variable)
 
-```
+```go
 	// 结果 3, 3, 3
 	arr1 := []int{1, 2, 3}
 	arr2 := make([]*int, len(arr1))
@@ -593,8 +593,8 @@
 - 复制切片
 ```go
 	copy(drc_slice, src_slice)  
-	// 
-	移除元素 copy(slice[3:], slice[4:])
+	// 移除元素 
+	copy(slice[3:], slice[4:])
 ```
 
 - 切片的比较
