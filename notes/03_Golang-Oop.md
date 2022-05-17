@@ -12,24 +12,9 @@
 	- 算子是一个函数空间到函数空间上的映射O: X -> X, 简单说来就是进行某种"操作"、动作
 	- 与之对应的，就是被操作的对象，称之为操作数，业务中往往将可变部分抽象成算子，方便业务逻辑的替换
 	- Map - Reduce -> 解耦数据结构和算法最常见的方式
-		- Map
-			- 模式
-				item1 --map func--> new1
-				item2 --map func--> new2
-				item3 --map func--> new3
-			- 示例 -> 使用Map函数将所有的字符串转换成大写
-		- Filter
-			- 模式
-				item1 -- reduce func -->   x
-				item2 -- reduce func -->   itme2
-				item3 -- reduce func -->   x
-			- 示例 -> 使用Filter函数将带"f"字段的数据筛选出
-		- Reduce
-			- 模式
-				item1 --|
-				item2 --|--reduce func--> new item
-				item3 --|
-			- 示例-> 使用Reduce函数进行求和
+		- Map模式
+		- Filter模式
+		- Reduce模式
 		- Map/Reduce/Filter只是一种控制逻辑，真正的业务逻辑是在传给他们的数据和那个函数来定义的
 			- 示例 -> 班级统计
 				- 数据集合
@@ -38,6 +23,10 @@
 				- 统计所有同学的数学平均分
 
 ```go
+	// Map模式
+	// item1 --map func--> new1
+	// item2 --map func--> new2
+	// item3 --map func--> new3
 	// 使用Map函数将所有的字符串转换成大写
 	func MapStrToUpper(data []string, fn func(string) string) []string {
 		newData := make([]string, 0, len(data))
@@ -50,7 +39,11 @@
 	out := MapStrToUpper(list, func(item string) string {
 		return strings.ToUpper(item)
 	})
-	
+
+	// Filter模式
+	// item1 -- reduce func -->   x
+	// item2 -- reduce func -->   itme2
+	// item3 -- reduce func -->   x
 	// 使用Filter函数将带"f"字段的数据筛选出
 	func ReduceFilter(data []string, fn func(string) bool) []string {
 		newData := []string{}
@@ -66,7 +59,11 @@
 		return strings.Contains(s, "f")
 	})
 	fmt.Println(out)
-	
+
+	// Reduce模式
+	// item1 --|
+	// item2 --|--reduce func--> new item
+	// item3 --|
 	// 使用Reduce函数进行求和
 	func ReduceSum(data []string, fn func(string) int) int {
 		sum := 0
@@ -279,40 +276,40 @@
 	有共同的通知方法，每种对象自己实现
 	*/
 	type notifer interface {
-			Init()                // 动作，定义的方法
-			push()
-			notify()
+		Init()                // 动作，定义的方法
+		push()
+		notify()
 	}
 	
 	type user struct {
-			name  string
-			email string
+		name  string
+		email string
 	}
 	type admin struct {
-			name string
-			age  int
+		name string
+		age  int
 	}
 	
 	func (u *user) Init()  {}
 	func (u *admin) Init() {}
 	
 	func (u *user) push() {
-			fmt.Printf("[普通用户][sendNotify to user %s]\n", u.name)
+		fmt.Printf("[普通用户][sendNotify to user %s]\n", u.name)
 	}
 	func (u *admin) push() {
-			fmt.Printf("[管理员][sendNotify to user %s]\n", u.name)
+		fmt.Printf("[管理员][sendNotify to user %s]\n", u.name)
 	}
 	
 	func (u *user) notify() {
-			fmt.Printf("[普通用户][sendNotify to user %s]\n", u.name)
+		fmt.Printf("[普通用户][sendNotify to user %s]\n", u.name)
 	}
 	func (u *admin) notify() {
-			fmt.Printf("[管理员][sendNotify to user %s]\n", u.name)
+		fmt.Printf("[管理员][sendNotify to user %s]\n", u.name)
 	}
 	
 	func sendNotify(n notifer) {           // 入口 -> 多态的统一调用方法
-			n.push()
-			n.notify()
+		n.push()
+		n.notify()
 	}
 	
 	u1.push()
@@ -341,59 +338,59 @@
 	3. PushData方法做写入数据
 	*/
 	type DataSource interface {
-			PushData(data string)                 // 方法集合
-			QueryData(name string) string
+		PushData(data string)                 // 方法集合
+		QueryData(name string) string
 	}
 	
 	type redis struct {
-			Name string
-			Addr string
+		Name string
+		Addr string
 	}
 	func (r *redis) PushData(data string) {
-			log.Printf("[PushData][ds.name:%s][data:%s]", r.Name, data)
+		log.Printf("[PushData][ds.name:%s][data:%s]", r.Name, data)
 	}
 	func (r *redis) QueryData(name string) string {
-			log.Printf("[QueryData][ds.name:%s][data:%s]", r.Name, name)
-			return name + "_redis"
+		log.Printf("[QueryData][ds.name:%s][data:%s]", r.Name, name)
+		return name + "_redis"
 	}
 	
 	type kafka struct {
-			Name string
-			Addr string
+		Name string
+		Addr string
 	}
 	func (k *kafka) PushData(data string) {
-			log.Printf("[PushData][ds.name:%s][data:%s]", k.Name, data)
+		log.Printf("[PushData][ds.name:%s][data:%s]", k.Name, data)
 	}
 	func (k *kafka) QueryData(name string) string {
-			log.Printf("[QueryData][ds.name:%s][data:%s]", k.Name, name)
-			return name + "_kafka"
+		log.Printf("[QueryData][ds.name:%s][data:%s]", k.Name, name)
+		return name + "_kafka"
 	}
 	
 	var Dm = make(map[string]DataSource)
 	
 	r := redis{
-			Name: "redis",
-			Addr: "1.1",
+		Name: "redis",
+		Addr: "1.1",
 	}
 	k := kafka{
-			Name: "kafka",
-			Addr: "2.2",
+		Name: "kafka",
+		Addr: "2.2",
 	}
 	
 	Dm["redis"] = &r                 // 注册数据源到承载的容器中
 	Dm["kafka"] = &k
 	for i := 0; i < 5; i++ {         // 推送数据
-			key := fmt.Sprintf("key_%d", i)
-			for _, ds := range Dm {
-					ds.PushData(key)
-			}
+		key := fmt.Sprintf("key_%d", i)
+		for _, ds := range Dm {
+			ds.PushData(key)
+		}
 	}                                // 查询数据
 	for i := 0; i < 5; i++ {
-			key := fmt.Sprintf("key_%d", i)
-			for _, ds := range Dm {
-					res := ds.QueryData(key)
-					log.Println(res)
-			}
+		key := fmt.Sprintf("key_%d", i)
+		for _, ds := range Dm {
+			res := ds.QueryData(key)
+			log.Println(res)
+		}
 	}
 ```
 
