@@ -65,14 +65,14 @@
 - 多返回值
 ```go
 	func calcReturn(x, y int) (int, int, int, int) {
-		return x + y, x - y, x  y, x  y
+		return x + y, x - y, x * y, x / y
 	}
 ```
 
 - 命名返回值
 ```go
 	func calcReturnNamecalc(x, y int) (sum, difference, product, quotient int) {
-		sum, difference, product, quotient = x + y, x - y, x  y, x  y
+		sum, difference, product, quotient = x + y, x - y, x * y, x / y
 		return
 	}
 ```
@@ -98,11 +98,11 @@
 	// n*(n-1)...3*2*1
 	func factorial(n int) int {
 		if n = 0 {
-				return -1
+			return -1
 		} else if n == 1 { 
-				return 1                     // 判断退出点
+			return 1                     // 判断退出点
 		} else {
-				return n  factorial(n-1)     // 递归表达式
+			return n * factorial(n-1)     // 递归表达式
 		}
 	}
 ```
@@ -112,7 +112,7 @@
 	// f(n)=f(n-1)+f(n-2)且f(2)=f(1)=1
 	func fib(n int) int {
 		if n == 1  n == 2 {
-				return 1
+			return 1
 		}
 		return fib(n-1) + fib(n-2)
 	}
@@ -127,11 +127,11 @@
 ```go
 	func tower(a, b, c string, layer int) {
 		if layer = 0 {
-				return
+			return
 		}
 		if layer == 1 {
-				fmt.Printf(%s -  %sn, a, c)
-				return
+			fmt.Printf("%s - > %s\n", a, c)
+			return
 		}
 		tower(a, c, b, layer-1)
 		fmt.Printf(%s -  %sn, a, c)
@@ -165,7 +165,7 @@
 	// 声明函数切片
 	var fs []func(int, int) int
 	fs = append(fs, Add, Sub, Mul, Div)
-	fmt.Printf(%T;n%#vn, fs, fs)         // []func(int, int) int;[]func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
+	fmt.Printf("%T; %#v\n", fs, fs)    // []func(int, int) int; []func(int, int) int{(func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef20), (func(int, int) int)(0xb6ef40), (func(int, int) int)(0xb6ef60)}
 	for _, f = range fs{
 		fmt.Println(f(4,2))
 	}
@@ -182,12 +182,13 @@
 	genFunc()
 ```
 
-- 声明&&调用参数类型为函数的函数 *高阶函数
+- 声明&&调用参数类型为函数的函数 高阶函数
 ```go
 	// 定义接收函数类型作为参数的函数
 	func printResult(pf func(...string), list ...string) {
 		pf(list...)
 	}
+
 	// 回调函数，作为参数被传递的函数
 	func line(list ...string) {
 		fmt.Print()
@@ -209,10 +210,10 @@
 	func asArg(fn addFunc) int {
 		return fn(2, 2)
 	}
-    // 调用函数asArg并使用匿名函数传参
+	// 调用函数asArg并使用匿名函数传参
 	ret = asArg(func(x, y int) int {
 		return x + y
-	}
+	})
 ```
 
 ## 六、匿名函数与闭包
@@ -228,7 +229,7 @@
 	// 使用匿名函数作为 printResult 的参数
 	printResult(func(list ...string) {
 		for i, v = range list{
-			fmt.Printf(%d %s, i, v)
+			fmt.Printf("%d: %s", i, v)
 		}
 	}, name...)
 
@@ -291,7 +292,7 @@
 
 	// 通过通过fmt.Errorf方法创建方法创建
 	err1, err2 = errors.New(error 1), fmt.Errorf(error %d, 2)
-	fmt.Printf(%T, %T, %v, %v, err1, err2, err1, err2)               // errors.errorString, errors.errorString, error 1, error 2
+	fmt.Printf("%T, %T, %v, %v", err1, err2, err1, err2)               // errors.errorString, errors.errorString, error 1, error 2
 ```
 
 ### 2. 复杂的错误类型
@@ -299,7 +300,7 @@
 
 - 可以用`switch err.(type)`判断类型
 ```go
-	file, err = os.Stat(test.txt)
+	file, err := os.Stat("test.txt")
 	if err != nil {
 		switch err.(type) {
 		case os.PathError
@@ -329,21 +330,21 @@
 	func (e MyError) Error() string {
 		return e.err.Error() + e.msg
 	}
-	err = errors.New(原始的错误 )
-	newErr = MyError{
-		err err,
-		msg 自定义的错误,
+	err := errors.New("原始的错误")
+	newErr := MyError{
+		err: err,
+		msg: "自定义的错误",
 	}
 	fmt.Println(newErr.Error())
 ```
 
-### 4. Error Wrapping 错误嵌套    golang 1.13
+### 4. Error Wrapping 错误嵌套   golang 1.13
 - 可以扩展error信息，使用 `fmt.Errorf(newErrorStr %w,e)`
 
 - 优势是不需要像上面一样定义结构体
 ```go
-	e = errors.New(原始的错误)
-	w = fmt.Errorf("Wrap了一个新的错误", %w, e)
+	e := errors.New("原始的错误")
+	w := fmt.Errorf("Wrap了一个新的错误: %w", e)
 ```
 
 ### 5. defer 函数
