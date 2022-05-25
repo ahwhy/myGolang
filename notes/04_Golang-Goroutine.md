@@ -167,19 +167,19 @@
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
-			go func() {
-					fmt.Println(i)        //  全部打印10
-					wg.Done()
-			}()
+		go func() {
+			fmt.Println(i)        //  全部打印10
+			wg.Done()
+		}()
 	}
 	wg.Wait()
 	fmt.Println("-----------------------")
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
-			go func(i int) {
-					fmt.Println(i)        //  打印0 ~ 9
-					wg.Done()
-			}(i)
+		go func(i int) {
+			fmt.Println(i)        //  打印0 ~ 9
+			wg.Done()
+		}(i)
 	}
 	wg.Wait()
 ```
@@ -322,13 +322,13 @@
 	channel03 := make(chan int)
 	go func() {
 		for e := range channel03 {
-				fmt.Println(e)
+			fmt.Println(e)
 		}
 		channel <- 0                     // 利用chan的特性进行阻塞
 	}()
 	go func() {
 		for i := 0; i < 100; i++ {
-				channel03 <- i
+			channel03 <- i
 		}
 		close(channel03)
 	}()
