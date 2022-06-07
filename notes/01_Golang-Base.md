@@ -1,6 +1,6 @@
 # Golang-Base  Golang的基础语法
 
-## 一、Golang简介
+## 一、Golang特性简介
 
 - Go语言的编译
 	- 决定语法正确的是: 底层编译器
