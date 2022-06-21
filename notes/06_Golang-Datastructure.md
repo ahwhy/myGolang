@@ -141,7 +141,7 @@
 		// 插入current，修改指向
 		after.Next = current
 		current.Next = afterNext
-		// after <-- current <-- after_next
+		// after <-- current <-- afterNext
 		current.Prev = after
 		afterNext.Prev = current
 		return nil
@@ -175,8 +175,16 @@
 				- 如果缓存容量没超，放入缓存，并把key放到链表头部
 				- 如果超出缓存容量，删除链表尾部元素，再把key放到链表头部
 ```go
-	cache = make(map[int]string, 10)
-	lst = list.New()
+	var cache map[int]string
+	var lst *list.List
+	const CAP = 10 //定义缓存容量的上限
+	func init() {
+		cache = make(map[int]string, CAP)
+		lst = list.New()
+	}
+	func readFromDisk(key int) string {
+		return "china"
+	}
 	func read(key int) string {
 		if v, exists := cache[key]; exists { //命中缓存
 			head := lst.Front()
@@ -186,7 +194,6 @@
 					notFound = true
 					break
 				}
-				// fmt.Printf("%v\n", notFound)
 				if head.Value.(int) == key { //从链表里找到相应的key
 					lst.MoveToFront(head) //把key移到链表头部
 					break
@@ -210,6 +217,22 @@
 			}
 			return v
 		}
+	}
+	func TraversList(lst *list.List) {
+		head := lst.Front()
+		for head.Next() != nil {
+			fmt.Printf("%v ", head.Value)
+			head = head.Next()
+		}
+		fmt.Println(head.Value)
+	}
+	func ReverseList(lst *list.List) {
+		tail := lst.Back()
+		for tail.Prev() != nil {
+			fmt.Printf("%v ", tail.Value)
+			tail = tail.Prev()
+		}
+		fmt.Println(tail.Value)
 	}
 ```
 
