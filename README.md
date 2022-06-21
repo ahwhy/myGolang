@@ -3,6 +3,7 @@
 个人笔记整理，以及demo记录
 
 ## Golang-notes
+  * [Golang-Preface](./notes/00_Golang-Preface.md)
   * [Golang-Base](./notes/01_Golang-Base.md)
   * [Golang-Functions&&Methods&&Interface](./notes/02_Golang-Functions&&Methods&&Interface.md)
   * [Golang-Oop](./notes/03_Golang-Oop.md)
