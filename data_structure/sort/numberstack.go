@@ -6,15 +6,15 @@ import "fmt"
 // 这里Item是范型, 指代任意类型
 type Item interface{}
 
-type Stack struct {
-	items []Item
-}
-
 // 构建函数
 func NewStack() *Stack {
 	return &Stack{
 		items: []Item{},
 	}
+}
+
+type Stack struct {
+	items []Item
 }
 
 func NewNumberStack(numbers []int) *Stack {

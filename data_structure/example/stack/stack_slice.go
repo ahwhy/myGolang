@@ -8,16 +8,16 @@ import (
 // 这里Item是范型, 指代任意类型
 type Item interface{}
 
-type Stack_slice struct {
-	items []Item
-	lock  *sync.RWMutex
-}
-
 func NewStackslice() *Stack_slice {
 	return &Stack_slice{
 		items: []Item{},
 		lock:  &sync.RWMutex{},
 	}
+}
+
+type Stack_slice struct {
+	items []Item
+	lock  *sync.RWMutex
 }
 
 func (stack *Stack_slice) Clear() {

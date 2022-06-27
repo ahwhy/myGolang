@@ -5,16 +5,16 @@ import (
 	"sync"
 )
 
-// 借助list包，实现stack
-type Stack_list struct {
-	list *list.List
-	lock *sync.RWMutex
-}
-
 func NewStacklist() *Stack_list {
 	list := list.New()
 	lock := &sync.RWMutex{}
 	return &Stack_list{list, lock}
+}
+
+// 借助list包，实现stack
+type Stack_list struct {
+	list *list.List
+	lock *sync.RWMutex
 }
 
 func (stack *Stack_list) Clear() {

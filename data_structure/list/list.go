@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func NewIntNode(v interface{}) *Node {
+	return &Node{Value: v}
+}
+
 // 重新定义节点
 type Node struct {
 	// 需要存储的数据
@@ -14,20 +18,16 @@ type Node struct {
 	Prev *Node
 }
 
-type List struct {
-	head *Node
-}
-
-func NewIntNode(v interface{}) *Node {
-	return &Node{Value: v}
-}
-
 func NewIntList(headValue interface{}) *List {
 	// 链表的头
 	head := &Node{Value: headValue}
 	return &List{
 		head: head,
 	}
+}
+
+type List struct {
+	head *Node
 }
 
 func (l *List) AddNode(n *Node) {

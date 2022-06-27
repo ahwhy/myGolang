@@ -7,7 +7,7 @@
 	                                     内核空间                               用户空间
 			1).网络请求 ->        2).copy(I/O模型、DMA)->        3).copy(MMAP) ->       4-1).处理请求
 	client                   网卡                         内核缓冲区            web服务进程    |
-			7).返回数据 <-               6).copy <-                6).copy <-           4-2).构建Respense
+			7).返回数据 <-               6).copy <-                6).copy <-          4-2).构建Respense
 ```
 
 - 网络请求过程

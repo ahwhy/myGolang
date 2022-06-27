@@ -27,18 +27,14 @@
 - 实现代码
 ```go
 	// 定义节点
+	func NewIntNode(v int) *Node {
+		return &Node{Value: v}
+	}
 	type Node struct {
 		// 需要存储的数据
 		Value interface{}
 		// 下一跳
 		Next  *Node
-	}
-	// 定义链表结构
-	type List struct {
-		head *Node
-	}
-	func NewIntNode(v int) *Node {
-		return &Node{Value: v}
 	}
 	func NewIntList(headValue int) *List {
 		// 链表的头
@@ -47,6 +43,11 @@
 			head: head,
 		}
 	}
+	// 定义链表结构
+	type List struct {
+		head *Node
+	}
+
 	func (l *List) AddNode(n *Node) {
 		// 需要找到尾节点
 		next := l.head.Next
@@ -317,14 +318,14 @@
 	// 这里Item是范型, 指代任意类型
 	type Item interface{}
 	
-	type Stack struct {
-		items []Item
-	}
 	// 构建函数
 	func NewStack() *Stack {
 		return &Stack{
 			items: []Item{},
 		}
+	}
+	type Stack struct {
+		items []Item
 	}
 	// Push adds an Item to the top of the stack
 	func (s *Stack) Push(item Item) {
@@ -426,7 +427,7 @@
 				- 一颗树深度为h，最大层数为k，深度与最大层数相同，k=h
 				- 叶子节点数(最后一层)为2k−1
 				- 第 i 层的节点数是: 2i−1
-				- 总节点数是: 2k-1，且总节点数一定是奇数
+				- 总节点数是: 2^k-1，且总节点数一定是奇数
 	- 完全二叉树
 		- 一棵深度为k的有n个结点的二叉树，对树中的结点按从上至下、从左到右的顺序进行编号，如果编号为i(1≤i≤n)的结点与满二叉树中编号为i的结点在二叉树中的位置相同
 		- 每一层都是紧凑靠左排列的, 上层排满了, 才能排下层, 每层先排满左节点，才能排右节点
