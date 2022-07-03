@@ -24,6 +24,7 @@ func NewStack() *Stack {
 func (stack *Stack) Clear() {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	stack.top = nil
 	stack.length = 0
 }
@@ -31,12 +32,14 @@ func (stack *Stack) Clear() {
 func (stack *Stack) Len() int {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return stack.length
 }
 
 func (stack *Stack) Empty() bool {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return stack.length == 0
 }
 
@@ -44,6 +47,7 @@ func (stack *Stack) Empty() bool {
 func (stack *Stack) Push(value interface{}) {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	node := &node{value, stack.top}
 	stack.top = node
 	stack.length++
@@ -53,6 +57,7 @@ func (stack *Stack) Push(value interface{}) {
 func (stack *Stack) Pop() interface{} {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	if stack.length == 0 {
 		return nil
 	}
@@ -66,6 +71,7 @@ func (stack *Stack) Pop() interface{} {
 func (stack *Stack) Peak() interface{} {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	if stack.length == 0 {
 		return nil
 	}
@@ -76,6 +82,7 @@ func (stack *Stack) Peak() interface{} {
 func (stack *Stack) ForEach(fn func(interface{})) {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+	
 	node := stack.top
 	for node != nil {
 		fn(node.value)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ahwhy/myGolang/data_structure/example/trie"
+	"github.com/ahwhy/myGolang/data_structure/trie"
 )
 
 func TestTrie(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ahwhy/myGolang/data_structure/example/stack"
+	"github.com/ahwhy/myGolang/data_structure/stack"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -124,4 +124,32 @@ func TestAllStackGo(t *testing.T) {
 			fmt.Println(v)
 		})
 	}
+}
+
+func TestStackslice(t *testing.T) {
+	stk := stack.NewStackslice()
+	fmt.Println(stk.Empty())
+
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		fmt.Printf("The %d round of insertion is in progress. \n", i+1)
+		wg.Add(1)
+		go func() {
+			for i := 0; i < 10; i++ {
+				stk.Push(rand.Intn(1000))
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	fmt.Println("Insert complete")
+
+	stk.Sort()
+	stk.ForEach(func(n interface{}) {
+		fmt.Printf("[%d] ", n.(int))
+	})
+	fmt.Println()
+	stk.Clear()
+	fmt.Println(stk.Peak())
+
 }

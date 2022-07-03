@@ -38,7 +38,7 @@ func ReverseAdjust(arr []int) {
 	}
 	
 	lastIndex := (n + 1) / 2 * 2
-	//逆序检查每一个三角形区域  left(i)   = 2i + 1 &&  right(i)  = 2i + 2
+	//逆序检查每一个三角形区域   left(i)  = 2i + 1   &&   right(i)  = 2i + 2
 	for i := lastIndex; i > 0; i -= 2 {
 		right := i
 		parent := (right - 1) / 2

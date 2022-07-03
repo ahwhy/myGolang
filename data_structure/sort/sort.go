@@ -57,5 +57,6 @@ func (s IntSlice) Swap(i, j int) {
 
 func BuildInSort(number []int) []int {
 	sort.Sort(IntSlice(number))
+	
 	return number
 }

@@ -47,6 +47,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 	*pq = old[0 : n-1] //去掉最一个元素
 	item.index = -1
 	// item.index = n - 1  打印弹出时索引
+
 	return item
 }
 
@@ -78,6 +79,6 @@ func TestPriorityQueue() {
 	pq.update(item, item.value, 6) // 更新item的优先级
 	for len(pq) > 0 {
 		item := heap.Pop(&pq).(*Item)
-		fmt.Printf("%.2d:%s index:%.2d\n", item.priority, item.value, item.index)
+		fmt.Printf("%.2d:%s index:%d\n", item.priority, item.value, item.index)
 	}
 }

@@ -19,6 +19,7 @@ func (node *TrieNode) add(words []rune, term string, beginIndex int) {
 	if node.Children == nil {
 		node.Children = make(map[rune]*TrieNode)
 	}
+
 	word := words[beginIndex] //把这个word放到node的子节点中
 	if child, exists := node.Children[word]; !exists {
 		newNode := &TrieNode{Word: word}
@@ -34,6 +35,7 @@ func (tree *TrieTree) AddTerm(term string) {
 	if len(term) <= 1 {
 		return
 	}
+
 	words := []rune(term)
 	if tree.root == nil {
 		tree.root = new(TrieNode)
@@ -47,6 +49,7 @@ func (node *TrieNode) walk(words []rune, beginIndex int) *TrieNode {
 		return node
 	}
 	beginIndex += 1
+
 	word := words[beginIndex]
 	if child, exists := node.Children[word]; exists {
 		return child.walk(words, beginIndex)
@@ -60,6 +63,7 @@ func (node *TrieNode) traverseTerms(terms *[]string) {
 	if len(node.Term) > 0 {
 		*terms = append(*terms, node.Term)
 	}
+
 	for _, child := range node.Children {
 		child.traverseTerms(terms)
 	}
@@ -70,6 +74,7 @@ func (tree *TrieTree) Retrieve(prefix string) []string {
 	if tree.root == nil || len(tree.root.Children) == 0 {
 		return nil
 	}
+	
 	words := []rune(prefix)
 	firstWord := words[0]
 	if child, exists := tree.root.Children[firstWord]; exists {

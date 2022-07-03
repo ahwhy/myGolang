@@ -4,16 +4,16 @@ import (
 	"fmt"
 )
 
-type ListNode struct {
-	Value interface{}
-	Prev  *ListNode
-	Next  *ListNode
-}
-
 type TList struct {
 	Head   *ListNode
 	Tail   *ListNode
 	Length int
+}
+
+type ListNode struct {
+	Value interface{}
+	Prev  *ListNode
+	Next  *ListNode
 }
 
 func (list *TList) Append(x interface{}) {
@@ -33,10 +33,9 @@ func (list *TList) Append(x interface{}) {
 func (list *TList) Traverse() {
 	curr := list.Head
 	for curr != nil {
-		fmt.Printf("%d ", curr.Value)
+		fmt.Printf("%d \n", curr.Value)
 		curr = curr.Next
 	}
-	fmt.Println()
 }
 
 func (list *TList) Len() int {
@@ -47,10 +46,12 @@ func (list *TList) Get(idx int) *ListNode {
 	if list.Length <= idx {
 		return nil
 	}
+
 	curr := list.Head
 	for i := 0; i < idx; i++ {
 		curr = curr.Next
 	}
+
 	return curr
 }
 
@@ -92,6 +93,7 @@ func (list *TList) Remove(idx int) *ListNode {
 	if list.Length <= idx {
 		return nil
 	}
+
 	curr := list.Head
 	for i := 0; i < idx; i++ {
 		curr = curr.Next
@@ -100,6 +102,7 @@ func (list *TList) Remove(idx int) *ListNode {
 	prev := curr.Prev
 	next := curr.Next
 	prev.Next, next.Prev = next, prev
+
 	return curr
 }
 
@@ -108,6 +111,7 @@ func (l *TList) RemoveEm(current *ListNode) error {
 	prev := current.Prev
 	next := current.Next
 	prev.Next, next.Prev = next, prev
+
 	return nil
 }
 
@@ -123,8 +127,7 @@ func (l *TList) ChangeToRing() {
 func (list *TList) TraverseRing() {
 	curr := list.Head
 	for i := 0; i < 20; i++ {
-		fmt.Printf("%d ", curr.Value)
+		fmt.Printf("%d \n", curr.Value)
 		curr = curr.Next
 	}
-	fmt.Println()
 }

@@ -3,7 +3,7 @@ package stack_test
 import (
 	"testing"
 
-	"github.com/ahwhy/myGolang/data_structure/example/stack"
+	"github.com/ahwhy/myGolang/data_structure/stack"
 )
 
 func BenchmarkStacklistPush(b *testing.B) {

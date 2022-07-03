@@ -23,18 +23,21 @@ type Stack_slice struct {
 func (stack *Stack_slice) Clear() {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	stack.items = []Item{}
 }
 
 func (stack *Stack_slice) Len() int {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return len(stack.items)
 }
 
 func (stack *Stack_slice) Empty() bool {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return len(stack.items) == 0
 }
 
@@ -42,6 +45,7 @@ func (stack *Stack_slice) Empty() bool {
 func (stack *Stack_slice) Push(item interface{}) {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	stack.items = append(stack.items, item)
 }
 
@@ -52,10 +56,12 @@ func (stack *Stack_slice) Pop() interface{} {
 	if stack.Empty() {
 		return nil
 	}
+
 	item := stack.items[len(stack.items)-1]
 	stack.lock.Lock()
 	stack.items = stack.items[0 : len(stack.items)-1]
 	stack.lock.Unlock()
+
 	return item
 }
 
@@ -63,6 +69,11 @@ func (stack *Stack_slice) Pop() interface{} {
 func (stack *Stack_slice) Peak() interface{} {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
+	if stack.Empty() {
+		return nil
+	}
+
 	return stack.items[len(stack.items)-1]
 }
 

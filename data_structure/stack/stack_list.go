@@ -8,6 +8,7 @@ import (
 func NewStacklist() *Stack_list {
 	list := list.New()
 	lock := &sync.RWMutex{}
+
 	return &Stack_list{list, lock}
 }
 
@@ -20,18 +21,21 @@ type Stack_list struct {
 func (stack *Stack_list) Clear() {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	stack.list.Init()
 }
 
 func (stack *Stack_list) Len() int {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return stack.list.Len()
 }
 
 func (stack *Stack_list) Empty() bool {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	return stack.list.Len() == 0
 }
 
@@ -39,6 +43,7 @@ func (stack *Stack_list) Empty() bool {
 func (stack *Stack_list) Push(value interface{}) {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	stack.list.PushBack(value)
 }
 
@@ -46,6 +51,7 @@ func (stack *Stack_list) Push(value interface{}) {
 func (stack *Stack_list) Pop() interface{} {
 	stack.lock.Lock()
 	defer stack.lock.Unlock()
+
 	ele := stack.list.Back()
 	if ele == nil {
 		return nil
@@ -58,6 +64,7 @@ func (stack *Stack_list) Pop() interface{} {
 func (stack *Stack_list) Peak() interface{} {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+
 	ele := stack.list.Back()
 	if ele == nil {
 		return nil
@@ -70,6 +77,7 @@ func (stack *Stack_list) Peak() interface{} {
 func (stack *Stack_list) ForEach(fn func(interface{})) {
 	stack.lock.RLock()
 	defer stack.lock.RUnlock()
+	
 	top := stack.list.Back()
 	for top.Prev() != nil {
 		fn(top.Value)

@@ -4,6 +4,19 @@ import (
 	"fmt"
 )
 
+func NewIntList(headValue interface{}) *List {
+	// 链表的头
+	head := &Node{Value: headValue}
+
+	return &List{
+		head: head,
+	}
+}
+
+type List struct {
+	head *Node
+}
+
 func NewIntNode(v interface{}) *Node {
 	return &Node{Value: v}
 }
@@ -16,18 +29,6 @@ type Node struct {
 	Next *Node
 	// 上一跳
 	Prev *Node
-}
-
-func NewIntList(headValue interface{}) *List {
-	// 链表的头
-	head := &Node{Value: headValue}
-	return &List{
-		head: head,
-	}
-}
-
-type List struct {
-	head *Node
 }
 
 func (l *List) AddNode(n *Node) {
@@ -74,6 +75,7 @@ func (l *List) Len() int {
 		n = n.Next
 		len++
 	}
+
 	return len + 1
 }
 
@@ -87,6 +89,7 @@ func (l *List) Get(idx int) interface{} {
 			return n.Value
 		}
 	}
+
 	return nil
 }
 
@@ -102,6 +105,7 @@ func (l *List) InsertAfter(after, current *Node) error {
 	// after <-- current <-- after_next
 	current.Prev = after
 	afterNext.Prev = current
+
 	return nil
 }
 
@@ -117,6 +121,7 @@ func (l *List) InsertBefore(before, current *Node) error {
 	// beforePrev --> current --> before
 	current.Next = before
 	beforePrev.Next = current
+
 	return nil
 }
 
@@ -125,6 +130,7 @@ func (l *List) Remove(current *Node) error {
 	prev := current.Prev
 	next := current.Next
 	prev.Next, next.Prev = next, prev
+
 	return nil
 }
 
@@ -135,6 +141,7 @@ func (l *List) ChangeToRing() {
 	for next.Next != nil {
 		next = next.Next
 	}
+	
 	head, tail := l.head, next
 	// head  -->  tail
 	head.Prev = tail
