@@ -82,7 +82,7 @@
 	git push -u origin --tags v0.0.2
 ```
 
-## 十、常用包与函数  
+## 十、常用内建库与函数  
 - 标准库 https://studygolang.com/pkgdoc
 
 ### 1. time
@@ -98,19 +98,59 @@
 ```
 
 ### 2. math
+- math
+	- math包提供了基本的数学常数和数学函数
 ```go
 	// 用于测试一个数是否是非数NaN
 	// NaN非数，一般用于表示无效的除法操作结果0/0或Sqrt(-1)
 	func IsNaN(f float64) (is bool)
 
-	// 返回非数对应的值
+	// 返回非数对应的值，一个IEEE 754 “这不是一个数字” 值
 	func NaN() float64
+
+	// 返回x的绝对值
+	func Abs(x float64) float64
+
+	// 返回x和y中最大值
+	func Max(x, y float64) float64
+
+	// 返回x和y中最小值
+	func Min(x, y float64) float64
 ```
 
+- math/big
+	- big包实现了大数字的多精度计算
+	- 支持如下数字类型
+		- Int	有符号整数
+		- Rat	有理数
+
+- math/cmplx
+	- cmplx包提供了复数的常用常数和常用函数。
+
 - math/rand
+	- rand包实现了伪随机数生成器
+	- 伪随机数，用确定性的算法计算出来自[0,1]均匀分布的随机数序列。并不真正的随机，但具有类似于随机数的统计特征，如均匀性、独立性等
+	- 在计算伪随机数时，若使用的初值（种子）不变，那么伪随机数的数序也不变
+	- 伪随机数可以用计算机大量生成，在模拟研究中为了提高模拟效率，一般采用伪随机数代替真正的随机数
+	- 模拟中使用的一般是循环周期极长并能通过随机数检验的伪随机数，以保证计算结果的随机性
 ```go
-	rand.Seed(time.Now().Unix())  // 使用当前时间设置随机数种子
-	rand.Intn(100)    // 生产[0, 100)的随机数
+	// 使用给定的seed将默认资源初始化到一个确定的状态
+	// 如未调用Seed，默认资源的行为就好像调用了Seed(1)
+	// 使用当前时间设置随机数种子  rand.Seed(time.Now().Unix())
+	func (r *Rand) Seed(seed int64)
+
+	// 返回一个非负的伪随机int值
+	func Int() int
+
+	// 返回一个取值范围在[0,n)的伪随机int值，如果 n<=0 会 panic
+	// 生产[0, 100)的随机数 rand.Intn(100)
+	func (r *Rand) Intn(n int) int
+
+	// 返回一个取值范围在[0.0, 1.0)的伪随机float64值
+	func Float64() float64
+
+	// 返回一个有n个元素的，[0,n)范围内整数的伪随机排列的切片
+	func Perm(n int) []int
 ```
 
 ### 3. reflect
@@ -212,7 +252,7 @@
 	// 提供缓冲流的功能
 	bufio.NewScanner(os.Stdin)
 ```
-	
+
 ### 15. io 
 ```go
 	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
@@ -220,53 +260,59 @@
 
 ### 16. io/ioutil
 
-### 17. gopkg.in/yaml.v2
-```go
-	yaml.Unmarshal()
-```
-
-### 18. net/http
+### 17. net/http
 ```go
 	http.StatusOK
 ```
 
-### 19. github.com/gin-gonic/gin
-- http客户端
-
-### 20. github.com/go-playground/validator
-- 校验参数
-
-### 21. github.com/spf13/cobra
-- cmd命令行客户端       
-
-### 22. github.com/AlecAivazis/survey
-- 隐藏密码
-
-### 23. github.com/schollz/progressbar
-- 进度条
-
-### 24. github.com/BurntSushi/toml
-- toml解析库，解析配置文件
-
-### 25. github.com/caarlos0/env
-- 环境变量解析库，解析环境变量
-
-### 26. github.com/rs/xid
-- ID生成器库
-
-### 27. github.com/stretchr/testify/assert
-- 测试
-
-### 28. net/http/pprof
+### 18. net/http/pprof
 - http://127.0.0.1:8080/debug/pprof/goroutine?debug=1
 
-### 29. github.com/gorilla/websocket
-- WebSocket
-
-### 30. bytes
+### 19. bytes
 - `func bytes.TrimSpace(s []byte) []byte` 去除首尾空格
 - `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
 - `func bytes.Join(s [][]byte, sep []byte) []byte`
 
-### 31. github.com/julienschmidt/httprouter
-- httprouter
+
+## 十、常用公共库 
+
+### 1. gopkg.in/yaml.v2
+```go
+	yaml.Unmarshal()
+```
+
+### 2. github.com/gin-gonic/gin
+- http客户端
+
+### 3. github.com/go-playground/validator
+- 校验参数
+
+### 4. github.com/spf13/cobra
+- cmd命令行客户端       
+
+### 5. github.com/AlecAivazis/survey
+- 隐藏密码
+
+### 6. github.com/schollz/progressbar
+- 进度条
+
+### 7. github.com/BurntSushi/toml
+- toml解析库，解析配置文件
+
+### 8. github.com/caarlos0/env
+- 环境变量解析库，解析环境变量
+
+### 9. github.com/rs/xid
+- ID生成器库
+
+### 10. github.com/stretchr/testify/assert
+- 测试
+
+### 11. github.com/gorilla/websocket
+- WebSocket
+
+### 12. github.com/julienschmidt/httprouter
+- Httprouter
+
+### 13.github.com/distribution/distribution
+- Registry
