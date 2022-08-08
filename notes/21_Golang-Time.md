@@ -2,18 +2,83 @@
 
 ## 一、Golang的time标准库
 - Go 语言通过标准库 time 包处理日期和时间相关的问题
- 
-### 1. 打印当前时间
+
+## 1. time标准库中的格式转换
+- 转换示意图
+	- `layout := "2006-01-02 15:04:05"`
+```
+	              -> time.Unix(sec int64, nsec int64)              -> time.Format(layout)
+	时间戳(Timestamp)                             time.Time                             日期格式
+	              <- time.Unix()                                   <- time.Parse(layout, value string)			
+```
+
+- 时间戳(Timestamp) 转成 time.Time 类型，再格式化成日期格式
+```go
+	// time.Time -> Timestamp  方法: time.Now().Unix()
+	ts := time.Now().Unix()             // 时间戳
+
+	// Timestamp -> time.Time  方法: time.Unix() 
+	t := time.Unix(ts, 0)               // 构造Time时间对象
+
+	// time.Time -> 日期格式  方法: time.Format("2006-01-02 15:04:05")
+	layout := "2006-01-02 15:04:05"
+	log.Printf(t.Format(layout))
+```
+
+- 日期格式字符串 转成 time.Time 类型 再转成时间戳
+```go
+	// time.Parse()                 func Parse(layout, value string) (Time, error)  返回转换后的时间格式和判断信息(err) 
+	d1, err := time.Parse("2006-01-02 15:04:05", "2021-06-18 12:12:12")
+	log.Println(d1.Unix())
+
+	// time.ParseInLocation()       func ParseInLocation(layout, value string, loc *Location) (Time, error)  可以指定时区
+	tStr := "2021-07-17 16:52:59"
+	layout := "2006-01-02 15:04:05"
+	t1, _ := time.ParseInLocation(layout, tStr, time.Local)
+	t2, _ := time.ParseInLocation(layout, tStr, time.UTC)
+	log.Printf("[ %s的 CST时区的时间戳为 : %d]", tStr, t1.Unix())
+	log.Printf("[ %s的 UTC时区的时间戳为 : %d]", tStr, t2.Unix())
+	log.Printf("[UTC - CST =%d 小时]", (t2.Unix()-t1.Unix())/3600)
+```
+
+### 2. 时间戳
+- Unix时间戳(Unix timestamp)定义为从1970年01月01日00时00分00秒(UTC)起至现在经过的总秒数
+	- 不论东西南北、在地球的每一个角落都是相同
+
+- `time.Unix(sec int64, nsec int64)`
+	- 函数签名 `func Unix(sec int64, nsec int64) Time`
+	- Unix创建一个本地时间，对应sec和nsec表示的Unix时间，自1970年1月1日 UTC 以来的秒数和纳秒
+	- nsec的值在[0, 999999999]范围外是合法的
+
+### 3. Time结构体
 - 方法: `time.Now()`
 	- 时间戳返回 int64
 	- 10位数时间戳 是秒单位
 	- 13位数时间戳 是毫秒单位，毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
 	- 19位数时间戳 是纳秒单位
+	- `time.Now()` 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
 
+- `time.Now()`返回的是个 Time结构体，这也是Go内部表示时间的数据结构
+	- Time 代表一个纳秒精度的时间点
+	- 程序中应使用 Time 类型值来保存和传递时间，而不是指针；就是说，表示时间的变量和字段，应为 `time.Time` 类型，而不是 `*time.Time`类型
+	- 时间点可以使用 `Before`、`After` 和 `Equal` 方法进行比较
+		- `Sub` 方法让两个时间点相减，生成一个 Duration 类型值(代表时间段)
+		- `Add` 方法给一个时间点加上一个时间段，生成一个新的 Time 类型时间点
+	- Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC
+		- 因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
+	- Time是有时区的通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
+```
+	type Time struct {
+		// Has unexported fields.
+	}
+```
+
+- 打印当前时间
 ```go
 	func numLen(n int64) int {
 		return len(strconv.Itoa(int(n)))
 	}
+
 	now := time.Now()
 	log.Printf("[当前时间对象为: %v]", now)
 	log.Printf("[当前时间戳 秒级: %v][位数: %v]", now.Unix(), numLen(now.Unix()))
@@ -22,41 +87,28 @@
 	log.Printf("[当前时间戳 纳秒小数部分: %v]", now.Nanosecond())
 	log.Printf("[当前时间 %v %v %v %v %v %v",now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 	log.Printf("[今天是 %d年中的第 %d天 星期 %d]", now.Year(), now.YearDay(), now.Weekday())
-	zone, offset := now.Zone() && log.Printf("[直接获取时区  %v，和东utc时区差 %d 个小时]", zone, offset/3600)
-	
+ 
+	year, month, day := now.Date()
+	log.Printf("[今天是 %d年中第 %d月的第 %d天]", year, month, day)
+
+	zone, offset := now.Zone()
+	log.Printf("[直接获取时区 %v，和东utc时区差 %d个小时]", zone, offset/3600)
+ 
 	/* 输出
-	2021/07/17 16:34:10 [当前时间对象为: 2021-07-17 16:34:10.2999431 +0800 CST m=+0.007295301]
-	2021/07/17 16:34:10 [当前时间戳 秒级: 1626510850][位数:10]
-	2021/07/17 16:34:10 [当前时间戳 毫秒级: 1626510850299][位数:13]
-	2021/07/17 16:34:10 [当前时间戳 纳秒级: 1626510850299943100][位数:19]
-	2021/07/17 16:34:10 [当前时间戳 纳秒小数部分: 299943100]
-	2021/07/17 16:34:10 [当前时间 2021 June 17 16 34 10]
-	2021/07/17 16:44:57 [今天是 2021年中的第 198天 星期]
-	2021/07/17 16:44:57 [直接获取时区  CST，和东utc时区差 8 个小时]
+	2022/08/08 09:36:58 [当前时间对象为: 2022-08-08 09:36:58.943631 +0800 CST m=+0.000096126]
+	2022/08/08 09:36:58 [当前时间戳 秒级: 1659922618][位数: 10]
+	2022/08/08 09:36:58 [当前时间戳 毫秒级: 1659922618943][位数:13]
+	2022/08/08 09:36:58 [当前时间戳 纳秒级: 1659922618943631000][位数:19]
+	2022/08/08 09:36:58 [当前时间戳 纳秒小数部分: 943631000]
+	2022/08/08 09:36:58 [当前时间 2022 August 8 9 36 58
+	2022/08/08 09:36:58 [今天是 2022年中的第 220天 星期 1]
+	2022/08/08 09:36:58 [今天是 2022年中第 8月的第 8天]
+	2022/08/08 09:36:58 [直接获取时区 CST，和东utc时区差 8个小时]
 	*/
 ```
 
-
-### 2. Time结构体
-- Now()返回的是个Time结构体，这也是Go内部表示时间的数据结构
-	- Time 代表一个纳秒精度的时间点
-	- 程序中应使用 Time 类型值来保存和传递时间，而不是指针；就是说，表示时间的变量和字段，应为 time.Time 类型，而不是 *time.Time. 类型
-	- 时间点可以使用 Before、After 和 Equal 方法进行比较
-		- `Sub` 方法让两个时间点相减，生成一个 Duration 类型值(代表时间段)
-		- `Add` 方法给一个时间点加上一个时间段，生成一个新的 Time 类型时间点
-	- Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC
-		- 因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
-	- Time是有时区的s通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
-```
-	type Time struct {
-		// Has unexported fields.
-	}
-```
-
-- now() 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
-
-### 3. 时间的格式化
-- 方法: time.Now().Format()
+### 4. 时间的格式化
+- 方法: `time.Now().Format()`
 
 - 格式
 ```go
@@ -73,45 +125,6 @@
 	fmt.Printf("%T %#v\n", now.Format(format), now.Format(format)) // string "2021-06-20 20:08:45"
 ```
 
-### 4. 时间戳转换
-- Unix时间戳(Unix timestamp)定义为从1970年01月01日00时00分00秒(UTC)起至现在经过的总秒数
-
-- 不论东西南北、在地球的每一个角落都是相同
-
-- Go语言中的转换
-```
-	              -> time.Unix(sec int64, nsec int64)              -> time.Format()
-	时间戳(Timestamp)                             time.Time                             日期格式
-	              <- time.Unix()                                   <- time.Parse()				
-```
-
-- 时间戳(Timestamp) 转成 time.Time 类型 再格式化成日期格式
-```go
-	// Time -> Timestamp  方法: time.Now().Unix()
-	ts := time.Now().Unix()             // 时间戳
-	layout := "2006-01-02 15:04:05"
-	
-	// Timestamp -> Time  方法: time.Unix()	
-	t := time.Unix(ts, 0)               // 构造时间对象
-	log.Printf(t.Format(layout))
-```
-
-- 日期格式字符串 转成 time.Time 类型 再转成时间戳
-```go
-	// time.Parse()                 func Parse(layout, value string) (Time, error)  返回转换后的时间格式和判断信息(err) 
-	d1, err := time.Parse("2006-01-02 15:04:05", "2021-06-18 12:12:12")
-	log.Println(d1.Unix())
-	
-	// time.ParseInLocation()       func ParseInLocation(layout, value string, loc *Location) (Time, error)  可以指定时区
-	tStr := "2021-07-17 16:52:59"
-	layout := "2006-01-02 15:04:05"
-	t1, _ := time.ParseInLocation(layout, tStr, time.Local)
-	t2, _ := time.ParseInLocation(layout, tStr, time.UTC)
-	log.Printf("[ %s的 CST时区的时间戳为 : %d]", tStr, t1.Unix())
-	log.Printf("[ %s的 UTC时区的时间戳为 : %d]", tStr, t2.Unix())
-	log.Printf("[UTC - CST =%d 小时]", (t2.Unix()-t1.Unix())/3600)
-```
-
 ### 5. 时间的比较
 - Before、After 和 Equal
 ```go
@@ -120,9 +133,9 @@
 	m1 := now.Add(t1)
 	log.Printf("[a.after(b) a在b之后: %v]", m1.After(now))      // func After(d Duration) <-chan Time
 	log.Printf("[a.Before(b) a在b之前: %v]", now.Before(m1))    // func (t Time) Before(u Time) bool
-	log.Printf("[a.Equal(b) a=b: %v]", m1.Equal(now))           // func (t Time) Equal(u Time) bool
+	log.Printf("[a.Equal(b) a=b: %v]", m1.Equal(now))          // func (t Time) Equal(u Time) bool
 ```
-	
+
 ### 6. 时间长度 Duration
 - `time.Duration`表示时间长度
 	- 以纳秒为基数

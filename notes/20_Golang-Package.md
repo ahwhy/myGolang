@@ -86,12 +86,25 @@
 - 标准库 https://studygolang.com/pkgdoc
 
 ### 1. time
+- time包提供了时间的显示和测量用的函数
+	- 日历的计算采用的是公历
+	- 详见 [Golang-Time](./21_Golang-Time.md)
+
+- time包中的格式转换
+	- `layout := "2006-01-02 15:04:05"`
+```
+	              -> time.Unix(sec int64, nsec int64)              -> time.Format(layout)
+	时间戳(Timestamp)                             time.Time                             日期格式
+	              <- time.Unix()                                   <- time.Parse(layout, value string)			
+```
+
+- 示例
 ```go
 	time.Now()          // 获取当前时间
 	time.Now().Unix()
 	time.Now().Year()   // Month() Day()  Hour()  Minute()  Second()
 	time.Now().Format("2006-01-02 15:04:05")
-	time.Parse()        // 返回转换后的时间格式和一个判断信息（err)
+	time.Parse("2006-01-02 15:04:05", "2022-08-08 09:36:58")        // 返回转换后的时间格式和一个判断信息（err)
 	time.Sleep(1 * time.Second)
 	time.Now().Add(30 * time.Second)
 	time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
@@ -316,3 +329,6 @@
 
 ### 13.github.com/distribution/distribution
 - Registry
+
+### 14.k8s.io/apimachinery/pkg/util/uuid
+- Uuid
