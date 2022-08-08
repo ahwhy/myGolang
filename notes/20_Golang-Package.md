@@ -137,14 +137,14 @@
 	// 使用给定的seed将默认资源初始化到一个确定的状态
 	// 如未调用Seed，默认资源的行为就好像调用了Seed(1)
 	// 使用当前时间设置随机数种子  rand.Seed(time.Now().Unix())
-	func (r *Rand) Seed(seed int64)
+	func Seed(seed int64)
 
 	// 返回一个非负的伪随机int值
 	func Int() int
 
 	// 返回一个取值范围在[0,n)的伪随机int值，如果 n<=0 会 panic
 	// 生产[0, 100)的随机数 rand.Intn(100)
-	func (r *Rand) Intn(n int) int
+	func Intn(n int) int
 
 	// 返回一个取值范围在[0.0, 1.0)的伪随机float64值
 	func Float64() float64
