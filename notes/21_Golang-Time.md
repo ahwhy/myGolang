@@ -3,13 +3,13 @@
 ## 一、Golang的time标准库
 - Go 语言通过标准库 time 包处理日期和时间相关的问题
 
-## 1. time标准库中的格式转换
+### 1. time标准库中的格式转换
 - 转换示意图
 	- `layout := "2006-01-02 15:04:05"`
 ```
-	              -> time.Unix(sec int64, nsec int64)              -> time.Format(layout)
-	时间戳(Timestamp)                             time.Time                             日期格式
-	              <- time.Unix()                                   <- time.Parse(layout, value string)			
+	              -> time.Unix(sec int64, nsec int64)        -> time.Format(layout)
+	时间戳(Timestamp)                             time.Time                                      日期格式
+	                       <- time.Unix()                    <- time.Parse(layout, value string)			
 ```
 
 - 时间戳(Timestamp) 转成 time.Time 类型，再格式化成日期格式
