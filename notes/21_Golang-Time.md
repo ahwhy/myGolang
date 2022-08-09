@@ -7,8 +7,8 @@
 - 转换示意图
 	- `layout := "2006-01-02 15:04:05"`
 ```
-	              -> time.Unix(sec int64, nsec int64)        -> time.Format(layout)
-	时间戳(Timestamp)                             time.Time                                      日期格式
+	              -> time.Unix(sec int64, nsec int64)             -> time.Format(layout)
+	时间戳(Timestamp)                             time.Time                                       日期格式
 	                       <- time.Unix()                    <- time.Parse(layout, value string)			
 ```
 
@@ -50,14 +50,7 @@
 	- Unix创建一个本地时间，对应sec和nsec表示的Unix时间，自1970年1月1日 UTC 以来的秒数和纳秒
 	- nsec的值在[0, 999999999]范围外是合法的
 
-### 3. Time结构体
-- 方法: `time.Now()`
-	- 时间戳返回 int64
-	- 10位数时间戳 是秒单位
-	- 13位数时间戳 是毫秒单位，毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
-	- 19位数时间戳 是纳秒单位
-	- `time.Now()` 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
-
+### 3. Time
 - `time.Now()`返回的是个 Time结构体，这也是Go内部表示时间的数据结构
 	- Time 代表一个纳秒精度的时间点
 	- 程序中应使用 Time 类型值来保存和传递时间，而不是指针；就是说，表示时间的变量和字段，应为 `time.Time` 类型，而不是 `*time.Time`类型
@@ -67,11 +60,19 @@
 	- Time 零值代表时间点 January 1, year 1, 00:00:00.000000000 UTC
 		- 因为本时间点一般不会出现在使用中，IsZero 方法提供了检验时间是否是显式初始化的一个简单途径
 	- Time是有时区的通过 == 比较 Time 时，Location 信息也会参与比较，因此 Time 不应该作为 map 的 key
+	- 一个Time类型值可以被多个go程同时使用
 ```
 	type Time struct {
 		// Has unexported fields.
 	}
 ```
+
+- 方法: `time.Now()`
+	- 时间戳返回 int64
+	- 10位数时间戳 是秒单位
+	- 13位数时间戳 是毫秒单位，毫秒=纳秒/1e6 且prometheus默认查询就是毫秒
+	- 19位数时间戳 是纳秒单位
+	- `time.Now()` 的具体实现在 runtime 包中，由汇编实现的，和平台有关，一般在`sys_{os_platform}_amd64.s` 中
 
 - 打印当前时间
 ```go
@@ -108,7 +109,10 @@
 ```
 
 ### 4. 时间的格式化
-- 方法: `time.Now().Format()`
+- 方法: `time.Now().Format(layout)`
+	- `func (t Time) Format(layout string) string`
+	- Format根据layout指定的格式返回t代表的时间点的格式化文本表示
+	- layout定义了参考时间，格式化后的字符串表示，它作为期望输出的例子
 
 - 格式
 ```go
@@ -127,13 +131,16 @@
 
 ### 5. 时间的比较
 - Before、After 和 Equal
+	- `func (t Time) Before(u Time) bool` 如果t代表的时间点在u之前，返回真；否则返回假
+	- `func (t Time) After(u Time) bool`  如果t代表的时间点在u之后，返回真；否则返回假
+	- `func (t Time) Equal(u Time) bool`  判断两个时间是否相同，会考虑时区的影响，因此不同时区标准的时间也可以正确比较
 ```go
 	now := time.Now()
 	t1, _ := time.ParseDuration("1h")
 	m1 := now.Add(t1)
-	log.Printf("[a.after(b) a在b之后: %v]", m1.After(now))      // func After(d Duration) <-chan Time
-	log.Printf("[a.Before(b) a在b之前: %v]", now.Before(m1))    // func (t Time) Before(u Time) bool
-	log.Printf("[a.Equal(b) a=b: %v]", m1.Equal(now))          // func (t Time) Equal(u Time) bool
+	log.Printf("[a.after(b) a在b之后: %v]", m1.After(now))
+	log.Printf("[a.Before(b) a在b之前: %v]", now.Before(m1))
+	log.Printf("[a.Equal(b) a=b: %v]", m1.Equal(now))
 ```
 
 ### 6. 时间长度 Duration
@@ -186,7 +193,7 @@
 	m3 := now.Add(t3)
 	log.Printf("[time.since 当前时间与t的时间差: %v]", time.Since(m3))    // func Since(t Time) Duration
 	log.Printf("[time.until t与当前时间的时间差: %v]", time.Until(m3))    // func Until(t Time) Duration
-	m4 := now.AddDate(0, 0, 5)                                            // func (t Time) AddDate(years int, months int, days int) Time
+	m4 := now.AddDate(0, 0, 5)                                          // func (t Time) AddDate(years int, months int, days int) Time
 	log.Printf("[5天后的时间: %v]", m4)
 ```
 

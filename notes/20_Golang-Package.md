@@ -93,8 +93,8 @@
 - time包中的格式转换
 	- `layout := "2006-01-02 15:04:05"`
 ```
-	              -> time.Unix(sec int64, nsec int64)        -> time.Format(layout)
-	时间戳(Timestamp)                             time.Time                                      日期格式
+	              -> time.Unix(sec int64, nsec int64)             -> time.Format(layout)
+	时间戳(Timestamp)                             time.Time                                       日期格式
 	                       <- time.Unix()                    <- time.Parse(layout, value string)			
 ```
 
