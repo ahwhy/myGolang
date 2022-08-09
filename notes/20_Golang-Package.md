@@ -56,15 +56,15 @@
 ```
 
 ## 九、创建git，发布到github
-- 项目目录下 go mod init github.com/ahwhy/myGolang
-- git init 
+- 项目目录下 `go mod init github.com/ahwhy/myGolang`
+- `git init`
 - 添加 .gitignore 文件去掉一些和代码无关的文件/文件夹
-- git add . && git commit -m "Record me learning golang"
+- `git add . && git commit -m "Record me learning golang" --author "ahwhya <ahwhya@outlook.com>"`
 - github上新建一个仓库
 - 推送到远程
 - 上传tag
 	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
-	- https://www.jianshu.com/p/79ecf4fe5079
+	- [git中tag与release的创建以及两者的区别](https://www.jianshu.com/p/79ecf4fe5079)
 ```shell
 	// 推送到远程
 	// or push an existing repository from the command line
@@ -83,7 +83,7 @@
 ```
 
 ## 十、常用内建库与函数  
-- 标准库 https://studygolang.com/pkgdoc
+- [golang的标准库](https://studygolang.com/pkgdoc)
 
 ### 1. time
 - time包提供了时间的显示和测量用的函数
