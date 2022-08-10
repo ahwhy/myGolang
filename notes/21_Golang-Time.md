@@ -145,18 +145,63 @@
 
 ### 6. 时间长度 Duration
 - `time.Duration`表示时间长度
+	- Duration类型代表两个时间点之间经过的时间
+	- 可表示的最长时间段大约290年
 	- 以纳秒为基数
 	- 底层数据类型为int64
 	- int64 类型的变量不能直接和time.Duration类型相乘，需要显示转换，常量除外
 		- 不行:  `num * time.Second`
 		- 可以:  `time.Duration(num) * time.Second`
 		- 可以:  `5 * time.Second`
+```go
+	type Duration int64
+
+	const (
+		Nanosecond  Duration = 1
+		Microsecond          = 1000 * Nanosecond
+		Millisecond          = 1000 * Microsecond
+		Second               = 1000 * Millisecond
+		Minute               = 60 * Second
+		Hour                 = 60 * Minute
+	)
+```
+
+- 常用方法
+```go
+	// ParseDuration解析一个时间段字符串
+	func ParseDuration(s string) (Duration, error)
+
+	// Since返回从t到现在经过的时间，等价于time.Now().Sub(t)
+	func Since(t Time) Duration
+
+	// Hours、Minutes、Seconds 将时间段表示为float64类型的小时数、分钟数、秒数
+	func (d Duration) Hours() float64
+	func (d Duration) Minutes() float64
+	func (d Duration) Seconds() float64
+
+	// Nanoseconds 将时间段表示为int64类型的纳秒数，等价于int64(d)
+	func (d Duration) Nanoseconds() int64
+
+	// 返回时间段采用"72h3m0.5s"格式的字符串表示
+	func (d Duration) String() string
+```
+
+- 示例
+```go
+	// 要将Duration类型值表示为某时间单元的个数，用除法
+	second := time.Second
+	fmt.Print(int64(second/time.Millisecond)) // prints 1000
+
+	// 要将整数个某时间单元表示为Duration类型值，用乘法
+	seconds := 10
+	fmt.Print(time.Duration(seconds)*time.Second) // prints 10s
+```
 
 ### 7. 时长计算
 - Add
 	- 让一个时间点加上一个时间段，生成一个新的 Time 类型时间点
+	- 函数签名 `func (t Time) Add(d Duration) Time`
 ```go
-	// func (t Time) Add(d Duration) Time
 	now := time.Now()
 	after := now.Add(time.Hour * 24)
 	fmt.Println(after)             // 2021/07/19 17:33:21 2021-07-20 17:33:21.12884928 +0800 CST m=+86400.000024700
@@ -164,8 +209,8 @@
 
 - Sub
 	- 让两个时间点相减，生成一个 Duration 类型值(代表时间段)
+	- 函数签名 `func (t Time) Sub(u Time) Duration`
 ```go
-	// func (t Time) Sub(u Time) Duration
 	fmt.Println(now.Sub(after))    // 2021/07/19 17:33:21 -24h0m0s
 ```
 
@@ -193,37 +238,71 @@
 	m3 := now.Add(t3)
 	log.Printf("[time.since 当前时间与t的时间差: %v]", time.Since(m3))    // func Since(t Time) Duration
 	log.Printf("[time.until t与当前时间的时间差: %v]", time.Until(m3))    // func Until(t Time) Duration
-	m4 := now.AddDate(0, 0, 5)                                          // func (t Time) AddDate(years int, months int, days int) Time
+	m4 := now.AddDate(0, 0, 5)                                         // func (t Time) AddDate(years int, months int, days int) Time
 	log.Printf("[5天后的时间: %v]", m4)
 ```
 
 ### 8. Sleep
-- 方法: `time.Sleep()`
+- `time.Sleep()`
+	- 函数签名 `func Sleep(d Duration)`
+	- Sleep阻塞当前go程至少d代表的时间段
+	- d<=0时，Sleep会立刻返回
 ```go
-	time.Sleep(time.Hour * 24)
+	time.Sleep(100 * time.Millisecond)
 ```
 
 ### 9. 定时器
 - 定时器是进程规划自己在未来某一时刻接获通知的一种机制，共有2种
 
-- 单次触发: `Timer`
-	- 通过 `time.After` 实现同步等待
-	- 通过 `time.AfterFunc` 中断循环，触发自定义函数
-		- Timer的stop
-			- 如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false
-			- 后续再对该 Timer 调用 Stop，直接返回 false
-		- Timer的Reset
-			- Reset 先调用 stopTimer 再调用 startTimer
-			- 类似于废弃之前的定时器，重新启动一个定时器
-			- 返回值和 Stop 一样
+- 单次触发 `Timer`
+	- Timer类型代表单次时间事件
+	- 当Timer到期时，当时的时间会被发送给C，除非Timer是被AfterFunc函数创建的
 ```go
 	// Timer数据结构
-	type Timer struct {
+	type Ti	select {
+	case m := <-c:
+		handle(m)
+	case <-time.After(5 * time.Minute):
+		fmt.Println("timed out")
+	}mer struct {
 		C <-chan Time   // C: 一个存放Time对象的Channel
 		r runtimeTimer  // runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
 	}
 
+	// NewTimer创建一个Timer，它会在最少过去时间段d后到期，向其自身的C字段发送当时的时间
+	func NewTimer(d Duration) *Timer
+
 	// 通过 time.After 实现同步等待
+	// After会在另一线程经过时间段d后向返回值发送当时的时间，等价于NewTimer(d).C
+	func After(d Duration) <-chan Time
+
+	// 通过 time.AfterFunc 中断循环，触发自定义函数
+	// AfterFunc另起一个go程等待时间段d过去，然后调用f
+	// 它返回一个Timer，可以通过调用其Stop方法来取消等待和对f的调用
+	func AfterFunc(d Duration, f func()) *Timer
+
+	// Reset使t重新开始计时，(本方法返回后再)等待时间段d过去后到期
+	// Reset 先调用 stopTimer 再调用 startTimer；类似于废弃之前的定时器，重新启动一个定时器
+	// 如果调用时t还在等待中会返回真；如果t已经到期或者被停止了会返回假
+	func (t *Timer) Reset(d Duration) bool
+
+	// Stop停止Timer的执行；如果 Timer 还未触发，Stop 会将其移除
+	// 如果停止了t会返回真；如果t已经被停止或者过期了会返回假
+	// Stop不会关闭通道t.C，以避免从该通道的读取不正确的成功
+	func (t *Timer) Stop() bool
+```
+
+- `Timer` 示例
+```go
+	// 通过 time.After 实现同步等待(超时机制)
+	select {
+	case m := <-c:
+		handle(m)
+	case <-time.After(5 * time.Minute):
+		fmt.Println("timed out")
+	}
+
+	// Timer
 	m := time.NewTimer(5 * time.Second)
 	fmt.Println(<-m.C)
 	fmt.Println("exit")
@@ -243,7 +322,8 @@
 ```
 
 
-- 周期性触发: `Ticker`
+- 周期性触发 `Ticker`
+	- `Ticker` 保管一个通道，并每隔一段时间向其传递"tick"
 ```go
 	// Ticker数据结构	
 	type Ticker struct {
@@ -251,6 +331,17 @@
 		r runtimeTimer
 	}
 
+	// NewTicker返回一个新的Ticker，该Ticker包含一个通道字段，并会每隔时间段d就向该通道发送当时的时间
+	// 如果 d<=0 会 panic
+	func NewTicker(d Duration) *Ticker
+
+	// Stop关闭一个Ticker
+	// Stop不会关闭通道t.C，以避免从该通道的读取不正确的成功
+	func (t *Ticker) Stop()
+```
+
+- `Ticker` 示例
+```go
 	// time.NewTicker 实现同步等待
 	tk := time.NewTicker(2 * time.Second)
 	count := 1
