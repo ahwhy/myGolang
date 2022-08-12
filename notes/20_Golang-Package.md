@@ -85,6 +85,8 @@
 ## 十、常用内建库与函数  
 - [golang的标准库](https://studygolang.com/pkgdoc)
 
+- [Go中文开发手册](https://www.php.cn/manual/view/35126.html)
+
 ### 1. time
 - time包提供了时间的显示和测量用的函数
 	- 日历的计算采用的是公历
@@ -240,6 +242,62 @@
 	// Output:
 	// found value: Go
 	// key not found: color
+```
+
+### 4. encoding
+- encoding
+	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
+	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
+
+- encoding/json
+	- json包实现了json对象的编解码
+	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
+```go
+	// json.Marshal
+	// Marshal函数返回v的json编码
+	// 结构体标签值里的"json"键为键名，后跟可选的逗号和选项，具体如下:
+	// // 字段被本包忽略
+	// Field int `json:"-"`
+	// // 字段在json里的键为"myName"
+	// Field int `json:"myName"`
+	// // 字段在json里的键为"myName"且如果字段为空值将在对象中省略掉
+	// Field int `json:"myName,omitempty"`
+	// // 字段在json里的键为"Field"（默认值），但如果字段为空值会跳过；注意前导的逗号
+	// Field int `json:",omitempty"
+	// // "string"选项标记一个字段在编码json时应编码为字符串；它只适用于字符串、浮点数、整数类型的字段
+	// Int64String int64 `json:",string"`
+	func Marshal(v interface{}) ([]byte, error)
+
+	// json.Unmarshal
+	// Unmarshal 函数解析json编码的数据并将结果存入v指向的值
+	// Unmarshal 和Marshal 做相反的操作，必要时申请映射、切片或指针，有如下的附加规则
+	// JSON 的 null 值解码为go的接口、指针、切片时会将它们设为nil，因为null在json里一般表示“不存在”；解码json的null值到其他go类型时，不会造成任何改变，也不会产生错误
+	// 要将json数据解码写入一个接口类型值，函数会将数据解码为如下类型写入接口:
+	// Bool                   对应JSON布尔类型
+	// float64                对应JSON数字类型
+	// string                 对应JSON字符串类型
+	// []interface{}          对应JSON数组
+	// map[string]interface{} 对应JSON对象
+	// nil                    对应JSON的null
+	func Unmarshal(data []byte, v interface{}) error
+
+	// Decoder从输入流解码json对象
+	type Decoder struct { ... }
+	
+	// NewDecoder创建一个从r读取并解码json对象的*Decoder，解码器有自己的缓冲，并可能超前读取部分json数据
+	func NewDecoder(r io.Reader) *Decoder
+
+	// Decode从输入流读取下一个json编码值并保存在v指向的值里
+	func (dec *Decoder) Decode(v interface{}) error
+
+	// Encoder将json对象写入输出流
+	type Encoder struct { ... }
+
+	// NewEncoder创建一个将数据写入w的 *Encoder
+	func NewEncoder(w io.Writer) *Encoder
+
+	// Encode将v的json编码写入输出流，并会写入一个换行符
+	func (enc *Encoder) Encode(v interface{}) error
 ```
 
 ### 3. reflect
