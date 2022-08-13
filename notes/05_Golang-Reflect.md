@@ -1,1 +1,460 @@
-# Golang-Reflect  GolangµÄ·´Éä## Ò»¡¢GolangµÄ·´Éä¶¨Òå- ·´ÉäÊÇÖ¸ÔÚÔËĞĞÊ±¶¯Ì¬µÄ·ÃÎÊºÍĞŞ¸ÄÈÎÒâÀàĞÍ¶ÔÏóµÄ½á¹¹ºÍ³ÉÔ±- ÎªÊ²Ã´Ê¹ÓÃ·´Éä	- Á½¸ö¾­µä³¡¾°		- ±àĞ´µÄÒ»¸öº¯Êı£¬»¹²»ÖªµÀ´«¸øº¯ÊıµÄÀàĞÍ¾ßÌåÊÇÊ²Ã´£¬¿ÉÄÜÊÇ»¹Ã»Ô¼¶¨ºÃ£¬Ò²¿ÉÄÜÊÇ´«ÈëµÄÀàĞÍºÜ¶à		- Ï£ÍûÍ¨¹ıÓÃ»§µÄÊäÈëÀ´¾ö¶¨µ÷ÓÃ°´¸öº¯Êı(¸ù¾İ×Ö·û´®µ÷ÓÃ·½·¨)£¬¶¯Ì¬Ö´ĞĞº¯Êı- pythonÖĞµÄ·´Éä 	- ¸ù¾İ×Ö·û´®Ö´ĞĞº¯Êı	- ¸ù¾İ×Ö·û´®µ¼Èë°ü- goÖĞµÄ·´Éä	- goÊÇ¾²Ì¬ÓïÑÔ¡£·´Éä¾ÍÊÇgoÌá¹©Ò»ÖÖ»úÖÆ£¬ÔÚ±àÒëÊ±²»ÖªµÀÀàĞÍµÄÇé¿öÏÂ£¬¿ÉÒÔ×öÈçÏÂµÄÊÂÇé:		- ¸üĞÂ±äÁ¿		- ÔËĞĞÊ±²é¿´Öµ		- µ÷ÓÃ·½·¨		- ¶ÔËûÃÇµÄ²¼¾Ö½øĞĞ²Ù×÷	- ÔÚgoÓïÑÔÖĞÌá¹©reflect°üÌá¹©·´ÉäµÄ¹¦ÄÜ £¬Ã¿Ò»¸ö±äÁ¿¶¼ÓĞÁ½¸öÊôĞÔ: ÀàĞÍ(Type)ºÍÖµ(Value)		- reflect°üÌá¹© ValueOfºÍTypeof		- reflect.ValueOf: »ñÈ¡ÊäÈë½Ó¿ÚÖĞÊı¾İµÄÖµ£¬Èç¹ûÎª¿Õ·µ»Ø 0		- reflect.Typeof: »ñÈ¡ÊäÈë½Ó¿ÚÖĞÖµµÄÀàĞÍ£¬Èç¹ûÎª¿Õ·µ»Ø nil		- Typeof´«ÈëËùÓĞÀàĞÍ£¬ÒòÎªËùÓĞµÄÀàĞÍ¶¼ÊµÏÖÁË¿Õ½Ó¿Ú		## ¶ş¡¢·´ÉäµÄType### 1. ¶¨Òå- reflect.Type ÊÇÒ»¸ö½Ó¿ÚÀàĞÍ£¬ÓÃÓÚ»ñÈ¡±äÁ¿ÀàĞÍµÄĞÅÏ¢£¬¿ÉÍ¨¹ı reflect.TypeOf º¯Êı»ñÈ¡Ä³¸ö±äÁ¿µÄÀàĞÍĞÅÏ¢### 2. Í¨ÓÃ·½·¨- `Name()`: ÀàĞÍÃû- `PkgPath()`: °üÂ·¾¶- `Kind()`: ÀàĞÍÃ¶¾ÙÖµ- `String()`: Type×Ö·û´®- `Comparable()`: ÊÇ·ñ¿É½øĞĞ±È½Ï- `ImplementsType()`: ÊÇ·ñÊµÏÖÄ³½Ó¿Ú- `AssignableTo(Type)`: ÊÇ·ñ¿É¸³Öµ¸øÄ³ÀàĞÍ- `ConvertibleTo(Type)`: ÊÇ·ñ¿É×ª»»ÎªÄ³ÀàĞÍ- `NumMethod()`: ·½·¨¸öÊı- `Method(int)`: Í¨¹ıË÷Òı»ñÈ¡·½·¨ÀàĞÍ		- Method½á¹¹Ìå³£ÓÃÊôĞÔ: 			Name: ·½·¨Ãû			Type: º¯ÊıÀàĞÍ			Func: ·½·¨Öµ Value)- `MethodByName(string)`: Í¨¹ı·½·¨Ãû×Ö»ñÈ¡·½·¨ÀàĞÍ### 3. ÌØ¶¨ÀàĞÍ·½·¨- `reflect.Int*, reflect.UInt*, reflect.Float*k, reflect.Complex*`	Bits(): »ñÈ¡Õ¼ÓÃ×Ö½ÚÎ»Êı- `reflect.Array`	Len(): »ñÈ¡Êı×é³¤¶È	Elem(): »ñÈ¡Êı¾İÔªËØÀàĞÍ- `reflect.Slice`	Elem(): »ñÈ¡ÇĞÆ¬ÔªËØÀàĞÍ- `reflect.Map`	Key(): »ñÈ¡Ó³Éä¼üÀàĞÍ	Elem(): »ñÈ¡Ó³ÉäÖµÀàĞÍ- `reflect.Ptr`	Elem(): »ñÈ¡Ö¸ÏòÖµÀàĞÍ- `reflect.Func`	IsVariadic(): ÊÇ·ñ¾ßÓĞ¿É±ä²ÎÊı	NumIn(): ²ÎÊı¸öÊı	In(int): Í¨¹ıË÷Òı»ñÈ¡²ÎÊıÀàĞÍ	NumOut : ·µ»ØÖµ ¸öÊı	Out(int): Í¨¹ıË÷Òı»ñÈ¡·µ»ØÖµÀàĞÍ- `reflect.Struct`	NumField : ÊôĞÔ¸öÊı	Field(int): Í¨¹ıË÷Òı»ñÈ¡ÊôĞÔ		StructField ½á¹¹Ìå³£ÓÃÊôĞÔ			Name: ÊôĞÔÃû			Anonymous: ÊÇ·ñÎªÄäÃû			Tag: ±êÇ©				StructTag ³£ÓÃ·½·¨:					Get(string)					Lookup(string)	FieldByName(string): Í¨¹ıÊôĞÔÃû»ñÈ¡ÊôĞÔ	## Èı¡¢·´ÉäµÄValue### 1. ¶¨Òå- `reflect.Value` ÊÇÒ»¸ö½á¹¹ÌåÀàĞÍ£¬ÓÃÓÚ»ñÈ¡±äÁ¿ÖµµÄĞÅÏ¢£¬¿ÉÍ¨¹ı reflect.ValueOf º¯Êı»ñÈ¡Ä³¸ö±äÁ¿µÄÖµĞÅÏ¢### 2. ´´½¨·½·¨- `reflect.ValueOf`### 3. Í¨ÓÃ·½·¨- `Type()`: »ñÈ¡ÖµÀàĞÍ- `CanAddr()`: ÊÇ·ñ¿É»ñÈ¡µØÖ·- `Addr()`: »ñÈ¡µØÖ·- `CanInterface()`: ÊÇ·ñ¿ÉÒÔ»ñÈ¡½Ó¿ÚµÄ- `InterfaceData()`:- `Interface()`: ½«±äÁ¿×ª»»Îª interface{}- `CanSet()`: ÊÇ·ñ¿É¸üĞÂ- `isValid()`: ÊÇ·ñ³õÊ¼»¯ÎªÁãÖµ- `Kind()`: »ñÈ¡Öµ ÀàĞÍÃ¶¾ÙÖµ- `NumMethod()`: ·½·¨¸öÊı- `Method(int)`: Í¨¹ıË÷Òı»ñÈ¡·½·¨Öµ- `MethodByName(string)`: Í¨¹ı·½·¨Ãû×Ö»ñÈ¡·½·¨Öµ- `ConvertType()`: ×ª»»Îª¶ÔÓ¦ÀàĞÍµÄÖµ### 4. ĞŞ¸Ä·½·¨- `Set/Set*`: ÉèÖÃ±äÁ¿Öµ### 5. µ÷ÓÃ·½·¨- `Call()`- `CallSlice()`### 6. ÌØ¶¨ÀàĞÍ·½·¨- `reflect.Int*`, `reflect.Uint*`	Int(): »ñÈ¡¶ÔÓ¦ÀàĞÍÖµ	Unit(): »ñÈ¡¶ÔÓ¦ÀàĞÍÖµ- `reflect.Float*`	Float(): »ñÈ¡¶ÔÓ¦ÀàĞÍÖµ- `reflect.Complex*`	Complex): »ñÈ¡¶ÔÓ¦ÀàĞÍÖµ- `reflect.Array`	Len(): »ñÈ¡Êı×é³¤¶È	Index(int): ¸ù¾İË÷Òı»ñÈ¡ÔªËØ	Slice(int, int): »ñÈ¡ÇĞÆ¬	Slice3(int, int, int): »ñÈ¡ÇĞÆ¬- `reflect.Slice`	IsNil(): ÅĞ¶ÏÊÇ·ñÎª	Len(): »ñÈ¡ÔªËØÊıÁ¿	Cap(): »ñÈ¡ÈİÁ¿	Index(int): ¸ù¾İË÷Òı»ñÈ¡ÔªËØ	Slice(int, int): »ñÈ¡ÇĞÆ¬	Slice3(int, int, int): »ñÈ¡ÇĞÆ¬- `reflect.Map`	IsNil(): ÅĞ¶ÏÊÇ·ñÎª	Len(): »ñÈ¡ÔªËØÊıÁ¿	MapKeys(): »ñÈ¡ËùÓĞ¼ü	MapIndex(Value): ¸ù¾İ¼ü»ñÈ¡Öµ	MapRange »ñÈ¡¼üÖµ×é³ÉµÄ¿Éµü´ú¶ÔÏó- `reflect.Ptr`	Elem(): »ñÈ¡Ö¸ÏòÖµÀàĞÍ(½âÒıÓÃ)- `reflect.Func`	IsVariadic(): ÊÇ·ñ¾ßÓĞ¿É±ä²ÎÊı	NumIn(): ²ÎÊı¸öÊı	In(int): Í¨¹ıË÷Òı»ñÈ¡²ÎÊıÀàĞÍ	NumOut: ·µ»ØÖµ¸öÊı	Out(int): Í¨¹ıË÷Òı»ñÈ¡·µ»ØÖµÀàĞÍ- `reflect.Struct`	NumField : ÊôĞÔ¸öÊı	Field(int): Í¨¹ıË÷Òı»ñÈ¡ÊôĞÔ		StructField ½á¹¹Ìå³£ÓÃÊôĞÔ			Name: ÊôĞÔÃû			Anonymous: ÊÇ·ñÎªÄäÃû			Tag±êÇ©:				StructTag ³£ÓÃ·½·¨:					Get(string)					Lookup(string)	FieldByName(string): Í¨¹ıÊôĞÔÃû»ñÈ¡ÊôĞÔ	## ËÄ¡¢Ó¦ÓÃ### 1. ÄÚÖÃÀàĞÍµÄ²âÊÔ```go	var s interface{} = "abc"	// TypeOf»á·µ»ØÄ£°åµÄ¶ÔÏó	reflectType := reflect.TypeOf(s)	reflectValue := reflect.ValueOf(s)	log.Printf("[typeof:%v]", reflectType)	log.Printf("[valueof:%v]", reflectValue)```### 2. ×Ô¶¨ÒåstructµÄ·´Éä- Éú³ÉµÄ¾ÙÀı£¬¶ÔÎ´ÖªÀàĞÍµÄ½øĞĞ ±éÀú Ì½²âËüµÄField£¬³éÏó³ÉÒ»¸öº¯Êı- GoÓïÑÔÀïÃæstruct³ÉÔ±±äÁ¿Ğ¡Ğ´£¬ÔÚ·´ÉäµÄÊ±ºòÖ±½Ópanic- ½á¹¹Ìå·½·¨ÃûĞ¡Ğ´²»»ápanic£¬·´ÉäÊ±Ò²²»»á±»²é¿´µ½- Ö¸Õë·½·¨²»ÄÜ±»·´Éä²é¿´µ½	- ¶ÔÓÚ³ÉÔ±±äÁ¿		- ÏÈ»ñÈ¡`intereface`µÄ`reflect.Type`£¬È»ºó±éÀú`NumField`		- ÔÙÍ¨¹ı`reflect.Type`µÄField»ñÈ¡×Ö¶Î		- ×îºóÍ¨¹ı`Field`µÄ`interface`»ñÈ¡¶ÔÓ¦µÄvalue	- ¶ÔÓÚ·½·¨		- ÏÈ»ñÈ¡`intereface`µÄ`reflect.Type`£¬È»ºó±éÀú`NumMethod`		- ÔÙ·Ö±ğÍ¨¹ı`reflect.Type`µÄ`t.Method`»ñÈ¡ÕæÊµµÄ·½·¨		- ×îºóÍ¨¹ı`Name`ºÍ`Type`»ñÈ¡·½·¨µÄÀàĞÍºÍÖµ```go	type Person struct {		Name string		Age  int	}	type Student struct {		Person     // ÄäÃû½á¹¹ÌåÇ¶Ì×		StudentId  int		SchoolName string		IsBaoSong  bool // ÊÇ·ñ±£ËÍ		Hobbies    []string		// panic: reflect.Value.Interface: cannot return value obtained from unexported field or method		// hobbies    []string		Labels map[string]string	}	// func (s *Student) goHome() {	// 		log.Printf("[»Ø¼Ò][sid:%d]", s.StudentId)	// }	func (s *Student) GoHome() {		log.Printf("[»Ø¼Ò][sid:%d]", s.StudentId)	}	func (s Student) GotoSchool() {		log.Printf("[È¥ÉÏÑ§][sid:%d]", s.StudentId)	}	func (s Student) Baosong() {		log.Printf("[¾ºÈü±£ËÍ][sid:%d]", s.StudentId)	}	func reflectProbeStruct(s interface{}) {		// »ñÈ¡Ä¿±ê¶ÔÏó		t := reflect.TypeOf(s)		log.Printf("[¶ÔÏóµÄÀàĞÍÃû³Æ: %s]", t.Name())		// »ñÈ¡Ä¿±ê¶ÔÏóµÄÖµÀàĞÍ		v := reflect.ValueOf(s)		// ±éÀú»ñÈ¡³ÉÔ±±äÁ¿		for i := 0; i < t.NumField(); i++ {			// Field ´ú±í¶ÔÏóµÄ×Ö¶ÎÃû			key := t.Field(i)			value := v.Field(i).Interface()			//			if key.Anonymous {					log.Printf("[ÄäÃû×Ö¶Î][µÚ:%d¸ö×Ö¶Î][×Ö¶ÎÃû:%s][×Ö¶ÎµÄÀàĞÍ:%v][×Ö¶ÎµÄÖµ:%v]", i+1, key.Name, key.Type, value)			} else {					log.Printf("[ÃüÃû×Ö¶Î][µÚ:%d¸ö×Ö¶Î][×Ö¶ÎÃû:%s][×Ö¶ÎµÄÀàĞÍ:%v][×Ö¶ÎµÄÖµ:%v]", i+1, key.Name, key.Type, value)			}		}		// ´òÓ¡·½·¨		for i := 0; i < t.NumMethod(); i++ {			m := t.Method(i)			log.Printf("[µÚ:%d¸ö·½·¨][·½·¨Ãû³Æ:%s][·½·¨µÄÀàĞÍ:%v]", i+1, m.Name, m.Type)		}	}	s := Student{		Person:     Person{Name: "xiaoyi", Age: 9900},		StudentId:  123,		SchoolName: "ÎåµÀ¿Ú»Ê¼ÒÄĞ×ÓÖ°Òµ¼¼ÊõÑ§Ôº",		IsBaoSong:  true,		Hobbies:    []string{"³ª", "Ìø", "Rap"},		//hobbies:    []string{"³ª", "Ìø", "Rap"},		Labels: map[string]string{"k1": "v1", "k2": "v2"},	}	p := Person{		Name: "ÀîåÓ",		Age:  124,	}	reflectProbeStruct(s)	reflectProbeStruct(p)	// Ö´ĞĞ½á¹û	// 2021/07/16 17:09:30 [¶ÔÏóµÄÀàĞÍÃû³Æ: Student]	// 2021/07/16 17:09:30 [ÄäÃû×Ö¶Î][µÚ:1¸ö×Ö¶Î][×Ö¶ÎÃû:Person][×Ö¶ÎµÄÀàĞÍ:main.Person][×Ö¶ÎµÄÖµ:{xiaoyi 9900}]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:2¸ö×Ö¶Î][×Ö¶ÎÃû:StudentId][×Ö¶ÎµÄÀàĞÍ:int][×Ö¶ÎµÄÖµ:123]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:3¸ö×Ö¶Î][×Ö¶ÎÃû:SchoolName][×Ö¶ÎµÄÀàĞÍ:string][×Ö¶ÎµÄÖµ:ÎåµÀ¿Ú»Ê¼ÒÄĞ×ÓÖ°Òµ¼¼ÊõÑ§Ôº]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:4¸ö×Ö¶Î][×Ö¶ÎÃû:IsBaoSong][×Ö¶ÎµÄÀàĞÍ:bool][×Ö¶ÎµÄÖµ:true]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:5¸ö×Ö¶Î][×Ö¶ÎÃû:Hobbies][×Ö¶ÎµÄÀàĞÍ:[]string][×Ö¶ÎµÄÖµ:[³ª Ìø Rap]]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:6¸ö×Ö¶Î][×Ö¶ÎÃû:Labels][×Ö¶ÎµÄÀàĞÍ:map[string]string][×Ö¶ÎµÄÖµ:map[k1:v1 k2:v2]]	// 2021/07/16 17:09:30 [µÚ:1¸ö·½·¨][·½·¨Ãû³Æ:Baosong][·½·¨µÄÀàĞÍ:func(main.Student)]	// 2021/07/16 17:09:30 [µÚ:2¸ö·½·¨][·½·¨Ãû³Æ:GotoSchool][·½·¨µÄÀàĞÍ:func(main.Student)]	// 2021/07/16 17:09:30 [¶ÔÏóµÄÀàĞÍÃû³Æ: Person]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:1¸ö×Ö¶Î][×Ö¶ÎÃû:Name][×Ö¶ÎµÄÀàĞÍ:string][×Ö¶ÎµÄÖµ:ÀîåÓ]	// 2021/07/16 17:09:30 [ÃüÃû×Ö¶Î][µÚ:2¸ö×Ö¶Î][×Ö¶ÎÃû:Age][×Ö¶ÎµÄÀàĞÍ:int][×Ö¶ÎµÄÖµ:124]```### 3. ·´ÉäĞŞ¸ÄÖµ- ±ØĞëÊÇÖ¸ÕëÀàĞÍ- µ÷ÓÃ·½·¨ `pointer.Elem().Setxxx()````go    var num float64 = 3.14    log.Printf("[numÔ­Ê¼Öµ:%f]", num)    // Í¨¹ıreflect.ValueOf»ñÈ¡numÖĞµÄvalue    // ±ØĞëÊÇÖ¸Õë²Å¿ÉÒÔĞŞ¸ÄÖµ    pointer := reflect.ValueOf(&num)    newValue := pointer.Elem()    // ¸³Öµ    newValue.SetFloat(5.6)    log.Printf("[numĞÂÖµ:%f]", num)    pointer = reflect.ValueOf(num)    // reflect: call of reflect.Value.Elem on float64 Value    newValue = pointer.Elem()``` ### 4. ·´Éäµ÷ÓÃ·½·¨- Ê×ÏÈ `reflect.ValueOf(p1)` »ñÈ¡£¬µÃµ½·´ÉäÀàĞÍ¶ÔÏó- `reflect.ValueOf.MethodByName`£¬ĞèÒª´«Èë×¼È·µÄ·½·¨Ãû³Æ£¬`MethodByName`´ú±í×¢²á	- Ãû³Æ´íÎó `panic: reflect: call of reflect.Value.Call on zero Value`- `[]reflect.Value`£¬ÕâÊÇ×îÖÕĞèÒªµ÷ÓÃ·½·¨µÄ²ÎÊı£¬ÎŞ²ÎÊı´«¿ÕÇĞÆ¬```go	type Person struct {		Name   string		Age    int		Gender string	}	func (p Person) ReflectCallFuncWithArgs(name string, age int) {		log.Printf("[µ÷ÓÃµÄÊÇ´ø²ÎÊıµÄ·½·¨][args.name:%s][args.age:%d][[p.name:%s][p.age:%d]",			name,			age,			p.Name,			p.Age,		)	}	func (p Person) ReflectCallFuncWithNoArgs() {		log.Printf("[µ÷ÓÃµÄÊÇ²»´ø²ÎÊıµÄ·½·¨]")	}	p1 := Person{		Name:   "Ğ¡ÒÒ",		Age:    18,		Gender: "ÄĞ",	}	// Ê×ÏÈÍ¨¹ı reflect.ValueOf(p1)»ñÈ¡ µÃµ½·´ÉäÖµÀàĞÍ	getValue := reflect.ValueOf(p1)	// ´ø²ÎÊıµÄ·½·¨µ÷ÓÃ	methodValue := getValue.MethodByName("ReflectCallFuncWithArgs")	// ²ÎÊıÊÇreflect.ValueµÄÇĞÆ¬	args := []reflect.Value{reflect.ValueOf("ÀîåÓ"), reflect.ValueOf(30)}	methodValue.Call(args)	// ²»´ø²ÎÊıµÄ·½·¨µ÷ÓÃ	methodValue = getValue.MethodByName("ReflectCallFuncWithNoArgs")	// ²ÎÊıÊÇreflect.ValueµÄÇĞÆ¬	args = make([]reflect.Value, 0)	methodValue.Call(args)```### 5. ½á¹¹Ìå±êÇ©ºÍ·´Éä- jsonµÄ±êÇ©½âÎöjson	- JSONÊÇ¶ÔJavaScriptÖĞ¸÷ÖÖÀàĞÍµÄÖµ£¬Èç£º×Ö·û´®¡¢Êı×Ö¡¢²¼¶ûÖµºÍ¶ÔÏóµÈ£¬½øĞĞUnicode±¾ÎÄ±àÂë- yamlµÄ±êÇ©½âÎöyaml- xorm gormµÄ±êÇ© ±êÊ¶db×Ö¶Î- ×Ô¶¨Òå±êÇ©	- Ô­ÀíÊÇt.Field.Tag.Lookup("±êÇ©Ãû")```go	type Person struct {		Name string `json:"name" yaml:"yaml_name" mage:"name"`		Age  int    `json:"age"  yaml:"yaml_age"  mage:"age"`		City string `json:"-" yaml:"yaml_city" mage:"-"`	}	//json½âÎö	func jsonWork() {		// ¶ÔÏómarshal³É×Ö·û´®		p := Person{			Name: "xiaoyi",			Age:  18,			City: "±±¾©",		}		data, err := json.Marshal(p)		if err != nil {			log.Printf("[json.marshal.err][err:%v]", err)			return		}		log.Printf("[person.marshal.res][res:%v]", string(data))			// ´Ó×Ö·û´®½âÎö³É½á¹¹Ìå		p2Str := `	{		"name":"ÀîåÓ",		"age":28,		"city":"É½¶«"	}		var p2 Person		err = json.Unmarshal([]byte(p2Str), &p2)		if err != nil {			log.Printf("[json.unmarshal.err][err:%v]", err)			return		}		log.Printf("[person.unmarshal.res][res:%v]", p2)	}	// yaml¶ÁÈ¡ÎÄ¼ş	func yamlWork() {		filename := "a.yaml"		content, err := ioutil.ReadFile(filename)		if err != nil {			log.Printf("[ioutil.ReadFile.err][err:%v]", err)			return		}		p := &Person{}		//err = yaml.Unmarshal(content, p)                         // func yaml.Unmarshal(in []byte, out interface{}) (err error)		err = yaml.UnmarshalStrict(content, p)                     // func yaml.UnmarshalStrict(in []byte, out interface{}) (err error)		if err != nil {			log.Printf("[yaml.UnmarshalStrict.err][err:%v]", err)			return		}		log.Printf("[yaml.UnmarshalStrict.res][res:%v]", p)	}	// ×Ô¶¨Òå±êÇ©	func jiexizidingyibiaoqian(s interface{}) {		// typeOf typeÀàĞÍ		r := reflect.TypeOf(s)		value := reflect.ValueOf(s)		for i := 0; i < r.NumField(); i++ {			field := r.Field(i)			key := field.Name			if tag, ok := field.Tag.Lookup("mage"); ok {				if tag == "-" {					continue				}				log.Printf("[ÕÒµ½ÁËmage±êÇ©][key:%v][value:%v][±êÇ©: mage=%s]",					key,					value.Field(i),					tag,				)			}		}	}	jsonWork()	yamlWork()	p := Person{		Name: "xiaoyi",		Age:  18,		City: "±±¾©",	}	jiexizidingyibiaoqian(p)```## Îå¡¢±×¶Ë### 1. ´úÂë¿É¶ÁĞÔ±ä²î### 2. Òş²ØµÄ´íÎó¶ã¹ı±àÒë¼ì²é- GoÓïÑÔÎª¾²Ì¬ÓïÑÔ£¬±àÒëÆ÷ÄÜ·¢ÏÖÀàĞÍµÄ´íÎó- µ«ÊÇ¶ÔÓÚ·´Éä´úÂëÎŞÄÜÎªÁ¦£¬¿ÉÄÜÔËĞĞºÜ¾Ã²Å»ápanic- ·´Éäµ÷ÓÃ·½·¨µÄ¸±×÷ÓÃ£¬½« float64 ²ÎÊı´«³É int `panic: reflect: Call using float64 as type int`### 3. GoÓïÑÔ·´ÉäĞÔÄÜÎÊÌâ- ·´Éä±ÈÕı³£µÄ´úÂëÒªÂı1-2¸öÊı¾İÁ¿¼¶£¬Èç¹ûÊÇ×·ÇóĞÔÄÜµÄ¹Ø¼üÄ£¿éÓ¦¼õÉÙ·´Éä```go	// ËüÊÇÒ»¸ö¾ßÌåµÄÖµ£¬²»ÊÇÒ»¸ö¿É¸´ÓÃµÄ¶ÔÏó	// Ã¿´ÎÈ¡³öµÄ fieldValueÀàĞÍÊÇ reflect.value	// Ã¿´Î·´Éä¶¼Òª mallocÕâ¸ö reflect.Value½á¹¹Ìå£¬»¹ÓĞGC	type := reflect.value(obj)	fieldValue := type_.FieldByName("xx")```
+# Golang-Reflect  Golangçš„åå°„
+
+## ä¸€ã€Golangçš„åå°„å®šä¹‰
+
+- åå°„æ˜¯æŒ‡åœ¨è¿è¡Œæ—¶åŠ¨æ€çš„è®¿é—®å’Œä¿®æ”¹ä»»æ„ç±»å‹å¯¹è±¡çš„ç»“æ„å’Œæˆå‘˜
+
+- ä¸ºä»€ä¹ˆä½¿ç”¨åå°„
+	- ä¸¤ä¸ªç»å…¸åœºæ™¯
+		- ç¼–å†™çš„ä¸€ä¸ªå‡½æ•°ï¼Œè¿˜ä¸çŸ¥é“ä¼ ç»™å‡½æ•°çš„ç±»å‹å…·ä½“æ˜¯ä»€ä¹ˆï¼Œå¯èƒ½æ˜¯è¿˜æ²¡çº¦å®šå¥½ï¼Œä¹Ÿå¯èƒ½æ˜¯ä¼ å…¥çš„ç±»å‹å¾ˆå¤š
+		- å¸Œæœ›é€šè¿‡ç”¨æˆ·çš„è¾“å…¥æ¥å†³å®šè°ƒç”¨æŒ‰ä¸ªå‡½æ•°(æ ¹æ®å­—ç¬¦ä¸²è°ƒç”¨æ–¹æ³•)ï¼ŒåŠ¨æ€æ‰§è¡Œå‡½æ•°
+
+- pythonä¸­çš„åå°„
+	- æ ¹æ®å­—ç¬¦ä¸²æ‰§è¡Œå‡½æ•°
+	- æ ¹æ®å­—ç¬¦ä¸²å¯¼å…¥åŒ…
+
+- goä¸­çš„åå°„
+	- goæ˜¯é™æ€è¯­è¨€ã€‚åå°„å°±æ˜¯goæä¾›ä¸€ç§æœºåˆ¶ï¼Œåœ¨ç¼–è¯‘æ—¶ä¸çŸ¥é“ç±»å‹çš„æƒ…å†µä¸‹ï¼Œå¯ä»¥åšå¦‚ä¸‹çš„äº‹æƒ…
+		- æ›´æ–°å˜é‡
+		- è¿è¡Œæ—¶æŸ¥çœ‹å€¼
+		- è°ƒç”¨æ–¹æ³•
+		- å¯¹ä»–ä»¬çš„å¸ƒå±€è¿›è¡Œæ“ä½œ
+	- åœ¨goè¯­è¨€ä¸­æä¾›reflectåŒ…æä¾›åå°„çš„åŠŸèƒ½ ï¼Œæ¯ä¸€ä¸ªå˜é‡éƒ½æœ‰ä¸¤ä¸ªå±æ€§: ç±»å‹(Type)å’Œå€¼(Value)
+		- reflectåŒ…æä¾› ValueOf å’Œ Typeof
+		- `reflect.ValueOf` è·å–è¾“å…¥æ¥å£ä¸­æ•°æ®çš„å€¼ï¼Œå¦‚æœä¸ºç©ºè¿”å› 0
+		- `reflect.Typeof` è·å–è¾“å…¥æ¥å£ä¸­å€¼çš„ç±»å‹ï¼Œå¦‚æœä¸ºç©ºè¿”å› nil
+		- Typeof ä¼ å…¥æ‰€æœ‰ç±»å‹ï¼Œå› ä¸ºæ‰€æœ‰çš„ç±»å‹éƒ½å®ç°äº†ç©ºæ¥å£
+		
+## äºŒã€åå°„çš„Type
+
+### 1. å®šä¹‰
+- `reflect.Type` æ˜¯ä¸€ä¸ªæ¥å£ç±»å‹ï¼Œç”¨äºè·å–å˜é‡ç±»å‹çš„ä¿¡æ¯ï¼Œå¯é€šè¿‡ `reflect.TypeOf` å‡½æ•°è·å–æŸä¸ªå˜é‡çš„ç±»å‹ä¿¡æ¯
+```go
+	type Type interface { ... }
+
+	// reflect.TypeOf
+	func TypeOf(i interface{}) Type
+```
+
+### 2. Í¨é€šç”¨æ–¹æ³•
+- `Name()` ç±»å‹å
+- `PkgPath()` åŒ…è·¯å¾„
+- `Kind()` ç±»å‹æšä¸¾å€¼
+- `String()` Typeå­—ç¬¦ä¸²
+- `Comparable()` æ˜¯å¦å¯è¿›è¡Œæ¯”è¾ƒ
+- `ImplementsType()` æ˜¯å¦å®ç°æŸæ¥å£
+- `AssignableTo(Type)` æ˜¯å¦å¯èµ‹å€¼ç»™æŸç±»å‹
+- `ConvertibleTo(Type)` æ˜¯å¦å¯è½¬æ¢ä¸ºæŸç±»å‹
+- `NumMethod()` æ–¹æ³•ä¸ªæ•°
+- `Method(int)` é€šè¿‡ç´¢å¼•è·å–æ–¹æ³•ç±»å‹ï¼ŒMethodç»“æ„ä½“å¸¸ç”¨å±æ€§: `Name` æ–¹æ³•å; `Type` å‡½æ•°ç±»å‹; `Func` æ–¹æ³•å€¼ Value
+- `MethodByName(string)` é€šè¿‡æ–¹æ³•åå­—è·å–æ–¹æ³•ç±»å‹
+
+### 3. ç‰¹å®šç±»å‹æ–¹æ³•
+- `reflect.Int*, reflect.UInt*, reflect.Float*k, reflect.Complex*`
+	- `Bits()` è·å–å ç”¨å­—èŠ‚ä½æ•°
+- `reflect.Array`
+	- `Len()` è·å–æ•°ç»„é•¿åº¦
+	- `Elem()` è·å–æ•°æ®å…ƒç´ ç±»å‹
+- `reflect.Slice`
+	- `Elem()` è·å–åˆ‡ç‰‡å…ƒç´ ç±»å‹
+- `reflect.Map`
+	- `Key()` è·å–æ˜ å°„é”®ç±»å‹
+	- `Elem()` è·å–æ˜ å°„å€¼ç±»å‹
+- `reflect.Ptr`
+	- `Elem()` è·å–æŒ‡å‘å€¼ç±»å‹
+- `reflect.Func`
+	- `IsVariadic()` æ˜¯å¦å…·æœ‰å¯å˜å‚æ•°
+	- `NumIn()` å‚æ•°ä¸ªæ•°
+	- `In(int)` Í¨é€šè¿‡ç´¢å¼•è·å–å‚æ•°ç±»å‹
+	- `NumOut`  è¿”å›å€¼ä¸ªæ•°
+	- `Out(int)` Í¨é€šè¿‡ç´¢å¼•è·å–è¿”å›å€¼ç±»å‹
+- `reflect.Struct`
+	- `NumField` å±æ€§ä¸ªæ•°
+	- `Field(int)` Í¨é€šè¿‡ç´¢å¼•è·å–å±æ€§
+		- `StructField` ç»“æ„ä½“å¸¸ç”¨å±æ€§
+			- Name å±æ€§å
+			- Anonymous æ˜¯å¦ä¸ºåŒ¿å
+			- Tag æ ‡ç­¾
+				- StructTag å¸¸ç”¨æ–¹æ³•
+					- `Get(string)`
+					- `Lookup(string)`
+	- `FieldByName(string)` Í¨é€šè¿‡å±æ€§åè·å–å±æ€§
+	
+## ä¸‰ã€åå°„çš„Value
+```go
+### 1. ï¿½ï¿½ï¿½ï¿½
+- `reflect.Value` ï¿½ï¿½Ò»ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Ú»ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ reflect.ValueOf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ï¢
+
+### 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+- `reflect.ValueOf`
+
+### 3. Í¨ï¿½Ã·ï¿½ï¿½ï¿½
+- `Type()`: ï¿½ï¿½È¡Öµï¿½ï¿½ï¿½ï¿½
+- `CanAddr()`: ï¿½Ç·ï¿½É»ï¿½È¡ï¿½ï¿½Ö·
+- `Addr()`: ï¿½ï¿½È¡ï¿½ï¿½Ö·
+- `CanInterface()`: ï¿½Ç·ï¿½ï¿½ï¿½Ô»ï¿½È¡ï¿½Ó¿Úµï¿½
+- `InterfaceData()`:
+- `Interface()`: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îª interface{}
+- `CanSet()`: ï¿½Ç·ï¿½É¸ï¿½ï¿½ï¿½
+- `isValid()`: ï¿½Ç·ï¿½ï¿½Ê¼ï¿½ï¿½Îªï¿½ï¿½Öµ
+- `Kind()`: ï¿½ï¿½È¡Öµ ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½Öµ
+- `NumMethod()`: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+- `Method(int)`: Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµ
+- `MethodByName(string)`: Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµ
+- `ConvertType()`: ×ªï¿½ï¿½Îªï¿½ï¿½Ó¦ï¿½ï¿½ï¿½Íµï¿½Öµ
+
+### 4. ï¿½Ş¸Ä·ï¿½ï¿½ï¿½
+- `Set/Set*`: ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½Öµ
+
+### 5. ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½
+- `Call()`
+- `CallSlice()`
+
+### 6. ï¿½Ø¶ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½
+- `reflect.Int*`, `reflect.Uint*`
+	Int(): ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Öµ
+	Unit(): ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Öµ
+
+- `reflect.Float*`
+	Float(): ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Öµ
+
+- `reflect.Complex*`
+	Complex): ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Öµ
+
+- `reflect.Array`
+	Len(): ï¿½ï¿½È¡ï¿½ï¿½ï¿½é³¤ï¿½ï¿½
+	Index(int): ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡Ôªï¿½ï¿½
+	Slice(int, int): ï¿½ï¿½È¡ï¿½ï¿½Æ¬
+	Slice3(int, int, int): ï¿½ï¿½È¡ï¿½ï¿½Æ¬
+
+- `reflect.Slice`
+	IsNil(): ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½Îª
+	Len(): ï¿½ï¿½È¡Ôªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	Cap(): ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+	Index(int): ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡Ôªï¿½ï¿½
+	Slice(int, int): ï¿½ï¿½È¡ï¿½ï¿½Æ¬
+	Slice3(int, int, int): ï¿½ï¿½È¡ï¿½ï¿½Æ¬
+
+- `reflect.Map`
+	IsNil(): ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½Îª
+	Len(): ï¿½ï¿½È¡Ôªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	MapKeys(): ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ğ¼ï¿½
+	MapIndex(Value): ï¿½ï¿½ï¿½İ¼ï¿½ï¿½ï¿½È¡Öµ
+	MapRange ï¿½ï¿½È¡ï¿½ï¿½Öµï¿½ï¿½ÉµÄ¿Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+- `reflect.Ptr`
+	Elem(): ï¿½ï¿½È¡Ö¸ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+
+- `reflect.Func`
+	IsVariadic(): ï¿½Ç·ï¿½ï¿½ï¿½Ğ¿É±ï¿½ï¿½ï¿½ï¿½
+	NumIn(): ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	In(int): Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	NumOut: ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+	Out(int): Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+
+- `reflect.Struct`
+	NumField : ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½
+	Field(int): Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+		StructField ï¿½á¹¹ï¿½å³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			Name: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			Anonymous: ï¿½Ç·ï¿½Îªï¿½ï¿½ï¿½ï¿½
+			Tagï¿½ï¿½Ç©:
+				StructTag ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½:
+					Get(string)
+					Lookup(string)
+	FieldByName(string): Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+```
+## åº”ç”¨
+
+### 1. å†…ç½®ç±»å‹çš„æµ‹è¯•
+```go
+	var s interface{} = "abc"
+	// TypeOfä¼šè¿”å›æ¨¡æ¿çš„å¯¹è±¡
+	reflectType := reflect.TypeOf(s)
+	reflectValue := reflect.ValueOf(s)
+	log.Printf("[typeof:%v]", reflectType)
+	log.Printf("[valueof:%v]", reflectValue)
+```
+
+### 2. è‡ªå®šä¹‰structçš„åå°„
+- ç”Ÿæˆçš„ä¸¾ä¾‹ï¼Œå¯¹æœªçŸ¥ç±»å‹çš„è¿›è¡Œ éå† æ¢æµ‹å®ƒçš„Fieldï¼ŒæŠ½è±¡æˆä¸€ä¸ªå‡½æ•°
+
+- Goè¯­è¨€é‡Œé¢structæˆå‘˜å˜é‡å°å†™ï¼Œåœ¨åå°„çš„æ—¶å€™ç›´æ¥panic
+
+- ç»“æ„ä½“æ–¹æ³•åå°å†™ä¸ä¼španicï¼Œåå°„æ—¶ä¹Ÿä¸ä¼šè¢«æŸ¥çœ‹åˆ°
+
+- æŒ‡é’ˆæ–¹æ³•ä¸èƒ½è¢«åå°„æŸ¥çœ‹åˆ°
+```go
+	- ï¿½ï¿½ï¿½Ú³ï¿½Ô±ï¿½ï¿½ï¿½ï¿½
+		- ï¿½È»ï¿½È¡`intereface`ï¿½ï¿½`reflect.Type`ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½`NumField`
+		- ï¿½ï¿½Í¨ï¿½ï¿½`reflect.Type`ï¿½ï¿½Fieldï¿½ï¿½È¡ï¿½Ö¶ï¿½
+		- ï¿½ï¿½ï¿½Í¨ï¿½ï¿½`Field`ï¿½ï¿½`interface`ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½value
+	- ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½
+		- ï¿½È»ï¿½È¡`intereface`ï¿½ï¿½`reflect.Type`ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½`NumMethod`
+		- ï¿½Ù·Ö±ï¿½Í¨ï¿½ï¿½`reflect.Type`ï¿½ï¿½`t.Method`ï¿½ï¿½È¡ï¿½ï¿½Êµï¿½Ä·ï¿½ï¿½ï¿½
+		- ï¿½ï¿½ï¿½Í¨ï¿½ï¿½`Name`ï¿½ï¿½`Type`ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Íºï¿½Öµ
+```
+```go
+	type Person struct {
+		Name string
+		Age  int
+	}
+	type Student struct {
+		Person     // åŒ¿åç»“æ„ä½“åµŒå¥—
+		StudentId  int
+		SchoolName string
+		IsBaoSong  bool // æ˜¯å¦ä¿é€
+		Hobbies    []string
+		// panic: reflect.Value.Interface: cannot return value obtained from unexported field or method
+		// hobbies    []string
+		Labels map[string]string
+	}
+	// func (s *Student) goHome() {
+	// 		log.Printf("[å›å®¶][sid:%d]", s.StudentId)
+	// }
+	func (s *Student) GoHome() {
+		log.Printf("[å›å®¶][sid:%d]", s.StudentId)
+	}
+	func (s Student) GotoSchool() {
+		log.Printf("[å»ä¸Šå­¦][sid:%d]", s.StudentId)
+	}
+	func (s Student) Baosong() {
+		log.Printf("[ç«èµ›ä¿é€][sid:%d]", s.StudentId)
+	}
+	func reflectProbeStruct(s interface{}) {
+		// è·å–ç›®æ ‡å¯¹è±¡
+		t := reflect.TypeOf(s)
+		log.Printf("[å¯¹è±¡çš„ç±»å‹åç§°: %s]", t.Name())
+		// è·å–ç›®æ ‡å¯¹è±¡çš„å€¼ç±»å‹
+		v := reflect.ValueOf(s)
+		// éå†è·å–æˆå‘˜å˜é‡
+		for i := 0; i < t.NumField(); i++ {
+			// Field ä»£è¡¨å¯¹è±¡çš„å­—æ®µå
+			key := t.Field(i)
+			value := v.Field(i).Interface()
+			//
+			if key.Anonymous {
+					log.Printf("[åŒ¿åå­—æ®µ][ç¬¬:%dä¸ªå­—æ®µ][å­—æ®µå:%s][å­—æ®µçš„ç±»å‹:%v][å­—æ®µçš„å€¼:%v]", i+1, key.Name, key.Type, value)
+			} else {
+					log.Printf("[å‘½åå­—æ®µ][ç¬¬:%dä¸ªå­—æ®µ][å­—æ®µå:%s][å­—æ®µçš„ç±»å‹:%v][å­—æ®µçš„å€¼:%v]", i+1, key.Name, key.Type, value)
+			}
+		}
+		// æ‰“å°æ–¹æ³•
+		for i := 0; i < t.NumMethod(); i++ {
+			m := t.Method(i)
+			log.Printf("[ç¬¬:%dä¸ªæ–¹æ³•][æ–¹æ³•åç§°:%s][æ–¹æ³•çš„ç±»å‹:%v]", i+1, m.Name, m.Type)
+		}
+	}
+	s := Student{
+		Person:     Person{Name: "xiaoyi", Age: 9900},
+		StudentId:  123,
+		SchoolName: "äº”é“å£çš‡å®¶ç”·å­èŒä¸šæŠ€æœ¯å­¦é™¢",
+		IsBaoSong:  true,
+		Hobbies:    []string{"å”±", "è·³", "Rap"},
+		//hobbies:    []string{"å”±", "è·³", "Rap"},
+		Labels: map[string]string{"k1": "v1", "k2": "v2"},
+	}
+	p := Person{
+		Name: "æé€µ",
+		Age:  124,
+	}
+	reflectProbeStruct(s)
+	reflectProbeStruct(p)
+	// æ‰§è¡Œç»“æœ
+	// 2021/07/16 17:09:30 [å¯¹è±¡çš„ç±»å‹åç§°: Student]
+	// 2021/07/16 17:09:30 [åŒ¿åå­—æ®µ][ç¬¬:1ä¸ªå­—æ®µ][å­—æ®µå:Person][å­—æ®µçš„ç±»å‹:main.Person][å­—æ®µçš„å€¼:{xiaoyi 9900}]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:2ä¸ªå­—æ®µ][å­—æ®µå:StudentId][å­—æ®µçš„ç±»å‹:int][å­—æ®µçš„å€¼:123]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:3ä¸ªå­—æ®µ][å­—æ®µå:SchoolName][å­—æ®µçš„ç±»å‹:string][å­—æ®µçš„å€¼:äº”é“å£çš‡å®¶ç”·å­èŒä¸šæŠ€æœ¯å­¦é™¢]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:4ä¸ªå­—æ®µ][å­—æ®µå:IsBaoSong][å­—æ®µçš„ç±»å‹:bool][å­—æ®µçš„å€¼:true]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:5ä¸ªå­—æ®µ][å­—æ®µå:Hobbies][å­—æ®µçš„ç±»å‹:[]string][å­—æ®µçš„å€¼:[å”± è·³ Rap]]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:6ä¸ªå­—æ®µ][å­—æ®µå:Labels][å­—æ®µçš„ç±»å‹:map[string]string][å­—æ®µçš„å€¼:map[k1:v1 k2:v2]]
+	// 2021/07/16 17:09:30 [ç¬¬:1ä¸ªæ–¹æ³•][æ–¹æ³•åç§°:Baosong][æ–¹æ³•çš„ç±»å‹:func(main.Student)]
+	// 2021/07/16 17:09:30 [ç¬¬:2ä¸ªæ–¹æ³•][æ–¹æ³•åç§°:GotoSchool][æ–¹æ³•çš„ç±»å‹:func(main.Student)]
+	// 2021/07/16 17:09:30 [å¯¹è±¡çš„ç±»å‹åç§°: Person]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:1ä¸ªå­—æ®µ][å­—æ®µå:Name][å­—æ®µçš„ç±»å‹:string][å­—æ®µçš„å€¼:æé€µ]
+	// 2021/07/16 17:09:30 [å‘½åå­—æ®µ][ç¬¬:2ä¸ªå­—æ®µ][å­—æ®µå:Age][å­—æ®µçš„ç±»å‹:int][å­—æ®µçš„å€¼:124]
+```
+
+### 3. åå°„ä¿®æ”¹å€¼
+- å¿…é¡»æ˜¯æŒ‡é’ˆç±»å‹
+
+- è°ƒç”¨æ–¹æ³• `pointer.Elem().Setxxx()`
+
+```go
+    var num float64 = 3.14
+    log.Printf("[numåŸå§‹å€¼:%f]", num)
+    // é€šè¿‡reflect.ValueOfè·å–numä¸­çš„value
+    // å¿…é¡»æ˜¯æŒ‡é’ˆæ‰å¯ä»¥ä¿®æ”¹å€¼
+    pointer := reflect.ValueOf(&num)
+    newValue := pointer.Elem()
+    // èµ‹å€¼
+    newValue.SetFloat(5.6)
+    log.Printf("[numæ–°å€¼:%f]", num)
+
+    pointer = reflect.ValueOf(num)
+    // reflect: call of reflect.Value.Elem on float64 Value
+    newValue = pointer.Elem()
+```
+ 
+### 4. åå°„è°ƒç”¨æ–¹æ³•
+- é¦–å…ˆ `reflect.ValueOf(p1)` è·å–ï¼Œå¾—åˆ°åå°„ç±»å‹å¯¹è±¡
+
+- `reflect.ValueOf.MethodByName` éœ€è¦ä¼ å…¥å‡†ç¡®çš„æ–¹æ³•åç§°ï¼Œ`MethodByName`ä»£è¡¨æ³¨å†Œ
+	- åç§°é”™è¯¯ `panic: reflect: call of reflect.Value.Call on zero Value`
+
+- `[]reflect.Value` è¿™æ˜¯æœ€ç»ˆéœ€è¦è°ƒç”¨æ–¹æ³•çš„å‚æ•°ï¼Œæ— å‚æ•°ä¼ ç©ºåˆ‡ç‰‡
+```go
+	type Person struct {
+		Name   string
+		Age    int
+		Gender string
+	}
+	func (p Person) ReflectCallFuncWithArgs(name string, age int) {
+		log.Printf("[è°ƒç”¨çš„æ˜¯å¸¦å‚æ•°çš„æ–¹æ³•][args.name:%s][args.age:%d][[p.name:%s][p.age:%d]",
+			name,
+			age,
+			p.Name,
+			p.Age,
+		)
+	}
+	func (p Person) ReflectCallFuncWithNoArgs() {
+		log.Printf("[è°ƒç”¨çš„æ˜¯ä¸å¸¦å‚æ•°çš„æ–¹æ³•]")
+	}
+	p1 := Person{
+		Name:   "å°ä¹™",
+		Age:    18,
+		Gender: "ç”·",
+	}
+
+	// é¦–å…ˆé€šè¿‡ reflect.ValueOf(p1)è·å– å¾—åˆ°åå°„å€¼ç±»å‹
+	getValue := reflect.ValueOf(p1)
+
+	// å¸¦å‚æ•°çš„æ–¹æ³•è°ƒç”¨
+	methodValue := getValue.MethodByName("ReflectCallFuncWithArgs")
+
+	// å‚æ•°æ˜¯reflect.Valueçš„åˆ‡ç‰‡
+	args := []reflect.Value{reflect.ValueOf("æé€µ"), reflect.ValueOf(30)}
+	methodValue.Call(args)
+
+	// ä¸å¸¦å‚æ•°çš„æ–¹æ³•è°ƒç”¨
+	methodValue = getValue.MethodByName("ReflectCallFuncWithNoArgs")
+
+	// å‚æ•°æ˜¯reflect.Valueçš„åˆ‡ç‰‡
+	args = make([]reflect.Value, 0)
+	methodValue.Call(args)
+```
+
+
+### 5. ç»“æ„ä½“æ ‡ç­¾å’Œåå°„
+- jsonçš„æ ‡ç­¾è§£æ `json`
+	- JSON æ˜¯å¯¹ JavaScript ä¸­å„ç§ç±»å‹çš„å€¼ï¼Œå¦‚ï¼šå­—ç¬¦ä¸²ã€æ•°å­—ã€å¸ƒå°”å€¼å’Œå¯¹è±¡ç­‰ï¼Œè¿›è¡ŒUnicodeæœ¬æ–‡ç¼–ç 
+
+- yamlçš„æ ‡ç­¾è§£æ `yaml`
+
+- xorm gormçš„æ ‡ç­¾ æ ‡è¯†dbå­—æ®µ
+
+- è‡ªå®šä¹‰æ ‡ç­¾
+	- åŸç†æ˜¯ `t.Field.Tag.Lookup` "æ ‡ç­¾å"
+```go
+	type Person struct {
+		Name string `json:"name" yaml:"yaml_name" mage:"name"`
+		Age  int    `json:"age"  yaml:"yaml_age"  mage:"age"`
+		City string `json:"-" yaml:"yaml_city" mage:"-"`
+	}
+	//jsonè§£æ
+	func jsonWork() {
+		// å¯¹è±¡marshalæˆå­—ç¬¦ä¸²
+		p := Person{
+			Name: "xiaoyi",
+			Age:  18,
+			City: "åŒ—äº¬",
+		}
+		data, err := json.Marshal(p)
+		if err != nil {
+			log.Printf("[json.marshal.err][err:%v]", err)
+			return
+		}
+		log.Printf("[person.marshal.res][res:%v]", string(data))
+	
+		// ä»å­—ç¬¦ä¸²è§£ææˆç»“æ„ä½“
+		p2Str := `
+	{
+		"name":"æé€µ",
+		"age":28,
+		"city":"å±±ä¸œ"
+	}`
+		var p2 Person
+		err = json.Unmarshal([]byte(p2Str), &p2)
+		if err != nil {
+			log.Printf("[json.unmarshal.err][err:%v]", err)
+			return
+		}
+		log.Printf("[person.unmarshal.res][res:%v]", p2)
+	}
+	// yamlè¯»å–æ–‡ä»¶
+	func yamlWork() {
+		filename := "a.yaml"
+		content, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Printf("[ioutil.ReadFile.err][err:%v]", err)
+			return
+		}
+		p := &Person{}
+		//err = yaml.Unmarshal(content, p)                         // func yaml.Unmarshal(in []byte, out interface{}) (err error)
+		err = yaml.UnmarshalStrict(content, p)                     // func yaml.UnmarshalStrict(in []byte, out interface{}) (err error)
+		if err != nil {
+			log.Printf("[yaml.UnmarshalStrict.err][err:%v]", err)
+			return
+		}
+		log.Printf("[yaml.UnmarshalStrict.res][res:%v]", p)
+	}
+	// è‡ªå®šä¹‰æ ‡ç­¾
+	func jiexizidingyibiaoqian(s interface{}) {
+		// typeOf typeç±»å‹
+		r := reflect.TypeOf(s)
+		value := reflect.ValueOf(s)
+		for i := 0; i < r.NumField(); i++ {
+			field := r.Field(i)
+			key := field.Name
+			if tag, ok := field.Tag.Lookup("mage"); ok {
+				if tag == "-" {
+					continue
+				}
+				log.Printf("[æ‰¾åˆ°äº†mageæ ‡ç­¾][key:%v][value:%v][æ ‡ç­¾: mage=%s]",
+					key,
+					value.Field(i),
+					tag,
+				)
+			}
+		}
+	}
+	jsonWork()
+	yamlWork()
+	p := Person{
+		Name: "xiaoyi",
+		Age:  18,
+		City: "åŒ—äº¬",
+	}
+	jiexizidingyibiaoqian(p)
+```
+
+## å¼Šç«¯
+
+### 1. ä»£ç å¯è¯»æ€§å˜å·®
+
+### 2. éšè—çš„é”™è¯¯èº²è¿‡ç¼–è¯‘æ£€æŸ¥
+- Goè¯­è¨€ä¸ºé™æ€è¯­è¨€ï¼Œç¼–è¯‘å™¨èƒ½å‘ç°ç±»å‹çš„é”™è¯¯
+
+- ä½†æ˜¯å¯¹äºåå°„ä»£ç æ— èƒ½ä¸ºåŠ›ï¼Œå¯èƒ½è¿è¡Œå¾ˆä¹…æ‰ä¼š panic
+
+- åå°„è°ƒç”¨æ–¹æ³•çš„å‰¯ä½œç”¨ï¼Œå°† float64 å‚æ•°ä¼ æˆ int `panic: reflect: Call using float64 as type int`
+
+### 3. Goè¯­è¨€åå°„æ€§èƒ½é—®é¢˜
+- åå°„æ¯”æ­£å¸¸çš„ä»£ç è¦æ…¢1-2ä¸ªæ•°æ®é‡çº§ï¼Œå¦‚æœæ˜¯è¿½æ±‚æ€§èƒ½çš„å…³é”®æ¨¡å—åº”å‡å°‘åå°„
+```go
+	// å®ƒæ˜¯ä¸€ä¸ªå…·ä½“çš„å€¼ï¼Œä¸æ˜¯ä¸€ä¸ªå¯å¤ç”¨çš„å¯¹è±¡
+	// æ¯æ¬¡å–å‡ºçš„ fieldValueç±»å‹æ˜¯ reflect.value
+	// æ¯æ¬¡åå°„éƒ½è¦ mallocè¿™ä¸ª reflect.Valueç»“æ„ä½“ï¼Œè¿˜æœ‰GC
+	type := reflect.value(obj)
+	fieldValue := type_.FieldByName("xx")
+```
