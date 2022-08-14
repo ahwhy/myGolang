@@ -81,7 +81,7 @@
 	- `FieldByName(string)` ͨ通过属性名获取属性
 	
 ## 三、反射的Value
-```go
+
 ### 1. ����
 - `reflect.Value` ��һ���ṹ�����ͣ����ڻ�ȡ����ֵ����Ϣ����ͨ�� reflect.ValueOf ������ȡĳ��������ֵ��Ϣ
 
@@ -163,7 +163,7 @@
 					Get(string)
 					Lookup(string)
 	FieldByName(string): ͨ����������ȡ����
-```
+
 ## 应用
 
 ### 1. 内置类型的测试
@@ -184,7 +184,6 @@
 - 结构体方法名小写不会panic，反射时也不会被查看到
 
 - 指针方法不能被反射查看到
-```go
 	- ���ڳ�Ա����
 		- �Ȼ�ȡ`intereface`��`reflect.Type`��Ȼ�����`NumField`
 		- ��ͨ��`reflect.Type`��Field��ȡ�ֶ�
@@ -193,7 +192,7 @@
 		- �Ȼ�ȡ`intereface`��`reflect.Type`��Ȼ�����`NumMethod`
 		- �ٷֱ�ͨ��`reflect.Type`��`t.Method`��ȡ��ʵ�ķ���
 		- ���ͨ��`Name`��`Type`��ȡ���������ͺ�ֵ
-```
+
 ```go
 	type Person struct {
 		Name string
