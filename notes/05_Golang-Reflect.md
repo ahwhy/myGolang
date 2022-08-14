@@ -82,87 +82,86 @@
 	
 ## 三、反射的Value
 
-### 1. ����
-- `reflect.Value` ��һ���ṹ�����ͣ����ڻ�ȡ����ֵ����Ϣ����ͨ�� reflect.ValueOf ������ȡĳ��������ֵ��Ϣ
-
-### 2. ��������
+### 1. 定义
+- `reflect.Value` 是一个结构体类型，用于获取变量值的信息，可通过 `reflect.ValueOf` 函数获取某个变量的值信息
+### 2. 通用方法
 - `reflect.ValueOf`
 
-### 3. ͨ�÷���
-- `Type()`: ��ȡֵ����
-- `CanAddr()`: �Ƿ�ɻ�ȡ��ַ
-- `Addr()`: ��ȡ��ַ
-- `CanInterface()`: �Ƿ���Ի�ȡ�ӿڵ�
-- `InterfaceData()`:
-- `Interface()`: ������ת��Ϊ interface{}
-- `CanSet()`: �Ƿ�ɸ���
-- `isValid()`: �Ƿ��ʼ��Ϊ��ֵ
-- `Kind()`: ��ȡֵ ����ö��ֵ
-- `NumMethod()`: ��������
-- `Method(int)`: ͨ��������ȡ����ֵ
-- `MethodByName(string)`: ͨ���������ֻ�ȡ����ֵ
-- `ConvertType()`: ת��Ϊ��Ӧ���͵�ֵ
+### 3. ͨ通用方法
+ - `Type()` 获取值类型
+ - `CanAddr()` 是否可获取地址
+ - `Addr()` 获取地址
+ - `CanInterface()` 是否可以获取接口的
+ - `InterfaceData()`
+ - `Interface()` 将变量转换为 interface{}
+ - `CanSet()` 是否可更新
+ - `isValid()` 是否初始化为零值
+ - `Kind()` 获取值 类型枚举值
+ - `NumMethod()` 方法个数
+ - `Method(int)` 通过索引获取方法值
+ - `MethodByName(string)` 通过方法名字获取方法值
+ - `ConvertType()` 转换为对应类型的值
 
-### 4. �޸ķ���
-- `Set/Set*`: ���ñ���ֵ
+### 4. 修改方法
+- `Set/Set*` 设置变量值
 
-### 5. ���÷���
+### 5. 调用方法
 - `Call()`
 - `CallSlice()`
 
-### 6. �ض����ͷ���
+### 6. 特定类型方法
 - `reflect.Int*`, `reflect.Uint*`
-	Int(): ��ȡ��Ӧ����ֵ
-	Unit(): ��ȡ��Ӧ����ֵ
+	- `Int()` 获取对应类型值
+	- `Unit()` 获取对应类型值
 
 - `reflect.Float*`
-	Float(): ��ȡ��Ӧ����ֵ
+	- `Float()` 获取对应类型值
 
 - `reflect.Complex*`
-	Complex): ��ȡ��Ӧ����ֵ
+	- `Complex()` 获取对应类型值
 
-- `reflect.Array`
-	Len(): ��ȡ���鳤��
-	Index(int): ����������ȡԪ��
-	Slice(int, int): ��ȡ��Ƭ
-	Slice3(int, int, int): ��ȡ��Ƭ
-
+- `reflact.Array`
+	- `Len()` 获取数组长度
+	- `Index(int)` 根据索引获取元素
+	- `Slice(int, int)` 获取切片
+	- `Slice3(int, int, int)` 获取切片
+	
 - `reflect.Slice`
-	IsNil(): �ж��Ƿ�Ϊ
-	Len(): ��ȡԪ������
-	Cap(): ��ȡ����
-	Index(int): ����������ȡԪ��
-	Slice(int, int): ��ȡ��Ƭ
-	Slice3(int, int, int): ��ȡ��Ƭ
+	- `IsNil()` 判断是否为
+	- `Len()` 获取元素数量
+	- `Cap()` 获取容量
+	- `Index(int)` 根据索引获取元素
+	- `Slice(int, int)` 获取切片
+	- `Slice3(int, int, int)` 获取切片
 
 - `reflect.Map`
-	IsNil(): �ж��Ƿ�Ϊ
-	Len(): ��ȡԪ������
-	MapKeys(): ��ȡ���м�
-	MapIndex(Value): ���ݼ���ȡֵ
-	MapRange ��ȡ��ֵ��ɵĿɵ�������
+	- `IsNil()` 判断是否为
+	- `Len()` 获取元素数量
+	- `MapKeys()` 获取所有键
+	- `MapIndex(Value)` 根据键获取值
+	- `MapRange()` 获取键值组成的可迭代对象
 
-- `reflect.Ptr`
-	Elem(): ��ȡָ��ֵ����(������)
+ - `reflect.Ptr`
+	- `Elem()` 获取指向值类型(解引用)
 
-- `reflect.Func`
-	IsVariadic(): �Ƿ���пɱ����
-	NumIn(): ��������
-	In(int): ͨ��������ȡ��������
-	NumOut: ����ֵ����
-	Out(int): ͨ��������ȡ����ֵ����
+ - `reflect.Func`
+	- `IsVariadic()` 是否具有可变参数
+	- `NumIn()` 参数个数
+	- `In(int)` 通过索引获取参数类型
+	-` NumOut()` 返回值个数
+	- `Out(int)` 通过索引获取返回值类型
 
-- `reflect.Struct`
-	NumField : ���Ը���
-	Field(int): ͨ��������ȡ����
-		StructField �ṹ�峣������
-			Name: ������
-			Anonymous: �Ƿ�Ϊ����
-			Tag��ǩ:
-				StructTag ���÷���:
-					Get(string)
-					Lookup(string)
-	FieldByName(string): ͨ����������ȡ����
+ - `reflect.Struct`
+	- `NumField()` 属性个数
+	- `Field(int)` 通过索引获取属性
+		- `StructField` 结构体常用属性
+			- Name 属性名
+			- Anonymous 是否为匿名
+			- Tag标签
+				- StructTag 常用方法
+					- `Get(string)`
+					- `Lookup(string)`
+	- `FieldByName(string)` 通过属性名获取属性
 
 ## 应用
 
@@ -184,14 +183,14 @@
 - 结构体方法名小写不会panic，反射时也不会被查看到
 
 - 指针方法不能被反射查看到
-	- ���ڳ�Ա����
-		- �Ȼ�ȡ`intereface`��`reflect.Type`��Ȼ�����`NumField`
-		- ��ͨ��`reflect.Type`��Field��ȡ�ֶ�
-		- ���ͨ��`Field`��`interface`��ȡ��Ӧ��value
-	- ���ڷ���
-		- �Ȼ�ȡ`intereface`��`reflect.Type`��Ȼ�����`NumMethod`
-		- �ٷֱ�ͨ��`reflect.Type`��`t.Method`��ȡ��ʵ�ķ���
-		- ���ͨ��`Name`��`Type`��ȡ���������ͺ�ֵ
+	- 对于成员变量
+		- 先获取 intereface 的 `reflect.Type`，然后遍历 `NumField`
+		- 再通过 `reflect.Type` 的 `Field` 获取字段
+		- 最后通过 `Field` 的interface 获取对应的 value
+	- 对于方法
+		- 先获取 intereface 的 `reflect.Type`，然后遍历 `NumMethod`
+		- 再分别通过 `reflect.Type` 的 `t.Method` 获取真实的方法
+		- 最后通过 Name 和 Type 获取方法的类型和值
 
 ```go
 	type Person struct {
