@@ -466,3 +466,10 @@
 
 ### 14.k8s.io/apimachinery/pkg/util/uuid
 - Uuid
+
+### 15.github.com/pkg/errors
+- Errors
+
+### 16.k8s.io/client-go
+- k8s.io/client-go/rest
+- k8s.io/client-go/tools/clientcmd
