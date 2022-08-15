@@ -249,6 +249,47 @@
 	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
 	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
 
+- encoding/base64
+	- base64实现了RFC 4648规定的base64编码
+```go
+	// RFC 4648定义的标准base64编码字符集
+	var StdEncoding = NewEncoding(encodeStd)
+
+	// RFC 4648定义的另一base64编码字符集，用于URL和文件名
+	var URLEncoding = NewEncoding(encodeURL)
+
+	// 双向的编码/解码协议
+	type Encoding struct { ... }
+
+	// 使用给出的字符集生成一个*Encoding，字符集必须是64字节的字符串
+	func NewEncoding(encoder string) *Encoding
+
+	// 将src的数据解码后存入dst，最多写DecodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 如果src包含非法字符，将返回成功写入的字符数和CorruptInputError
+	// 换行符（\r、\n）会被忽略。
+	func (enc *Encoding) Decode(dst, src []byte) (n int, err error)
+
+	// 返回base64编码的字符串s代表的数据
+	// base64.StdEncoding.DecodeString(str)
+	func (enc *Encoding) DecodeString(s string) ([]byte, error)
+
+	// 将src的数据编码后存入dst，最多写EncodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 函数会把输出设置为4的倍数，因此不建议对大数据流的独立数据块执行此方法，使用NewEncoder()代替
+	func (enc *Encoding) Encode(dst, src []byte)
+
+	// 返回将src编码后的字符串
+	// base64.StdEncoding.EncodeToString(data)
+	func (enc *Encoding) EncodeToString(src []byte) string
+
+	// 创建一个新的base64流解码器
+	func NewDecoder(enc *Encoding, r io.Reader) io.Reader
+
+	// 创建一个新的base64流编码器
+	// 写入的数据会在编码后再写入w，base32编码每3字节执行一次编码操作
+	// 写入完毕后，使用者必须调用Close方法以便将未写入的数据从缓存中刷新到w中
+	func NewEncoder(enc *Encoding, w io.Writer) io.WriteCloser
+```
+
 - encoding/json
 	- json包实现了json对象的编解码
 	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
