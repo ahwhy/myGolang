@@ -341,6 +341,54 @@
 	func (enc *Encoder) Encode(v interface{}) error
 ```
 
+### 5. io
+- io
+	- io包提供了对I/O原语的基本接口
+	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
+```go
+	// io.Reader 接口用于包装基本的读取方法
+	type Reader interface {
+		// Read方法读取len(p)字节数据写入p
+		Read(p []byte) (n int, err error)
+	}
+
+	// io.Writer接口用于包装基本的写入方法
+	type Writer interface {
+		// Write方法len(p) 字节数据从p写入底层的数据流
+		Write(p []byte) (n int, err error)
+	}
+
+	// io.Closer接口用于包装基本的关闭方法
+	type Closer interface {
+		Close() error
+	}
+
+	// io.Seeker接口用于包装基本的移位方法
+	type Seeker interface {
+		// Seek方法设定下一次读写的位置：偏移量为offset，校准点由whence确定：0表示相对于文件起始；1表示相对于当前位置；2表示相对于文件结尾
+		// Seek方法返回新的位置以及可能遇到的错误
+		// 移动到一个绝对偏移量为负数的位置会导致错误;移动到任何偏移量为正数的位置都是合法的，但其下一次I/O操作的具体行为则要看底层的实现
+		Seek(offset int64, whence int) (int64, error)
+	}
+
+	// 将src的数据拷贝到dst，直到在src上到达EOF或发生错误，返回拷贝的字节数和遇到的第一个错误
+	func Copy(dst Writer, src Reader) (written int64, err error)
+
+	// 从src拷贝n个字节数据到dst，直到在src上到达EOF或发生错误，返回复制的字节数和遇到的第一个错误
+	func CopyN(dst Writer, src Reader, n int64) (written int64, err error)
+
+	// ReadAtLeast从r至少读取min字节数据填充进buf
+	func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
+
+	// ReadFull从r精确地读取len(buf)字节数据填充进buf
+	func ReadFull(r Reader, buf []byte) (n int, err error)
+
+	// WriteString函数将字符串s的内容写入w中
+	func WriteString(w Writer, s string) (n int, err error)
+```
+
+- io/ioutil
+
 ### 3. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
