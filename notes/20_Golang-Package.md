@@ -409,25 +409,40 @@
 	func TempFile(dir, prefix string) (f *os.File, err error)
 ```
 
+### 6. os
+- os包提供了操作系统函数的不依赖平台的接口
+	- os包的接口规定为在所有操作系统中都是一致的
+	- 非公用的属性可以从操作系统特定的syscall包获取
+	- `os.Hostname()` 获取主机名
+	- `os.Getenv(key)` Getenv检索并返回名为key的环境变量的值
+	- `os.Getpid()` 返回调用者所在进程的进程ID
+	- `os.Getppid()` 返回调用者所在进程的父进程的进程ID
+	- `os.Exit(code)` Exit让当前程序以给出的状态码code退出;一般来说，状态码0表示成功，非0表示出错;程序会立刻终止，defer的函数不会被执行
+	- `os.Getwd()` 获取当前目录
+	- `os.Mkdir("a", os.ModePerm)` 创建文件夹
+	- `os.MkdirAll("a/b/c", os.ModePerm)` 创建文件夹(父目录不存在逐层创建)
+	- `os.IsExist(err)` 与 `os.Stat` 一起用于判断文件存在
+	- `os.IsNotExist(err)` 与 `os.Stat` 一起用于判断文件不存在
+	- `os.Link("oldname", "newname")` 创建一个名为newname指向oldname的硬链
+	- `os.Create()` 创建文件
+	- `os.Open("test.txt")` 读取文件
+	- `os.Open().Stat` 获取文件属性 
+	- `os.Chmod(name string, mode FileMode)` 修改文件权限
+	- `os.Chown(name string, uid, gid int)` 修改文件所属用户，用户组
+	- `os.Truncate(name string, size int64)` 修改name指定的文件的大小
+	- `os.Rename("a.txt", "b.txt")` 重命名文件
+	- `os.Remove("b.txt")` 删除指定的文件或目录
+	- `os.RemoveAll("path")` 删除path指定的文件，或目录及它包含的任何下级对象
+	- `os.TempDir()` 返回一个用于保管临时文件的默认目录
+	- `os.Create(name)` 创建文件并返回文件对象指针(文件不存在则创建，文件存在则清空)
+	- `os.Open(name)` 打开文件并返回文件对象指针
+	- `os.OpenFile(name, flag, perm)` 按指定权限打开文件，并返回文件指针对象
 
-### 3. reflect
+### 4. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
 	reflect.TypeOf()
 	reflect.ValueOf()
-```
-
-### 4. os
-```go
-	// os文件处理
-	*os.PathError           // PathError records an error and the operation and file path that caused it.
-	*os.LinkError           // LinkError records an error during a link or symlink or rename system call and the paths that caused it.
-	*os.SyscallError        // SyscallError records an error from a specific system call.
-
-	//系统退出
-	os.Esxit(1) 
-	os.Args                 // 接收命令行参数生成切片，从程序本身的路径开始 var os.Args []string
-	os.Stat("test.txt")     // func os.Stat(name string) (fs.FileInfo, error)  Stat returns a FileInfo describing the named file. If there is an error, it will be of type *PathError.
 ```
 
 ### 5. strings
