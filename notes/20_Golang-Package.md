@@ -410,7 +410,8 @@
 ```
 
 ### 6. os
-- os包提供了操作系统函数的不依赖平台的接口
+- os
+	- os包提供了操作系统函数的不依赖平台的接口
 	- os包的接口规定为在所有操作系统中都是一致的
 	- 非公用的属性可以从操作系统特定的syscall包获取
 	- `os.Hostname()` 获取主机名
@@ -437,6 +438,50 @@
 	- `os.Create(name)` 创建文件并返回文件对象指针(文件不存在则创建，文件存在则清空)
 	- `os.Open(name)` 打开文件并返回文件对象指针
 	- `os.OpenFile(name, flag, perm)` 按指定权限打开文件，并返回文件指针对象
+
+- os/exec
+	- exec包提供了启动一个外部进程并使用标准输入和输出进行通信
+	- `exec.Command("date").Output()` 执行命令并返回标准输出的切片
+
+- os/signal
+	- signal包实现了对输入信号的访问
+```go
+	// Notify函数让signal包将输入信号转发到c
+	// 如果没有列出要传递的信号，会将所有输入信号传递到c；否则只传递列出的输入信号。
+	func Notify(c chan<- os.Signal, sig ...os.Signal)
+
+	// Stop 让signal包停止向c转发信号
+	// 它会取消之前使用c调用的所有Notify的效果；当Stop返回后，会保证c不再接收到任何信号
+	func Stop(c chan<- os.Signal)
+
+	// Example
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	s := <-c
+	fmt.Println("Got signal:", s)
+```
+
+- os/user
+	- user包允许通过名称或ID查询用户帐户
+```go
+	// User代表一个用户帐户
+	type User struct {
+		Uid      string // 用户ID
+		Gid      string // 初级组ID
+		Username string
+		Name     string
+		HomeDir  string
+	}
+
+	// user.Current 返回当前的用户帐户
+	func Current() (*User, error)
+
+	// user.Lookup 根据用户名查询用户
+	func Lookup(username string) (*User, error)
+
+	// user.LookupId 根据用户ID查询用户
+	func LookupId(uid string) (*User, error)
+```
 
 ### 4. reflect
 ```go

@@ -32,6 +32,48 @@
 	- 通常错误值里包含更多信息，例如，如果某个使用一个文件名的调用(如Open、Stat)失败了，打印错误时会包含该文件名，错误类型将为*PathError，其内部可以解包获得更多信息
 	- os包的接口规定为在所有操作系统中都是一致的；非公用的属性可以从操作系统特定的syscall包获取
 
+- os包中，标准输入、标准输出、标准错误
+	- `os.Stdin` 标准输入 
+	- `os.Stdout` 标准输出
+	- `os.Stderr` 标准错误
+```go
+	// Stdin、Stdout和Stderr是指向标准输入、标准输出、标准错误输出的文件描述符
+	var (
+		Stdin  = NewFile(uintptr(syscall.Stdin), "/dev/stdin")
+		Stdout = NewFile(uintptr(syscall.Stdout), "/dev/stdout")
+		Stderr = NewFile(uintptr(syscall.Stderr), "/dev/stderr")
+	)
+
+	// os.Stdin 直接读取 
+	content := make([]byte, 3)
+	os.Stdin.Read(content)
+
+	// os.StdOut.WriteString
+	os.Stdout.WriteString("我是Stdout的输出")
+	fmt.Fprintln(os.Stdout, "aaaaa")
+	fmt.Fprintf(os.Stdout, "I am: %s", "aaaaa")
+
+	// os.StdOut.Write 代替 fmt.Print
+	os.Stdout.Write([]byte("aa和bb"))
+	fmt.Println("aa和bb")
+```
+
+- os包中，操作系统信号
+```go
+	// Signal代表一个操作系统信号
+	// 一般其底层实现是依赖于操作系统的：在Unix中，它是syscall.Signal类型
+	type Signal interface {
+		String() string
+		Signal() // 用来区分其他实现了Stringer接口的类型
+	}
+
+	// 仅有的肯定会被所有操作系统提供的信号，Interrupt(中断信号) 和Kill (强制退出信号)
+	var (
+		Interrupt Signal = syscall.SIGINT
+		Kill      Signal = syscall.SIGKILL
+	)
+```
+
 - os包中，常用 对系统、进程的操作函数
 	- `os.Hostname()` 获取主机名
 	- `os.Getenv(key)` Getenv检索并返回名为key的环境变量的值
@@ -219,7 +261,6 @@
 		return
 	}
 	defer file.Close()
-	
 	name := "aa"
 	fmt.Fprintf(file, "I am %s\n", name)
 	file.WriteString("ccc联动")
@@ -265,68 +306,82 @@
 	defer file.Close()
 ```
 
-### 2. 标准输入、标准输出、标准错误
-- 标准输入 -> `os.Stdin`
-	- `os.Stdin` 直接读取
+- Go语言中的os/exec包
+	- exec包执行外部命令
+	- 它包装了os.StartProcess函数以便更容易的修正输入和输出，使用管道连接I/O，以及作其它的一些调整
 ```go
-		content := make([]byte, 3)
-		
-		fmt.Print("请输入内容: ")
-		fmt.Println(os.Stdin.Read(content))
-		fmt.Printf("%q\n", string(content))
+	// exec.LookPath 在环境变量PATH指定的目录中搜索可执行文件，如file中有斜杠，则只在当前目录搜索；返回完整路径或者相对于当前目录的一个相对路径。
+	func LookPath(file string) (string, error)
+
+	// Cmd 代表一个正在准备或者在执行中的外部命令
+	type Cmd struct {
+		// Path是将要执行的命令的路径
+		Path string
+		// Args保管命令的参数，包括命令名作为第一个参数；如果为空切片或者nil，相当于无参数命令
+		Args []string
+		// Env指定进程的环境，如为nil，则是在当前进程的环境下执行
+		Env []string
+		// Dir指定命令的工作目录。如为空字符串，会在调用者的进程当前目录下执行
+		Dir string
+		// Stdin指定进程的标准输入，如为nil，进程会从空设备读取（os.DevNull）
+
+		Stdin io.Reader
+		// Stdout和Stderr指定进程的标准输出和标准错误输出。
+		// 如果任一个为nil，Run方法会将对应的文件描述符关联到空设备（os.DevNull）
+		// 如果两个字段相同，同一时间最多有一个线程可以写入
+		Stdout io.Writer
+		Stderr io.Writer
+
+		// ExtraFiles指定额外被新进程继承的已打开文件流，不包括标准输入、标准输出、标准错误输出
+		// 如果本字段非nil，entry i会变成文件描述符3+i
+		ExtraFiles []*os.File
+		// SysProcAttr保管可选的、各操作系统特定的sys执行属性
+		// Run方法会将它作为os.ProcAttr的Sys字段传递给os.StartProcess函数
+		SysProcAttr *syscall.SysProcAttr
+		// Process是底层的，只执行一次的进程
+		Process *os.Process
+		// ProcessState包含一个已经存在的进程的信息，只有在调用Wait或Run后才可用
+	}
+
+	// 函数返回一个*Cmd，用于使用给出的参数执行name指定的程序；返回值只设定了Path和Args两个参数
+	// 如果name不含路径分隔符，将使用LookPath获取完整路径；否则直接使用name；参数arg不应包含命令名
+	func Command(name string, arg ...string) *Cmd
+
+	// Run 执行c包含的命令，并阻塞直到完成
+	func (c *Cmd) Run() error
+	// Start 开始执行c包含的命令，但并不会等待该命令完成即返回
+	func (c *Cmd) Start() error
+	// Wait会阻塞直到该命令执行完成，该命令必须是被Start方法开始执行的
+	func (c *Cmd) Wait() error
+	
+	// Output 执行命令并返回标准输出的切片
+	func (c *Cmd) Output() ([]byte, error)
+	// CombinedOutput 执行命令并返回标准输出和错误输出合并的切片
+	func (c *Cmd) CombinedOutput() ([]byte, error)
+
+	// StdinPipe 返回一个在命令Start后与命令标准输入关联的管道
+	func (c *Cmd) StdinPipe() (io.WriteCloser, error)
+	// StdoutPipe 返回一个在命令Start后与命令标准输出关联的管道
+	func (c *Cmd) StdoutPipe() (io.ReadCloser, error)
+	// StderrPipe 返回一个在命令Start后与命令标准错误输出关联的管道
+	func (c *Cmd) StderrPipe() (io.ReadCloser, error)
+
+	// 写一个脚本，和命令一个输入的文件
+	// 文件作为脚本的stdin，执行
+	// echo "ss -ntlp " > a.txt
+	// go run a.go < a.txt
+	cmd := exec.Command("sh")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("run.err", err)
+		return
+	}
 ```
-	- `os.Stdin` 作为脚本的输入内容
-```go
-		// os/exec exec包提供了启动一个外部进程并使用标准输入和输出进行通信
-		// 常用结构体
-		// Cmd: 执行命令 
-		// 常用函数
-		// Command
-		func Command(name string, arg ...string) *Cmd
-		// 常用方法
-		// Output: 执行并获取标准输出结果
-		// Run: 自行命令
-		func (c *Cmd) Run() error
-		// Start: 启动命令
-		func (c *Cmd) Start() error
-		// Wait: 与 Start一起使用等待命令结束
-		// StdoutPipe: 输出管道
-		func (c *Cmd) StdoutPipe() (io.ReadCloser, error)
-		// StdinPipe: 输入管道
-		func (c *Cmd) StdinPipe() (io.WriteCloser, error)
-		// StderrPipe: 错误管道
-		func (c *Cmd) StderrPipe() (io.ReadCloser, error)
 
-		// 写一个脚本，和命令一个输入的文件
-		// 文件作为脚本的stdin，执行
-		// echo "ss -ntlp " > a.txt
-		// go run a.go < a.txt
-		cmd := exec.Command("sh")
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("run.err", err)
-			return
-		}
-```
-
-- 标准输出 -> `os.Stdout`
-```go
-		os.Stdout.WriteString("我是Stdout的输出")
-		fmt.Fprintln(os.Stdout, "aaaaa")
-		fmt.Fprintf(os.Stdout, "I am: %s", "aaaaa")
-
-		// os.StdOut.Write 代替 fmt.Print
-		os.Stdout.Write([]byte("aa和bb"))
-		fmt.Println("aa和bb")
-```
-
-- 标准错误  -> `os.Stderr`
-
-
-### 3. 带缓冲的IO
+### 2. 带缓冲的IO
 - bufio包提供缓冲流的功能
 	- 常用结构体
 		- Reader

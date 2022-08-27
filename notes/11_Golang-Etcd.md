@@ -608,3 +608,4 @@
 	- [etcdv3.4 官网启动参数](https://etcd.io/docs/v3.4/op-guide/configuration/)
 	- [etcdv3.4 CHANGELOG-3.4](https://github.com/etcd-io/etcd/blob/main/CHANGELOG-3.4.md)
 	- [ETCD-内部原理](https://www.cnblogs.com/seattle-xyt/p/10366131.html)
+	- [etcd 服务配置 TLS 证书认证](https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/security.md)
