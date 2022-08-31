@@ -381,36 +381,56 @@
 	}
 ```
 
-### 2. 带缓冲的IO
-- bufio包提供缓冲流的功能
-	- 常用结构体
-		- Reader
-			- 常用函数 
-				`NewReader`: 创建缓冲 输入 流
-			- 常用方法
-				- `Read`: 读取数据到切片中
-				- `ReadLine`: 读取一行内容到字节切片中
-				- `ReadSlice`: 根据分隔符读取数据到字节切片
-				- `ReadString`: 根据分隔符读取数据到字符串
-				- `Reset`: 重设缓冲流
-				- `WriteTo`: 将数据写入到输出流
-		- Scanner
-			- 常用函数 
-				`NewScanner`: 创建扫描对象
-			- 常用方法
-				- `Scan`: 扫描数据
-				- `Split`: 定义流分割函数，默认 空格
-				- `Text`: 读取数据
-				- `Err`: 获取错误
-		- Writer
-			- 常用函数 
-				`NewWriter`: 创建缓冲输出流
-			- 常用方法
-				- `Write`: 将字节切片内容写入
-				- `WriteString`: 将字符串写入
-				- `Reset`: 重置输出流
-				- `Flush`: 刷新数据到输出流
-	- 示例
+### 2. 带缓冲IO 的 读、写
+- bufio包
+	- 实现了有缓冲的I/O，提供缓冲流的功能
+	- 它包装一个 `io.Reader` 或 `io.Writer` 接口对象，创建另一个也实现了该接口，且同时还提供了缓冲和一些文本I/O的帮助函数的对象
+
+
+- bufio包中，常用的结构体
+	- Reader
+		- 常用函数 
+			- `bufio.NewReader` 创建缓冲 输入 流
+		- 常用方法
+			- `Read` 读取数据到切片中
+			- `ReadLine` 读取一行内容到字节切片中
+			- `ReadSlice` 根据分隔符读取数据到字节切片
+			- `ReadString` 根据分隔符读取数据到字符串
+			- `Reset` 重设缓冲流
+			- `WriteTo` 将数据写入到输出流
+	- Scanner
+		- 常用函数
+			- `bufio.NewScanner` 创建扫描对象
+		- 常用方法
+			- `Scan` 扫描数据
+			- `Split` 定义流分割函数，默认 空格
+			- `Text` 读取数据
+			- `Err` 获取错误
+	- Writer
+		- 常用函数	
+			- `bufio.NewWriter` 创建缓冲输出流
+		- 常用方法
+			- `Write` 将字节切片内容写入
+			- `WriteString` 将字符串写入
+			- `Reset` 重置输出流
+			- `Flush` 刷新数据到输出流
+```go
+	const (
+		// 用于缓冲一个token，实际需要的最大token尺寸可能小一些，例如缓冲中需要保存一整行内容
+		MaxScanTokenSize = 64 * 1024
+	)
+
+	// Reader实现了给一个io.Reader接口对象附加缓冲
+	type Reader struct { ... }
+
+	// Scanner类型提供了方便的读取数据的接口，如从换行符分隔的文本里读取每一行
+	type Scanner struct { ... }
+
+	// NewWriter创建一个具有默认大小缓冲、写入w的*Writer
+	type Writer struct { ... }
+```
+
+- 参考示例
 ```go
 		scanner := bufio.NewScanner(os.Stdin)        // os.Stdin
 		for scanner.Scan() {
@@ -430,7 +450,7 @@
 		fmt.Println(num, err)
 ```
 
-### 4. IO库
+### 3. IO库
 - io库属于底层接口定义库，作用是定义一些基本接口和基本常量，如io.EOF
 
 - io.Copy `func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)`
