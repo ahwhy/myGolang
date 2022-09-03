@@ -489,29 +489,41 @@
 	- 它包装一个 `io.Reader` 或 `io.Writer` 接口对象，创建另一个也实现了该接口，且同时还提供了缓冲和一些文本I/O的帮助函数的对象
 	- Reader
 		- 常用函数 
-			- `bufio.NewReader` 创建缓冲 输入 流
+			- `bufio.NewReader` 创建缓冲输入流
 		- 常用方法
+			- `Reset` 重设缓冲流
+			- `Buffered` 回缓冲中现有的可读取的字节数
+			- `Peek` 返回输入流的下n个字节，而不会移动读取位置
 			- `Read` 读取数据到切片中
+			- `ReadByte` 读取并返回一个字节
 			- `ReadLine` 读取一行内容到字节切片中
 			- `ReadSlice` 根据分隔符读取数据到字节切片
 			- `ReadString` 根据分隔符读取数据到字符串
-			- `Reset` 重设缓冲流
 			- `WriteTo` 将数据写入到输出流
 	- Writer
 		- 常用函数	
 			- `bufio.NewWriter` 创建缓冲输出流
 		- 常用方法
+			- `Reset` 重置输出流
+			- `Buffered` 返回缓冲中已使用的字节数
+			- `Available` 返回缓冲中还有多少字节未使用
 			- `Write` 将字节切片内容写入
 			- `WriteString` 将字符串写入
-			- `Reset` 重置输出流
+			- `WriteByte` 写入单个字节
+			- `WriteRune` 写入一个unicode码值(的utf-8编码)，返回写入的字节数和可能的错误
 			- `Flush` 刷新数据到输出流
+			- `ReadFrom` ReadFrom实现了io.ReaderFrom接口
+	- ReadWriter
+		- 常用函数	
+			- `bufio.NewReadWriter` 申请创建一个新的、将读写操作分派给r和w 的ReadWriter
 	- Scanner
 		- 常用函数
 			- `bufio.NewScanner` 创建扫描对象
 		- 常用方法
+			- `Split` 定义流分割函数，默认空格，必须在Scan前
 			- `Scan` 扫描数据
-			- `Split` 定义流分割函数，默认 空格
-			- `Text` 读取数据
+			- `Bytes` 读取数据，返回byte数组
+			- `Text` 读取数据，返回字符串
 			- `Err` 获取错误
 
 ### 4. reflect

@@ -386,48 +386,173 @@
 	- 实现了有缓冲的I/O，提供缓冲流的功能
 	- 它包装一个 `io.Reader` 或 `io.Writer` 接口对象，创建另一个也实现了该接口，且同时还提供了缓冲和一些文本I/O的帮助函数的对象
 
-
 - bufio包中，常用的结构体
 	- Reader
 		- 常用函数 
-			- `bufio.NewReader` 创建缓冲 输入 流
+			- `bufio.NewReader` 创建缓冲输入流
 		- 常用方法
+			- `Reset` 重设缓冲流
+			- `Buffered` 回缓冲中现有的可读取的字节数
+			- `Peek` 返回输入流的下n个字节，而不会移动读取位置
 			- `Read` 读取数据到切片中
+			- `ReadByte` 读取并返回一个字节
 			- `ReadLine` 读取一行内容到字节切片中
 			- `ReadSlice` 根据分隔符读取数据到字节切片
 			- `ReadString` 根据分隔符读取数据到字符串
-			- `Reset` 重设缓冲流
 			- `WriteTo` 将数据写入到输出流
-	- Scanner
-		- 常用函数
-			- `bufio.NewScanner` 创建扫描对象
-		- 常用方法
-			- `Scan` 扫描数据
-			- `Split` 定义流分割函数，默认 空格
-			- `Text` 读取数据
-			- `Err` 获取错误
 	- Writer
 		- 常用函数	
 			- `bufio.NewWriter` 创建缓冲输出流
 		- 常用方法
+			- `Reset` 重置输出流
+			- `Buffered` 返回缓冲中已使用的字节数
+			- `Available` 返回缓冲中还有多少字节未使用
 			- `Write` 将字节切片内容写入
 			- `WriteString` 将字符串写入
-			- `Reset` 重置输出流
+			- `WriteByte` 写入单个字节
+			- `WriteRune` 写入一个unicode码值(的utf-8编码)，返回写入的字节数和可能的错误
 			- `Flush` 刷新数据到输出流
+			- `ReadFrom` ReadFrom实现了io.ReaderFrom接口
+	- ReadWriter
+		- 常用函数	
+			- `bufio.NewReadWriter` 申请创建一个新的、将读写操作分派给r和w 的ReadWriter
+	- Scanner
+		- 常用函数
+			- `bufio.NewScanner` 创建扫描对象
+		- 常用方法
+			- `Split` 定义流分割函数，默认空格，必须在Scan前
+			- `Scan` 扫描数据
+			- `Bytes` 读取数据，返回byte数组
+			- `Text` 读取数据，返回字符串
+			- `Err` 获取错误
 ```go
 	const (
 		// 用于缓冲一个token，实际需要的最大token尺寸可能小一些，例如缓冲中需要保存一整行内容
 		MaxScanTokenSize = 64 * 1024
 	)
 
-	// Reader实现了给一个io.Reader接口对象附加缓冲
+	// bufio.NewReader创建一个具有默认大小缓冲、从r读取的*Reader
+	func NewReader(rd io.Reader) *Reader
+
+	// bufio.NewReaderSize创建一个具有最少有size尺寸的缓冲、从r读取的*Reader
+	// 如果参数r已经是一个具有足够大缓冲的* Reader类型值，会返回r
+	func NewReaderSize(rd io.Reader, size int) *Reader
+
+	// bufio.Reader实现了给一个io.Reader接口对象附加缓冲
 	type Reader struct { ... }
 
-	// Scanner类型提供了方便的读取数据的接口，如从换行符分隔的文本里读取每一行
+	// Reset丢弃缓冲中的数据，清除任何错误，将b重设为其下层从r读取数据
+	func (b *Reader) Reset(r io.Reader)
+
+	// Buffered返回缓冲中现有的可读取的字节数
+	func (b *Reader) Buffered() int
+
+	// Peek返回输入流的下n个字节，而不会移动读取位置
+	func (b *Reader) Peek(n int) ([]byte, error)
+
+	// Read读取数据写入p，本方法返回写入p的字节数
+	// 本方法一次调用最多会调用下层Reader接口一次Read方法，因此返回值n可能小于len(p)；读取到达结尾时，返回值n将为0而err将为io.EOF
+	func (b *Reader) Read(p []byte) (n int, err error)
+
+	// ReadByte读取并返回一个字节。如果没有可用的数据，会返回错误
+	func (b *Reader) ReadByte() (c byte, err error)
+
+	// UnreadByte吐出最近一次读取操作读取的最后一个字节(只能吐出最后一个，多次调用会出问题)
+	func (b *Reader) UnreadByte() error
+
+	// ReadRune读取一个utf-8编码的unicode码值，返回该码值、其编码长度和可能的错误
+	func (b *Reader) ReadRune() (r rune, size int, err error)
+
+	// UnreadRune吐出最近一次ReadRune调用读取的unicode码值
+	func (b *Reader) UnreadRune() error
+
+	// ReadLine是一个低水平的行数据读取原语；大多数调用者应使用ReadBytes('\n')或ReadString('\n')代替，或者使用Scanner
+	func (b *Reader) ReadLine() (line []byte, isPrefix bool, err error)
+
+	// ReadSlice读取直到第一次遇到delim字节，返回缓冲里的包含已读取的数据和delim字节的切片
+	func (b *Reader) ReadSlice(delim byte) (line []byte, err error)
+
+	// ReadBytes读取直到第一次遇到delim字节，返回一个包含已读取的数据和delim字节的切片
+	func (b *Reader) ReadBytes(delim byte) (line []byte, err error)
+
+	// ReadString读取直到第一次遇到delim字节，返回一个包含已读取的数据和delim字节的字符串
+	func (b *Reader) ReadString(delim byte) (line string, err error)
+
+	// WriteTo方法实现了io.WriterTo接口
+	func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
+
+	// bufio.NewWriter创建一个具有默认大小缓冲、写入w的*Writer
+	func NewWriter(w io.Writer) *Writer
+
+	// bufio.Writer实现了为io.Writer接口对象提供缓冲
+	// 如果在向一个Writer类型值写入时遇到了错误，该对象将不再接受任何数据，且所有写操作都会返回该错误
+	// 在说有数据都写入后，调用者有义务调用Flush方法以保证所有的数据都交给了下层的io.Writer
+	// w := bufio.NewWriter(os.Stdout);w.Flush()
+	type Writer struct { ... }
+
+	// Reset丢弃缓冲中的数据，清除任何错误，将b重设为将其输出写入w
+	func (b *Writer) Reset(w io.Writer)
+
+	// Buffered返回缓冲中已使用的字节数
+	func (b *Writer) Buffered() int
+
+	// Available返回缓冲中还有多少字节未使用
+	func (b *Writer) Available() int
+	
+	// Write将p的内容写入缓冲，返回写入的字节数
+	func (b *Writer) Write(p []byte) (nn int, err error)
+
+	// WriteString写入一个字符串，返回写入的字节数
+	func (b *Writer) WriteString(s string) (int, error)
+
+	// WriteByte写入单个字节
+	func (b *Writer) WriteByte(c byte) error
+
+	// WriteRune写入一个unicode码值（的utf-8编码），返回写入的字节数和可能的错误
+	func (b *Writer) WriteRune(r rune) (size int, err error)
+
+	// Flush方法将缓冲中的数据写入下层的io.Writer接口
+	func (b *Writer) Flush() error
+
+	// ReadFrom实现了io.ReaderFrom接口
+	func (b *Writer) ReadFrom(r io.Reader) (n int64, err error)
+
+	// bufio.NewReadWriter申请创建一个新的、将读写操作分派给r和w 的ReadWriter
+	func NewReadWriter(r *Reader, w *Writer) *ReadWriter
+
+	// bufio.ReadWriter类型保管了指向Reader和Writer类型的指针，实现了io.ReadWriter接口
+	type ReadWriter struct {
+		*Reader
+		*Writer
+	}
+
+	// bufio.SplitFunc类型代表用于对输出作词法分析的分割函数
+	type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err error)
+
+	// bufio.ScanBytes是用于Scanner类型的分割函数(符合SplitFunc)，本函数会将每个字节作为一个token返回
+	func ScanBytes(data []byte, atEOF bool) (advance int, token []byte, err error)
+
+	// bufio.NewScanner创建并返回一个从r读取数据的Scanner，默认的分割函数是ScanLines
+	func NewScanner(r io.Reader) *Scanner
+
+	// bufio.Scanner类型提供了方便的读取数据的接口，如从换行符分隔的文本里读取每一行
 	type Scanner struct { ... }
 
-	// NewWriter创建一个具有默认大小缓冲、写入w的*Writer
-	type Writer struct { ... }
+	// Split设置该Scanner的分割函数；本方法必须在Scan之前调用
+	func (s *Scanner) Split(split SplitFunc)
+
+	// Scan方法获取当前位置的token(该token可以通过Bytes或Text方法获得)，并让Scanner的扫描位置移动到下一个token
+	// 当扫描因为抵达输入流结尾或者遇到错误而停止时，本方法会返回false；在Scan方法返回false后，Err方法将返回扫描时遇到的任何错误；除非是io.EOF，此时Err会返回nil
+	func (s *Scanner) Scan() bool
+
+	// Bytes方法返回最近一次Scan调用生成的token；底层数组指向的数据可能会被下一次Scan的调用重写
+	func (s *Scanner) Bytes() []byte
+
+	// Bytes方法返回最近一次Scan调用生成的token，会申请创建一个字符串保存token并返回该字符串
+	func (s *Scanner) Text() string
+
+	// Err返回Scanner遇到的第一个非EOF的错误
+	func (s *Scanner) Err() error
 ```
 
 - 参考示例
