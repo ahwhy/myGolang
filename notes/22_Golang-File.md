@@ -575,65 +575,149 @@
 		fmt.Println(num, err)
 ```
 
-### 3. IO库
-- io库属于底层接口定义库，作用是定义一些基本接口和基本常量，如io.EOF
+### 3. IO包
+- io包
+	- io包提供了对I/O原语的基本接口
+	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
+```go
+	// EOF当无法得到更多输入时，Read方法返回EO
+	var EOF = errors.New("EOF")
 
-- io.Copy `func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)`
+	// 当从一个已关闭的Pipe读取或者写入时，会返回ErrClosedPipe
+	var ErrClosedPipe = errors.New("io: read/write on closed pipe")
 
-- io库常用接口有:`Reader`、`Writer`、`Close` 以流的方式高效处理数据，并不需要考虑数据是什么，数据来自哪里，数据要发送到哪里
-	- Reader
-		- `io.Reader`表示一个读取器
-			- 它从某个地方读取数据到传输的缓存区
-			- 在缓存区里面，数据可以被流式的使用
-			- 接口签名
-```go
-				type Reader interface {
-					Read(p []byte) (n int, err error)
-				}
+	// 某些使用io.Reader接口的客户端如果多次调用Read都不返回数据也不返回错误时，就会返回本错误，一般来说是io.Reader的实现有问题的标志
+	var ErrNoProgress = errors.New("multiple Read calls return no data or error")
+
+	// ErrShortBuffer表示读取操作需要大缓冲，但提供的缓冲不够大
+	var ErrShortBuffer = errors.New("short buffer")
+
+	// ErrShortWrite表示写入操作写入的数据比提供的少，却没有显式的返回错误
+	var ErrShortWrite = errors.New("short write")
+
+	// ErrUnexpectedEOF表示在读取一个固定尺寸的块或者数据结构时，在读取未完全时遇到了EOF
+	var ErrUnexpectedEOF = errors.New("unexpected EOF")
+
+	// io包中的常用接口，以流的方式高效处理数据，并不需要考虑数据是什么，数据来自哪里，数据要发送到哪里
+	// io.Reader 接口用于包装基本的读取方法
+	type Reader interface {
+		// Read方法读取len(p)字节数据写入p
+		Read(p []byte) (n int, err error)
+	}
+
+	// io.Writer接口用于包装基本的写入方法
+	type Writer interface {
+		// Write方法len(p) 字节数据从p写入底层的数据流
+		Write(p []byte) (n int, err error)
+	}
+
+	// io.Closer接口用于包装基本的关闭方法
+	type Closer interface {
+		Close() error
+	}
+
+	// io.Seeker接口用于包装基本的移位方法
+	type Seeker interface {
+		// Seek方法设定下一次读写的位置：偏移量为offset，校准点由whence确定：0表示相对于文件起始；1表示相对于当前位置；2表示相对于文件结尾
+		// Seek方法返回新的位置以及可能遇到的错误
+		// 移动到一个绝对偏移量为负数的位置会导致错误;移动到任何偏移量为正数的位置都是合法的，但其下一次I/O操作的具体行为则要看底层的实现
+		Seek(offset int64, whence int) (int64, error)
+	}
+
+	// 将src的数据拷贝到dst，直到在src上到达EOF或发生错误，返回拷贝的字节数和遇到的第一个错误
+	func Copy(dst Writer, src Reader) (written int64, err error)
+
+	// 从src拷贝n个字节数据到dst，直到在src上到达EOF或发生错误，返回复制的字节数和遇到的第一个错误
+	func CopyN(dst Writer, src Reader, n int64) (written int64, err error)
+
+	// ReadAtLeast从r至少读取min字节数据填充进buf
+	func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
+
+	// ReadFull从r精确地读取len(buf)字节数据填充进buf
+	func ReadFull(r Reader, buf []byte) (n int, err error)
+
+	// WriteString函数将字符串s的内容写入w中
+	func WriteString(w Writer, s string) (n int, err error)
 ```
-		- `strings.NewReader`
-			- `io.Reader` 接口只有一个方法: Read方法
-			- 即只要有个对象实现了Read方法，那么这个对象就是一个读取器
-			- `Read()` 首先要有一个读缓冲区的参数
-			- `Read()` 返回两个值，第一个是读取到的字节数，第二个是读取时发生的错误 `func (*strings.Reader).Read(b []byte) (n int, err error)`
-			- 注意: 返回到的读取字节个数n可能小于缓冲区的大小
-			- io.EOF 表示输入的流已经读到头了
+
+- io/ioutil
+	- ioutil包提供了一些I/O实用函数
 ```go
-				// 实现一个 reader 每次读取4个字节
-				// 从字符串创建一个reader对象
-				reader := strings.NewReader("马哥教育 2021 第005期 golang")
-				// new一个3字节的读取缓冲区
-				p := make([]byte, 3)
-				for {
-					// reader对象读取数据
-					n, err := reader.Read(p)
-					if err != nil {
-						if err == io.EOF {
-							log.Printf("[数据已读完 EOF:%d]", n)
-							break
-						}
-						log.Printf("[未知错误:%v]", err)
-						return
-					}
-					log.Printf("[打印读取的字节数:%d 内容:%s]", n, string(p[:n]))
-				}
+	// ReadAll从r读取数据直到EOF或遇到error，返回读取的数据和遇到的错误，且成功的调用返回的err为nil而非EOF
+	func ReadAll(r io.Reader) ([]byte, error)
+
+	// ReadFile 从filename指定的文件中读取数据并返回文件的内容，成功的调用返回的err为nil而非EOF
+	func ReadFile(filename string) ([]byte, error)
+
+	// 函数向filename指定的文件中写入数据，如果文件不存在将按给出的权限创建文件，否则在写入数据之前清空文件
+	func WriteFile(filename string, data []byte, perm os.FileMode) error
+
+	// 返回dirname指定的目录的目录信息的有序列表
+	func ReadDir(dirname string) ([]os.FileInfo, error)
+
+	// 在dir目录里创建一个新的、使用prfix作为前缀的临时文件夹，并返回文件夹的路径
+	func TempDir(dir, prefix string) (name string, err error)
+
+	// 在dir目录下创建一个新的、使用prefix为前缀的临时文件，以读写模式打开该文件并返回os.File指针
+	func TempFile(dir, prefix string) (f *os.File, err error)
 ```
-		- 自定义Reader
-			- 要求: 过滤输入字符串中的非字母字符
-			- 输入 "mage jiaoyue 2021 go !!!!"
-			- 输出 "magejiaoyuego"
+
+### 4. Reader
+- Reader
+	- `io.Reader`表示一个读取器
+		- 它从某个地方读取数据到传输的缓存区
+		- 在缓存区里面，数据可以被流式的使用
 ```go
-				type zimuguolv struct {
-					src string
-					cur int
-				}
-				func alpha(r byte) byte {
-					// r在 A-Z 或者 a-z
-					if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
-						return r
-					}
-					return 0
-				}
+	// 接口签名
+	type Reader interface {
+		Read(p []byte) (n int, err error)
+	}
+```
+
+- `strings.NewReader`
+	- `io.Reader` 接口只有一个方法: Read方法
+	- 即只要有个对象实现了Read方法，那么这个对象就是一个读取器
+	- `Read()` 首先要有一个读缓冲区的参数
+	- `Read()` 返回两个值，第一个是读取到的字节数，第二个是读取时发生的错误 `func (*strings.Reader).Read(b []byte) (n int, err error)`
+	- 注意: 返回到的读取字节个数n可能小于缓冲区的大小
+	- io.EOF 表示输入的流已经读到头了
+```go
+	// 实现一个 reader 每次读取4个字节
+	// 从字符串创建一个reader对象
+	reader := strings.NewReader("马哥教育 2021 第005期 golang")
+	// new一个3字节的读取缓冲区
+	p := make([]byte, 3)
+	for {
+		// reader对象读取数据
+		n, err := reader.Read(p)
+		if err != nil {
+			if err == io.EOF {
+				log.Printf("[数据已读完 EOF:%d]", n)
+				break
+			}
+			log.Printf("[未知错误:%v]", err)
+			return
+		}
+		log.Printf("[打印读取的字节数:%d 内容:%s]", n, string(p[:n]))
+	}
+```
+
+- 自定义Reader
+	- 要求: 过滤输入字符串中的非字母字符
+	- 输入 "mage jiaoyue 2021 go !!!!"
+	- 输出 "magejiaoyuego"
+```go
+	type zimuguolv struct {
+		src string
+		cur int
+	}
+	func alpha(r byte) byte {
+		// r在 A-Z 或者 a-z
+		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
+			return r
+		}
+		return 0
+	}
 				func (z *zimuguolv) Read(p []byte) (int, error) {
 					// 当前位置 >= 字符串长度，说明已经读取到结尾了，返回 EOF
 					if z.cur >= len(z.src) {
@@ -678,11 +762,12 @@
 					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
 				}
 ```
-		- 组合多个Reader
-			- 标准库里面已经有了很多Reader
-			- 使用一个Reader A作为一个Reader B的一部分
-			- 目的是重用和屏蔽下层实现的复杂度；即复用逻辑，流式处理
-			- 复用的`io.Reader`
+
+- 组合多个Reader
+	- 标准库里面已经有了很多Reader
+	- 使用一个Reader A作为一个Reader B的一部分
+	- 目的是重用和屏蔽下层实现的复杂度；即复用逻辑，流式处理
+	- 复用的`io.Reader`
 ```go
 				type alphaReader struct {
 					ioReader io.Reader
@@ -723,9 +808,10 @@
 					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
 				}
 ```
-		- os.File 结合
-			- os.Open得到一个file对象 ，实现了io.Reader的Read方法
-			- 以下代码展示了 alphaReader 如何与 os.File 结合以过滤掉文件中的非字母字符
+
+- os.File 结合
+	- os.Open得到一个file对象 ，实现了io.Reader的Read方法
+	- 以下代码展示了 alphaReader 如何与 os.File 结合以过滤掉文件中的非字母字符
 ```go
 				file, err := os.Open("test.txt")
 				if err != nil {
@@ -746,10 +832,11 @@
 					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
 				}
 ```
-		- 读取文件 `ioutil.ReadFile` vs `bufio`
-			- 都提供了文件读写的能力
-			- bufio多了一层缓存的能力，优势体现在读取大文件的时候
-			- `ioutil.ReadFile`是一次性将内容加载到内存，大文件容易爆掉
+
+- 读取文件 `ioutil.ReadFile` vs `bufio`
+	- 都提供了文件读写的能力
+	- bufio多了一层缓存的能力，优势体现在读取大文件的时候
+	- `ioutil.ReadFile`是一次性将内容加载到内存，大文件容易爆掉
 ```go
 				fileName := "test.txt"
 				
@@ -790,20 +877,23 @@
 				}
 				file.Close()
 ```
-	- Writer 
-		- `io.Writer` 表示一个编写器，它从缓冲区读取数据，并将数据写入目标资源
-			- 接口签名
+
+### 5. Writer
+- Writer 
+	- `io.Writer` 表示一个编写器，它从缓冲区读取数据，并将数据写入目标资源
 ```go
-				type Writer interface {
-					Write(p []byte) (n int, err error)
-				}
+	// 接口签名
+	type Writer interface {
+		Write(p []byte) (n int, err error)
+	}
 ```
-		- Write() 方法有两个返回值，一个是写入到目标资源的字节数，一个是发生错误时的错误。
-			- closer
-			- `bytes.Buffer`库 
-				- bytes.Buffer 的针对的是内存到内存的缓存
-			- `io/ioutil` ioutil库 工具包
-				- 在io目录下，它是一个工具包，实现一些实用的工具
+
+- Write() 方法有两个返回值，一个是写入到目标资源的字节数，一个是发生错误时的错误。
+	- closer
+	- `bytes.Buffer`库 
+		- bytes.Buffer 的针对的是内存到内存的缓存
+	- `io/ioutil` ioutil库 工具包
+		- 在io目录下，它是一个工具包，实现一些实用的工具
 ```go
 				// ReadFile 读取文件                           
 				// func ReadFile(filename string) ([]byte, error)
@@ -838,36 +928,7 @@
 				}
 ```
 
-## 三、目录
-
-- Go语言中的os包，提供了对目录的操作
-	- 创建 
-		`os.Mkdir("a", os.ModePerm)`，
-		`os.MkdirAll("a/b/c", os.ModePerm)`
-	- 读取 `os.Open("test.txt")`
-	- 获取属性 `os.Open().Stat`/`os.Stat `
-	- 修改属性 -> 权限，所属人 
-		`os.Chmod()`，
-		`os.Chown()`
-	- 重命名 `fmt.Println(os.Rename("b", "d:\\d"))`
-	- 删除文件夹 
-		`os.Remove("a")`，
-		`os.RemoveAll("a")`
-	- FileInfo: 文件状态信息
-		- 常用函数
-			- `Lstat`: 获取文件路径文件信息（对于链接返回连接文件信息）
-			- `Stat`: 获取文件路径文件信息（对于链接返回连接到的文件的信息）
-		- 常用方法
-			- `Name`: 获取文件名
-			- `Size`: 获取文件大小
-			- `Mode`: 获取文件模式 `func (fs.FileInfo).Mode() fs.FileMode`
-			- `ModTime`: 获取修改时间
-			- `IsDir`: 判断是否为文件夹  
-	- FileMode: 文件模式
-		- 常用方法
-			`IsDir`: 判断是否为文件夹 `func (fs.FileMode).IsDir() bool`
-
-## 四、编码格式
+## 三、编码格式
 
 - 处理流程
 	- 注册，打开文件，创建对象，编码/解码

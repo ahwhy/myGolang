@@ -341,75 +341,7 @@
 	func (enc *Encoder) Encode(v interface{}) error
 ```
 
-### 5. io
-- io
-	- io包提供了对I/O原语的基本接口
-	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
-```go
-	// io.Reader 接口用于包装基本的读取方法
-	type Reader interface {
-		// Read方法读取len(p)字节数据写入p
-		Read(p []byte) (n int, err error)
-	}
-
-	// io.Writer接口用于包装基本的写入方法
-	type Writer interface {
-		// Write方法len(p) 字节数据从p写入底层的数据流
-		Write(p []byte) (n int, err error)
-	}
-
-	// io.Closer接口用于包装基本的关闭方法
-	type Closer interface {
-		Close() error
-	}
-
-	// io.Seeker接口用于包装基本的移位方法
-	type Seeker interface {
-		// Seek方法设定下一次读写的位置：偏移量为offset，校准点由whence确定：0表示相对于文件起始；1表示相对于当前位置；2表示相对于文件结尾
-		// Seek方法返回新的位置以及可能遇到的错误
-		// 移动到一个绝对偏移量为负数的位置会导致错误;移动到任何偏移量为正数的位置都是合法的，但其下一次I/O操作的具体行为则要看底层的实现
-		Seek(offset int64, whence int) (int64, error)
-	}
-
-	// 将src的数据拷贝到dst，直到在src上到达EOF或发生错误，返回拷贝的字节数和遇到的第一个错误
-	func Copy(dst Writer, src Reader) (written int64, err error)
-
-	// 从src拷贝n个字节数据到dst，直到在src上到达EOF或发生错误，返回复制的字节数和遇到的第一个错误
-	func CopyN(dst Writer, src Reader, n int64) (written int64, err error)
-
-	// ReadAtLeast从r至少读取min字节数据填充进buf
-	func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
-
-	// ReadFull从r精确地读取len(buf)字节数据填充进buf
-	func ReadFull(r Reader, buf []byte) (n int, err error)
-
-	// WriteString函数将字符串s的内容写入w中
-	func WriteString(w Writer, s string) (n int, err error)
-```
-
-- io/ioutil
-	- 包ioutil提供了一些I/O实用函数
-```go
-	// ReadAll从r读取数据直到EOF或遇到error，返回读取的数据和遇到的错误，且成功的调用返回的err为nil而非EOF
-	func ReadAll(r io.Reader) ([]byte, error)
-
-	// ReadFile 从filename指定的文件中读取数据并返回文件的内容，成功的调用返回的err为nil而非EOF
-	func ReadFile(filename string) ([]byte, error)
-
-	// 函数向filename指定的文件中写入数据，如果文件不存在将按给出的权限创建文件，否则在写入数据之前清空文件
-	func WriteFile(filename string, data []byte, perm os.FileMode) error
-
-	// 返回dirname指定的目录的目录信息的有序列表
-	func ReadDir(dirname string) ([]os.FileInfo, error)
-
-	// 在dir目录里创建一个新的、使用prfix作为前缀的临时文件夹，并返回文件夹的路径
-	func TempDir(dir, prefix string) (name string, err error)
-
-	// 在dir目录下创建一个新的、使用prefix为前缀的临时文件，以读写模式打开该文件并返回os.File指针
-	func TempFile(dir, prefix string) (f *os.File, err error)
-```
-
-### 6. os
+### 5. os
 - os
 	- os包提供了操作系统函数的不依赖平台的接口
 	- os包的接口规定为在所有操作系统中都是一致的
@@ -483,7 +415,7 @@
 	func LookupId(uid string) (*User, error)
 ```
 
-### 7. bufio
+### 6. bufio
 - bufio包
 	- 实现了有缓冲的I/O，提供缓冲流的功能
 	- 它包装一个 `io.Reader` 或 `io.Writer` 接口对象，创建另一个也实现了该接口，且同时还提供了缓冲和一些文本I/O的帮助函数的对象
@@ -525,6 +457,74 @@
 			- `Bytes` 读取数据，返回byte数组
 			- `Text` 读取数据，返回字符串
 			- `Err` 获取错误
+
+### 7. io
+- io
+	- io包提供了对I/O原语的基本接口
+	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
+```go
+	// io.Reader 接口用于包装基本的读取方法
+	type Reader interface {
+		// Read方法读取len(p)字节数据写入p
+		Read(p []byte) (n int, err error)
+	}
+
+	// io.Writer接口用于包装基本的写入方法
+	type Writer interface {
+		// Write方法len(p) 字节数据从p写入底层的数据流
+		Write(p []byte) (n int, err error)
+	}
+
+	// io.Closer接口用于包装基本的关闭方法
+	type Closer interface {
+		Close() error
+	}
+
+	// io.Seeker接口用于包装基本的移位方法
+	type Seeker interface {
+		// Seek方法设定下一次读写的位置：偏移量为offset，校准点由whence确定：0表示相对于文件起始；1表示相对于当前位置；2表示相对于文件结尾
+		// Seek方法返回新的位置以及可能遇到的错误
+		// 移动到一个绝对偏移量为负数的位置会导致错误;移动到任何偏移量为正数的位置都是合法的，但其下一次I/O操作的具体行为则要看底层的实现
+		Seek(offset int64, whence int) (int64, error)
+	}
+
+	// 将src的数据拷贝到dst，直到在src上到达EOF或发生错误，返回拷贝的字节数和遇到的第一个错误
+	func Copy(dst Writer, src Reader) (written int64, err error)
+
+	// 从src拷贝n个字节数据到dst，直到在src上到达EOF或发生错误，返回复制的字节数和遇到的第一个错误
+	func CopyN(dst Writer, src Reader, n int64) (written int64, err error)
+
+	// ReadAtLeast从r至少读取min字节数据填充进buf
+	func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
+
+	// ReadFull从r精确地读取len(buf)字节数据填充进buf
+	func ReadFull(r Reader, buf []byte) (n int, err error)
+
+	// WriteString函数将字符串s的内容写入w中
+	func WriteString(w Writer, s string) (n int, err error)
+```
+
+- io/ioutil
+	- 包ioutil提供了一些I/O实用函数
+```go
+	// ReadAll从r读取数据直到EOF或遇到error，返回读取的数据和遇到的错误，且成功的调用返回的err为nil而非EOF
+	func ReadAll(r io.Reader) ([]byte, error)
+
+	// ReadFile 从filename指定的文件中读取数据并返回文件的内容，成功的调用返回的err为nil而非EOF
+	func ReadFile(filename string) ([]byte, error)
+
+	// 函数向filename指定的文件中写入数据，如果文件不存在将按给出的权限创建文件，否则在写入数据之前清空文件
+	func WriteFile(filename string, data []byte, perm os.FileMode) error
+
+	// 返回dirname指定的目录的目录信息的有序列表
+	func ReadDir(dirname string) ([]os.FileInfo, error)
+
+	// 在dir目录里创建一个新的、使用prfix作为前缀的临时文件夹，并返回文件夹的路径
+	func TempDir(dir, prefix string) (name string, err error)
+
+	// 在dir目录下创建一个新的、使用prefix为前缀的临时文件，以读写模式打开该文件并返回os.File指针
+	func TempFile(dir, prefix string) (f *os.File, err error)
+```
 
 ### 4. reflect
 ```go
