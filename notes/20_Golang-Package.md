@@ -244,104 +244,7 @@
 	// key not found: color
 ```
 
-### 4. encoding
-- encoding
-	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
-	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
-
-- encoding/base64
-	- base64实现了RFC 4648规定的base64编码
-```go
-	// RFC 4648定义的标准base64编码字符集
-	var StdEncoding = NewEncoding(encodeStd)
-
-	// RFC 4648定义的另一base64编码字符集，用于URL和文件名
-	var URLEncoding = NewEncoding(encodeURL)
-
-	// 双向的编码/解码协议
-	type Encoding struct { ... }
-
-	// 使用给出的字符集生成一个*Encoding，字符集必须是64字节的字符串
-	func NewEncoding(encoder string) *Encoding
-
-	// 将src的数据解码后存入dst，最多写DecodedLen(len(src))字节数据到dst，并返回写入的字节数
-	// 如果src包含非法字符，将返回成功写入的字符数和CorruptInputError
-	// 换行符（\r、\n）会被忽略。
-	func (enc *Encoding) Decode(dst, src []byte) (n int, err error)
-
-	// 返回base64编码的字符串s代表的数据
-	// base64.StdEncoding.DecodeString(str)
-	func (enc *Encoding) DecodeString(s string) ([]byte, error)
-
-	// 将src的数据编码后存入dst，最多写EncodedLen(len(src))字节数据到dst，并返回写入的字节数
-	// 函数会把输出设置为4的倍数，因此不建议对大数据流的独立数据块执行此方法，使用NewEncoder()代替
-	func (enc *Encoding) Encode(dst, src []byte)
-
-	// 返回将src编码后的字符串
-	// base64.StdEncoding.EncodeToString(data)
-	func (enc *Encoding) EncodeToString(src []byte) string
-
-	// 创建一个新的base64流解码器
-	func NewDecoder(enc *Encoding, r io.Reader) io.Reader
-
-	// 创建一个新的base64流编码器
-	// 写入的数据会在编码后再写入w，base32编码每3字节执行一次编码操作
-	// 写入完毕后，使用者必须调用Close方法以便将未写入的数据从缓存中刷新到w中
-	func NewEncoder(enc *Encoding, w io.Writer) io.WriteCloser
-```
-
-- encoding/json
-	- json包实现了json对象的编解码
-	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
-```go
-	// json.Marshal
-	// Marshal函数返回v的json编码
-	// 结构体标签值里的"json"键为键名，后跟可选的逗号和选项，具体如下:
-	// // 字段被本包忽略
-	// Field int `json:"-"`
-	// // 字段在json里的键为"myName"
-	// Field int `json:"myName"`
-	// // 字段在json里的键为"myName"且如果字段为空值将在对象中省略掉
-	// Field int `json:"myName,omitempty"`
-	// // 字段在json里的键为"Field"（默认值），但如果字段为空值会跳过；注意前导的逗号
-	// Field int `json:",omitempty"
-	// // "string"选项标记一个字段在编码json时应编码为字符串；它只适用于字符串、浮点数、整数类型的字段
-	// Int64String int64 `json:",string"`
-	func Marshal(v interface{}) ([]byte, error)
-
-	// json.Unmarshal
-	// Unmarshal 函数解析json编码的数据并将结果存入v指向的值
-	// Unmarshal 和Marshal 做相反的操作，必要时申请映射、切片或指针，有如下的附加规则
-	// JSON 的 null 值解码为go的接口、指针、切片时会将它们设为nil，因为null在json里一般表示“不存在”；解码json的null值到其他go类型时，不会造成任何改变，也不会产生错误
-	// 要将json数据解码写入一个接口类型值，函数会将数据解码为如下类型写入接口:
-	// Bool                   对应JSON布尔类型
-	// float64                对应JSON数字类型
-	// string                 对应JSON字符串类型
-	// []interface{}          对应JSON数组
-	// map[string]interface{} 对应JSON对象
-	// nil                    对应JSON的null
-	func Unmarshal(data []byte, v interface{}) error
-
-	// Decoder从输入流解码json对象
-	type Decoder struct { ... }
-	
-	// NewDecoder创建一个从r读取并解码json对象的*Decoder，解码器有自己的缓冲，并可能超前读取部分json数据
-	func NewDecoder(r io.Reader) *Decoder
-
-	// Decode从输入流读取下一个json编码值并保存在v指向的值里
-	func (dec *Decoder) Decode(v interface{}) error
-
-	// Encoder将json对象写入输出流
-	type Encoder struct { ... }
-
-	// NewEncoder创建一个将数据写入w的 *Encoder
-	func NewEncoder(w io.Writer) *Encoder
-
-	// Encode将v的json编码写入输出流，并会写入一个换行符
-	func (enc *Encoder) Encode(v interface{}) error
-```
-
-### 5. os
+### 4. os
 - os
 	- os包提供了操作系统函数的不依赖平台的接口
 	- os包的接口规定为在所有操作系统中都是一致的
@@ -415,7 +318,7 @@
 	func LookupId(uid string) (*User, error)
 ```
 
-### 6. bufio
+### 5. bufio
 - bufio包
 	- 实现了有缓冲的I/O，提供缓冲流的功能
 	- 它包装一个 `io.Reader` 或 `io.Writer` 接口对象，创建另一个也实现了该接口，且同时还提供了缓冲和一些文本I/O的帮助函数的对象
@@ -458,7 +361,7 @@
 			- `Text` 读取数据，返回字符串
 			- `Err` 获取错误
 
-### 7. io
+### 6. io
 - io
 	- io包提供了对I/O原语的基本接口
 	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
@@ -526,6 +429,111 @@
 	func TempFile(dir, prefix string) (f *os.File, err error)
 ```
 
+### 7. encoding
+- encoding
+	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
+	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
+
+- encoding/base64
+	- base64实现了RFC 4648规定的base64编码
+```go
+	// RFC 4648定义的标准base64编码字符集
+	var StdEncoding = NewEncoding(encodeStd)
+
+	// RFC 4648定义的另一base64编码字符集，用于URL和文件名
+	var URLEncoding = NewEncoding(encodeURL)
+
+	// 双向的编码/解码协议
+	type Encoding struct { ... }
+
+	// 使用给出的字符集生成一个*Encoding，字符集必须是64字节的字符串
+	func NewEncoding(encoder string) *Encoding
+
+	// 将src的数据解码后存入dst，最多写DecodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 如果src包含非法字符，将返回成功写入的字符数和CorruptInputError
+	// 换行符（\r、\n）会被忽略。
+	func (enc *Encoding) Decode(dst, src []byte) (n int, err error)
+
+	// 返回base64编码的字符串s代表的数据
+	// base64.StdEncoding.DecodeString(str)
+	func (enc *Encoding) DecodeString(s string) ([]byte, error)
+
+	// 将src的数据编码后存入dst，最多写EncodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 函数会把输出设置为4的倍数，因此不建议对大数据流的独立数据块执行此方法，使用NewEncoder()代替
+	func (enc *Encoding) Encode(dst, src []byte)
+
+	// 返回将src编码后的字符串
+	// base64.StdEncoding.EncodeToString(data)
+	func (enc *Encoding) EncodeToString(src []byte) string
+
+	// 创建一个新的base64流解码器
+	func NewDecoder(enc *Encoding, r io.Reader) io.Reader
+
+	// 创建一个新的base64流编码器
+	// 写入的数据会在编码后再写入w，base32编码每3字节执行一次编码操作
+	// 写入完毕后，使用者必须调用Close方法以便将未写入的数据从缓存中刷新到w中
+	func NewEncoder(enc *Encoding, w io.Writer) io.WriteCloser
+```
+
+- encoding/csv
+	- `encoding/csv` 包提供对 csv 文件读写的操作
+
+- encoding/json
+	- json包实现了json对象的编解码
+	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
+```go
+	// json.Marshal
+	// Marshal函数返回v的json编码
+	// 结构体标签值里的"json"键为键名，后跟可选的逗号和选项，具体如下:
+	// // 字段被本包忽略
+	// Field int `json:"-"`
+	// // 字段在json里的键为"myName"
+	// Field int `json:"myName"`
+	// // 字段在json里的键为"myName"且如果字段为空值将在对象中省略掉
+	// Field int `json:"myName,omitempty"`
+	// // 字段在json里的键为"Field"（默认值），但如果字段为空值会跳过；注意前导的逗号
+	// Field int `json:",omitempty"
+	// // "string"选项标记一个字段在编码json时应编码为字符串；它只适用于字符串、浮点数、整数类型的字段
+	// Int64String int64 `json:",string"`
+	func Marshal(v interface{}) ([]byte, error)
+
+	// json.Unmarshal
+	// Unmarshal 函数解析json编码的数据并将结果存入v指向的值
+	// Unmarshal 和Marshal 做相反的操作，必要时申请映射、切片或指针，有如下的附加规则
+	// JSON 的 null 值解码为go的接口、指针、切片时会将它们设为nil，因为null在json里一般表示“不存在”；解码json的null值到其他go类型时，不会造成任何改变，也不会产生错误
+	// 要将json数据解码写入一个接口类型值，函数会将数据解码为如下类型写入接口:
+	// Bool                   对应JSON布尔类型
+	// float64                对应JSON数字类型
+	// string                 对应JSON字符串类型
+	// []interface{}          对应JSON数组
+	// map[string]interface{} 对应JSON对象
+	// nil                    对应JSON的null
+	func Unmarshal(data []byte, v interface{}) error
+
+	// Decoder从输入流解码json对象
+	type Decoder struct { ... }
+	
+	// NewDecoder创建一个从r读取并解码json对象的*Decoder，解码器有自己的缓冲，并可能超前读取部分json数据
+	func NewDecoder(r io.Reader) *Decoder
+
+	// Decode从输入流读取下一个json编码值并保存在v指向的值里
+	func (dec *Decoder) Decode(v interface{}) error
+
+	// Encoder将json对象写入输出流
+	type Encoder struct { ... }
+
+	// NewEncoder创建一个将数据写入w的 *Encoder
+	func NewEncoder(w io.Writer) *Encoder
+
+	// Encode将v的json编码写入输出流，并会写入一个换行符
+	func (enc *Encoder) Encode(v interface{}) error
+```
+
+- encoding/gob
+	- gob包管理gob流，在编码器(发送器)和解码器(接受器)之间交换的binary值
+	- go特有的编码格式，不能跨语言，提供了对数据结构进行二进制序列化的功能
+	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
+
 ### 4. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
@@ -577,17 +585,6 @@
 	sha256.Sum256([]byte(""))
 ```
 
-### 10. encoding/base64
-```go
-	base64.stdEncoding.EncodeToString([]byte(""))     // 计算byte切片中字符的base64加密
-	base64.StdEncoding.DecodeString()                 // 计算base64解码
-	base64.RawStdEncoding.EncodeToString([]byte(""))  // 计算byte切片中字符的base64加密且不使用=填充
-	base64.URLEncoding.EncodeToString([]byte(""))     // 计算byte切片中字符的url加密
-	encoding/gob
-	encoding/csv
-	encoding/json
-```
-
 ### 11. log
 ```go
 	log.Printf("aa")  // 2021/07/04 15:32:10 aa
@@ -606,19 +603,6 @@
 ```go
 	func runtime.Gosched()
 ```
-
-### 14. bufio
-```go
-	// 提供缓冲流的功能
-	bufio.NewScanner(os.Stdin)
-```
-
-### 15. io 
-```go
-	func io.Copy(dst io.Writer, src io.Reader) (written int64, err error)
-```
-
-### 16. io/ioutil
 
 ### 17. net/http
 ```go

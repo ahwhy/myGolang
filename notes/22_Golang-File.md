@@ -557,22 +557,22 @@
 
 - 参考示例
 ```go
-		scanner := bufio.NewScanner(os.Stdin)        // os.Stdin
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-			break
+	scanner := bufio.NewScanner(os.Stdin)        // os.Stdin
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+		break
+	}
+	
+	func ScanInt() (int, error) {
+		// 读取一行 进行转换
+		scanner := bufio.NewScanner(os.Stdin)
+		if scanner.Scan() {
+			return strconv.Atoi(scanner.Text())
 		}
-		
-		func ScanInt() (int, error) {
-			// 读取一行 进行转换
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				return strconv.Atoi(scanner.Text())
-			}
-			return 0, scanner.Err()
-		}
-		num, err := ScanInt()
-		fmt.Println(num, err)
+		return 0, scanner.Err()
+	}
+	num, err := ScanInt()
+	fmt.Println(num, err)
 ```
 
 ### 3. IO包
@@ -674,11 +674,12 @@
 	}
 ```
 
-- `strings.NewReader`
-	- `io.Reader` 接口只有一个方法: Read方法
-	- 即只要有个对象实现了Read方法，那么这个对象就是一个读取器
-	- `Read()` 首先要有一个读缓冲区的参数
-	- `Read()` 返回两个值，第一个是读取到的字节数，第二个是读取时发生的错误 `func (*strings.Reader).Read(b []byte) (n int, err error)`
+- Read 方法
+	- 常用函数 `strings.NewReader`
+		- 函数签名`func (*strings.Reader) Read(b []byte) (n int, err error)`
+		- `io.Reader` 接口只有一个方法: Read方法，即只要有个对象实现了Read方法，那么这个对象就是一个读取器
+	- `Read()` 首先要有一个读缓冲区的参数 `[]byte`
+	- `Read()` 返回两个值，第一个是读取到的字节数，第二个是读取时发生的错误
 	- 注意: 返回到的读取字节个数n可能小于缓冲区的大小
 	- io.EOF 表示输入的流已经读到头了
 ```go
@@ -703,7 +704,7 @@
 ```
 
 - 自定义Reader
-	- 要求: 过滤输入字符串中的非字母字符
+	- 要求 过滤输入字符串中的非字母字符
 	- 输入 "mage jiaoyue 2021 go !!!!"
 	- 输出 "magejiaoyuego"
 ```go
@@ -718,49 +719,49 @@
 		}
 		return 0
 	}
-				func (z *zimuguolv) Read(p []byte) (int, error) {
-					// 当前位置 >= 字符串长度，说明已经读取到结尾了，返回 EOF
-					if z.cur >= len(z.src) {
-						return 0, io.EOF
-					}
-					// 定义一个剩余还没读到的长度
-					x := len(z.src) - z.cur
-					// bound叫做本次读取长度
-					// n代表本次遍历 bound的索引
-					n, bound := 0, 0
-					if x >= len(p) {
-						// 剩余长度超过缓冲区大小，说明本次可以完全填满换冲区
-						bound = len(p)
-					} else {
-						// 剩余长度小于缓冲区大小，使用剩余长度输出，缓冲区填不满
-						bound = x
-					}
+	func (z *zimuguolv) Read(p []byte) (int, error) {
+		// 当前位置 >= 字符串长度，说明已经读取到结尾了，返回 EOF
+		if z.cur >= len(z.src) {
+			return 0, io.EOF
+		}
+		// 定义一个剩余还没读到的长度
+		x := len(z.src) - z.cur
+		// bound叫做本次读取长度
+		// n代表本次遍历 bound的索引
+		n, bound := 0, 0
+		if x >= len(p) {
+			// 剩余长度超过缓冲区大小，说明本次可以完全填满换冲区
+			bound = len(p)
+		} else {
+			// 剩余长度小于缓冲区大小，使用剩余长度输出，缓冲区填不满
+			bound = x
+		}
 				
-					buf := make([]byte, bound)
-				
-					for n < bound {
-						if char := alpha(z.src[z.cur]); char != 0 {
-							buf[n] = char
-						}
-						// 索引++
-						n++
-						z.cur++
-					}
-					copy(p, buf)
-					return n, nil
-				}
-				zmreader := zimuguolv{
-					src: "mage jiaoyu 2021 go !!!!",
-				}
-				p := make([]byte, 4)
-				for {
-					n, err := zmreader.Read(p)
-					if err == io.EOF {
-						log.Printf("[EOF错误]")
-						break
-					}
-					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
-				}
+		buf := make([]byte, bound)
+	
+		for n < bound {
+			if char := alpha(z.src[z.cur]); char != 0 {
+				buf[n] = char
+			}
+			// 索引++
+			n++
+			z.cur++
+		}
+		copy(p, buf)
+		return n, nil
+	}
+	zmreader := zimuguolv{
+		src: "mage jiaoyu 2021 go !!!!",
+	}
+	p := make([]byte, 4)
+	for {
+		n, err := zmreader.Read(p)
+		if err == io.EOF {
+			log.Printf("[EOF错误]")
+			break
+		}
+		log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
+	}
 ```
 
 - 组合多个Reader
@@ -769,68 +770,68 @@
 	- 目的是重用和屏蔽下层实现的复杂度；即复用逻辑，流式处理
 	- 复用的`io.Reader`
 ```go
-				type alphaReader struct {
-					ioReader io.Reader
-				}
-				func (a *alphaReader) Read(p []byte) (int, error) {
-					// 复用io.reader的read方法
-					n, err := a.ioReader.Read(p)
-					if err != nil {
-						return n, err
-					}
-				
-					buf := make([]byte, n)
-					for i := 0; i < n; i++ {
-						if char := alpha(p[i]); char != 0 {
-							buf[i] = char
-						}
-					}
-					copy(p, buf)
-					return n, nil
-				}
-				func alpha(r byte) byte {
-					// r在 A-Z 或者 a-z
-					if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
-						return r
-					}
-					return 0
-				}
-				myReader := alphaReader{
-					strings.NewReader("mage jiaoyu 2021 go !!!"),
-				}
-				p := make([]byte, 4)
-				for {
-					n, err := myReader.Read(p)
-					if err == io.EOF {
-						log.Printf("[EOF错误]")
-						break
-					}
-					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
-				}
+	type alphaReader struct {
+		ioReader io.Reader
+	}
+	func (a *alphaReader) Read(p []byte) (int, error) {
+		// 复用io.reader的read方法
+		n, err := a.ioReader.Read(p)
+		if err != nil {
+			return n, err
+		}
+	
+		buf := make([]byte, n)
+		for i := 0; i < n; i++ {
+			if char := alpha(p[i]); char != 0 {
+				buf[i] = char
+			}
+		}
+		copy(p, buf)
+		return n, nil
+	}
+	func alpha(r byte) byte {
+		// r在 A-Z 或者 a-z
+		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
+			return r
+		}
+		return 0
+	}
+	myReader := alphaReader{
+		strings.NewReader("mage jiaoyu 2021 go !!!"),
+	}
+	p := make([]byte, 4)
+	for {
+		n, err := myReader.Read(p)
+		if err == io.EOF {
+			log.Printf("[EOF错误]")
+			break
+		}
+		log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
+	}
 ```
 
 - os.File 结合
 	- os.Open得到一个file对象 ，实现了io.Reader的Read方法
 	- 以下代码展示了 alphaReader 如何与 os.File 结合以过滤掉文件中的非字母字符
 ```go
-				file, err := os.Open("test.txt")
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
-				defer file.Close()
-				myReader := alphaReader{
-					file,
-				}
-				p := make([]byte, 4)
-				for {
-					n, err := myReader.Read(p)
-					if err == io.EOF {
-						log.Printf("[EOF错误]")
-						break
-					}
-					log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
-				}
+	file, err := os.Open("test.txt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer file.Close()
+	myReader := alphaReader{
+		file,
+	}
+	p := make([]byte, 4)
+	for {
+		n, err := myReader.Read(p)
+		if err == io.EOF {
+			log.Printf("[EOF错误]")
+			break
+		}
+		log.Printf("[读取到的长度%d 内容%s]", n, string(p[:n]))
+	}
 ```
 
 - 读取文件 `ioutil.ReadFile` vs `bufio`
@@ -838,44 +839,44 @@
 	- bufio多了一层缓存的能力，优势体现在读取大文件的时候
 	- `ioutil.ReadFile`是一次性将内容加载到内存，大文件容易爆掉
 ```go
-				fileName := "test.txt"
-				
-				// ioutil.ReadFile
-				bytes, err := ioutil.ReadFile(fileName)
-				if err != nil {
-					return
-				}
-				
-				// os.Open + ioutil.ReadAll  
-				// func ReadAll(r io.Reader) ([]byte, error)
-				file, err := os.Open(fileName)
-				if err != nil {
-					return
-				}
-				bytes, err = ioutil.ReadAll(file)
-				if err != nil {
-					return
-				}
-				file.Close()
-				
-				// os.Open + file.Read
-				file, _ = os.Open(fileName)
-				buf := make([]byte, 50)
-				_, err = file.Read(buf)
-				if err != nil {
-					return
-				}
-				file.Close()
-				
-				// os.Open + bufio.Read
-				file, _ = os.Open(fileName)
-				rd := bufio.NewReader(file)  	// bufio.NewReader
-				buf1 := make([]byte, 50)
-				_, err = rd.Read(buf1)
-				if err != nil {
-					return
-				}
-				file.Close()
+	fileName := "test.txt"
+	
+	// ioutil.ReadFile
+	bytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return
+	}
+	
+	// os.Open + ioutil.ReadAll  
+	// func ReadAll(r io.Reader) ([]byte, error)
+	file, err := os.Open(fileName)
+	if err != nil {
+		return
+	}
+	bytes, err = ioutil.ReadAll(file)
+	if err != nil {
+		return
+	}
+	file.Close()
+	
+	// os.Open + file.Read
+	file, _ = os.Open(fileName)
+	buf := make([]byte, 50)
+	_, err = file.Read(buf)
+	if err != nil {
+		return
+	}
+	file.Close()
+	
+	// os.Open + bufio.Read
+	file, _ = os.Open(fileName)
+	rd := bufio.NewReader(file)  	// bufio.NewReader
+	buf1 := make([]byte, 50)
+	_, err = rd.Read(buf1)
+	if err != nil {
+		return
+	}
+	file.Close()
 ```
 
 ### 5. Writer
@@ -888,155 +889,261 @@
 	}
 ```
 
-- Write() 方法有两个返回值，一个是写入到目标资源的字节数，一个是发生错误时的错误。
-	- closer
-	- `bytes.Buffer`库 
-		- bytes.Buffer 的针对的是内存到内存的缓存
-	- `io/ioutil` ioutil库 工具包
-		- 在io目录下，它是一个工具包，实现一些实用的工具
+- Write 方法
+	- 方法本身有两个返回值，一个是写入到目标资源的字节数，一个是发生错误时的错误
+	- `bytes.Buffer` 针对的是内存到内存的缓存
+	- `io/ioutil` 是一个工具包，实现一些实用的工具
 ```go
-				// ReadFile 读取文件                           
-				// func ReadFile(filename string) ([]byte, error)
-				fileName := "golang.txt"
-				bytes, err := ioutil.ReadFile(fileName)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				// WriteFile 写入文件
-				// func WriteFile(filename string, data []byte, perm fs.FileMode) error
-				fileName := "test.txt"
-				err := ioutil.WriteFile(fileName, []byte("123\n456"), 0644)
-				fmt.Println(err)
-
-				// ReadDir 读取目录下的文件元信息
-				// func ReadDir(dirname string) ([]fs.FileInfo, error)
-				fs, err := ioutil.ReadDir("./")
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				for _, f := range fs {
-					fmt.Printf("[name:%v][size:%v][isDir:%v][mode:%v][ModTime:%v]\n",
-						f.Name(),
-						f.Size(),
-						f.IsDir(),
-						f.Mode(),
-						f.ModTime(),
-					)
-				}
+	// ReadFile 读取文件                           
+	// func ReadFile(filename string) ([]byte, error)
+	fileName := "golang.txt"
+	bytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	
+	// WriteFile 写入文件
+	// func WriteFile(filename string, data []byte, perm fs.FileMode) error
+	fileName := "test.txt"
+	err := ioutil.WriteFile(fileName, []byte("123\n456"), 0644)
+	fmt.Println(err)
+	
+	// ReadDir 读取目录下的文件元信息
+	// func ReadDir(dirname string) ([]fs.FileInfo, error)
+	fs, err := ioutil.ReadDir("./")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, f := range fs {
+		fmt.Printf("[name:%v][size:%v][isDir:%v][mode:%v][ModTime:%v]\n",
+			f.Name(),
+			f.Size(),
+			f.IsDir(),
+			f.Mode(),
+			f.ModTime(),
+		)
+	}
 ```
 
 ## 三、编码格式
 
-- 处理流程
-	- 注册，打开文件，创建对象，编码/解码
+### 1. encoding
+- encoding
+	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
+	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
 
-- gob
-	- go特有的编码格式，不能跨语言
-	- `encoding/gob` 包提供了对数据结构进行二进制序列化的功能
-		- 常用函数
-			- `Register`: 注册 gob 编解码记录值 `func Register(value interface{})`
-			- `RegisterName`: 注册 gob 编解码记录值，并指定名称 `func RegisterName(name string, value interface{})`
-		- 常用结构体
-			- Encoder `type Encoder struct{ ... }`
-				- 常用函数 
-					- `NewEncoder`: 创建编码器 `func NewEncoder(w io.Writer) *Encoder`
-				- 常用方法
-					- `Encode`: 将对象进行编码到流对象中 `func (enc *Encoder) Encode(e interface{}) error`
-			- Decoder `type Decoder struct{ ... }`
-				- 常用函数
-					- `NewDecoder`: 创建解码器 `func NewDecoder(r io.Reader) *Decoder`
-				- 常用方法
-					- `Decode`: 将流对象中的数据编码到对象中 `func (dec *Decoder) Decode(e interface{}) error`
+### 2. encoding/base64
+- encoding/base64
+	- base64实现了RFC 4648规定的base64编码
 ```go
-		type User struct {
-			Id   int
-			Name string
-		}
-		enusers := []User{
-			{1, "aa"},
-			{2, "bb"},
-		}
-		// 注册
-		gob.Register(User{})
-		// 编码
-		file, err := os.Create("users.gob")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		encoder := gob.NewEncoder(file)
-		fmt.Println(encoder.Encode(enusers))
-		file.Close()
-		// 解码
-		file, err := os.Open("users.gob")
-		if err != nil {
-			return
-		}
-		decoder := gob.NewDecoder(file)
-		var deusers []User
-		fmt.Println(decoder.Decode(&deusers))
-		fmt.Println(deusers)
-		file.Close()
+	// RFC 4648定义的标准base64编码字符集
+	var StdEncoding = NewEncoding(encodeStd)
+
+	// RFC 4648定义的另一base64编码字符集，用于URL和文件名
+	var URLEncoding = NewEncoding(encodeURL)
+
+	// 双向的编码/解码协议
+	type Encoding struct { ... }
+
+	// 使用给出的字符集生成一个*Encoding，字符集必须是64字节的字符串
+	func NewEncoding(encoder string) *Encoding
+
+	// 将src的数据解码后存入dst，最多写DecodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 如果src包含非法字符，将返回成功写入的字符数和CorruptInputError
+	// 换行符（\r、\n）会被忽略。
+	func (enc *Encoding) Decode(dst, src []byte) (n int, err error)
+
+	// 返回base64编码的字符串s代表的数据
+	// base64.StdEncoding.DecodeString(str)
+	func (enc *Encoding) DecodeString(s string) ([]byte, error)
+
+	// 将src的数据编码后存入dst，最多写EncodedLen(len(src))字节数据到dst，并返回写入的字节数
+	// 函数会把输出设置为4的倍数，因此不建议对大数据流的独立数据块执行此方法，使用NewEncoder()代替
+	func (enc *Encoding) Encode(dst, src []byte)
+
+	// 返回将src编码后的字符串
+	// base64.StdEncoding.EncodeToString(data)
+	func (enc *Encoding) EncodeToString(src []byte) string
+
+	// 创建一个新的base64流解码器
+	func NewDecoder(enc *Encoding, r io.Reader) io.Reader
+
+	// 创建一个新的base64流编码器
+	// 写入的数据会在编码后再写入w，base32编码每3字节执行一次编码操作
+	// 写入完毕后，使用者必须调用Close方法以便将未写入的数据从缓存中刷新到w中
+	func NewEncoder(enc *Encoding, w io.Writer) io.WriteCloser
 ```
-		
-- csv
+
+### 3. encoding/csv
+- encoding/csv
 	- `encoding/csv` 包提供对 csv 文件读写的操作
-	- 常用结构体
-		- Reader
-			- 常用函数
-				- `func NewReader(r io.Reader) *Reader`
-			- 常用方法
-				- `func (r *Reader) Read() (record []string, err error)`
-				- `func (r *Reader) ReadAll() (records [][]string, err error)`
-		- Writer
-			- 常用函数
-				- `func NewWriter(w io.Writer) *Writer`
-			- 常用方法
-				- `func (w *Writer) WriteAll(records [][]string) error`
-				- `func (w *Writer) Write(record []string) error`
-				- `func (w *Writer) Flush()`
-				- `func (w *Writer) Error() error`
+
+- 常用结构体
+	- Reader
+		- 常用函数
+			- `func NewReader(r io.Reader) *Reader`
+		- 常用方法
+			- `func (r *Reader) Read() (record []string, err error)`
+			- `func (r *Reader) ReadAll() (records [][]string, err error)`
+	- Writer
+		- 常用函数
+			- `func NewWriter(w io.Writer) *Writer`
+		- 常用方法
+			- `func (w *Writer) WriteAll(records [][]string) error`
+			- `func (w *Writer) Write(record []string) error`
+			- `func (w *Writer) Flush()`
+			- `func (w *Writer) Error() error`
 ```go
-		wusers := []User{
-			{1, "aa"},
-			{2, "bb"},
-		}
-		// 写入
-		file, err := os.Create("users.csv")
+	wusers := []User{
+		{1, "aa"},
+		{2, "bb"},
+	}
+	// 写入
+	file, err := os.Create("users.csv")
+	if err != nil {
+		return
+	}
+	writer := csv.NewWriter(file)
+	for _, user := range wusers {
+		writer.Write([]string{strconv.Itoa(user.Id), user.Name})
+	}
+	writer.Flush()
+	file.Close()
+	// 读取
+	file, err = os.Open("users.csv")
+	if err != nil {
+		return
+	}
+	var rusers []User
+	reader := csv.NewReader(file)
+	for {
+		line, err := reader.Read()
 		if err != nil {
-			return
-		}
-		writer := csv.NewWriter(file)
-		for _, user := range wusers {
-			writer.Write([]string{strconv.Itoa(user.Id), user.Name})
-		}
-		writer.Flush()
-		file.Close()
-		// 读取
-		file, err = os.Open("users.csv")
-		if err != nil {
-			return
-		}
-		var rusers []User
-		reader := csv.NewReader(file)
-		for {
-			line, err := reader.Read()
-			if err != nil {
-				if err != io.EOF {
-					fmt.Println(err)
-				}
-				break
+			if err != io.EOF {
+				fmt.Println(err)
 			}
-			id, _ := strconv.Atoi(line[0])
-			rusers = append(rusers, User{id, line[1]})
+			break
 		}
-		fmt.Println(rusers)
+		id, _ := strconv.Atoi(line[0])
+		rusers = append(rusers, User{id, line[1]})
+	}
+	fmt.Println(rusers)
 ```
 
-## 五、参考范例
+### 4. encoding/json
+- encoding/json
+	- json包实现了json对象的编解码
+	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
+```go
+	// json.Marshal
+	// Marshal函数返回v的json编码
+	// 结构体标签值里的"json"键为键名，后跟可选的逗号和选项，具体如下:
+	// // 字段被本包忽略
+	// Field int `json:"-"`
+	// // 字段在json里的键为"myName"
+	// Field int `json:"myName"`
+	// // 字段在json里的键为"myName"且如果字段为空值将在对象中省略掉
+	// Field int `json:"myName,omitempty"`
+	// // 字段在json里的键为"Field"（默认值），但如果字段为空值会跳过；注意前导的逗号
+	// Field int `json:",omitempty"
+	// // "string"选项标记一个字段在编码json时应编码为字符串；它只适用于字符串、浮点数、整数类型的字段
+	// Int64String int64 `json:",string"`
+	func Marshal(v interface{}) ([]byte, error)
+
+	// json.Unmarshal
+	// Unmarshal 函数解析json编码的数据并将结果存入v指向的值
+	// Unmarshal 和Marshal 做相反的操作，必要时申请映射、切片或指针，有如下的附加规则
+	// JSON 的 null 值解码为go的接口、指针、切片时会将它们设为nil，因为null在json里一般表示“不存在”；解码json的null值到其他go类型时，不会造成任何改变，也不会产生错误
+	// 要将json数据解码写入一个接口类型值，函数会将数据解码为如下类型写入接口:
+	// Bool                   对应JSON布尔类型
+	// float64                对应JSON数字类型
+	// string                 对应JSON字符串类型
+	// []interface{}          对应JSON数组
+	// map[string]interface{} 对应JSON对象
+	// nil                    对应JSON的null
+	func Unmarshal(data []byte, v interface{}) error
+
+	// Decoder从输入流解码json对象
+	type Decoder struct { ... }
+	
+	// NewDecoder创建一个从r读取并解码json对象的*Decoder，解码器有自己的缓冲，并可能超前读取部分json数据
+	func NewDecoder(r io.Reader) *Decoder
+
+	// Decode从输入流读取下一个json编码值并保存在v指向的值里
+	func (dec *Decoder) Decode(v interface{}) error
+
+	// Encoder将json对象写入输出流
+	type Encoder struct { ... }
+
+	// NewEncoder创建一个将数据写入w的 *Encoder
+	func NewEncoder(w io.Writer) *Encoder
+
+	// Encode将v的json编码写入输出流，并会写入一个换行符
+	func (enc *Encoder) Encode(v interface{}) error
+```
+
+### 5. encoding/gob
+- encoding/gob
+	- gob包管理gob流，在编码器(发送器)和解码器(接受器)之间交换的binary值
+	- go特有的编码格式，不能跨语言，提供了对数据结构进行二进制序列化的功能
+	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
+
+- 处理流程
+	- 注册
+	- 打开文件
+	- 创建对象
+	- 编码/解码
+
+- 常用函数
+	- `Register`: 注册 gob 编解码记录值 `func Register(value interface{})`
+	- `RegisterName`: 注册 gob 编解码记录值，并指定名称 `func RegisterName(name string, value interface{})`
+		
+- 常用结构体
+	- Encoder `type Encoder struct{ ... }`
+		- 常用函数 
+			- `NewEncoder`: 创建编码器 `func NewEncoder(w io.Writer) *Encoder`
+		- 常用方法
+			- `Encode`: 将对象进行编码到流对象中 `func (enc *Encoder) Encode(e interface{}) error`
+	- Decoder `type Decoder struct{ ... }`
+		- 常用函数
+			- `NewDecoder`: 创建解码器 `func NewDecoder(r io.Reader) *Decoder`
+		- 常用方法
+			- `Decode`: 将流对象中的数据编码到对象中 `func (dec *Decoder) Decode(e interface{}) error`
+```go
+	type User struct {
+		Id   int
+		Name string
+	}
+	enusers := []User{
+		{1, "aa"},
+		{2, "bb"},
+	}
+	// 注册
+	gob.Register(User{})
+	// 编码
+	file, err := os.Create("users.gob")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	encoder := gob.NewEncoder(file)
+	fmt.Println(encoder.Encode(enusers))
+	file.Close()
+	// 解码
+	file, err := os.Open("users.gob")
+	if err != nil {
+		return
+	}
+	decoder := gob.NewDecoder(file)
+	var deusers []User
+	fmt.Println(decoder.Decode(&deusers))
+	fmt.Println(deusers)
+	file.Close()
+```
+
+## 四、参考范例
 
 - 真实生产应用 
 	- 夜莺监控发送告警，调用python的send.py脚本，将发送的内容作为stdin传过去
