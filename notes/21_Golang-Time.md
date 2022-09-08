@@ -259,12 +259,7 @@
 	- 当Timer到期时，当时的时间会被发送给C，除非Timer是被AfterFunc函数创建的
 ```go
 	// Timer数据结构
-	type Ti	select {
-	case m := <-c:
-		handle(m)
-	case <-time.After(5 * time.Minute):
-		fmt.Println("timed out")
-	}mer struct {
+	type Timer struct {
 		C <-chan Time   // C: 一个存放Time对象的Channel
 		r runtimeTimer  // runtimeTimer: 它定义在 sleep.go 文件中，必须和 runtime 包中 time.go 文件中的 timer 必须保持一致
 	}
