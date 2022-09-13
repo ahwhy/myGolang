@@ -1,10 +1,11 @@
 # Golang-Strings  Golang的字符串
 
 ## 一、Golang的字符串
+
 - 字符串是 Go 语言中的基础数据类型
 	- 虽然字符串往往被看做一个整体，但是它实际上是一片连续的内存空间，也可以将它理解成一个由字符组成的数组  
 	- 字符串中的每一个元素叫做"字符"
-		
+
 - 字符串的本质
 	- 字符串是由字符组成的数组[]byte
 	- 数组会占用一片连续的内存空间，而内存空间存储的字节共同组成了字符串
@@ -36,68 +37,74 @@
 ```
 
 - 字符串是不可修改的，修改字符串内部数据的操作也是被禁止的
-```
-	s[0] = 'L' // compile error: cannot assign to s[0]
-```
 	- 不变性意味如果两个字符串共享相同的底层数据的话也是安全的，这使得复制任何长度的字符串代价是低廉的
 	- 同样，一个字符串s和对应的子字符串切片s[7:]的操作也可以安全地共享相同的内存，因此字符串切片操作代价也是低廉的
 	- 在这两种情况下都没有必要分配新的内存
+```
+	s[0] = 'L' // compile error: cannot assign to s[0]
+```
 
 - `+` 操作符将两个字符串链接构造一个新字符串
 
-- byte 和 rune
+- `byte` 和 `rune`
 	- string 中每个元素叫"字符"，字符有两种
-		- byte: 1个字节，代表 ASCLL码 的一个字符
-		- rune: 4个字节，代表一个 UTF-8字符，一个汉字可用一个 rune 表示
+		- byte 1个字节，代表 ASCLL码 的一个字符
+		- rune 4个字节，代表一个 UTF-8字符，一个汉字可用一个 rune 表示
 	- string 底层是byte数组，string的长度就是该byte数组的长度，UTF-8 编码下一个汉字占 3个byte，即一个汉字占3个长度
-	- string 可以转换为 []byte 或 []rune 类型
+	- string 可以转换为 `[]byte` 或 `[]rune` 类型
 
 - 强制类型转换
-	- byte  和 int 可以相互转换
-	- float 和 int 可以相互转换，小数位会丢失
-	- boot  和 int 不可以相互转换
-	- 不同长度的 int 和 float 之间可以相互转换
-	- string 可以转换为 []byte 或 []rune 类型，byte 或 rune 类型可以转换为string
+	- `byte`  和 `int` 可以相互转换
+	- `float` 和 `int` 可以相互转换，小数位会丢失
+	- `boot`  和 `int` 不可以相互转换
+	- 不同长度的 `int` 和 `float` 之间可以相互转换
+	- `string` 可以转换为 `[]byte` 或 `[]rune` 类型，`byte` 或 `rune` 类型可以转换为 `string`
 	- 低精度向高精度转换没有问题，高精度向低精度转换会丢失位数
 	- 无符号向有符号转换，最高位是无符号
-	
 
-## 二、ASCII && Unicode && UTF-8 
+
+## 二、ASCII && Unicode && UTF-8
+
 - ASCII编码
-	- 英文和数字
+	- ASCII (American Standard Code for Information Interchange)
+	- 美国信息交换标准代码是基于拉丁字母的一套电脑编码系统，主要用于显示现代英语和其他西欧语言，即英文和数字
 	- [Go语言字符串的字节长度和字符个数](https://blog.csdn.net/qq_39397165/article/details/116178566)
 
 - Unicode 
 	- 称为Unicode字符集或者万国码, 就是将全球所有语言的字符通过编码
 	- 所有语言都统一到一套编码，本质就是一张大的码表
-	- 比如 `104 -> h`，`101 ->e` (数字 -> 字符 的映射机制，兼容assicc码)，即利用一个数字即可表示一个字符
+	- 比如 `104 -> h`，`101 ->e` (数字 -> 字符 的映射机制，兼容ASCII编码)，即利用一个数字即可表示一个字符
 
 - UTF-8
 	- 目前互联网上使用最广泛的一种Unicode编码方式，最大特点就是可变长
 	- 可以使用多个字节表示一个字符，根据字符的不同变换长度
 	- UTF-8编码中，一个英文为一个字节，一个中文为三个字节
-		- utf8使用变长字节编码，来表示这些unicode码
+		- UTF-8使用变长字节编码，来表示这些Unicode码
 		- 编码规则如下
 			- 如果只有一个字节则其最高二进制位为0
 			- 如果是多字节，其第一个字节从最高位开始，连续的二进制位值为1的个数决定了其编码的位数，其余各字节均以10开头
 			- UTF-8最多可用到6个字节
 				- 如表
-					1字节 0xxxxxxx
-					2字节 110xxxxx 10xxxxxx 
-					3字节 1110xxxx 10xxxxxx 10xxxxxx 
-					4字节 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx 
-					5字节 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 
-					6字节 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+					|1字节|0xxxxxxx|
+					|2字节|110xxxxx|10xxxxxx|
+					|3字节|1110xxxx|10xxxxxx|10xxxxxx|
+					|4字节|11110xxx|10xxxxxx|10xxxxxx|10xxxxxx|
+					|5字节|111110xx|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|
+					|6字节|1111110x|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|
 				- ascii码 本来就是7个bit表示，所以完全兼容
 	- Go语言
 		- Go语言里的字符串的内部实现使用UTF8编码. 默认rune类型
-		- GO中 uint8(byte类型 ascll) -> 0~127; int32(rune类型 utf-8) -> 128~0x10ffff;  
-		- Ascll使用下标遍历，Unicode使用for range遍历
-		- len只能表示字符串的 ASCII字符的个数或者字节长度
-		- 使用 + 拼接多个字符串，支持换行
+		- `uint8`(byte类型 ASCII) -> 0~127
+		- `int32`(rune类型 UTF-8) -> 128~0x10ffff;  
+		- Ascll使用下标遍历，Unicode使用`for range`遍历
+		- len只能表示字符串的 ASCII字符 的个数或者字节长度
+		- 使用 `+` 拼接多个字符串，支持换行
+
 
 ## 三、Golang的标准库strings包
-- 用于实现字符串的一些常规操作
+
+- strings包
+	- 实现了用于操作字符的简单函数
 
 - 字符串比较
 	- Compare 函数
@@ -148,8 +155,8 @@
 	- 将字符串数组(或 slice)连接起来可以通过 Join 实现
 		- `func Join(a []string, sep string) string`
 	- 拼接性能较高
-		- strings.Builder 
-		- bytes.Buffer
+		- `strings.Builder`
+		- `bytes.Buffer`
 
 - 计算子串位置
 ```go
@@ -210,10 +217,10 @@
 ## 五、其他
 - Go语言源代码始终为UTF-8
 
-- Go语言的字符串可以包含任意字节，字符底层是一个只读的byte数组
+- Go语言的字符串可以包含任意字节，字符底层是一个只读的`byte`数组
 
-- Go语言中字符串可以进行循环，使用下表循环获取的acsii字符，使用range循环获取的unicode字符
+- Go语言中字符串可以进行循环，使用下表循环获取的 ASCII字符，使用`for range`循环获取的 Unicode字符
 
-- Go语言中提供了rune类型用来区分字符值和整数值，一个值代表的就是一个Unicode字符
+- Go语言中提供了`rune`类型用来区分字符值和整数值，一个值代表的就是一个 Unicode字符
 
-- Go语言中获取字符串的字节长度使用len()函数，获取字符串的字符个数使用utf8.RuneCountInString函数或者转换为rune切片求其长度，这两种方法都可以达到预期结果。
+- Go语言中获取字符串的字节长度使用`len()`函数，获取字符串的字符个数使用`utf8.RuneCountInString`函数或者转换为rune切片求其长度，这两种方法都可以达到预期结果。
