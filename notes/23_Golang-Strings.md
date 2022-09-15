@@ -103,30 +103,128 @@
 
 ## 三、Golang的标准库strings包
 
-- strings包
-	- 实现了用于操作字符的简单函数
-
+### 1. 字符串查询
 - 字符串比较
 	- Compare 函数
 		- 用于比较两个字符串的大小，如果两个字符串相等，返回为 0
 		- 如果 a 小于 b ，返回 -1 ，反之返回 1
 		- 不推荐使用这个函数，直接使用 == != > < >= <= 等一系列运算符更加直观
-		- `func Compare(a, b string) int`
 	- EqualFold 函数
-		- 计算 s 与 t 忽略字母大小写后是否相等
-		- `func EqualFold(s, t string) bool`
+		- 判断两个utf-8编码字符串（将unicode大写、小写、标题三种格式字符视为相同）是否相同
+```go
+	func Compare(a, b string) int       // Compare
+	func EqualFold(s, t string) bool    // EqualFold
+```
+
+- 判断前缀和后缀
+```go
+	func HasPrefix(s, prefix string) bool   // 判断 s 是否有前缀字符串 prefix
+	func HasSuffix(s, suffix string) bool   // 判断 s 是否有后缀字符串 suffix
+```
 
 - 是否存在某个字符或子串
-	- 子串 substr 在 s 中，返回 true
-		- `func Contains(s, substr string) bool`
-	- chars 中任何一个 Unicode 代码点在 s 中，返回 true 
-		- `func ContainsAny(s, chars string) bool`
-	- Unicode 代码点 r 在 s 中，返回 true 
-		- `func ContainsRune(s string, r rune) bool`
+```go
+	func Contains(s, substr string) bool       // 子串 substr 在 s 中，返回 true
+	func ContainsAny(s, chars string) bool     // chars 中任何一个 Unicode 代码点在 s 中，返回 true 
+	func ContainsRune(s string, r rune) bool   // Unicode 代码点 r 在 s 中，返回 true 
+```
 
 - 子串出现次数
-	- 在 Go 中，查找子串出现次数即字符串模式匹配，Count 函数的签名 `func Count(s, sep string) int`
+```go
+	// Count 查找子串出现次数即字符串模式匹配
+	func Count(s, sep string) int
+```
 
+- 计算子串位置
+```go
+	// 查询子串的开始Index的函数有
+	func Index(s, sep string) int                     // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引，不存在则返回-1
+	func IndexByte(s string, c byte) int              // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
+	func IndexAny(s, chars string) int                // chars 中任何一个 Unicode 代码点在 s 中首次出现的位置
+	func IndexRune(s string, r rune) int              // Unicode 代码点 r 在 s 中第一次出现的位置
+	func IndexFunc(s string, f func(rune) bool) int   // s 中第一个满足函数 f 的位置 i (该处的utf-8码值r满足f(r)==true)
+
+	// 查找字串的结束Index的函数
+	// 有三个对应的查找最后一次出现的位置
+	func LastIndex(s, sep string) int
+	func LastIndexByte(s string, c byte) int
+	func LastIndexAny(s, chars string) int
+	func LastIndexFunc(s string, f func(rune) bool) int
+```
+
+### 2. 字符串替换
+- 字符串大小写转换
+```go
+	// 返回s中每个单词的首字母都改为标题格式的字符串拷贝
+	// strings.Title("her royal highness")
+	// Output: Her Royal Highness
+	func Title(s string) string
+	// 返回s中所有字母都转为对应的标题版本的拷贝
+	func ToTitle(s string) string
+	// 使用_case规定的字符映射，返回s中所有字母都转为对应的标题版本的拷贝
+	func ToTitleSpecial(_case unicode.SpecialCase, s string) string
+
+	// ToLower，ToUpper 用于大小写转换
+	func ToLower(s string) string
+	func ToUpper(s string) string
+
+	// ToLowerSpecial，ToUpperSpecial 可以转换特殊字符的大小写
+	func ToLowerSpecial(c unicode.SpecialCase, s string) string 
+	func ToUpperSpecial(c unicode.SpecialCase, s string) string
+```
+
+- `strings.Replace`
+```go
+	// 返回将s中前n个不重叠old子串都替换为new的新字符串，如果 n<0 会替换所有old子串
+	func Replace(s, old, new string, n int) string
+	// 替换所有old子串，该函数内部直接调用了函数 Replace
+	func ReplaceAll(s, old, new string) string
+
+	// 示例 Example
+	fmt.Println(strings.Replace("oink oink oink", "k", "ky", 2))
+	fmt.Println(strings.Replace("oink oink oink", "oink", "moo", -1))
+	// Output:
+	// oinky oinky oink
+	// moo moo moo
+```
+
+- `strings.Map`
+	- 将 s 的每一个字符按照 mapping 的规则做映射替换，如果 mapping 返回值 <0 ，则舍弃该字符
+	- 该方法只能对每一个字符做处理，但处理方式很灵活，可以方便的过滤，筛选汉字等
+```go
+	// 将s的每一个unicode码值r都替换为mapping(r)，返回这些新码值组成的字符串拷贝
+	// 如果mapping返回一个负值，将会丢弃该码值而不会被替换 (如果mapping返回一个负值，将会丢弃该码值而不会被替换)
+	func Map(mapping func(rune) rune, s string) string
+
+	// 示例 Example
+	rot13 := func(r rune) rune {
+		switch {
+		case r >= 'A' && r <= 'Z':
+			return 'A' + (r-'A'+13)%26
+		case r >= 'a' && r <= 'z':
+			return 'a' + (r-'a'+13)%26
+		}
+		return r
+	}
+	fmt.Println(strings.Map(rot13, "'Twas brillig and the slithy gopher..."))
+	// Output: 'Gjnf oevyyvt naq gur fyvgul tbcure...
+```
+
+### 3. 字符串剔除
+- 剔除子串
+```go
+	func Trim(s string, cutset string) string              // 将 s 左侧和右侧中匹配 cutset 中的任一字符的字符去掉
+	func TrimLeft(s string, cutset string) string          // 将 s 左侧的匹配 cutset 中的任一字符的字符去掉
+	func TrimRight(s string, cutset string) string         // 将 s 右侧的匹配 cutset 中的任一字符的字符去掉
+	func TrimPrefix(s, prefix string) string               // 如果 s 的前缀为 prefix 则返回去掉前缀后的 string , 否则 s 没有变化。
+	func TrimSuffix(s, suffix string) string               // 如果 s 的后缀为 suffix 则返回去掉后缀后的 string , 否则 s 没有变化。
+	func TrimSpace(s string) string                        // 将 s 左侧和右侧的间隔符去掉。常见间隔符包括: '\t', '\n', '\v', '\f', '\r', ' ', U+0085 (NEL)
+	func TrimFunc(s string, f func(rune) bool) string      // 将 s 左侧和右侧的匹配 f 的字符去掉
+	func TrimLeftFunc(s string, f func(rune) bool) string  // 将 s 左侧的匹配 f 的字符去掉
+	func TrimRightFunc(s string, f func(rune) bool) string // 将 s 右侧的匹配 f 的字符去掉
+```
+
+### 4. 字符串分割
 - 字符切分
 	- 通过分隔符来切割字符串
 		- 带 N 的方法可以通过最后一个参数 n 控制返回的结果中的 slice 中的元素个数
@@ -143,12 +241,7 @@
 	func SplitAfterN(s, sep string, n int) []string { return genSplit(s, sep, len(sep), n) }
 ```
 
-- 判断前缀和后缀
-	- s 中是否以 prefix 开始
-		- `func HasPrefix(s, prefix string) bool`
-	- s 中是否以 suffix 结尾
-		- `func HasSuffix(s, suffix string) bool`
-
+### 5. 字符串分割
 - 字符串拼接
 	- '+' 用加号连接
 	- `func fmt.Sprintf(format string, a ...interface{}) string`
@@ -158,61 +251,14 @@
 		- `strings.Builder`
 		- `bytes.Buffer`
 
-- 计算子串位置
-```go
-	// 查询子串的开始Index的函数有
-	func Index(s, sep string) int                   // 在 s 中查找 sep 的第一次出现，返回第一次出现的索引
-	func LastIndex(s, substr string) int
-	func IndexByte(s string, c byte) int            // 在 s 中查找字节 c 的第一次出现，返回第一次出现的索引
-	func IndexAny(s, chars string) int              // chars 中任何一个 Unicode 代码点在 s 中首次出现的位置
-	func IndexRune(s string, r rune) int            // Unicode 代码点 r 在 s 中第一次出现的位置
-
-	// 查找字串的结束Index的函数
-	// 有三个对应的查找最后一次出现的位置
-	func LastIndex(s, sep string) int
-	func LastIndexByte(s string, c byte) int
-	func LastIndexAny(s, chars string) int
-	func LastIndexFunc(s string, f func(rune) bool) int
-```
-
 - 子串Count
-	- `func Repeat(s string, count int) string`
-
-- 字符和字符串替换
-	- 字符替换: Map
-		- 将 s 的每一个字符按照 mapping 的规则做映射替换，如果 mapping 返回值 <0 ，则舍弃该字符
-		- 该方法只能对每一个字符做处理，但处理方式很灵活，可以方便的过滤，筛选汉字等
-			- `func Map(mapping func(rune) rune, s string) string`
-	- 字符串替换
-		- 用 new 替换 s 中的 old，一共替换 n 个
-		- 如果 n < 0，则不限制替换次数，即全部替换
-			- `func Replace(s, old, new string, n int) string`
-		- 该函数内部直接调用了函数 `Replace(s, old, new , -1)`
-			- `func ReplaceAll(s, old, new string) string`
-
-- 大小写转换
+	- 返回count个s串联的字符串
 ```go
-	// ToLower，ToUpper 用于大小写转换
-	func ToLower(s string) string
-	func ToUpper(s string) string
-
-	// ToLowerSpecial，ToUpperSpecial 可以转换特殊字符的大小写
-	func ToLowerSpecial(c unicode.SpecialCase, s string) string 
-	func ToUpperSpecial(c unicode.SpecialCase, s string) string
+	// "ba" + strings.Repeat("na", 2)
+	// Output: banana
+	func Repeat(s string, count int) string
 ```
 
-- 剔除子串
-```go
-	func Trim(s string, cutset string) string              // 将 s 左侧和右侧中匹配 cutset 中的任一字符的字符去掉
-	func TrimLeft(s string, cutset string) string          // 将 s 左侧的匹配 cutset 中的任一字符的字符去掉
-	func TrimRight(s string, cutset string) string         // 将 s 右侧的匹配 cutset 中的任一字符的字符去掉
-	func TrimPrefix(s, prefix string) string               // 如果 s 的前缀为 prefix 则返回去掉前缀后的 string , 否则 s 没有变化。
-	func TrimSuffix(s, suffix string) string               // 如果 s 的后缀为 suffix 则返回去掉后缀后的 string , 否则 s 没有变化。
-	func TrimSpace(s string) string                        // 将 s 左侧和右侧的间隔符去掉。常见间隔符包括: '\t', '\n', '\v', '\f', '\r', ' ', U+0085 (NEL)
-	func TrimFunc(s string, f func(rune) bool) string      // 将 s 左侧和右侧的匹配 f 的字符去掉
-	func TrimLeftFunc(s string, f func(rune) bool) string  // 将 s 左侧的匹配 f 的字符去掉
-	func TrimRightFunc(s string, f func(rune) bool) string // 将 s 右侧的匹配 f 的字符去掉
-```
 
 ## 五、其他
 - Go语言源代码始终为UTF-8
