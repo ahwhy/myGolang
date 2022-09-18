@@ -458,13 +458,27 @@
 	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
 
 ### 7. strings
-```go
-	strings.FieldsFunc()  // 将字符串进行分段，返回切片 func strings.FieldsFunc(s string, f func(rune) bool) []string
-	strings.Contains()    // func Contains(s, substr string) bool  判断字符串s中是否存在对应字符substr
-	strings.ToLower()     // func ToLower(s string) string         将字符串统一转成小写
-	strings.NewReader("")     // 从字符串创建一个reader对象
-	strings.Reader.Reader()   // func (*strings.Reader).Read(b []byte) (n int, err error)
-```
+### 7. strings
+- strings包
+	- 实现了用于操作字符的简单函数
+	- `strings.EqualFold` 判断两个字符串是否相同
+	- `strings.HasPrefix` 判断 s 是否有前缀字符串 prefix
+	- `strings.HasSuffix` 判断 s 是否有后缀字符串 suffix
+	- `strings.Contains` 子串 substr 在 s 中，返回 true
+	- `strings.Count` 查找子串出现次数即字符串模式匹配
+	- `strings.Repeat` 返回count个s串联的字符串
+	- `strings.Index` 在 s 中查找 sep 的第一次出现，返回第一次出现的索引，不存在则返回-1
+	- `strings.LastIndex`
+	- `strings.Title` 返回s中每个单词的首字母都改为标题格式的字符串拷贝
+	- `strings.ToLower` 返回将所有字母都转为对应的小写版本的拷贝
+	- `strings.ToUpper` 返回将所有字母都转为对应的大写版本的拷贝
+	- `strings.Replace` 返回将s中前n个不重叠old子串都替换为new的新字符串，如果n<0会替换所有old子串
+	- `strings.Map` 将s的每一个unicode码值r都替换为mapping(r)，返回这些新码值组成的字符串拷贝
+	- `strings.Trim` 返回将s前后端所有cutset包含的utf-8码值都去掉的字符串
+	- `strings.Fields` 返回将字符串按照空白（unicode.IsSpace确定，可以是一到多个连续的空白字符）分割的多个字符串
+	- `strings.SplitN` 用去掉s中出现的sep的方式进行分割，会分割到结尾，并返回生成的所有片段组成的切片
+	- `strings.Join` 将一系列字符串连接为一个字符串，之间用sep来分隔
+	- `strings.NewReader` NewReader创建一个从s读取数据的Reader
 
 ### 8. context
 - Context 包定义了上下文类型，该上下文类型跨越 API 边界和进程之间传递截止期限，取消信号和其他请求范围值

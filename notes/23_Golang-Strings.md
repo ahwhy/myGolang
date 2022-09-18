@@ -213,7 +213,7 @@
 ### 3. 字符串剔除
 - 剔除子串
 ```go
-	func Trim(s string, cutset string) string              // 将 s 左侧和右侧中匹配 cutset 中的任一字符的字符去掉
+	func Trim(s string, cutset string) string              // 将 s 左侧和右侧中匹配 cutset 中的任一字符(包含的utf-8码值)的字符去掉
 	func TrimLeft(s string, cutset string) string          // 将 s 左侧的匹配 cutset 中的任一字符的字符去掉
 	func TrimRight(s string, cutset string) string         // 将 s 右侧的匹配 cutset 中的任一字符的字符去掉
 	func TrimPrefix(s, prefix string) string               // 如果 s 的前缀为 prefix 则返回去掉前缀后的 string , 否则 s 没有变化。
@@ -225,15 +225,25 @@
 ```
 
 ### 4. 字符串分割
-- 字符切分
-	- 通过分隔符来切割字符串
-		- 带 N 的方法可以通过最后一个参数 n 控制返回的结果中的 slice 中的元素个数
-			- 当 n < 0 时，返回所有的子字符串
-			- 当 n == 0 时，返回的结果是 nil
-			- 当 n > 0 时，表示返回的 slice 中最多只有 n 个元素，其中，最后一个元素不会分割
-		- 这4个函数都是通过genSplit内部函数来实现的, 通过 sep 进行分割，返回[]string
-		- 如果 sep 为空，相当于分成一个个的 UTF-8 字符，如 `Split("abc","")`，得到的是`[a b c]`
-		- `func genSplit(s, sep string, sepSave, n int) []string `
+- 通过空白字符来分割字符串
+```go
+	// 返回将字符串按照空白(unicode.IsSpace确定，可以是一到多个连续的空白字符)分割的多个字符串
+	// 如果字符串全部是空白或者是空字符串的话，会返回空切片
+	func Fields(s string) []string
+	// 类似Fields，但使用函数f来确定分割符(满足f的unicode码值)
+	func FieldsFunc(s string, f func(rune) bool) []string
+```
+
+- 通过分隔符来分割字符串
+	- 用去掉s中出现的sep的方式进行分割，会分割到结尾，并返回生成的所有片段组成的切片
+	- 每一个sep都会进行一次切割，即使两个sep相邻，也会进行两次切割
+	- 带 N 的方法可以通过最后一个参数 n 控制返回的结果中的 slice 中的元素个数
+		- 当 n < 0 时，返回所有的子字符串
+		- 当 n == 0 时，返回的结果是 nil
+		- 当 n > 0 时，表示返回的 slice 中最多只有 n 个元素，其中 最后一个元素不会分割
+	- 这4个函数都是通过genSplit内部函数来实现的, 通过 sep 进行分割，返回 `[]string`
+	- 如果 sep 为空，相当于分成一个个的 UTF-8 字符，如 `Split("abc","")`，得到的是`[a b c]`
+	- `func genSplit(s, sep string, sepSave, n int) []string`
 ```go
 	func Split(s, sep string) []string { return genSplit(s, sep, 0, -1) }               // Split 会将 s 中的 sep 去掉，而 SplitAfter 会保留 sep
 	func SplitAfter(s, sep string) []string { return genSplit(s, sep, len(sep), -1) }
@@ -241,12 +251,12 @@
 	func SplitAfterN(s, sep string, n int) []string { return genSplit(s, sep, len(sep), n) }
 ```
 
-### 5. 字符串分割
+### 5. 字符串拼接
 - 字符串拼接
 	- '+' 用加号连接
 	- `func fmt.Sprintf(format string, a ...interface{}) string`
 	- 将字符串数组(或 slice)连接起来可以通过 Join 实现
-		- `func Join(a []string, sep string) string`
+		- `func Join(a []string, sep string) string` 将一系列字符串连接为一个字符串，之间用sep来分隔
 	- 拼接性能较高
 		- `strings.Builder`
 		- `bytes.Buffer`
@@ -257,6 +267,28 @@
 	// "ba" + strings.Repeat("na", 2)
 	// Output: banana
 	func Repeat(s string, count int) string
+```
+
+### 6. Strings包中的Reader
+- `Strings.Reader`
+	- Reader 类型通过从一个字符串读取数据，实现了io.Reader、io.Seeker、io.ReaderAt、io.WriterTo、io.ByteScanner、io.RuneScanner接口
+```go
+	type Reader struct { ... }
+
+	// NewReader创建一个从s读取数据的Reader
+	func NewReader(s string) *Reader
+
+	// Len返回r包含的字符串还没有被读取的部分
+	func (r *Reader) Len() int
+
+	func (r *Reader) Read(b []byte) (n int, err error)
+	func (r *Reader) ReadByte() (b byte, err error)
+	func (r *Reader) UnreadByte() error
+	func (r *Reader) ReadRune() (ch rune, size int, err error)
+	func (r *Reader) UnreadRune() error
+	func (r *Reader) Seek(offset int64, whence int) (int64, error)  // Seek实现了io.Seeker接口
+	func (r *Reader) ReadAt(b []byte, off int64) (n int, err error)
+	func (r *Reader) WriteTo(w io.Writer) (n int64, err error)      // WriteTo实现了io.WriterTo接口
 ```
 
 
