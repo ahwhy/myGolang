@@ -1,6 +1,6 @@
 # Golang-Context  Golang的上下文
 
-## 一、Golang的Context标准库
+## 一、Golang的标准库 Context包
 
 - Context 包定义了上下文类型，该上下文类型跨越 API 边界和进程之间传递截止期限，取消信号和其他请求范围值
 	- 对服务器的传入请求应创建一个 Context，对服务器的传出调用应接受 Context

@@ -458,7 +458,6 @@
 	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
 
 ### 7. strings
-### 7. strings
 - strings包
 	- 实现了用于操作字符的简单函数
 	- `strings.EqualFold` 判断两个字符串是否相同
@@ -512,6 +511,18 @@
 	// 提供的密钥必须具有可比性，不应该是字符串类型或任何其他内置类型，以避免使用上下文的包之间发生冲突
 	func WithValue(parent Context, key, val interface{}) Context
 ```
+
+### 9. log
+- log包
+	- 实现了简单的日志服务
+	- 定义了Logger类型，该类型提供了一些格式化输出的方法
+		- `log.New` 创建一个Logger
+		- `logger.Println` 调用Output将生成的格式化字符串输出到标准logger
+	- Fatal系列函数会在写入日志信息后调用 `os.Exit(1)`
+		- `log.Fatalf` 等价于 `{Printf(v...); os.Exit(1)}`
+	- Panic系列函数会在写入日志信息后 `panic`
+		- `log.Panicf` 等价于 `{Printf(v...); panic(...)}`
+
 ### 4. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
