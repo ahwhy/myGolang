@@ -155,10 +155,15 @@
 ```
 
 
-## 二、其他的log包
+## 二、常用的公共log包
 
 ### 1. github.com/sirupsen/logrus
 - 实现利用logrus包，通过钉钉机器人发送日志
+	- 首先定义相关结构体，然后实现`Levels`和`Fire`方法 --> 实现 Hook接口
+		- `Levels`中定义日志等级
+		- `Fire`中处理日志发送逻辑
+			- 比如发送到redis、es、钉钉、logstash
+	- 调用 `AddHook()`，直接打印日志并发送
 ```go
 	// ogrus源码
 	type Hook interface {
@@ -169,15 +174,9 @@
 		std.AddHook(hook)
 	}
 ```
-	- 首先定义相关结构体，然后实现Levels和Fire方法 --> 实现 Hook接口
-		- Levels中定义日志等级
-		- Fire中处理日志发送逻辑
-			- 比如发送到redis、es、钉钉、logstash
-	- 调用AddHook()，直接打印日志并发送
 
 ### 2. github.com/rifflock/lfshook
 - 结合`logrotate github.com/lestrrat-go/file-rotatelogs`
 	- 保留4个文件 `rotatelogs.WithRotationCount(4)`
 	- 切割时间 `rotatelogs.WithRotationTime(1*time.Second)`
 	- 删除时间 `rotatelogs.WithMaxAge(2*time.Minute)`
-

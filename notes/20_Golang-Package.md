@@ -650,3 +650,12 @@
 ### 16.k8s.io/client-go
 - k8s.io/client-go/rest
 - k8s.io/client-go/tools/clientcmd
+
+### 17. log
+- `github.com/sirupsen/logrus` logrus库 完全兼容标准log库，被广泛使用
+- `github.com/uber-go/zap` 快速、结构化、分级的日志库
+- `github.com/rs/zerolog` zerolog包提供了一个快速简单的日志记录器，专门用于JSON输出
+- `github.com/rifflock/lfshook` 为logrus库设计的钩子
+
+### 18. github.com/jedib0t/go-pretty
+- 美化表格、列表、进度条、文本等控制台输出
