@@ -354,7 +354,7 @@
 - defer 的本质是，当在某个函数中使用了defer关键字，则创建一个独立的defer栈帧，并将该defer语句压入栈中，同时将其使用的相关变量也拷贝到该栈帧中(值拷贝的)
 	- 因为栈是LIFO方式，所以先压栈的后执行
 	- 因为是独立的栈帧，所以即使调用者函数已经返回或报错，也一样能在它们之后进入defer栈帧去执行
-	
+
 ### 6. panic与 recover 函数
 - panic
 	- panic和recover函数用于处理运行时错误，当调用panic抛出错误，可以中断原有的控制流程，常用于不可修复性错误
@@ -365,6 +365,12 @@
 		- 逆序执行当前goroutine的defer链(recover从这里介入)
 		- 打印错误信息和调用堆栈
 		- 调用exit(2)结束整个进程
+```golang
+	// 内建函数panic停止当前Go程的正常执行
+	// 当函数F调用panic时，F的正常执行就会立刻停止；F中defer的所有函数先入后出执行后，F返回给其调用者G；G如同F一样行动，层层返回，直到该Go程中所有函数都按相反的顺序停止执行
+	// 之后，程序被终止，而错误情况会被报告，包括引发该恐慌的实参值，此终止序列称为恐慌过程。
+	func panic(v interface{})
+```
 
 - recover
 	- recover函数用于终止错误处理流程，仅在defer语句的函数中有效，用于截取错误处理流程 recover 只能捕获到最后一个错误
@@ -373,6 +379,12 @@
 		- recover只能获取到最后一次的panic的信息
 		- 在并发的场景中，需要在goroutine的启动函数里面专门编写recover，用于捕获当前goroutine的异常
 ```go
+	// 内建函数recover允许程序管理恐慌过程中的Go程
+	// 在defer的函数中，执行recover调用会取回传至panic调用的错误值，恢复正常执行，停止恐慌过程；若recover在defer的函数之外被调用，它将不会停止恐慌过程序列
+	// 在此情况下，或当该Go程不在恐慌过程中时，或提供给panic的实参为nil时，recover就会返回nil
+	func recover() interface{}
+
+	// 示例
 	defer func() {
 		fmt.Println(recover())
 	}()
