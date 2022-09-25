@@ -523,7 +523,106 @@
 	- Panic系列函数会在写入日志信息后 `panic`
 		- `log.Panicf` 等价于 `{Printf(v...); panic(...)}`
 
-### 4. reflect
+### 10. archive
+- archive/tar包
+	- tar包实现了tar格式压缩文件的存取
+	- 本包目标是覆盖大多数tar的变种，包括GNU和BSD生成的tar文件
+
+- archive/zip包
+	- zip包提供了zip档案文件的读写服务
+	- 本包不支持跨硬盘的压缩
+
+### 11. compress
+- compress/bzip2
+	- bzip2包实现bzip2的解压
+
+- compress/flate
+	- flate包实现了deflate压缩数据格式
+	- gzip包和zlib包实现了对基于deflate的文件格式的访问
+
+- compress/gzip
+	- gzip包实现了gzip格式压缩文件的读写
+
+- compress/gzip
+	- gzip包实现了gzip格式压缩文件的读写
+
+- compress/lzw 
+	- lzw包实现了Lempel-Ziv-Welch数据压缩格式
+
+- compress/zlib
+	- zlib包实现了对zlib格式压缩数据的读写
+	- 本包的实现提供了在读取时解压和写入时压缩的滤镜
+
+### 12. container
+- container/heap
+	- heap包提供了对任意类型(实现了heap.Interface接口)的堆操作
+	- (最小)堆是具有"每个节点都是以其为根的子树中最小值"属性的树
+	- 树的最小元素为其根元素，索引0的位置
+
+- container/list
+	- list包实现了双向链表
+
+- container/ring
+	- ring包实现了环形链表的操作
+
+### 13. crypto
+- crypto
+	- crypto包搜集了常用的密码(算法)常量
+
+- crypto/aes
+	- aes包实现了AES加密算法
+
+- crypto/cipher
+	- cipher包实现了多个标准的用于包装底层块加密算法的加密算法实现
+
+- crypto/des
+	- des包实现了DES标准和TDEA算法
+
+- crypto/dsa
+	- dsa包实现FIPS 186-3定义的数字签名算法(Digital Signature Algorithm)，即DSA算法
+
+- crypto/ecdsa
+	- ecdsa包实现了椭圆曲线数字签名算法
+
+- crypto/elliptic
+	- elliptic包实现了几条覆盖素数有限域的标准椭圆曲线
+
+- crypto/hmac
+	- hmac包实现了 U.S. Federal Information Processing Standards Publication 198规定的HMAC(加密哈希信息认证码)。
+	- HMAC是使用key标记信息的加密hash
+	- 接收者使用相同的key逆运算来认证hash
+
+- crypto/md5
+	- md5包实现了MD5哈希算法
+
+- crypto/rand
+	- rand包实现了用于加解密的更安全的随机数生成器
+
+- crypto/rc4
+	- rc4包实现了RC4加密算法
+
+- crypto/rsa
+	- rsa包实现了PKCS#1规定的RSA加密算法
+
+- crypto/sha1
+	- sha1包实现了SHA1哈希算法
+
+- crypto/sha256
+	- sha256包实现了SHA224和SHA256哈希算法
+
+- crypto/sha512
+	- sha512包实现了SHA384和SHA512哈希算法
+
+- crypto/tls
+	- tls包实现了TLS 1.2
+
+- crypto/x509
+	- x509包解析X.509编码的证书和密钥
+
+- crypto/x509/pkix
+	- pkix包提供了共享的、低层次的结构体，用于ASN.1解析和X.509证书、CRL、OCSP的序列化
+
+### 14. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
 	reflect.TypeOf()
