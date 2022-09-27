@@ -180,17 +180,68 @@
 		- 不要使用连表操作，join逻辑在业务代码里完成
 
 ### 3. Go语言中SQL驱动接口
-- `database/sql`
+- database/sql
+	- sql包提供了保证SQL或类SQL数据库的泛用接口
 	- Go官方没有提供数据库驱动，而是为开发数据库驱动定义了一些标准接口(即database/sql)，开发者可以根据定义的接口来开发相应的数据库驱动
 	- Go语言中支持MySQL的驱动比较多，如
-		- github.com/go-sql-driver/mysql  支持 database/sql
-		- github.com/ziutek/mymysql       支持 database/sql，支持自定义的接口
-		- github.com/Philio/GoMySQL     不支持 database/sql，支持自定义的接口
+		- `github.com/go-sql-driver/mysql` 支持 database/sql
+		- `github.com/ziutek/mymysql` 支持 database/sql，支持自定义的接口
+		- `github.com/Philio/GoMySQL` 不支持 database/sql，支持自定义的接口
+```go
+	// Register注册并命名一个数据库，可以在Open函数中使用该命名启用该驱动
+	func Register(name string, driver driver.Driver)
 
-- Driver
-	- `driver.Driver`
-	- 注册数据库驱动
-	- 打开数据库连接
+	// Scanner接口会被Rows或Row的Scan方法使用
+	type Scanner interface {
+		// Scan方法从数据库驱动获取一个值
+		// 参数src的类型保证为如下类型之一：
+		//    int64
+		//    float64
+		//    bool
+		//    []byte
+		//    string
+		//    time.Time
+		// 如果不能不丢失信息的保存一个值，应返回错误
+		Scan(src interface{}) error
+	}
+
+	// NullBool、NullInt64、NullFloat64、NullString 实现了Scanner接口，因此可以作为Rows/Row的Scan方法的参数保存扫描结果
+	// NullString代表一个可为NULL的字符串
+	type NullString struct {
+		String string
+		Valid  bool // 如果String不是NULL则Valid为真
+	}
+	// Scan实现了Scanner接口
+	func (ns *NullString) Scan(value interface{}) error
+	// Value实现了driver.Valuer接口
+	func (ns NullString) Value() (driver.Value, error)
+	// 示例 example
+	// var s NullString
+	// err := db.QueryRow("SELECT name FROM foo WHERE id=?", id).Scan(&s)
+	// if s.Valid { // use s.String } else { // NULL value }
+
+	// RawBytes是一个字节切片，保管对内存的引用，为数据库自身所使用
+	// 在Scaner接口的Scan方法写入RawBytes数据后，该切片只在限次调用Next、Scan或Close方法之前合法
+	type RawBytes []byte
+
+	// Result是对已执行的SQL命令的总结
+	type Result interface {
+		// LastInsertId返回一个数据库生成的回应命令的整数
+		// 当插入新行时，一般来自一个"自增"列
+		// 不是所有的数据库都支持该功能，该状态的语法也各有不同
+		LastInsertId() (int64, error)
+
+		// RowsAffected返回被update、insert或delete命令影响的行数
+		// 不是所有的数据库都支持该功能
+		RowsAffected() (int64, error)
+	}
+```
+
+- database/sql/driver
+	- driver包定义了应被数据库驱动实现的接口，这些接口会被sql包使用，绝大多数代码应使用sql包绝大多数代码应使用sql包
+	- `driver.Driver` 
+		- 注册数据库驱动
+		- 打开数据库连接
 	- Conn
 		- 把一个查询 query传给Prepare，返回 Stmt(statement)
 		- Close关闭数据库连接
