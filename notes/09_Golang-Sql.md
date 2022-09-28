@@ -237,6 +237,53 @@
 	}
 ```
 
+- 数据库操作 `DB`
+	- `DB` 是一个数据库(操作)句柄，代表一个具有零到多个底层连接的连接池，它可以安全的被多个go程同时使用
+		- sql包会自动创建和释放连接
+		- 它也会维护一个闲置连接的连接池
+			- 如果数据库具有单连接状态的概念，该状态只有在事务中被观察时才可信
+			- 一旦调用了 `BD.Begin`，返回的Tx会绑定到单个连接
+			- 当调用事务Tx的 `Commit` 或 `Rollback` 后，该事务使用的连接会归还到DB的闲置连接池中
+			- 连接池的大小可以用 `SetMaxIdleConns` 方法控制
+	- `Open` 打开一个 `dirverName` 指定的数据库，`dataSourceName` 指定数据源，一般包至少括数据库文件名和(可能的)连接信息
+		- 大多数用户会通过数据库特定的连接帮助函数打开数据库，返回一个*DB
+		- Go标准库中没有数据库驱动，参见 http://golang.org/s/sqldrivers 获取第三方驱动
+		- Open函数可能只是验证其参数，而不创建与数据库的连接
+		- 如果要检查数据源的名称是否合法，应调用返回值的Ping方法
+		- 返回的DB可以安全的被多个go程同时使用，并会维护自身的闲置连接池；这样一来，Open函数只需调用一次，且很少需要关闭DB
+```golang
+	type DB struct { ... }
+
+	func Open(driverName, dataSourceName string) (*DB, error)
+
+	// Driver方法返回数据库下层驱动
+	func (db *DB) Driver() driver.Driver
+	// Ping检查与数据库的连接是否仍有效，如果需要会创建连接
+	func (db *DB) Ping() error
+	// Close关闭数据库，释放任何打开的资源
+	// 一般不会关闭DB，因为DB句柄通常被多个go程共享，并长期活跃
+	func (db *DB) Close() error
+
+	// SetMaxOpenConns设置与数据库建立连接的最大数目
+	// 如果n大于0且小于最大闲置连接数，会将最大闲置连接数减小到匹配最大开启连接数的限制；如果n <= 0，不会限制最大开启连接数，默认为0(无限制)
+	func (db *DB) SetMaxOpenConns(n int)
+	// SetMaxIdleConns设置连接池中的最大闲置连接数
+	// 如果n大于最大开启连接数，则新的最大闲置连接数会减小到匹配最大开启连接数的限制；如果n <= 0，不会保留闲置连接
+	func (db *DB) SetMaxIdleConns(n int)
+
+	// Exec执行一次命令(包括查询、删除、更新、插入等)，不返回任何执行结果，参数args表示query中的占位参数
+	func (db *DB) Exec(query string, args ...interface{}) (Result, error)
+	// Query执行一次查询，返回多行结果(即Rows)，一般用于执行select命令
+	func (db *DB) Query(query string, args ...interface{}) (*Rows, error)
+	// QueryRow执行一次查询，并期望返回最多一行结果(即Row)
+	// QueryRow总是返回非nil的值，直到返回值的Scan方法被调用时，才会返回被延迟的错误(如：未找到结果)
+	func (db *DB) QueryRow(query string, args ...interface{}) *Row
+	// Prepare创建一个准备好的状态用于之后的查询和命令，返回值可以同时执行多个查询和命令
+	func (db *DB) Prepare(query string) (*Stmt, error)
+	// Begin开始一个事务，隔离水平由数据库驱动决定
+	func (db *DB) Begin() (*Tx, error)
+```
+
 - database/sql/driver
 	- driver包定义了应被数据库驱动实现的接口，这些接口会被sql包使用，绝大多数代码应使用sql包绝大多数代码应使用sql包
 	- `driver.Driver` 
