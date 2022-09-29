@@ -12,7 +12,7 @@
   * [Golang-Datastructure](./notes/06_Golang-Datastructure.md)
   * [Golang-Network](./notes/07_Golang-Network.md)
   * [Golang-Secret](./notes/08_Golang-Secret.md)
-  * [Golang-Sql](./notes/09_Golang-Sql.md)
+  * [Golang-Database](./notes/09_Golang-Database.md)
   * [Golang-gRPC](./notes/10_Golang-gRPC.md)
   * [Golang-Etcd](./notes/11_Golang-Etcd.md)
   * [Golang-Gc](./notes/12_Golang-Gc.md)
@@ -24,6 +24,7 @@
   * [Golang-Context](./notes/24_Golang-Context.md)
   * [Golang-Log](./notes/25_Golang-Log.md)
   * [Golang-Unsafe](./notes/26_Golang-Unsafe.md)
+  * [Golang-Sql](./notes/27_Golang-Sql.md)
   * [Golang-Other](./notes/30_Golang-Other.md)
 
 ## Others
