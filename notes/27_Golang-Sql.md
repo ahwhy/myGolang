@@ -220,9 +220,132 @@
 ## 二、Golang的标准库 driver包
 
 - database/sql/driver
-	- driver包定义了应被数据库驱动实现的接口，这些接口会被sql包使用，绝大多数代码应使用sql包绝大多数代码应使用sql包
+	- driver包定义了应被数据库驱动实现的接口，这些接口会被sql包使用
+	- 绝大多数代码应使用sql包
 
-### 1. database/sql/driver
+### 1. ValueConverter
+- ValueConverter
+	- ValueConverter接口提供了ConvertValue方法
+	- driver包提供了各种ValueConverter接口的实现，以保证不同驱动之间的实现和转换的一致性
+	- ValueConverter接口有如下用途
+		- 转换sql包提供的Value类型值到数据库指定列的类型，并保证它的匹配，例如保证某个int64值满足一个表的uint16列
+		- 转换数据库提供的值到驱动的Value类型
+		- 在扫描时被sql包用于将驱动的Value类型转换为用户的类型
+```go
+	type ValueConverter interface {
+		// ConvertValue将一个值转换为驱动支持的Value类型
+		ConvertValue(v interface{}) (Value, error)
+	}
+```
+
+- ColumnConverter
+	- 如果Stmt有自己的列类型，可以实现ColumnConverter接口，返回值可以将任意类型转换为驱动的Value类型
+```go
+	type ColumnConverter interface {
+		// ColumnConverter返回指定列的ValueConverter
+		// 如果该列未指定类型，或不应特殊处理，应返回DefaultValueConverter
+		ColumnConverter(idx int) ValueConverter
+	}
+```
+
+- NotNull
+	- NotNull实现了ValueConverter接口，不允许nil值，否则会将值交给Converter字段处理
+```go
+	type NotNull struct {
+		Converter ValueConverter
+	}
+
+	func (n NotNull) ConvertValue(v interface{}) (Value, error)
+```
+
+- Null
+	- Null实现了ValueConverter接口，允许nil值，否则会将值交给Converter字段处理
+```go
+	type Null struct {
+		Converter ValueConverter
+	}
+
+	func (n Null) ConvertValue(v interface{}) (Value, error)
+```
+
+### 2. Variables
+- ValueConverter接口转化规则
+	- 用于将输入的值转换为对应类型，如 bool、init32、string
+	- 布尔类型
+		- 不做修改
+	- 整数类型
+		- 1 为真
+		- 0 为假
+		- 其余整数会导致错误
+	- 字符串和`[]byte`
+		- 与 `strconv.ParseBool` 的规则相同
+	- 所有其他类型都会导致错误
+```go
+	// Bool 是ValueConverter接口值，用于将输入的值转换为布尔类型
+	var Bool boolType
+
+	// Int32 是一个ValueConverter接口值，用于将值转换为int64类型，会尊重int32类型的限制
+	var Int32 int32Type
+
+	// String 是一个ValueConverter接口值，用于将值转换为字符串。
+	// 如果值v是字符串或者[]byte类型，不会做修改，如果值v是其它类型，会转换为fmt.Sprintf("%v", v)
+	var String stringType
+
+	// DefaultParameterConverter 是ValueConverter接口的默认实现，当一个Stmt没有实现ColumnConverter时，就会使用它
+	var DefaultParameterConverter defaultConverter
+	// 如果值value满足函数IsValue(value)为真，DefaultParameterConverter直接返回 value
+	// 否则，整数类型会被转换为int64，浮点数转换为float64，字符串转换为[]byte，其它类型会导致错误
+
+	// ResultNoRows是预定义的Result类型值，用于当一个DDL命令(如create table)成功时被驱动返回
+	// 它的LastInsertId和RowsAffected方法都返回错误
+	var ResultNoRows noRows
+
+	// ErrBadConn应被驱动返回，以通知sql包一个driver.Conn处于损坏状态(如服务端之前关闭了连接)，sql包会重启一个新的连接
+	var ErrBadConn = errors.New("driver: bad connection")
+
+	// ErrSkip可能会被某些可选接口的方法返回，用于在运行时表明快速方法不可用，sql包应像未实现该接口的情况一样执行
+	var ErrSkip = errors.New("driver: skip fast-path; continue as if unimplemented")
+```
+
+### 3. Value
+- Value
+	- Value是驱动必须能处理的值
+	- 它要么是nil，要么是如下类型的实例
+		- `int64`
+		- `float64`
+		- `bool`
+		- `[]byte`
+		- `string`   [*] Rows.Next不会返回该类型值
+		- `time.Time` 
+```go
+	type Value interface{}
+```
+
+- Valuer
+	- Valuer是提供Value方法的接口
+	- 实现了Valuer接口的类型可以将自身转换为驱动支持的Value类型值
+```go
+	type Valuer interface {
+		// Value返回一个驱动支持的Value类型值
+		Value() (Value, error)
+	}
+```
+
+- IsValue
+	- IsValue报告v是否是合法的Value类型参数
+	- 和IsScanValue不同，IsValue接受字符串类型
+```go
+	func IsValue(v interface{}) bool
+```
+
+- IsScanValue
+	- IsScanValue报告v是否是合法的Value扫描类型参数
+	- 和IsValue不同，IsScanValue不接受字符串类型
+```go
+	func IsScanValue(v interface{}) bool
+```
+
+### 4. Struct
 - `driver.Driver` 
 	- 注册数据库驱动
 	- 打开数据库连接
