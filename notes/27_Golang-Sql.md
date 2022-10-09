@@ -225,7 +225,7 @@
 
 ### 1. ValueConverter
 - ValueConverter
-	- ValueConverter接口提供了ConvertValue方法
+	- ValueConverter接口提供了ConvertValue方法，把数据库里的数据类型转换成Value允许的数据类型
 	- driver包提供了各种ValueConverter接口的实现，以保证不同驱动之间的实现和转换的一致性
 	- ValueConverter接口有如下用途
 		- 转换sql包提供的Value类型值到数据库指定列的类型，并保证它的匹配，例如保证某个int64值满足一个表的uint16列
@@ -345,41 +345,154 @@
 	func IsScanValue(v interface{}) bool
 ```
 
-### 4. Struct
-- `driver.Driver` 
+### 4. Driver
+- Driver 
+	- Driver接口必须被数据库驱动实现
 	- 注册数据库驱动
 	- 打开数据库连接
+```go
+	type Driver interface {
+		// Open返回一个新的与数据库的连接，参数name的格式是驱动特定的
+		//
+		// Open可能返回一个缓存的连接(之前关闭的连接)，但这么做是不必要的
+		// sql包会维护闲置连接池以便有效的重用连接
+		//
+		// 返回的连接同一时间只会被一个go程使用
+		Open(name string) (Conn, error)
+	}
+```
 
+### 5. Conn
 - Conn
-	- 把一个查询 query传给Prepare，返回 Stmt(statement)
-	- Close关闭数据库连接
-	- Begin返回一个事务 Tx(transaction)
+	- Conn是与数据库的连接，该连接不会被多线程并行使用，且连接被假定为具有状态的
+	- 把一个查询 `query` 传给 `Prepare`，返回 `Stmt` (statement)
+	- `Close` 关闭数据库连接
+	- `Begin` 返回一个事务 `Tx` (transaction)
+```go
+	type Conn interface {
+		// Prepare返回一个准备好的、绑定到该连接的状态
+		Prepare(query string) (Stmt, error)
 
+		// Close作废并停止任何现在准备好的状态和事务，将该连接标注为不再使用
+		//
+		// 因为sql包维护着一个连接池，只有当闲置连接过剩时才会调用Close方法
+		// 驱动的实现中不需要添加自己的连接缓存池
+		Close() error
+
+		// Begin开始并返回一个新的事务
+		Begin() (Tx, error)
+	}
+```
+
+- Execer
+	- Execer是一个可选的、可能被Conn接口实现的接口
+	- 如果一个Conn未实现 Execer接口，sql包的`DB.Exec`会首先准备一个查询，执行状态，然后关闭状态
+	- `Query` 可能会返回 `ErrSkip`
+```go
+	type Execer interface {
+		Exec(query string, args []Value) (Result, error)
+	}
+```
+
+- Queryer
+	- Queryer是一个可选的、可能被Conn接口实现的接口
+	- 如果一个Conn未实现 Queryer接口，sql包的`DB.Exec`会首先准备一个查询，执行状态，然后关闭状态
+	- `Exec` 可能会返回 `ErrSkip`
+```go
+	type Queryer interface {
+		Query(query string, args []Value) (Rows, error)
+	}
+```
+
+### 6. Stmt
 - Stmt
-	- Close关闭当前的链接状态
-	- NumInput返回当前预留参数的个数
-	- Exec执行Prepare准备好的 sql，传入参数执行 update/insert 等操作，返回 Result 数据
-	- Query执行Prepare准备好的 sql，传入需要的参数执行 select 操作，返回 Rows 结果集	
+	- Stmt是准备好的状态，它会绑定到一个连接，不应被多go程同时使用
+	- `Close` 关闭当前的链接状态
+	- `NumInput` 返回当前预留参数的个数
+	- `Exec` 执行Prepare准备好的 sql，传入参数执行 update/insert 等操作，返回 `Result` 数据
+	- `Query` 执行Prepare准备好的 sql，传入需要的参数执行 select 操作，返回 `Rows` 结果集	
+```go
+	type Stmt interface {
+		// Close关闭Stmt
+		//
+		// 和Go1.1一样，如果Stmt被任何查询使用中的话，将不会被关闭
+		Close() error
 
+		// NumInput返回占位参数的个数。
+		//
+		// 如果NumInput返回值 >= 0，sql包会提前检查调用者提供的参数个数，
+		// 并且会在调用Exec或Query方法前返回数目不对的错误。
+		//
+		// NumInput可以返回-1，如果驱动占位参数的数量
+		// 此时sql包不会提前检查参数个数
+		NumInput() int
+
+		// Exec执行查询，而不会返回结果，如insert或update
+		Exec(args []Value) (Result, error)
+
+		// Query执行查询并返回结果，如select
+		Query(args []Value) (Rows, error)
+	}
+```
+
+### 7. Tx
 - Tx
-	- Commit提交事务
-	- Rollback回滚事务
+	- Tx是一次事务
+	- `Commit` 提交事务
+	- `Rollback` 回滚事务
+```go
+	type Tx interface {
+		Commit() error
+		Rollback() error
+	}
+```
 
+### 8. Result
 - Result
-	- LastInsertId返回由数据库执行插入操作得到的自增ID号
-	- RowsAffected返回操作影响的数据条目数
-	- RowsAffected
-		- RowsAffected是int64的别名，它实现了Result接口
-			- `type RowsAffected int64`
-			- `func (RowsAffected) LastInsertId() (int64, error)`
-			- `func (v RowsAffected) RowsAffected() (int64, error)`
+	- `LastInsertId` 返回由数据库执行插入操作得到的自增ID号
+	- `RowsAffected` 返回操作影响的数据条目数
+```go
+	type Result interface {
+		// LastInsertId返回insert等命令后数据库自动生成的ID
+		LastInsertId() (int64, error)
 
+		// RowsAffected返回被查询影响的行数
+		RowsAffected() (int64, error)
+	}
+
+	// RowsAffected实现了Result接口，用于insert或update操作，这些操作会修改零到多行数据
+	type RowsAffected int64
+	func (v RowsAffected) LastInsertId() (int64, error)
+	func (v RowsAffected) RowsAffected() (int64, error)
+```
+
+### 9. Rows
 - Rows
-	- Columns是查询所需要的表字段
-	- Close关闭迭代器
-	- Next返回下一条数据，把数据赋值给dest，dest里面的元素必须是driver.Value的值
+	- Rows是执行查询得到的结果的迭代器
+	- `Columns` 是查询所需要的表字段
+	- `Close` 关闭迭代器
+	- `Next` 返回下一条数据，把数据赋值给dest，dest里面的元素必须是 `driver.Value` 的值
 		- 如果最后没有数据，Next 函数返回 `io.EOF`
-	
+```go
+	type Rows interface {
+		// Columns返回各列的名称，列的数量可以从切片长度确定
+		// 如果某个列的名称未知，对应的条目应为空字符串
+		Columns() []string
+
+		// Close关闭Rows
+		Close() error
+
+		// 调用Next方法以将下一行数据填充进提供的切片中
+		// 提供的切片必须和Columns返回的切片长度相同
+		//
+		// 切片dest可能被填充同一种驱动Value类型，但字符串除外
+		// 所有string值都必须转换为[]byte
+		//
+		// 当没有更多行时，Next应返回io.EOF
+		Next(dest []Value) error
+	}
+```
+
 - Value
 	- `driver.ValueConverter` 把数据库里的数据类型转换成Value允许的数据类型
 ```go
@@ -425,9 +538,9 @@
 
 	// driver.Rows
 	type Rows interface {
-		Columns() []string                             // func (rs *Rows) Columns() ([]string, error)
-		Close() error                                  // func (rs *Rows) Close() error
-		Next(dest []Value) error                       // func (rs *Rows) Next() bool
+		Columns() []string                                      // func (rs *Rows) Columns() ([]string, error)
+		Close() error                                           // func (rs *Rows) Close() error
+		Next(dest []Value) error                                // func (rs *Rows) Next() bool
 	}
 
 	// driver.Value
