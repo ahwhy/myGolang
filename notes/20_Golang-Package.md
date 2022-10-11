@@ -622,7 +622,34 @@
 - crypto/x509/pkix
 	- pkix包提供了共享的、低层次的结构体，用于ASN.1解析和X.509证书、CRL、OCSP的序列化
 
-### 14. reflect
+### 14. debug
+- debug/dwarf
+	- dwarf包提供对从可执行文件加载的dwarf调试信息的访问，如 http://dwarfstd.org/doc/dwarf-2.0.0.pdf 的DWARF 2.0标准中所定义的
+
+- debug/elf
+	- elf包提供对 ELF 文件的访问
+
+- debug/gosym
+	- gosym包提供对gc编译器生成的Go二进制文件中嵌入的Go符号和行号表的访问
+
+- debug/macho
+	- macho包提供对 Mach-O 件的访问
+
+- debug/pe
+	- pe包提供对对 PE(Microsoft Windows Portable Executable) 文件的访问
+
+- debug/plan9obj
+	- plan9obj包提供对 Plan 9 a.out 文件的访问
+
+### 15. runtime
+- runtime
+	- runtime包提供和go运行时环境的互操作，如控制go程的函数
+	- 它也包括用于reflect包的低层次类型信息
+
+- runtime/debug
+	- debug包 包含程序在运行时自我调试的工具
+
+### 16. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
 	reflect.TypeOf()
