@@ -1,6 +1,7 @@
 package debug_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -12,5 +13,6 @@ func TestDebug(t *testing.T) {
 	debug.SetupDumpStackTrap()
 
 	// ...
-	time.sleep( 5 * time.Second )
+	fmt.Println("starting ...")
+	time.Sleep( 600 * time.Second )
 }
