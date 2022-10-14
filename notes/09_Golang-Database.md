@@ -270,12 +270,12 @@
 - SQLBuilder
 	- Go语言中的第三方库
 		- Go-SQLBuilder 是一个用于创建SQL语句的工具函数库，提供一系列灵活的、与原生SQL语法一致的链式函数，归属于艾润物联公司 `go get -u github.com/parkingwang/go-sqlbuilder`
-		- Gendry是一个用于辅助操作数据库的Go包，基于go-sql-driver/mysql，它提供了一系列的方法来为调用标准库database/sql中的方法准备参数 `go get –u github.com/didi/gendry`
+		- Gendry 是一个用于辅助操作数据库的Go包，基于go-sql-driver/mysql，它提供了一系列的方法来为调用标准库database/sql中的方法准备参数 `go get –u github.com/didi/gendry`
 	- 自行封装SQL构建器
 		- 写一句很长的sql容易出错，且出错后不好定位
 		- 函数式编程可以直接定位到是哪个函数的问题
 		- 函数式编程比一长串sql更容易编写和理解
-		- `github.com/ahwhy/myGolang/blob/main/week12/database/self_sql_builder/main.go`
+		- [custom sqlbuilder](../database/03_sql_builder/custom_sqlbuilder/main.go)
 ```go
 	// Go-SQLBuilder 函数链
 	sql := gsb.NewContext().
@@ -301,8 +301,8 @@
 - ORM技术与GORM
 	- ORM
 		- ORM 即 Object Relational Mapping，对象关系映射
-		- Relational指各种sql类的关系型数据为
-		- Object指面向对象编程(object-oriented programming)中的对象
+		- Relational 指各种sql类的关系型数据为
+		- Object 指面向对象编程(object-oriented programming)中的对象
 		- ORM在数据库记录和程序对象之间做一层映射转换，使程序中不用再去编写原生SQL，而是面向对象的思想去编写类、对象、调用相应的方法来完成数据库操作
 	- GORM
 		- `go get -u gorm.io/gorm`

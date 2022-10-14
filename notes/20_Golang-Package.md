@@ -726,6 +726,25 @@
 
 ## 十、常用公共库 
 
+### 1. log
+- `github.com/sirupsen/logrus` logrus库 完全兼容标准log库，被广泛使用
+- `github.com/uber-go/zap` 快速、结构化、分级的日志库
+- `github.com/rs/zerolog` zerolog包提供了一个快速简单的日志记录器，专门用于JSON输出
+- `github.com/rifflock/lfshook` 为logrus库设计的钩子
+
+### 2. db
+- SQLBuilder
+	- `github.com/parkingwang/go-sqlbuilder` 创建SQL语句
+	- `github.com/didi/gendr` 辅助操作数据库
+
+- ORM
+	- GORM
+		- `gorm.io/gorm`
+		- `gorm.io/driver/mysql`
+
+- MongoDB
+	- `go.mongodb.org/mongo-driver`
+
 ### 1. gopkg.in/yaml.v2
 ```go
 	yaml.Unmarshal()
@@ -776,12 +795,6 @@
 ### 16.k8s.io/client-go
 - k8s.io/client-go/rest
 - k8s.io/client-go/tools/clientcmd
-
-### 17. log
-- `github.com/sirupsen/logrus` logrus库 完全兼容标准log库，被广泛使用
-- `github.com/uber-go/zap` 快速、结构化、分级的日志库
-- `github.com/rs/zerolog` zerolog包提供了一个快速简单的日志记录器，专门用于JSON输出
-- `github.com/rifflock/lfshook` 为logrus库设计的钩子
 
 ### 18. github.com/jedib0t/go-pretty
 - 美化表格、列表、进度条、文本等控制台输出
