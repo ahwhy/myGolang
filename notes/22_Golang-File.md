@@ -934,8 +934,64 @@
 - encoding
 	- encoding包定义了供其它包使用的可以将数据在字节水平和文本表示之间转换的接口
 	- `encoding/gob`, `encoding/json`, `encoding/xml`, 三个包都会检查使用这些接口
+```go
+	// 实现了BinaryMarshaler接口的类型可以将自身序列化为binary格式
+	type BinaryMarshaler interface {
+		MarshalBinary() (data []byte, err error)
+	}
 
-### 2. encoding/base64
+	// 实现了BinaryUnmarshaler接口的类型可以将binary格式表示的自身解序列化
+	type BinaryUnmarshaler interface {
+		UnmarshalBinary(data []byte) error
+	}
+
+	// 实现了BinaryMarshaler接口的类型可以将自身序列化为utf-8编码的textual格式
+	type TextMarshaler interface {
+		MarshalText() (text []byte, err error)
+	}
+
+	// 实现了TextUnmarshaler接口的类型可以将textual格式表示的自身解序列化
+	type TextUnmarshaler interface {
+		UnmarshalText(text []byte) error
+	}
+```
+
+### 2. encoding/ascii85
+- encoding/ascii85
+	- ascii85包实现了ascii85数据编码(5个ascii字符表示4个字节)，该编码用于btoa工具和Adobe的PostScript语言和PDF文档格式
+```go
+	// 返回n字节源数据编码后的最大字节数
+	func MaxEncodedLen(n int) int
+
+	// 将src编码成最多MaxEncodedLen(len(src))数据写入dst，返回实际写入的字节数
+	func Encode(dst, src []byte) int
+
+	// 将src解码后写入dst，返回写入dst的字节数、从src解码的字节数
+	func Decode(dst, src []byte, flush bool) (ndst, nsrc int, err error)
+
+	// 创建一个将数据编码为ascii85流写入w的编码器
+	func NewEncoder(w io.Writer) io.WriteCloser
+
+	// 创建一个从r解码ascii85流的解码器
+	func NewDecoder(r io.Reader) io.Reader
+```
+
+### 3. encoding/asn1
+- encoding/asn1
+	- asn1包实现了DER编码的ASN.1数据结构的解析，参见ITU-T Rec X.690
+	- [A Layman's Guide to a Subset of ASN.1, BER, and DER](http://luca.ntop.org/Teaching/Appunti/asn1.html)
+```go
+	// Marshal函数返回val的ASN.1编码
+	func Marshal(val interface{}) ([]byte, error)
+
+	// Unmarshal函数解析DER编码的ASN.1结构体数据并使用reflect包填写val指向的任意类型值
+	func Unmarshal(b []byte, val interface{}) (rest []byte, err error)
+```
+
+### 4. encoding/base
+- encoding/base32
+	- base32包实现了RFC 4648规定的base32编码
+
 - encoding/base64
 	- base64实现了RFC 4648规定的base64编码
 ```go
@@ -977,9 +1033,19 @@
 	func NewEncoder(enc *Encoding, w io.Writer) io.WriteCloser
 ```
 
-### 3. encoding/csv
+### 5. encoding/binary
+- encoding/binary
+	- binary包实现了简单的数字与字节序列的转换以及变长值的编解码
+	- 数字翻译为定长值来读写，一个定长值，要么是固定长度的数字类型(int8, uint8, int16, float32, complex64, ...)或者只包含定长值的结构体或者数组
+	- 变长值是使用一到多个字节编码整数的方法，绝对值较小的数字会占用较少的字节数
+	- 本包相对于效率更注重简单；如果需要高效的序列化，特别是数据结构较复杂的，请参见更高级的解决方法，例如encoding/gob包，或者采用协议缓存
+
+### 6. encoding/csv
 - encoding/csv
-	- `encoding/csv` 包提供对 csv 文件读写的操作
+	- `encoding/csv` 包提供对 csv 文件(逗号分隔值)读写的操作
+	- 一个csv分拣包含零到多条记录，每条记录一到多个字段
+	- 每个记录用换行符分隔
+	- 最后一条记录后面可以有换行符，也可以没有
 
 - 常用结构体
 	- Reader
@@ -1033,7 +1099,95 @@
 	fmt.Println(rusers)
 ```
 
-### 4. encoding/json
+### 7. encoding/gob
+- encoding/gob
+	- gob包管理gob流，在编码器(发送器)和解码器(接受器)之间交换的binary值
+	- go特有的编码格式，不能跨语言，提供了对数据结构进行二进制序列化的功能
+	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
+
+- 处理流程
+	- 注册
+	- 打开文件
+	- 创建对象
+	- 编码/解码
+
+- 常用函数
+	- `Register` 注册 gob 编解码记录值 `func Register(value interface{})`
+	- `RegisterName` 注册 gob 编解码记录值，并指定名称 `func RegisterName(name string, value interface{})`
+
+- 常用结构体
+	- Encoder `type Encoder struct{ ... }`
+		- 常用函数 
+			- `NewEncoder` 创建编码器 `func NewEncoder(w io.Writer) *Encoder`
+		- 常用方法
+			- `Encode` 将对象进行编码到流对象中 `func (enc *Encoder) Encode(e interface{}) error`
+	- Decoder `type Decoder struct{ ... }`
+		- 常用函数
+			- `NewDecoder` 创建解码器 `func NewDecoder(r io.Reader) *Decoder`
+		- 常用方法
+			- `Decode` 将流对象中的数据编码到对象中 `func (dec *Decoder) Decode(e interface{}) error`
+```go
+	type User struct {
+		Id   int
+		Name string
+	}
+	enusers := []User{
+		{1, "aa"},
+		{2, "bb"},
+	}
+	// 注册
+	gob.Register(User{})
+	// 编码
+	file, err := os.Create("users.gob")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	encoder := gob.NewEncoder(file)
+	fmt.Println(encoder.Encode(enusers))
+	file.Close()
+	// 解码
+	file, err := os.Open("users.gob")
+	if err != nil {
+		return
+	}
+	decoder := gob.NewDecoder(file)
+	var deusers []User
+	fmt.Println(decoder.Decode(&deusers))
+	fmt.Println(deusers)
+	file.Close()
+```
+
+### 8. encoding/hex
+- encoding/hex
+	- hex包实现了16进制字符表示的编解码
+```go
+	// 长度x的编码数据解码后的明文数据的长度
+	func DecodedLen(x int) int
+
+	// 将src解码为DecodedLen(len(src))字节，返回实际写入dst的字节数；如遇到非法字符，返回描述错误的error
+	func Decode(dst, src []byte) (int, error)
+	
+	// 返回hex编码的字符串s代表的数据
+	func DecodeString(s string) ([]byte, error)
+
+	// 长度x的明文数据编码后的编码数据的长度
+	func EncodedLen(n int) int
+
+	// 将src的数据解码为EncodedLen(len(src))字节，返回实际写入dst的字节数：EncodedLen(len(src))
+	func Encode(dst, src []byte) int
+	
+	// 将数据src编码为字符串s
+	func EncodeToString(src []byte) string
+
+	// 返回给定数据的hex dump格式的字符串，这个字符串与控制台下`hexdump -C`对该数据的输出是一致的
+	func Dump(data []byte) string
+
+	// 返回一个io.WriteCloser接口，将写入的数据的hex dump格式写入w，具体格式为'hexdump -C'
+	func Dumper(w io.Writer) io.WriteCloser
+```
+
+### 9. encoding/json
 - encoding/json
 	- json包实现了json对象的编解码
 	- [JSON and Go](http://golang.org/doc/articles/json_and_go.html)
@@ -1085,64 +1239,25 @@
 	func (enc *Encoder) Encode(v interface{}) error
 ```
 
-### 5. encoding/gob
-- encoding/gob
-	- gob包管理gob流，在编码器(发送器)和解码器(接受器)之间交换的binary值
-	- go特有的编码格式，不能跨语言，提供了对数据结构进行二进制序列化的功能
-	- 一般用于传递远端程序调用(RPC)的参数和结果，如net/rpc包就有提供
-
-- 处理流程
-	- 注册
-	- 打开文件
-	- 创建对象
-	- 编码/解码
-
-- 常用函数
-	- `Register`: 注册 gob 编解码记录值 `func Register(value interface{})`
-	- `RegisterName`: 注册 gob 编解码记录值，并指定名称 `func RegisterName(name string, value interface{})`
-		
-- 常用结构体
-	- Encoder `type Encoder struct{ ... }`
-		- 常用函数 
-			- `NewEncoder`: 创建编码器 `func NewEncoder(w io.Writer) *Encoder`
-		- 常用方法
-			- `Encode`: 将对象进行编码到流对象中 `func (enc *Encoder) Encode(e interface{}) error`
-	- Decoder `type Decoder struct{ ... }`
-		- 常用函数
-			- `NewDecoder`: 创建解码器 `func NewDecoder(r io.Reader) *Decoder`
-		- 常用方法
-			- `Decode`: 将流对象中的数据编码到对象中 `func (dec *Decoder) Decode(e interface{}) error`
+### 10. encoding/pem
+- encoding/pem
+	- pem包实现了PEM数据编码（源自保密增强邮件协议）。目前PEM编码主要用于TLS密钥和证书
 ```go
-	type User struct {
-		Id   int
-		Name string
+	// Block代表PEM编码的结构
+	type Block struct {
+		Type    string            // 得自前言的类型（如"RSA PRIVATE KEY"）
+		Headers map[string]string // 可选的头项
+		Bytes   []byte            // 内容解码后的数据，一般是DER编码的ASN.1结构
 	}
-	enusers := []User{
-		{1, "aa"},
-		{2, "bb"},
-	}
-	// 注册
-	gob.Register(User{})
-	// 编码
-	file, err := os.Create("users.gob")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	encoder := gob.NewEncoder(file)
-	fmt.Println(encoder.Encode(enusers))
-	file.Close()
-	// 解码
-	file, err := os.Open("users.gob")
-	if err != nil {
-		return
-	}
-	decoder := gob.NewDecoder(file)
-	var deusers []User
-	fmt.Println(decoder.Decode(&deusers))
-	fmt.Println(deusers)
-	file.Close()
+
+	func Decode(data []byte) (p *Block, rest []byte)
+	func Encode(out io.Writer, b *Block) error
+	func EncodeToMemory(b *Block) []byte
 ```
+
+### 11. encoding/xml
+- encoding/xml
+	- xml包实现了一个简单的xml 1.0解析器，它能够理解XML名称空间
 
 
 ## 四、参考范例
