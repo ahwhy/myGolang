@@ -125,3 +125,31 @@ func TestSearchIssuesHtml(t *testing.T) {
 func TestSnake(t *testing.T) {
 	fmt.Println(utils.Snake("qwer1234ASDF"))
 }
+
+func TestTable(t *testing.T) {
+	results := make([]*utils.Result, 0, 10)
+	for i := 0; i < 5; i++ {
+		result := utils.Result{
+			ID:       i + 1,
+			Name:     fmt.Sprintf("member_%d", i+1),
+			Describe: "This is a result",
+			Value:    "True",
+			Level:    "normal",
+			Message:  "This is a result",
+		}
+		results = append(results, &result)
+	}
+	for i := 5; i < 10; i++ {
+		result := utils.Result{
+			ID:       i + 1,
+			Name:     fmt.Sprintf("member_%d", i+1),
+			Describe: "This is a error",
+			Value:    "Flase",
+			Level:    "error",
+			Message:  "This is a error",
+		}
+		results = append(results, &result)
+	}
+
+	utils.PrintResult(results)
+}
