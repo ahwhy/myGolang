@@ -580,7 +580,11 @@
 	- io包提供了对I/O原语的基本接口
 	- 本包的基本任务是包装这些原语已有的实现(如os包里的原语)，使之成为共享的公共接口，这些公共接口抽象出了泛用的函数并附加了一些相关的原语的操作
 ```go
-	// EOF当无法得到更多输入时，Read方法返回EO
+	// EOF当无法得到更多输入时，Read方法返回EOF
+	// EOF 用于标识 流(io stream)结束，如 parser/parser.go 会重复解析声明到文件的最后
+	// for p.tok != token.EOF {
+	// 	decls = append(decls, p.parseDecl(declStart))
+	// }
 	var EOF = errors.New("EOF")
 
 	// 当从一个已关闭的Pipe读取或者写入时，会返回ErrClosedPipe

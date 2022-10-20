@@ -649,7 +649,25 @@
 - runtime/debug
 	- debug包 包含程序在运行时自我调试的工具
 
-### 16. reflect
+### 16. errors
+- errors
+	- errors包实现了创建错误值的函数
+```go
+	// 使用字符串创建一个错误，同fmt.Errorf，类似于 New(fmt.Sprintf(...))
+	func New(text string) error
+```
+
+### 17. expvar
+- expvar
+	- expvar包提供了公共变量的标准接口，如服务的操作计数器
+	- 本包通过HTTP在/debug/vars位置以JSON格式导出了这些变量
+
+### 18. flag
+- flag
+	- flag包实现了命令行参数的解析
+	- [flag 示例](../cloudstation/simple_tool/simple_call.go)
+
+### 19. reflect
 ```go
 	//  获取数据类型，同Printf("%T")
 	reflect.TypeOf()
