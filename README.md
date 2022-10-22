@@ -25,6 +25,7 @@
   * [Golang-Log](./notes/25_Golang-Log.md)
   * [Golang-Unsafe](./notes/26_Golang-Unsafe.md)
   * [Golang-Sql](./notes/27_Golang-Sql.md)
+  * [Golang-Format](./notes/28_Golang-Format.md)
   * [Golang-Other](./notes/30_Golang-Other.md)
 
 ## Others
