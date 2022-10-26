@@ -523,6 +523,9 @@
 	- Panic系列函数会在写入日志信息后 `panic`
 		- `log.Panicf` 等价于 `{Printf(v...); panic(...)}`
 
+- log/syslog
+	- syslog 包提供一个简单的系统日志服务的接口
+
 ### 10. archive
 - archive/tar包
 	- tar包实现了tar格式压缩文件的存取
@@ -594,6 +597,10 @@
 
 - crypto/md5
 	- md5包实现了MD5哈希算法
+```go
+	md5.Sum([]byte(""))     // 计算byte切片中字符的MD5
+	md5.New()               // 解码
+```
 
 - crypto/rand
 	- rand包实现了用于加解密的更安全的随机数生成器
@@ -606,6 +613,12 @@
 
 - crypto/sha1
 	- sha1包实现了SHA1哈希算法
+```go
+	sha1.Sum([]byte(""))    // 计算byte切片中字符消息摘要(Hash)
+	sha256.Sum([]byte(""))
+	sha512.Sum([]byte(""))
+	sha256.Sum256([]byte(""))
+```
 
 - crypto/sha256
 	- sha256包实现了SHA224和SHA256哈希算法
@@ -666,27 +679,6 @@
 - flag
 	- flag包实现了命令行参数的解析
 	- [flag 示例](../cloudstation/simple_tool/simple_call.go)
-
-### 19. reflect
-```go
-	//  获取数据类型，同Printf("%T")
-	reflect.TypeOf()
-	reflect.ValueOf()
-```
-
-### 6. errors
-```go
-	errors.New() // 创建错误 或使用 fmt.Errorf()
-```
-
-### 7. sort
-```go
-	type StringSlice []string
-	func sort.Strings(x []string)
-	func sort.Sort(data sort.Interface)
-```
-
-### 8. flag
 ```go
 	flag.Parse()           // 解析命令行参数
 	flag.IntVar()          // 设置int类型参数
@@ -695,23 +687,109 @@
 	flag.PrintDefaults()   // 获取自动生成的参数信息
 ```
 
-### 9. crypto
-- crypto/md5
+### 19. hash
+- hash
+	- hash包提供hash函数的接口
+
+- hash/adler32
+	- adler32包实现了Adler-32校验和算法
+
+- hash/crc32
+	- crc32包实现了32位循环冗余校验(CRC-32)的校验和算法
+
+- hash/crc64
+	- crc64包实现了64位循环冗余校验(CRC-64)的校验和算法
+
+- hash/fnv
+	- fnv包实现了FNV-1和FNV-1a(非加密hash函数)
+
+### 20. html
+- html
+	- html包提供了用于转义和解转义HTML文本的函数
 ```go
-	md5.Sum([]byte(""))     // 计算byte切片中字符的MD5
-	md5.New()               // 解码
-```
-- crypto/sha1
-```go
-	sha1.Sum([]byte(""))    // 计算byte切片中字符消息摘要(Hash)
-	sha256.Sum([]byte(""))
-	sha512.Sum([]byte(""))
-	sha256.Sum256([]byte(""))
+	// EscapeString函数将特定的一些字符转为逸码后的字符实体，如"<"变成"&lt;"
+	// 它只会修改五个字符：<、>、&、'、"
+	// UnescapeString(EscapeString(s)) == s总是成立，但是两个函数顺序反过来则不一定成立
+	func EscapeString(s string) string
+	// UnescapeString函数将逸码的字符实体如"&lt;"修改为原字符"<"
+	func UnescapeString(s string) string
 ```
 
-### 11. log
+- html/template
+	- template包实现了数据驱动的模板，用于生成可对抗代码注入的安全HTML输出
+	- 本包提供了和text/template包相同的接口，无论何时当输出是HTML的时候都应使用本包
+	- [html/template 包](https://studygolang.com/static/pkgdoc/pkg/html_template.htm)
+
+### 21. image
+- image
+	- image实现了基本的2D图片库
+	- 基本接口叫作Image，图片的色彩定义在image/color包
+	- Image接口可以通过调用如`NewRGBA`和`NewPaletted`函数等获得；也可以通过调用`Decode`函数解码包含GIF、JPEG或PNG格式图像数据的输入流获得
+	- 解码任何具体图像类型之前都必须注册对应类型的解码函数；注册过程一般是作为包初始化的副作用，放在包的init函数里；要解码PNG图像，只需在程序的main包里嵌入如下代码 `import _ "image/png"` _表示导入包但不使用包中的变量/函数/类型，只是为了包初始化函数的副作用
+
+- image/color
+	- color包实现了基本色彩库
+
+- image/color/palette
+	- palette包提供了标准的调色板
+
+- image/draw
+	- draw包提供了图像合成函数
+
+- image/gif
+	- gif包实现了gif文件的编码器和解码器
+
+- image/jpeg
+	- jpeg包实现了jpeg格式图像的编解码
+
+- image/png
+	- png包实现了PNG图像的编解码
+
+### 22. reflect
+- index/suffixarray
+	- suffixarrayb包通过使用内存中的后缀树实现了对数级时间消耗的子字符串搜索
+
+### 23. mime
+- mime
+	- mime包实现了MIME的部分规定
+
+- mime/multipart
+	- multipart包实现了MIME的multipart解析，参见 [RFC 2046](http://tools.ietf.org/html/rfc2046)
+	- 该实现适用于HTTP([RFC 2046](https://www.rfc-editor.org/rfc/rfc2388))和常见浏览器生成的multipart主体
+
+- mime/quotedprintable
+	- quotedprintable包实现了quoted-printable encoding，参见 [RFC 2045](http://tools.ietf.org/html/rfc2045)
+
+### 24. path
+- path
+	- path包实现了对斜杠分隔的路径的实用操作函数
+
+- path/filepath
+	- filepath包实现了兼容各操作系统的文件路径的实用操作函数
+
+### 25. plugin
+- plugin
+	- plugin包实现Go plugins的加载和符号解析
+	- plugin是一个带有导出函数和变量的Go main包，目前plugin只在Linux上工作 `go build -buildmode=plugin`
+	- 当一个plugin第一次打开时，所有不属于程序的包的init函数都会被调用；主函数不会运行，插件只初始化一次，并且无法关闭。
+
+### 26. reflect
+- reflect
+	- reflect包实现了运行时反射，允许程序操作任意类型的对象
+	- 典型用法是用静态类型 `interface{}`保存一个值，通过调用 `TypeOf`获取其动态类型信息，该函数返回一个 `Type`类型值
+	- 调用 `ValueOf`函数返回一个 `Value`类型值，该值代表运行时的数据
+	- `Zero`接受一个 `Type`类型参数并返回一个代表该类型零值的 `Value`类型值。
 ```go
-	log.Printf("aa")  // 2021/07/04 15:32:10 aa
+	// 获取数据类型，同Printf("%T")
+	reflect.TypeOf()
+	reflect.ValueOf()
+```
+
+### 7. sort
+```go
+	type StringSlice []string
+	func sort.Strings(x []string)
+	func sort.Sort(data sort.Interface)
 ```
 
 ### 12. sync
@@ -735,12 +813,9 @@
 
 ### 18. net/http/pprof
 - http://127.0.0.1:8080/debug/pprof/goroutine?debug=1
-
-### 19. bytes
 - `func bytes.TrimSpace(s []byte) []byte` 去除首尾空格
 - `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
 - `func bytes.Join(s [][]byte, sep []byte) []byte`
-
 
 ## 十、常用公共库 
 

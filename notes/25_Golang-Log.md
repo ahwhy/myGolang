@@ -9,6 +9,8 @@
 	- Fatal系列函数会在写入日志信息后调用 `os.Exit(1)`
 	- Panic系列函数会在写入日志信息后 `panic`
 
+- log/syslog
+	- syslog 包提供一个简单的系统日志服务的接口
 ### 1. Constants
 ```go
 	// itoa枚举依次是 1，2，4，8，16，32
