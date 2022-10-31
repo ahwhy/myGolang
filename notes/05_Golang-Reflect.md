@@ -26,13 +26,67 @@
 			- 通过调用 `ValueOf`函数返回一个 `Value`类型值，该值代表运行时的数据
 			- `Zero`接受一个 `Type`类型参数并返回一个代表该类型零值的 `Value`类型值
 		- [laws_of_reflection](http://golang.org/doc/articles/laws_of_reflection.html)
+```go
+	// StringHeader 代表一个运行时的字符串
+	type StringHeader struct {
+		Data uintptr
+		Len  int
+	}
+
+	// SliceHeader 代表一个运行时的切片
+	type SliceHeader struct {
+		Data uintptr
+		Len  int
+		Cap  int
+	}
+
+	// StructField 类型描述结构体中的一个字段的信息
+	type StructField struct {
+		// Name是字段的名字；PkgPath是非导出字段的包路径，对导出字段该字段为""
+		// 参见http://golang.org/ref/spec#Uniqueness_of_identifiers
+		Name      string
+		PkgPath   string
+		Type      Type      // 字段的类型
+		Tag       StructTag // 字段的标签
+		Offset    uintptr   // 字段在结构体中的字节偏移量
+		Index     []int     // 用于Type.FieldByIndex时的索引切片
+		Anonymous bool      // 是否匿名字段
+	}
+	// StructTag 是结构体字段的标签
+	type StructTag string
+	// Method 代表一个方法
+	type Method struct {
+		// Name是方法名。PkgPath是非导出字段的包路径，对导出字段该字段为""。
+		// 结合PkgPath和Name可以从方法集中指定一个方法。
+		// 参见http://golang.org/ref/spec#Uniqueness_of_identifiers
+		Name    string
+		PkgPath string
+		Type  Type  // 方法类型
+		Func  Value // 方法的值
+		Index int   // 用于Type.Method的索引
+	}
+
+	// ChanDir 表示通道类型的方向
+	type ChanDir int
+	// SelectDir 描述一个SelectCase的通信方向
+	type SelectDir int
+	// SelectCase 描述select操作中的单条case
+	type SelectCase struct {
+		Dir  SelectDir // case的方向
+		Chan Value     // 使用的通道(收/发)
+		Send Value     // 用于发送的值
+	}
+	// Select 函数执行cases切片描述的select操作
+	func Select(cases []SelectCase) (chosen int, recv Value, recvOK bool)
+```
+
 
 ## 二、反射的Type
 
 ### 1. 定义
 - `reflect.Type` 是一个接口类型，用于获取变量类型的信息，可通过 `reflect.TypeOf` 函数获取某个变量的类型信息
 ```go
-	// Type类型用来表示一个go类型
+	// Type 类型用来表示一个go类型
 	type Type interface {
 		// Kind返回该接口的具体分类
 		Kind() Kind
@@ -41,8 +95,8 @@
 		// PkgPath返回类型的包路径，即明确指定包的import路径，如"encoding/base64"
 		// 如果类型为内建类型(string, error)或未命名类型(*T, struct{}, []int)，会返回""
 		PkgPath() string
-		// 返回类型的字符串表示。该字符串可能会使用短包名（如用base64代替"encoding/base64"）
-		// 也不保证每个类型的字符串表示不同。如果要比较两个类型是否相等，请直接用Type类型比较。
+		// 返回类型的字符串表示；该字符串可能会使用短包名(如用base64代替"encoding/base64")
+		// 也不保证每个类型的字符串表示不同；如果要比较两个类型是否相等，请直接用Type类型比较
 		String() string
 		// 返回要保存一个该类型的值需要多少字节；类似unsafe.Sizeof
 		Size() uintptr
@@ -56,30 +110,30 @@
 		AssignableTo(u Type) bool
 		// 如该类型的值可以转换为u代表的类型，返回真
 		ConvertibleTo(u Type) bool
-		// 返回该类型的字位数。如果该类型的Kind不是Int、Uint、Float或Complex，会panic
+		// 返回该类型的字位数；如果该类型的Kind不是Int、Uint、Float或Complex，会panic
 		Bits() int
 		// 返回array类型的长度，如非数组类型将panic
 		Len() int
 		// 返回该类型的元素类型，如果该类型的Kind不是Array、Chan、Map、Ptr或Slice，会panic
 		Elem() Type
-		// 返回map类型的键的类型。如非映射类型将panic
+		// 返回map类型的键的类型；如非映射类型将panic
 		Key() Type
 		// 返回一个channel类型的方向，如非通道类型将会panic
 		ChanDir() ChanDir
-		// 返回struct类型的字段数（匿名字段算作一个字段），如非结构体类型将panic
+		// 返回struct类型的字段数(匿名字段算作一个字段)，如非结构体类型将panic
 		NumField() int
 		// 返回struct类型的第i个字段的类型，如非结构体或者i不在[0, NumField())内将会panic
 		Field(i int) StructField
 		// 返回索引序列指定的嵌套字段的类型，
 		// 等价于用索引中每个值链式调用本方法，如非结构体将会panic
 		FieldByIndex(index []int) StructField
-		// 返回该类型名为name的字段（会查找匿名字段及其子字段），
+		// 返回该类型名为name的字段(会查找匿名字段及其子字段)，
 		// 布尔值说明是否找到，如非结构体将panic
 		FieldByName(name string) (StructField, bool)
 		// 返回该类型第一个字段名满足函数match的字段，布尔值说明是否找到，如非结构体将会panic
 		FieldByNameFunc(match func(string) bool) (StructField, bool)
 		// 如果函数类型的最后一个输入参数是"..."形式的参数，IsVariadic返回真
-		// 如果这样，t.In(t.NumIn() - 1)返回参数的隐式的实际类型（声明类型的切片）
+		// 如果这样，t.In(t.NumIn() - 1)返回参数的隐式的实际类型(声明类型的切片)
 		// 如非函数类型将panic
 		IsVariadic() bool
 		// 返回func类型的参数个数，如果不是函数，将会panic
@@ -105,9 +159,17 @@
 		...
 	}
 
-	// TypeOf返回接口中保存的值的类型，TypeOf(nil)会返回nil
+	// TypeOf 返回接口中保存的值的类型，TypeOf(nil)会返回nil
 	// reflect.TypeOf
 	func TypeOf(i interface{}) Type
+	// PtrTo 返回类型t的指针的类型
+	func PtrTo(t Type) Type
+	// SliceOf 返回类型t的切片的类型
+	func SliceOf(t Type) Type
+	// MapOf 返回一个键类型为key，值类型为elem的映射类型
+	func MapOf(key, elem Type) Type
+	// ChanOf 返回元素类型为t、方向为dir的通道类型
+	func ChanOf(dir ChanDir, t Type) Type
 ```
 
 ### 2. ͨ通用方法
@@ -170,38 +232,58 @@
 	type Value struct { ... }
 
 	// ValueOf返回一个初始化为i接口保管的具体值的Value，ValueOf(nil)返回Value零值
+	// reflect.ValueOf
 	func ValueOf(i interface{}) Value
 
 	// Zero返回一个持有类型typ的零值的Value
 	func Zero(typ Type) Value
+	// New 返回一个Value类型值，该值持有一个指向类型为typ的新申请的零值的指针，返回值的Type为PtrTo(typ)
+	func New(typ Type) Value
+	// NewAt 回一个Value类型值，该值持有一个指向类型为typ、地址为p的值的指针
+	func NewAt(typ Type, p unsafe.Pointer) Value
+	// 返回持有v持有的指针指向的值的Value
+	func Indirect(v Value) Value
+
+	// MakeSlice 创建一个新申请的元素类型为typ，长度len容量cap的切片类型的Value值
+	func MakeSlice(typ Type, len, cap int) Value
+	// MakeMap 创建一个特定映射类型的Value值
+	func MakeMap(typ Type) Value
+	// MakeChan 创建一个元素类型为typ、有buffer个缓存的通道类型的Value值
+	func MakeChan(typ Type, buffer int) Value
+	// MakeFunc 返回一个具有给定类型、包装函数fn的函数的Value封装
+	func MakeFunc(typ Type, fn func(args []Value) (results []Value)) Value
+
+	// 向切片类型的Value值s中添加一系列值，x等Value值持有的值必须能直接赋值给s持有的切片的元素类型
+	func Append(s Value, x ...Value) Value
+	// 类似Append函数，但接受一个切片类型的Value值；将切片t的每一个值添加到s
+	func AppendSlice(s, t Value) Value
+
+	// Copy 将src中的值拷贝到dst，直到src被耗尽或者dst被装满，要求这二者都是slice或array，且元素类型相同
+	func Copy(dst, src Value) int
+	// DeepEqual 用来判断两个值是否深度一致：除了类型相同；在可以时（主要是基本类型）会使用==；但还会比较array、slice的成员，map的键值对，结构体字段进行深入比对
+	func DeepEqual(a1, a2 interface{}) bool
 ```
 
-### 2. 通用方法
-- `reflect.ValueOf`
+### 2. ͨ通用方法
+- 通用方法
+	- `Type()` 获取值类型
+	- `CanAddr()` 是否可获取地址
+	- `Addr()` 获取地址
+	- `CanInterface()` 是否可以获取接口的
+	- `InterfaceData()`
+	- `Interface()` 将变量转换为 interface{}
+	- `CanSet()` 是否可更新
+	- `isValid()` 是否初始化为零值
+	- `Kind()` 获取值 类型枚举值
+	- `NumMethod()` 方法个数
+	- `Method(int)` 通过索引获取方法值
+	- `MethodByName(string)` 通过方法名字获取方法值
+	- `ConvertType()` 转换为对应类型的值
+	- `Set/Set*` 设置变量值
+	- `Call()`  调用方法
+	- `CallSlice()`  调用方法
 
-### 3. ͨ通用方法
- - `Type()` 获取值类型
- - `CanAddr()` 是否可获取地址
- - `Addr()` 获取地址
- - `CanInterface()` 是否可以获取接口的
- - `InterfaceData()`
- - `Interface()` 将变量转换为 interface{}
- - `CanSet()` 是否可更新
- - `isValid()` 是否初始化为零值
- - `Kind()` 获取值 类型枚举值
- - `NumMethod()` 方法个数
- - `Method(int)` 通过索引获取方法值
- - `MethodByName(string)` 通过方法名字获取方法值
- - `ConvertType()` 转换为对应类型的值
-
-### 4. 修改方法
-- `Set/Set*` 设置变量值
-
-### 5. 调用方法
-- `Call()`
-- `CallSlice()`
-
-### 6. 特定类型方法
+### 3. 特定类型方法
 - `reflect.Int*`, `reflect.Uint*`
 	- `Int()` 获取对应类型值
 	- `Unit()` 获取对应类型值
@@ -260,6 +342,7 @@
 ### 1. 内置类型的测试
 ```go
 	var s interface{} = "abc"
+	
 	// TypeOf会返回模板的对象
 	reflectType := reflect.TypeOf(s)
 	reflectValue := reflect.ValueOf(s)
@@ -276,13 +359,13 @@
 
 - 指针方法不能被反射查看到
 	- 对于成员变量
-		- 先获取 intereface 的 `reflect.Type`，然后遍历 `NumField`
+		- 先获取 `interface` 的 `reflect.Type`，然后遍历 `NumField`
 		- 再通过 `reflect.Type` 的 `Field` 获取字段
-		- 最后通过 `Field` 的interface 获取对应的 value
+		- 最后通过 `Field` 的 `interface` 获取对应的 `value`
 	- 对于方法
-		- 先获取 intereface 的 `reflect.Type`，然后遍历 `NumMethod`
+		- 先获取 `interface` 的 `reflect.Type`，然后遍历 `NumMethod`
 		- 再分别通过 `reflect.Type` 的 `t.Method` 获取真实的方法
-		- 最后通过 Name 和 Type 获取方法的类型和值
+		- 最后通过 `Name` 和 `Type` 获取方法的类型和值
 
 ```go
 	type Person struct {
@@ -299,8 +382,9 @@
 		// hobbies    []string
 		Labels map[string]string
 	}
+
 	// func (s *Student) goHome() {
-	// 		log.Printf("[回家][sid:%d]", s.StudentId)
+	// 	log.Printf("[回家][sid:%d]", s.StudentId)
 	// }
 	func (s *Student) GoHome() {
 		log.Printf("[回家][sid:%d]", s.StudentId)
@@ -335,6 +419,7 @@
 			log.Printf("[第:%d个方法][方法名称:%s][方法的类型:%v]", i+1, m.Name, m.Type)
 		}
 	}
+
 	s := Student{
 		Person:     Person{Name: "xiaoyi", Age: 9900},
 		StudentId:  123,
@@ -373,6 +458,7 @@
 ```go
     var num float64 = 3.14
     log.Printf("[num原始值:%f]", num)
+
     // 通过reflect.ValueOf获取num中的value
     // 必须是指针才可以修改值
     pointer := reflect.ValueOf(&num)
@@ -387,9 +473,9 @@
 ```
  
 ### 4. 反射调用方法
-- 首先 `reflect.ValueOf(p1)` 获取，得到反射类型对象
+- 首先通过 `reflect.ValueOf(p1)` 获取，得到反射类型对象
 
-- `reflect.ValueOf.MethodByName` 需要传入准确的方法名称，`MethodByName`代表注册
+- 其次通过 `reflect.ValueOf.MethodByName` 需要传入准确的方法名称，`MethodByName`代表注册
 	- 名称错误 `panic: reflect: call of reflect.Value.Call on zero Value`
 
 - `[]reflect.Value` 这是最终需要调用方法的参数，无参数传空切片
@@ -410,25 +496,23 @@
 	func (p Person) ReflectCallFuncWithNoArgs() {
 		log.Printf("[调用的是不带参数的方法]")
 	}
+
 	p1 := Person{
 		Name:   "小乙",
 		Age:    18,
 		Gender: "男",
 	}
-
 	// 首先通过 reflect.ValueOf(p1)获取 得到反射值类型
 	getValue := reflect.ValueOf(p1)
 
 	// 带参数的方法调用
 	methodValue := getValue.MethodByName("ReflectCallFuncWithArgs")
-
 	// 参数是reflect.Value的切片
 	args := []reflect.Value{reflect.ValueOf("李逵"), reflect.ValueOf(30)}
 	methodValue.Call(args)
 
 	// 不带参数的方法调用
 	methodValue = getValue.MethodByName("ReflectCallFuncWithNoArgs")
-
 	// 参数是reflect.Value的切片
 	args = make([]reflect.Value, 0)
 	methodValue.Call(args)
@@ -441,7 +525,7 @@
 
 - yaml的标签解析 `yaml`
 
-- xorm gorm的标签 标识db字段
+- xorm、gorm的标签 标识db字段
 
 - 自定义标签
 	- 原理是 `t.Field.Tag.Lookup` "标签名"
@@ -451,6 +535,7 @@
 		Age  int    `json:"age"  yaml:"yaml_age"  mage:"age"`
 		City string `json:"-" yaml:"yaml_city" mage:"-"`
 	}
+
 	//json解析
 	func jsonWork() {
 		// 对象marshal成字符串
@@ -481,6 +566,7 @@
 		}
 		log.Printf("[person.unmarshal.res][res:%v]", p2)
 	}
+
 	// yaml读取文件
 	func yamlWork() {
 		filename := "a.yaml"
@@ -498,6 +584,7 @@
 		}
 		log.Printf("[yaml.UnmarshalStrict.res][res:%v]", p)
 	}
+
 	// 自定义标签
 	func jiexizidingyibiaoqian(s interface{}) {
 		// typeOf type类型
@@ -518,6 +605,7 @@
 			}
 		}
 	}
+
 	jsonWork()
 	yamlWork()
 	p := Person{
@@ -530,7 +618,8 @@
 
 ## 五、弊端
 
-### 1. 代码可读性变差
+### 1. 代码可读性
+- 反射的使用，会导致代码可读性变差
 
 ### 2. 隐藏的错误躲过编译检查
 - Go语言为静态语言，编译器能发现类型的错误
