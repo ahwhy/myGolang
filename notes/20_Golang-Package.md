@@ -658,9 +658,25 @@
 - runtime
 	- runtime包提供和go运行时环境的互操作，如控制go程的函数
 	- 它也包括用于reflect包的低层次类型信息
+	- 也包括用于reflect包的低层次类型信息
+
+- runtime/cgo
+	- cgo 包含有 cgo 工具生成的代码的运行时支持
 
 - runtime/debug
 	- debug包 包含程序在运行时自我调试的工具
+
+- runtime/pprof
+	- pprof包以pprof可视化工具期望的格式书写运行时剖面数据
+
+- runtime/race
+	- race包实现了数据竞争检测逻辑
+	- 没有提供公共接口
+
+- runtime/trace
+	- 执行追踪器；tracer捕获各种执行事件，如goroutine创建/阻塞/解除阻塞、syscall进入/退出/阻塞、GC相关事件、堆大小的变化、处理器启动/停止等，并将它们写入io
+	- 对于大多数事件，都会捕获精确到纳秒级的时间戳和堆栈跟踪
+	- 使用 `go tool trace` 命令来分析跟踪
 
 ### 16. errors
 - errors
@@ -784,6 +800,21 @@
 	reflect.TypeOf()
 	reflect.ValueOf()
 ```
+
+### 27. fmt
+- fmt
+    - fmt包实现了类似C语言printf和scanf的格式化I/O
+    - 格式化动作('verb')源自C语言但更简单
+
+### 28. regexp
+- regexp
+ - regexp包实现了正则表达式搜索
+ - 正则表达式采用RE2语法（除了\c、\C），和Perl、Python等语言的正则基本一致
+ - 参见 [Syntax](http://code.google.com/p/re2/wiki/Syntax)z
+
+- regexp/syntax
+ - syntax包将正则表达式解析成解析树，并将解析树编译成程序
+ - 一般使用regexp包的功能
 
 ### 7. sort
 ```go
