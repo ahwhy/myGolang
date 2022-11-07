@@ -28,7 +28,8 @@
   * [Golang-Format](./notes/28_Golang-Format.md)
   * [Golang-Path](./notes/29_Golang-Path.md)
   * [Golang-Regexp](./notes/30_Golang-Regexp.md)
-  * [Golang-Other](./notes/31_Golang-Other.md)
+  * [Golang-Runtime](./notes/31_Golang-Runtime.md)
+  * [Golang-Other](./notes/40_Golang-Other.md)
 
 ## Others
   * [Protobuf](./notes/41_Protobuf.md)
