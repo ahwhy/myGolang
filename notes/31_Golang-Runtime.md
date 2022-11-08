@@ -50,7 +50,53 @@
 	- 环境变量GOARCH、GOOS、GOPATH和GOROOT构成完整的go环境变量集合，它们影响go程序的构建
 	- 环境变量GOARCH、GOOS和GOROOT在编译时被记录并可用本包的常量和函数获取，但它们不会影响运行时环境
 
+### 3. Constants && Variables
+```go
+	// Compiler 是编译工具链的名字，工具链会构建可执行的二进制文件
+	const Compiler = "gc"
+	// GOARCH是可执行程序的目标处理器架构(将要在该架构的机器上执行)：386、amd64或arm
+	const GOARCH string = theGoarch
+	// GOOS是可执行程序的目标操作系统(将要在该操作系统的机器上执行)：darwin、freebsd、linux等
+	const GOOS string = theGoos
 
+	// MemProfileRate 控制会在内存profile里记录和报告的内存分配采样频率
+	var MemProfileRate int = 512 * 1024
+```
+
+### 4. Functions
+```go
+	type Error interface {
+		error
+		// RuntimeError是一个无操作的函数，仅用于区别运行时错误和普通错误。
+		// 具有RuntimeError方法的错误类型就是运行时错误类型。
+		RuntimeError()
+	}
+
+	// TypeAssertionError 表示一次失败的类型断言
+	type TypeAssertionError struct { ... }
+	func (e *TypeAssertionError) Error() string
+	func (e *TypeAssertionError) RuntimeError()
+
+	// GOROOT 返回Go的根目录
+	func GOROOT() string
+	// 返回Go的版本字符串
+	func Version() string
+	// NumCPU 返回本地机器的逻辑CPU个数
+	func NumCPU() int
+	// GOMAXPROCS 设置可同时执行的最大CPU数，并返回先前的设置
+	func GOMAXPROCS(n int) int
+	// SetCPUProfileRate 设置CPU profile记录的速率为平均每秒hz次
+	func SetCPUProfileRate(hz int)
+	// CPUProfile 返回二进制CPU profile堆栈跟踪数据的下一个chunk，函数会阻塞直到该数据可用
+	func CPUProfile() []byte
+
+	// GC 执行一次垃圾回收
+	func GC()
+	// SetFinalizer将x的终止器设置为f
+	// 当垃圾收集器发现一个不能接触的(即引用计数为零，程序中不能再直接或间接访问该对象)具有终止器的块时，它会清理该关联(对象到终止器)并在独立go程调用f(x)，这使x再次可以接触，但没有了绑定的终止器
+	// 如果SetFinalizer没有被再次调用，下一次垃圾收集器将视x为不可接触的，并释放x
+	func SetFinalizer(x, f interface{})
+```
 ## 二、Golang的标准库 cgo包
 
 - runtime/cgo
