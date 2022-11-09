@@ -96,6 +96,65 @@
 	// 当垃圾收集器发现一个不能接触的(即引用计数为零，程序中不能再直接或间接访问该对象)具有终止器的块时，它会清理该关联(对象到终止器)并在独立go程调用f(x)，这使x再次可以接触，但没有了绑定的终止器
 	// 如果SetFinalizer没有被再次调用，下一次垃圾收集器将视x为不可接触的，并释放x
 	func SetFinalizer(x, f interface{})
+
+	// MemProfile 返回当前内存profile中的记录数n
+	// 大多数调用者应当使用runtime/pprof包或testing包的-test.memprofile标记，而非直接调用MemProfile
+	func MemProfile(p []MemProfileRecord, inuseZero bool) (n int, ok bool)
+	// Breakpoint 执行一个断点陷阱
+	func Breakpoint()
+	// Stack 将调用其的go程的调用栈踪迹格式化后写入到buf中并返回写入的字节数
+	func Stack(buf []byte, all bool) int
+	// Caller 报告当前go程调用栈所执行的函数的文件和行号信息
+	func Caller(skip int) (pc uintptr, file string, line int, ok bool)
+	// Callers 把当前go程调用栈上的调用栈标识符填入切片pc中，返回写入到pc中的项数
+	func Callers(skip int, pc []uintptr) int
+
+	// StackRecord 描述单条调用栈
+	type StackRecord struct {
+		Stack0 [32]uintptr // 该记录的调用栈踪迹，以第一个零值成员截止
+	}
+	// Stack 返回与记录相关联的调用栈踪迹，即r.Stack0的前缀
+	func (r *StackRecord) Stack() []uintptr
+
+	type Func struct { ... }
+	// FuncForPC返回一个表示调用栈标识符pc对应的调用栈的*Func；如果该调用栈标识符没有对应的调用栈，函数会返回nil；每一个调用栈必然是对某个函数的调用
+	func FuncForPC(pc uintptr) *Func
+
+	// Name 返回该调用栈所调用的函数的名字
+	func (f *Func) Name() string
+	// FileLine 返回该调用栈所调用的函数的源代码文件名和行号
+	// 如果pc不是f内的调用栈标识符，结果是不精确的
+	func (f *Func) FileLine(pc uintptr) (file string, line int)
+	// Entry 返回该调用栈的调用栈标识符
+	func (f *Func) Entry() uintptr
+	// NumCgoCall 返回当前进程执行的cgo调用次数
+	func NumCgoCall() int64
+	// NumGoroutine 返回当前存在的Go程数
+	func NumGoroutine() int
+	// Goexit 终止调用它的go程；其它go程不会受影响
+	// Goexit 会在终止该go程前执行所有defer的函数
+	func Goexit()
+	// Gosched 使当前go程放弃处理器，以让其它go程运行
+	func Gosched()
+	// GoroutineProfile 返回活跃go程的堆栈profile中的记录个数
+	func GoroutineProfile(p []StackRecord) (n int, ok bool)
+	// LockOSThread 将调用的go程绑定到它当前所在的操作系统线程
+	func LockOSThread()
+	// UnlockOSThread 将调用的go程解除和它绑定的操作系统线程
+	func UnlockOSThread()
+	// ThreadCreateProfile 返回线程创建profile中的记录个数
+	func ThreadCreateProfile(p []StackRecord) (n int, ok bool)
+
+	// BlockProfileRecord 用于描述某个调用栈序列发生的阻塞事件的信息
+	type BlockProfileRecord struct {
+		Count  int64
+		Cycles int64
+		StackRecord
+	}
+	// SetBlockProfileRate 控制阻塞profile记录go程阻塞事件的采样频率
+	func SetBlockProfileRate(rate int)
+	// BlockProfile 返回当前阻塞profile中的记录个数
+	func BlockProfile(p []BlockProfileRecord) (n int, ok bool)
 ```
 ## 二、Golang的标准库 cgo包
 
