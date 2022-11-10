@@ -673,9 +673,22 @@
 
 - 快速排序: 快速排序是对冒泡排序的一种改进，也属于交换类的排序算法
 
-- 其他 
-	- Go语言中内置排序 -> sort包，用于对象的排序, 参与排序的对象必须实现比较方法
+### 3. Golang的标准库 sort包
+- sort
+	- sort包提供了排序切片和用户自定义数据集的函数
+	- Go语言中内置排序，用于对象的排序, 参与排序的对象必须实现比较方法
 ```go
+	// 一个满足sort.Interface接口的(集合)类型可以被本包的函数进行排序
+	// 方法要求集合中的元素可以被整数索引
+	type Interface interface {
+		// Len方法返回集合中的元素个数
+		Len() int
+		// Less方法报告索引i的元素是否比索引j的元素小
+		Less(i, j int) bool
+		// Swap方法交换索引i和j的两个元素
+		Swap(i, j int)
+	}
+
 	// Sort sorts data.
 	// It makes one call to data.Len to determine n and O(n*log(n)) calls to
 	// data.Less and data.Swap. The sort is not guaranteed to be stable.
@@ -700,8 +713,8 @@
 		return numbers
 	}
 ```
-			
-### 3. 算法评估的维度
+
+### 4. 算法评估的维度
 - 时间维度: 是指执行当前算法所消耗的时间，通常用「时间复杂度」来描述，可以估算出程序对处理器的使用程度
 	- 时间频度: T(n) 通常，一个算法所花费的时间与代码语句执行的次数成正比，算法执行语句越多，消耗的时间也就越多
 	- 渐进时间复杂度: 算法的时间复杂度函数为 T(n)=O(f(n))

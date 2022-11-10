@@ -808,15 +808,17 @@
 
 ### 28. regexp
 - regexp
- - regexp包实现了正则表达式搜索
- - 正则表达式采用RE2语法（除了\c、\C），和Perl、Python等语言的正则基本一致
- - 参见 [Syntax](http://code.google.com/p/re2/wiki/Syntax)z
+	- regexp包实现了正则表达式搜索
+	- 正则表达式采用RE2语法（除了\c、\C），和Perl、Python等语言的正则基本一致
+	- 参见 [Syntax](http://code.google.com/p/re2/wiki/Syntax)z
 
 - regexp/syntax
- - syntax包将正则表达式解析成解析树，并将解析树编译成程序
- - 一般使用regexp包的功能
+	- syntax包将正则表达式解析成解析树，并将解析树编译成程序
+	- 一般使用regexp包的功能
 
-### 7. sort
+### 29. sort
+- sort
+	- sort包提供了排序切片和用户自定义数据集的函数
 ```go
 	type StringSlice []string
 	func sort.Strings(x []string)
