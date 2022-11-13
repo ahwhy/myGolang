@@ -820,23 +820,30 @@
 - sort
 	- sort包提供了排序切片和用户自定义数据集的函数
 ```go
-	type StringSlice []string
-	func sort.Strings(x []string)
-	func sort.Sort(data sort.Interface)
+	// Search函数采用二分法搜索找到[0, n)区间内最小的满足f(i)==true的值i
+	// Search函数希望f在输入位于区间[0, n)的前面某部分(可以为空)时返回假，而在输入位于剩余至结尾的部分(可以为空)时返回真；Search函数会返回满足f(i)==true的最小值i；如果没有该值，函数会返回n
+	func Search(n int, f func(int) bool) int
+	
+	// Sort 排序data，它调用1次data.Len确定长度，调用O(n*log(n))次data.Less和data.Swap
+	func Sort(data Interface)
+
+	// Reverse包装一个Interface接口并返回一个新的Interface接口，对该接口排序可生成递减序列
+	func Reverse(data Interface) Interface
+	// Ints 函数将a排序为递增顺序
+	func Ints(a []int)
+	// Float64s函数将a排序为递增顺序
+	func Float64s(a []float64)
+	// Strings 函数将a排序为递增顺序
+	func Strings(a []string)
 ```
 
-### 12. sync
+### 30. sync
 ```go
 	sync.Mutex 互斥锁
 	sync.RWMutex 读写锁
 	sync.Map 线程安全的Map
 	sync.WaitGroup(计数信号量)
 	sync.Once
-```
-
-### 13. runtime
-```go
-	func runtime.Gosched()
 ```
 
 ### 17. net/http

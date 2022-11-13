@@ -675,8 +675,8 @@
 
 ### 3. Golang的标准库 sort包
 - sort
-	- sort包提供了排序切片和用户自定义数据集的函数
-	- Go语言中内置排序，用于对象的排序, 参与排序的对象必须实现比较方法
+ - sort包提供了排序切片和用户自定义数据集的函数
+ - Go语言中内置排序，用于对象的排序, 参与排序的对象必须实现比较方法
 ```go
 	// 一个满足sort.Interface接口的(集合)类型可以被本包的函数进行排序
 	// 方法要求集合中的元素可以被整数索引
@@ -689,29 +689,78 @@
 		Swap(i, j int)
 	}
 
-	// Sort sorts data.
-	// It makes one call to data.Len to determine n and O(n*log(n)) calls to
-	// data.Less and data.Swap. The sort is not guaranteed to be stable.
-	func Sort(data Interface) {
-		...
-	}
-	// 实现一个IntSlice结构
-	func NewIntSlice(numbers []int) IntSlice {
-		return IntSlice(numbers)
-	}
-	
+	// IntSlice 给[]int添加方法以满足Interface接口，以便排序为递增序列
+	// // 实现一个IntSlice结构
+	// func NewIntSlice(numbers []int) IntSlice {
+	// 	return IntSlice(numbers)
+	// }
 	type IntSlice []int
+	func (p IntSlice) Len() int { return len(s) }
+	func (p IntSlice) Less(i, j int) bool { return s[i] < s[j] }
+	func (p IntSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+	// Sort 等价于调用Sort(p)
+	func (p IntSlice) Sort()
+	// Search 等价于调用SearchInts(p, x)
+	func (p IntSlice) Search(x int) int
+	// // For example 比较函数
+	// func BuildInSort(numbers []int) []int {
+	// 	sort.Sort(IntSlice(numbers))
+	// 	return numbers
+	// }
+
+	// Float64Slice 给[]float64添加方法以满足Interface接口，以便排序为递增序列
+	type Float64Slice []float64
+	func (p Float64Slice) Len() int
+	func (p Float64Slice) Less(i, j int) bool
+	func (p Float64Slice) Swap(i, j int)
+	func (p Float64Slice) Sort()
+	func (p Float64Slice) Search(x float64) int
+
+	// StringSlice 给[]string添加方法以满足Interface接口，以便排序为递增序列
+	type StringSlice []string
+	func (p StringSlice) Len() int
+	func (p StringSlice) Less(i, j int) bool
+	func (p StringSlice) Swap(i, j int)
+	func (p StringSlice) Sort()
+	func (p StringSlice) Search(x string) int
+
+	// Search函数采用二分法搜索找到[0, n)区间内最小的满足f(i)==true的值i
+	// Search函数希望f在输入位于区间[0, n)的前面某部分(可以为空)时返回假，而在输入位于剩余至结尾的部分(可以为空)时返回真；Search函数会返回满足f(i)==true的最小值i；如果没有该值，函数会返回n
+	func Search(n int, f func(int) bool) int
 	
-	func (s IntSlice) Len() int { return len(s) }
-	
-	func (s IntSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-	
-	func (s IntSlice) Less(i, j int) bool { return s[i] < s[j] }
-	// 比较函数
-	func BuildInSort(numbers []int) []int {
-		sort.Sort(IntSlice(numbers))
-		return numbers
-	}
+	// Sort 排序data，它调用1次data.Len确定长度，调用O(n*log(n))次data.Less和data.Swap
+	func Sort(data Interface)
+	// Stable 排序data，并保证排序的稳定性，相等元素的相对次序不变
+	func Stable(data Interface)
+	// IsSorted 报告data是否已经被排序
+	func IsSorted(data Interface) bool
+
+	// Reverse包装一个Interface接口并返回一个新的Interface接口，对该接口排序可生成递减序列
+	// s := []int{5, 2, 6, 3, 1, 4} // unsorted
+	// sort.Sort(sort.Reverse(sort.IntSlice(s)))
+	// Output: [6 5 4 3 2 1]
+	func Reverse(data Interface) Interface
+
+	// Ints 函数将a排序为递增顺序
+	func Ints(a []int)
+	// IntsAreSorted 检查a是否已排序为递增顺序
+	func IntsAreSorted(a []int) bool
+	// SearchInts 在递增顺序的a中搜索x，返回x的索引
+	func SearchInts(a []int, x int) int
+
+	// Float64s函数将a排序为递增顺序
+	func Float64s(a []float64)
+	// Float64sAreSorted 检查a是否已排序为递增顺序
+	func Float64sAreSorted(a []float64) bool
+	// SearchFloat64s 在递增顺序的a中搜索x，返回x的索引
+	func SearchFloat64s(a []float64, x float64) int
+
+	// Strings 函数将a排序为递增顺序
+	func Strings(a []string)
+	// StringsAreSorted 检查a是否已排序为递增顺序
+	func StringsAreSorted(a []string) bool
+	// SearchStrings 在递增顺序的a中搜索x，返回x的索引
+	func SearchStrings(a []string, x string) int
 ```
 
 ### 4. 算法评估的维度
