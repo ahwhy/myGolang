@@ -1084,6 +1084,7 @@
 	- `sync.WaitGroup`: 组等待
 	
 ## 九、Golang的runtime包
+
 - runtime包提供了与 Go运行时系统交互的操作
 
 - 常用函数

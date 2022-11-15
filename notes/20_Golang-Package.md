@@ -837,7 +837,24 @@
 	func Strings(a []string)
 ```
 
-### 30. sync
+### 30. strconv
+- strconv
+	- strconv包实现了基本数据类型和其字符串表示的相互转换
+	- 提供了字符串与简单数据类型之间的类型转换功能，可以将简单类型转换为字符串，也可以将字符串转换为其它简单类型
+	- string 转 bool `strconv.ParseBool("true")`
+	- bool 转 string `strconv.FormatBool(true)`
+	- string 转 int `strconv.ParseInt("11111111", 2, 16)` 、 `strconv.Atoi("100x")`
+	- int 转 string `strconv.FormatInt(255, 10)` 、 `strconv.Itoa(100)`
+	- string 转 uint `strconv.ParseUint("4E2D", 16, 16)`
+	- uint 转 string `strconv.FormatUint(255, 16)`
+	- string 转 float `strconv.ParseFloat("3.1", 64)`
+	- float 转 string `strconv.FormatFloat(3.1415, 'E', -1, 64)`
+
+### 31. sync
+- sync
+	- sync包提供了基本的同步基元，如互斥锁
+	- 除了Once和WaitGroup类型，大部分都是适用于低水平程序线程，高水平的同步使用channel通信更好一些
+	- 本包的类型的值不应被拷贝
 ```go
 	sync.Mutex 互斥锁
 	sync.RWMutex 读写锁
@@ -845,6 +862,16 @@
 	sync.WaitGroup(计数信号量)
 	sync.Once
 ```
+
+- sync/atomic
+	- atomic包提供了底层的原子级内存操作，对于同步算法的实现很有用
+	- 应通过通信来共享内存，而不通过共享内存实现通信
+
+### 32. syscall
+- syscall
+	- syscall包 包含一个到低级操作系统原语的接口
+	- 具体细节因底层系统而异，默认情况下，godoc将显示当前系统的syscall文档
+	- 如果希望godoc显示另一个系统的syscall文档，可以将$GOOS和$GOARCH设置为所需的系统
 
 ### 17. net/http
 ```go
