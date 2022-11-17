@@ -29,6 +29,8 @@
   * [Golang-Path](./notes/29_Golang-Path.md)
   * [Golang-Regexp](./notes/30_Golang-Regexp.md)
   * [Golang-Runtime](./notes/31_Golang-Runtime.md)
+  * [Golang-Strconv](./notes/32_Golang-Strconv.md)
+  * [Golang-Sync](./notes/33_Golang-Sync.md)
   * [Golang-Other](./notes/40_Golang-Other.md)
 
 ## Others
