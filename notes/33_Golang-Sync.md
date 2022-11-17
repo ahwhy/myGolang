@@ -131,3 +131,69 @@
 - sync/atomic
 	- atomic包提供了底层的原子级内存操作，对于同步算法的实现很有用
 	- 应通过通信来共享内存，而不通过共享内存实现通信
+```go
+	// LoadInt32 原子性的获取*addr的值
+	func LoadInt32(addr *int32) (val int32)
+	// LoadInt64 原子性的获取*addr的值
+	func LoadInt64(addr *int64) (val int64)
+	// LoadUint32 原子性的获取*addr的值
+	func LoadUint32(addr *uint32) (val uint32)
+	// LoadUint64 原子性的获取*addr的值
+	func LoadUint64(addr *uint64) (val uint64)
+	// LoadUintptr 原子性的获取*addr的值
+	func LoadUintptr(addr *uintptr) (val uintptr)
+	// LoadPointer 原子性的获取*addr的值
+	func LoadPointer(addr *unsafe.Pointer) (val unsafe.Pointer)
+
+	// StoreInt32 原子性的将val的值保存到*addr
+	func StoreInt32(addr *int32, val int32)
+	// StoreInt64原子性的将val的值保存到*addr
+	func StoreInt64(addr *int64, val int64)
+	// StoreUint32 原子性的将val的值保存到*addr
+	func StoreUint32(addr *uint32, val uint32)
+	// StoreUint64 原子性的将val的值保存到*addr
+	func StoreUint64(addr *uint64, val uint64)
+	// StoreUintptr 原子性的将val的值保存到*addr
+	func StoreUintptr(addr *uintptr, val uintptr)
+	// StorePointer 原子性的将val的值保存到*addr
+	func StorePointer(addr *unsafe.Pointer, val unsafe.Pointer)
+
+	// AddInt32 原子性的将val的值添加到*addr并返回新值
+	func AddInt32(addr *int32, delta int32) (new int32)
+	// AddInt64 原子性的将val的值添加到*addr并返回新值
+	func AddInt64(addr *int64, delta int64) (new int64)
+	// AddUint32 原子性的将val的值添加到*addr并返回新值
+	// 如要减去一个值c，调用AddUint32(&x, ^uint32(c-1))；特别的，让x减1，调用AddUint32(&x, ^uint32(0))
+	func AddUint32(addr *uint32, delta uint32) (new uint32)
+	// AddUint64 原子性的将val的值添加到*addr并返回新值
+	// 如要减去一个值c，调用AddUint64(&x, ^uint64(c-1))；特别的，让x减1，调用AddUint64(&x, ^uint64(0))
+	func AddUint64(addr *uint64, delta uint64) (new uint64)
+	// AddUintptr 原子性的将val的值添加到*addr并返回新值
+	func AddUintptr(addr *uintptr, delta uintptr) (new uintptr)
+
+	// SwapInt32 原子性的将新值保存到*addr并返回旧值
+	func SwapInt32(addr *int32, new int32) (old int32)
+	// SwapInt64 原子性的将新值保存到*addr并返回旧值
+	func SwapInt64(addr *int64, new int64) (old int64)
+	// SwapUint32 原子性的将新值保存到*addr并返回旧值
+	func SwapUint32(addr *uint32, new uint32) (old uint32)
+	// SwapUint64 原子性的将新值保存到*addr并返回旧值
+	func SwapUint64(addr *uint64, new uint64) (old uint64)
+	// SwapUintptr 原子性的将新值保存到*addr并返回旧值
+	func SwapUintptr(addr *uintptr, new uintptr) (old uintptr)
+	// SwapPointer 原子性的将新值保存到*addr并返回旧值
+	func SwapPointer(addr *unsafe.Pointer, new unsafe.Pointer) (old unsafe.Pointer)
+
+	// CompareAndSwapInt32 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapInt32(addr *int32, old, new int32) (swapped bool)
+	// CompareAndSwapInt64 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapInt64(addr *int64, old, new int64) (swapped bool)
+	// CompareAndSwapUint32 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapUint32(addr *uint32, old, new uint32) (swapped bool)
+	// CompareAndSwapUint64 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapUint64(addr *uint64, old, new uint64) (swapped bool)
+	// CompareAndSwapUintptr 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapUintptr(addr *uintptr, old, new uintptr) (swapped bool)
+	// CompareAndSwapPointer 原子性的比较*addr和old，如果相同则将new赋值给*addr并返回真
+	func CompareAndSwapPointer(addr *unsafe.Pointer, old, new unsafe.Pointer) (swapped bool)
+```
