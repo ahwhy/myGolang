@@ -2,11 +2,27 @@
 
 ## 一、Go语言中的测试
 
-### 1、单元测试
+### 1、test工具
 - Go提供了test工具用于代码的测试
 	- test工具会查找包下以 `_test.go`结尾的文件
-	- 调用测试文件中以Test或Benchmark开头的函数并给出运行结果
+	- 调用测试文件中以 `TestXxx` 或 `BenchmarkXxx` 开头的函数并给出运行结果
+	- 这类文件将被排除在正常的程序包之外，但在运行 `go test` 命令时将被包含
+	- 有关详细信息，请运行 `go help test` 和 `go help testflag` 了解
 
+- testing
+	- testing包 提供对 Go 包的自动化测试的支持
+	- 通过 `go test` 命令，能够自动执行 `func TestXxx(*testing.T)` 形式的任何函数
+		- 其中 Xxx 可以是任何字母数字字符串(但第一个字母不能是 [a-z])，用于识别测试例程
+	- 在这些函数中，使用 `Error`, `Fail` 或相关方法来发出失败信号
+	- 如果有需要，可以调用 `*T` 和 `*B` 的 Skip 方法，跳过该测试或基准测试
+```go
+	func TestTimeConsuming(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping test in short mode.")
+		}
+		...
+	}
+```
 ### 2、单元测试
 - 定义
 	- 单元是应用中最小的可测试部件，如函数和对象的方法
