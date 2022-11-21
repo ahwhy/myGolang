@@ -23,6 +23,13 @@
 		...
 	}
 ```
+
+- testing/iotest
+	- iotest包 实现用于测试的读取器和写入器
+
+- testing/quick
+	- quick包 实现一些实用函数来帮助黑盒测试
+
 ### 2、单元测试
 - 定义
 	- 单元是应用中最小的可测试部件，如函数和对象的方法
@@ -108,9 +115,8 @@
 
 - 执行命令
 	- go test 会在运行基准测试之前执行包里所有的单元测试
-		- 如果包里有很多单元测试，或者它们会运行很长时间
-		- 通过 go test 的-run 标识排除这些单元测试
-		- `go test -bench=. -run=none`
+		- 通过 `go test` 命令，加上 `-bench flag` 来执行，多个基准测试按照顺序运行
+		- 如果包里有很多单元测试，或者它们会运行很长时间，通过 go test -run 标识排除这些单元测试 `go test -bench=. -run=none`
 	- 内存消耗情况
 		- `go test -bench=. -benchmem -run=none`
 	- CPU消耗情况
@@ -119,7 +125,38 @@
 		- `go test -bench=. -count=10 -benchmem -run=none      // 热缩放、内存局部性、后台处理、gc活动等等会导致单次的误差`
 	- benchtime指定运行秒数 
 		- `go test -bench=. -benchtime=5s -benchmem -run=none  // 有的函数比较慢，为了更精确的结果，可以通过 -benchtime 标志指定运行时间，从而使它运行更多次`
+```go
+	// For example
+	func BenchmarkHello(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			fmt.Sprintf("hello")
+		}
+	}
+	// 基准函数会运行目标代码 b.N 次。在基准执行期间，会调整 b.N 直到基准测试函数持续足够长的时间
+	// Output: BenchmarkHello    10000000    282 ns/op
+	// 意味着循环执行了 10000000 次，每次循环花费 282 纳秒(ns)
 
+	// 如果在运行前基准测试需要一些耗时的配置，则可以通过 b.ResetTimer() 先重置定时器
+	func BenchmarkBigLen(b *testing.B) {
+		big := NewBig()
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			big.Len()
+		}
+	}
+
+	// 如果基准测试需要在并行设置中测试性能，则可以使用 RunParallel 辅助函数; 这样的基准测试一般与 go test -cpu 标志一起使用
+	func BenchmarkTemplateParallel(b *testing.B) {
+		templ := template.Must(template.New("test").Parse("Hello, {{.}}!"))
+		b.RunParallel(func(pb *testing.PB) {
+			var buf bytes.Buffer
+			for pb.Next() {
+				buf.Reset()
+				templ.Execute(&buf, "World")
+			}
+		})
+	}
+```
 
 - 斐波那契数列
 ```go
