@@ -74,6 +74,58 @@
 				- 如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取
 			- [prometheus的api_test](https://github.com/prometheus/prometheus/blob/main/web/api/v1/api_test.go)
 ```go
+	// AllocsPerRun 返回在调用 f 期间内存平均分配次数。虽然返回值的类型为 float64，但它始终是一个整数值
+	func AllocsPerRun(runs int, f func()) (avg float64)
+
+	// PB 被 RunParallel 使用来运行并行基准测试
+	type PB struct { ... }
+	// Next 判断是否有更多的迭代要执行
+	func (pb *PB) Next() bool
+
+	// T 是传递给测试函数的一种类型，它用于管理测试状态并支持格式化测试日志；测试日志会在执行测试的过程中不断累积， 并在测试完成时转储至标准输出
+	// 当一个测试的测试函数返回时， 又或者当一个测试函数调用 FailNow 、 Fatal 、 Fatalf 、 SkipNow 、 Skip 或者 Skipf 中的任意一个时， 该测试即宣告结束
+	type T struct { ... }
+
+	// 调用 Error 相当于在调用 Log 之后调用 Fail
+	func (c *T) Error(args ...interface{})
+	// 调用 Errorf 相当于在调用 Logf 之后调用 Fail
+	func (c *T) Errorf(format string, args ...interface{})
+	// 将当前测试标识为失败，但是仍继续执行该测试
+	func (c *T) Fail()
+	// 将当前测试标识为失败并停止执行该测试，在此之后，测试过程将在下一个测试或者下一个基准测试中继续
+	func (c *T) FailNow()
+	// Failed 用于报告测试函数是否已失败
+	func (c *T) Failed() bool
+	// 调用 Fatal 相当于在调用 Log 之后调用 FailNow
+	func (c *T) Fatal(args ...interface{})
+	// Log 使用与 Println 相同的格式化语法对它的参数进行格式化，然后将格式化后的文本记录到错误日志里面
+	// 1）对于测试来说，格式化文本只会在测试失败或者设置了 -test.v 标志的情况下被打印出来
+	// 2）对于基准测试来说，为了避免 -test.v 标志的值对测试的性能产生影响， 格式化文本总会被打印出来
+	func (c *T) Log(args ...interface{})
+	// Log 使用与 Printf 相同的格式化语法对它的参数进行格式化，然后将格式化后的文本记录到错误日志里面
+	// 如果输入的格式化文本最末尾没有出现新行，那么将一个新行添加到格式化后的文本末尾
+	func (c *T) Logf(format string, args ...interface{})
+	// 返回正在运行的测试或基准测试的名字
+	func (c *T) Name() string
+	// Parallel 用于表示当前测试只会与其他带有 Parallel 方法的测试并行进行测试
+	func (t *T) Parallel()
+	// 执行名字为 name 的子测试 f，并报告 f 在执行过程中是否出现了任何失败；Run 将一直阻塞直到 f 的所有并行测试执行完毕
+	func (t *T) Run(name string, f func(t *T)) bool
+	// 调用 Skip 相当于在调用 Log 之后调用 SkipNow
+	func (c *T) Skip(args ...interface{})
+	// 将当前测试标识为“被跳过”并停止执行该测试
+	func (c *T) SkipNow()
+	// 调用 Skipf 相当于在调用 Logf 之后调用 SkipNow
+	func (c *T) Skipf(format string, args ...interface{})
+	// Skipped 用于报告测试函数是否已被跳过
+	func (c *T) Skipped() bool
+```
+
+- 参考示例
+	- GoConvey 测试框架 `go get github.com/smartystreets/goconvey`
+	- testify 测试框架 `go get github.com/stretchr/testify/assert`
+	- [单元测试覆盖率应用实例](https://github.com/m3db/m3/pull/3525)
+```go
 	// 子测试 t.Run
 	func TestMul(t *testing.T) {
 		t.Run("正数", func(t *testing.T) {
@@ -89,11 +141,6 @@
 		})
 	}
 ```
-
-- 参考示例
-	- GoConvey 测试框架 `go get github.com/smartystreets/goconvey`
-	- testify 测试框架 `go get github.com/stretchr/testify/assert`
-	- [单元测试覆盖率应用实例](https://github.com/m3db/m3/pull/3525)
 
 ### 3、基准测试
 - 用途
