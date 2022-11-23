@@ -112,6 +112,94 @@
 		- 上述结果解读代表 1秒内运行了183次 每次 6272054 ns
 		- -12 后缀和用于运行次测试的 GOMAXPROCS 值有关
 		- 与GOMAXPROCS一样，此数字默认为启动时 Go
+```go
+	// B 是传递给基准测试函数的一种类型，它用于管理基准测试的计时行为，并指示应该迭代地运行测试多少次
+	// 一个基准测试在它的基准测试函数返回时，又或者在它的基准测试函数调用 FailNow、Fatal、Fatalf、SkipNow、Skip 或者 Skipf 中的任意一个方法时，测试即宣告结束；至于其他报告方法，比如 Log 和 Error 的变种，则可以在其他 goroutine 中同时进行调用
+	// 跟单元测试一样，基准测试会在执行的过程中积累日志，并在测试完毕时将日志转储到标准错误；但跟单元测试不一样的是，为了避免基准测试的结果受到日志打印操作的影响，基准测试总是会把日志打印出来
+	type B struct {
+	N int
+	...
+	}
+
+	// 调用 Error 相当于在调用 Log 之后调用 Fail
+	func (c *B) Error(args ...interface{})
+	// 调用 Errorf 相当于在调用 Logf 之后调用 Fail
+	func (c *B) Errorf(format string, args ...interface{})
+	// 将当前的测试函数标识为“失败”，但仍然继续执行该函数
+	func (c *B) Fail()
+	// 将当前的测试函数标识为“失败”，并停止执行该函数；在此之后，测试过程将在下一个测试或者下一个基准测试中继续
+	func (c *B) FailNow()
+	// Failed 用于报告测试函数是否已失败
+	func (c *B) Failed() bool
+	// 调用 Fatal 相当于在调用 Log 之后调用 FailNow
+	func (c *B) Fatal(args ...interface{})
+	// Log 使用与 Println 相同的格式化语法对它的参数进行格式化，然后将格式化后的文本记录到错误日志里面
+	func (c *B) Log(args ...interface{})
+	// Log 使用与 Printf 相同的格式化语法对它的参数进行格式化， 然后将格式化后的文本记录到错误日志里面
+	func (c *B) Logf(format string, args ...interface{})
+	// 返回正在运行的测试或者基准测试的名字
+	func (c *B) Name() string
+	// 打开当前基准测试的内存统计功能，与使用 -test.benchmem 设置类似，但 ReportAllocs 只影响那些调用了该函数的基准测试
+	func (b *B) ReportAllocs()
+	// 对已经逝去的基准测试时间以及内存分配计数器进行清零
+	func (b *B) ResetTimer()
+	// 执行名字为 name 的子基准测试（subbenchmark）f ，并报告 f 在执行过程中是否出现了任何失败
+	func (b *B) Run(name string, f func(b *B)) bool
+	// 以并行的方式执行给定的基准测试
+	func (b *B) RunParallel(body func(*PB))
+	// 记录在单个操作中处理的字节数量
+	func (b *B) SetBytes(n int64)
+	// 将 RunParallel 使用的 goroutine 数量设置为 p*GOMAXPROCS ，如果 p 小于 1 ，那么调用将不产生任何效果
+	func (b *B) SetParallelism(p int)
+	// 调用 Skip 相当于在调用 Log 之后调用 SkipNow
+	func (c *B) Skip(args ...interface{})
+	// 将当前测试标识为“被跳过”并停止执行该测试
+	func (c *B) SkipNow()
+	// 调用 Skipf 相当于在调用 Logf 之后调用 SkipNow
+	func (c *B) Skipf(format string, args ...interface{})
+	// 报告测试是否已被跳过
+	func (c *B) Skipped() bool
+	// 开始对测试进行计时
+	func (b *B) StartTimer()
+	// 停止对测试进行计时
+	func (b *B) StopTimer()
+
+	// 基准测试运行的结果
+	type BenchmarkResult struct {
+	N         int           // The number of iterations.
+	T         time.Duration // The total time taken.
+	Bytes     int64         // Bytes processed in one iteration.
+	MemAllocs uint64        // The total number of memory allocations.
+	MemBytes  uint64        // The total number of bytes allocated.
+	}
+
+	// 测试单个函数
+	func Benchmark(f func(b *B)) BenchmarkResult
+	func (r BenchmarkResult) AllocedBytesPerOp() int64
+	func (r BenchmarkResult) AllocsPerOp() int64
+	func (r BenchmarkResult) MemString() string
+	func (r BenchmarkResult) NsPerOp() int64
+	func (r BenchmarkResult) String() string
+
+	// TB 是一个接口，类型 T 和 B 实现了该接口
+	type TB interface {
+		Error(args ...interface{})
+		Errorf(format string, args ...interface{})
+		Fail()
+		FailNow()
+		Failed() bool
+		Fatal(args ...interface{})
+		Fatalf(format string, args ...interface{})
+		Log(args ...interface{})
+		Logf(format string, args ...interface{})
+		Name() string
+		Skip(args ...interface{})
+		SkipNow()
+		Skipf(format string, args ...interface{})
+		Skipped() bool
+		// contains filtered or unexported methods
+	}
+```
 
 - 执行命令
 	- go test 会在运行基准测试之前执行包里所有的单元测试
