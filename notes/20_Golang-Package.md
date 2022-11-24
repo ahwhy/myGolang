@@ -855,13 +855,11 @@
 	- sync包提供了基本的同步基元，如互斥锁
 	- 除了Once和WaitGroup类型，大部分都是适用于低水平程序线程，高水平的同步使用channel通信更好一些
 	- 本包的类型的值不应被拷贝
-```go
-	sync.Mutex 互斥锁
-	sync.RWMutex 读写锁
-	sync.Map 线程安全的Map
-	sync.WaitGroup(计数信号量)
-	sync.Once
-```
+	- 互斥锁 `sync.Mutex`
+	- 读写锁 `sync.RWMutex`
+	- 线程安全的Map `sync.Map`
+	- 等待一组线程 `sync.WaitGroup(计数信号量)`
+	- 执行一次动作 `sync.Once`
 
 - sync/atomic
 	- atomic包提供了底层的原子级内存操作，对于同步算法的实现很有用
@@ -872,6 +870,22 @@
 	- syscall包 包含一个到低级操作系统原语的接口
 	- 具体细节因底层系统而异，默认情况下，godoc将显示当前系统的syscall文档
 	- 如果希望godoc显示另一个系统的syscall文档，可以将$GOOS和$GOARCH设置为所需的系统
+
+### 33. text
+- text/scanner
+	- scanner包提供对utf-8文本的token扫描服务
+		- 它会从一个io.Reader获取utf-8文本，通过对Scan方法的重复调用获取一个个token
+		- 为了兼容已有的工具，NUL字符不被接受
+		- 如果第一个字符是表示utf-8编码格式的BOM标记，会自动忽略该标记
+
+- text/tabwrite
+	- tabwriter包实现了写入过滤器 `tabwriter.Writer`，可以将输入的缩进修正为正确的对齐文本
+
+- text/template
+	- template包实现了数据驱动的用于生成文本输出的模板
+
+- text/template/parse
+	- parse包 由 text/template包 和 html/template包定义的模版，构建解析树
 
 ### 17. net/http
 ```go
