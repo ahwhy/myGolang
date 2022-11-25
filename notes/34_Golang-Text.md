@@ -24,6 +24,36 @@
 	// IsValid 返回所处的位置是否合法
 	func (pos *Position) IsValid() bool
 	func (pos Position) String() string
+
+	// Scanner类型实现了token和unicode字符(从io.Reader中)的读取
+	type Scanner struct {
+		// 每一次出现错误时都会调用该函数；如果Error为nil，则会将错误报告到os.Stderr。
+		Error func(s *Scanner, msg string)
+		// 每一次出现错误时，ErrorCount++
+		ErrorCount int
+		// 控制那些token被识别。如要识别整数，就将Mode的ScanInts位设为1。随时都可以修改Mode。
+		Mode uint
+		// 控制那些字符识别为空白。如果要将一个码值小于32的字符视为空白，只需将码值对应的位设为1；
+		// 空格码值是32，大于32的位设为1的行为未定义。随时都可以修改Whitespace。
+		Whitespace uint64
+		// 最近一次扫描到的token的开始位置，由Scan方法设定
+		// 调用Init或Next方法会使位置无效（Line==0），Scanner不会操作Position.Filename字段
+		// 如果发生错误且Position不合法，此时扫描位置不在token内，应调用Pos获取错误发生的位置
+		Position
+		...
+	}
+	// Init 使用src创建一个Scanner，并将Error设为nil，ErrorCount设为0，Mode设为GoTokens，Whitespace 设为GoWhitespace
+	func (s *Scanner) Init(src io.Reader) *Scanner
+	// Pos 返回上一次调用Next或Scan方法后读取结束时的位置
+	func (s *Scanner) Pos() (pos Position)
+	// Peek 返回资源的下一个unicode字符而不移动扫描位置；如果扫描位置在资源的结尾会返回EOF
+	func (s *Scanner) Peek() rune
+	// Next 读取并返回下一个unicode字符
+	func (s *Scanner) Next() rune
+	// Scan 从资源读取下一个token或者unicode字符并返回它
+	func (s *Scanner) Scan() rune
+	// TokenText 返回最近一次扫描的token对应的字符串；应该在Scan方法后调用
+	func (s *Scanner) TokenText() string
 ```
 
 
