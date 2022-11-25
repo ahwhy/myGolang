@@ -62,7 +62,47 @@
 ### 1. text/tabwrite
 - text/tabwrite
 	- tabwriter包实现了写入过滤器 `tabwriter.Writer`，可以将输入的缩进修正为正确的对齐文本
+```go
+	// Writer是一个过滤器，会在输入的tab划分的列进行填充，在输出中对齐它们
+	type Writer struct { ... }
 
+	// 创建并初始化一个tabwriter.Writer，参数用法和Init函数类似
+	func NewWriter(output io.Writer, minwidth, tabwidth, padding int, padchar byte, flags uint) *Writer
+
+	// 初始化一个Writer，第一个参数指定格式化后的输出目标，其余的参数控制格式化
+	// minwidth 最小单元长度
+	// tabwidth tab字符的宽度
+	// padding  计算单元宽度时会额外加上它
+	// padchar  用于填充的ASCII字符，如果是'\t'，则Writer会假设tabwidth作为输出中tab的宽度，且单元必然左对齐
+	// flags    格式化控制
+	func (b *Writer) Init(output io.Writer, minwidth, tabwidth, padding int, padchar byte, flags uint) *Writer
+	// 将buf写入b，实现io.Writer接口，只有在写入底层输出流是才可能发生并返回错误
+	func (b *Writer) Write(buf []byte) (n int, err error)
+	// 在最后一次调用Write后，必须调用Flush方法以清空缓存，并将格式化对齐后的文本写入生成时提供的output中
+	func (b *Writer) Flush() (err error)
+
+	// For Example
+	w := new(tabwriter.Writer)
+	// Format in tab-separated columns with a tab stop of 8.
+	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
+	fmt.Fprintln(w, "a\tb\tc\td\t.")
+	fmt.Fprintln(w, "123\t12345\t1234567\t123456789\t.")
+	fmt.Fprintln(w)
+	w.Flush()
+	// Format right-aligned in space-separated columns of minimal width 5
+	// and at least one blank of padding (so wider column entries do not
+	// touch each other).
+	w.Init(os.Stdout, 5, 0, 1, ' ', tabwriter.AlignRight)
+	fmt.Fprintln(w, "a\tb\tc\td\t.")
+	fmt.Fprintln(w, "123\t12345\t1234567\t123456789\t.")
+	fmt.Fprintln(w)
+	w.Flush()
+	// Output:
+	// a b c d  .
+	// 123 12345 1234567 123456789 .
+	//     a     b       c         d.
+	//   123 12345 1234567 123456789.
+```
 
 ## 三、Golang的标准库 template包
 
