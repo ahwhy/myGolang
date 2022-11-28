@@ -16,10 +16,10 @@
 
 	// 代表资源里的一个位置
 	type Position struct {
-		Filename string // 文件名（如果存在）
+		Filename string // 文件名(如果存在)
 		Offset   int    // 偏移量，从0开始
 		Line     int    // 行号，从1开始
-		Column   int    // 列号，从1开始（每行第几个字符）
+		Column   int    // 列号，从1开始(每行第几个字符)
 	}
 	// IsValid 返回所处的位置是否合法
 	func (pos *Position) IsValid() bool
@@ -37,7 +37,7 @@
 		// 空格码值是32，大于32的位设为1的行为未定义。随时都可以修改Whitespace。
 		Whitespace uint64
 		// 最近一次扫描到的token的开始位置，由Scan方法设定
-		// 调用Init或Next方法会使位置无效（Line==0），Scanner不会操作Position.Filename字段
+		// 调用Init或Next方法会使位置无效(Line==0)，Scanner不会操作Position.Filename字段
 		// 如果发生错误且Position不合法，此时扫描位置不在token内，应调用Pos获取错误发生的位置
 		Position
 		...
@@ -177,25 +177,25 @@
 	- 参数代表一个简单的，由下面的某一条表示的值
 		- go语法的布尔值、字符串、字符、整数、浮点数、虚数、复数，视为无类型字面常数，字符串不能跨行
 		- 关键字nil，代表一个go的无类型的nil值
-		- 字符'.'（句点，用时不加单引号），代表dot的值
-		- 变量名，以美元符号起始加上（可为空的）字母和数字构成的字符串，如：$piOver2和$；执行结果为变量的值，变量参见下面的介绍
+		- 字符'.'(句点，用时不加单引号)，代表dot的值
+		- 变量名，以美元符号起始加上(可为空的)字母和数字构成的字符串，如：$piOver2和$；执行结果为变量的值，变量参见下面的介绍
 		- 结构体数据的字段名，以句点起始，如：.Field；
 			- 执行结果为字段的值，支持链式调用：.Field1.Field2；
-			- 字段也可以在变量上使用（包括链式调用）：$x.Field1.Field2；
+			- 字段也可以在变量上使用(包括链式调用)：$x.Field1.Field2；
 		- 字典类型数据的键名；以句点起始，如：.Key；
 			- 执行结果是该键在字典中对应的成员元素的值；
 			- 键也可以和字段配合做链式调用，深度不限：.Field1.Key1.Field2.Key2；
 			- 虽然键也必须是字母和数字构成的标识字符串，但不需要以大写字母起始；
-			- 键也可以用于变量（包括链式调用）：$x.key1.key2；
+			- 键也可以用于变量(包括链式调用)：$x.key1.key2；
 		- 数据的无参数方法名，以句点为起始，如：.Method；
 			- 执行结果为dot调用该方法的返回值，dot.Method()；
 			- 该方法必须有1到2个返回值，如果有2个则后一个必须是error接口类型；
 			- 如果有2个返回值的方法返回的error非nil，模板执行会中断并返回给调用模板执行者该错误；
 			- 方法可和字段、键配合做链式调用，深度不限：.Field1.Key1.Method1.Field2.Key2.Method2；
-			- 方法也可以在变量上使用（包括链式调用）：$x.Method1.Field；
+			- 方法也可以在变量上使用(包括链式调用)：$x.Method1.Field；
 		- 无参数的函数名，如：fun；
 			- 执行结果是调用该函数的返回值fun()；对返回值的要求和方法一样；函数和函数名细节参见后面
-		- 上面某一条的实例加上括弧（用于分组）,执行结果可以访问其字段或者键对应的值：
+		- 上面某一条的实例加上括弧(用于分组),执行结果可以访问其字段或者键对应的值：
 			- print (.F1 arg1) (.F2 arg2)
 			- (.StructValuedMethod "arg").Field
 
@@ -266,9 +266,82 @@
 		执行结果是调用第一个参数的返回值，该参数必须是函数类型，其余参数作为调用该函数的参数；
 		如"call .X.Y 1 2"等价于go语言里的dot.X.Y(1, 2)；
 		其中Y是函数类型的字段或者字典的值，或者其他类似情况；
-		call的第一个参数的执行结果必须是函数类型的值（和预定义函数如print明显不同）；
+		call的第一个参数的执行结果必须是函数类型的值(和预定义函数如print明显不同)；
 		该函数类型值必须有1到2个返回值，如果有2个则后一个必须是error接口类型；
 		如果有2个返回值的方法返回的error非nil，模板执行会中断并返回给调用模板执行者该错误；
+```
+
+### 2. Code
+```go
+	// 函数向w中写入b的HTML转义等价表示
+	func HTMLEscape(w io.Writer, b []byte)
+	// 返回s的HTML转义等价表示字符串
+	func HTMLEscapeString(s string) string
+	// 函数返回其所有参数文本表示的HTML转义等价表示字符串
+	func HTMLEscaper(args ...interface{}) string
+
+	// 函数向w中写入b的JavaScript转义等价表示
+	func JSEscape(w io.Writer, b []byte)
+	// 返回s的JavaScript转义等价表示字符串
+	func JSEscapeString(s string) string
+	// 函数返回其所有参数文本表示的JavaScript转义等价表示字符串
+	func JSEscaper(args ...interface{}) string
+
+	// 函数返回其所有参数文本表示的可以嵌入URL查询的转义等价表示字符串
+	func URLQueryEscaper(args ...interface{}) string
+	// FuncMap类型定义了函数名字符串到函数的映射，每个函数都必须有1到2个返回值，如果有2个则后一个必须是error接口类型
+	// 如果有2个返回值的方法返回的error非nil，模板执行会中断并返回给调用者该错误
+	type FuncMap map[string]interface{}
+
+	// 代表一个解析好的模板，*parse.Tree字段仅仅是暴露给html/template包使用的，因此其他人应该视字段未导出
+	type Template struct {
+		*parse.Tree
+		...
+	}
+	// 创建一个名为name的模板
+	func New(name string) *Template
+	// Must函数用于包装返回(*Template, error)的函数/方法调用，它会在err非nil时panic，一般用于变量初始化
+	// var t = template.Must(template.New("name").Parse("text"))
+	func Must(t *Template, err error) *Template
+	// ParseFiles函数创建一个模板并解析filenames指定的文件里的模板定义
+	// 返回的模板的名字是第一个文件的文件名(不含扩展名)，内容为解析后的第一个文件的内容；至少要提供一个文件。如果发生错误，会停止解析并返回nil
+	func ParseFiles(filenames ...string) (*Template, error)
+	// ParseGlob创建一个模板并解析匹配pattern的文件(参见glob规则)里的模板定义
+	func ParseGlob(pattern string) (*Template, error)
+
+	// 返回模板t的名字
+	func (t *Template) Name() string
+	// Delims方法用于设置action的分界字符串，应用于之后的Parse、ParseFiles、ParseGlob方法；嵌套模板定义会继承这种分界符设置
+	// 空字符串分界符表示相应的默认分界符：{{或}}；返回值就是t，以便进行链式调用
+	func (t *Template) Delims(left, right string) *Template
+	// Funcs方法向模板t的函数字典里加入参数funcMap内的键值对
+	// 如果funcMap某个键值对的值不是函数类型或者返回值不符合要求会panic
+	// 但是，可以对t函数列表的成员进行重写；方法返回t以便进行链式调用
+	func (t *Template) Funcs(funcMap FuncMap) *Template
+	// Clone方法返回模板的一个副本，包括所有相关联的模板；模板的底层表示树并未拷贝，而是拷贝了命名空间，因此拷贝调用Parse方法不会修改原模板的命名空间
+	// Clone方法用于准备模板的公用部分，向拷贝中加入其他关联模板后再进行使用
+	func (t *Template) Clone() (*Template, error)
+	// Lookup方法返回与t关联的名为name的模板，如果没有这个模板返回nil
+	func (t *Template) Lookup(name string) *Template
+	// Templates方法返回与t相关联的模板的切片，包括t自己
+	func (t *Template) Templates() []*Template
+	// New方法创建一个和t关联的名字为name的模板并返回它
+	// 这种可以传递的关联允许一个模板使用template action调用另一个模板
+	func (t *Template) New(name string) *Template
+	// AddParseTree方法使用name和tree创建一个模板并使它和t相关联
+	func (t *Template) AddParseTree(name string, tree *parse.Tree) (*Template, error)
+	// Parse方法将字符串text解析为模板。嵌套定义的模板会关联到最顶层的t；Parse可以多次调用，但只有第一次调用可以包含空格、注释和模板定义之外的文本
+	// 如果后面的调用在解析后仍剩余文本会引发错误、返回nil且丢弃剩余文本；如果解析得到的模板已有相关联的同名模板，会覆盖掉原模板
+	func (t *Template) Parse(text string) (*Template, error)
+	// ParseGlob方法解析filenames指定的文件里的模板定义并将解析结果与t关联；如果发生错误，会停止解析并返回nil，否则返回(t, nil)
+	func (t *Template) ParseFiles(filenames ...string) (*Template, error)
+	// ParseFiles方法解析匹配pattern的文件里的模板定义并将解析结果与t关联；如果发生错误，会停止解析并返回nil，否则返回(t, nil)
+	func (t *Template) ParseGlob(pattern string) (*Template, error)
+	// Execute方法将解析好的模板应用到data上，并将输出写入wr
+	// 如果执行时出现错误，会停止执行，但有可能已经写入wr部分数据；模板可以安全的并发执行
+	func (t *Template) Execute(wr io.Writer, data interface{}) (err error)
+	// ExecuteTemplate方法类似Execute，但是使用名为name的t关联的模板产生输出
+	func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) error
 ```
 
 ## 四、Golang的标准库 parse包
