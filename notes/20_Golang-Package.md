@@ -887,6 +887,16 @@
 - text/template/parse
 	- parse包 由 text/template包 和 html/template包定义的模版，构建解析树
 
+### 34. unicode
+- unicode
+	- unicode包提供数据和函数来测试Unicode码位的一些属性
+
+- unicode/utf16
+	- utf16包实现了UTF-16序列的编解码
+
+- unicode/utf8
+	- utf8包实现了对utf-8文本的常用函数和常数的支持，包括rune和utf-8编码byte序列之间互相翻译的函数
+
 ### 17. net/http
 ```go
 	http.StatusOK
