@@ -897,16 +897,69 @@
 - unicode/utf8
 	- utf8包实现了对utf-8文本的常用函数和常数的支持，包括rune和utf-8编码byte序列之间互相翻译的函数
 
-### 17. net/http
-```go
-	http.StatusOK
-```
+### 35. net
+- net
+	- net包提供了可移植的网络I/O接口，包括TCP/IP、UDP、域名解析和Unix域socket
+	- 虽然本包提供了对网络原语的访问，大部分使用者只需要Dial、Listen和Accept函数提供的基本接口；以及相关的Conn和Listener接口
+	- crypto/tls包提供了相同的接口和类似的Dial和Listen函数
 
-### 18. net/http/pprof
-- http://127.0.0.1:8080/debug/pprof/goroutine?debug=1
-- `func bytes.TrimSpace(s []byte) []byte` 去除首尾空格
-- `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
-- `func bytes.Join(s [][]byte, sep []byte) []byte`
+- net/http
+	- http包提供了HTTP客户端和服务端的实现
+	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
+		- `http.Get("http://example.com/")`
+		- `http.Post("http://example.com/upload", "image/jpeg", &buf)`
+		- `http.PostForm("http://example.com/form", url.Values{"key": {"Value"}, "id": {"123"}})`
+		- `http.StatusOK`
+
+- net/http/cgi
+	- cgi包实现了CGI(Common Gateway Interface，公共网关协议)，参见RFC 3875
+	- 注意使用CGI意味着对每一个请求开始一个新的进程，这显然要比使用长期运行的服务程序要低效
+	- 本包主要是为了兼容现有的系统
+
+- net/http/cookiejar
+	- cookiejar包实现了保管在内存中的符合RFC 6265标准的http.CookieJar接口
+
+- net/http/fcgi
+	- fcgi包实现了FastCGI协议
+	- 目前只支持响应器的角色
+
+- net/http/httptest
+	- httptest包提供了HTTP测试的常用函数
+
+- net/http/httptrace
+	- httptrace包提供了跟踪HTTP客户端请求中的事件的机制
+
+- net/http/httputil
+	- httputil包提供了HTTP公用函数，是对net/http包的更常见函数的补充
+
+- net/http/pprof
+	- pprof包通过它的HTTP服务端提供pprof可视化工具期望格式的运行时剖面文件数据服务
+	- 本包一般只需导入获取其注册HTTP处理器的副作用。处理器的路径以/debug/pprof/开始
+		- http://127.0.0.1:8080/debug/pprof/goroutine?debug=1
+		- `func bytes.TrimSpace(s []byte) []byte` 去除首尾空格
+		- `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
+		- `func bytes.Join(s [][]byte, sep []byte) []byte`
+
+- net/smtp
+	- smtp包实现了简单邮件传输协议(SMTP)
+
+- net/mail
+	- mail包实现了邮件的解析
+
+- net/rpc/jsonrpc
+	- rpc包提供了通过网络或其他I/O连接对一个对象的导出方法的访问
+
+- net/rpc/jsonrpc
+	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包。
+
+- net/smtp
+	- smtp包实现了简单邮件传输协议(SMTP)
+
+- net/textproto
+	- textproto实现了对基于文本的请求/回复协议的一般性支持，包括HTTP、NNTP和SMTP
+
+- net/url
+	- url包解析URL并实现了查询的逸码
 
 ## 十、常用公共库 
 
