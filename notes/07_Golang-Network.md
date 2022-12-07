@@ -261,6 +261,85 @@
 		- `func (c *TCPConn) Close() error`
 		- `func (l *TCPListener) Close() error`
 		- 关闭连接
+```golang
+	// TCPAddr 代表一个TCP终端地址
+	type TCPAddr struct {
+		IP   IP
+		Port int
+		Zone string // IPv6范围寻址域
+	}
+	// ResolveTCPAddr 将addr作为TCP地址解析并返回
+	// 参数addr格式为"host:port"或"[ipv6-host%zone]:port"，解析得到网络名和端口名；net必须是"tcp"、"tcp4"或"tcp6"
+	// IPv6地址字面值/名称必须用方括号包起来，如"[::1]:80"、"[ipv6-host]:http"或"[ipv6-host%zone]:80"
+	func ResolveTCPAddr(net, addr string) (*TCPAddr, error)
+	// 返回地址的网络类型，"tcp"
+	func (a *TCPAddr) Network() string
+	func (a *TCPAddr) String() string
+
+	// TCPListener 代表一个TCP网络的监听者，应尽量使用Listener接口而不是假设(网络连接为)TCP
+	type TCPListener struct { ... }
+	// ListenTCP 在本地TCP地址laddr上声明并返回一个*TCPListener，net参数必须是"tcp"、"tcp4"、"tcp6"，如果laddr的端口字段为0，函数将选择一个当前可用的端口，可以用Listener的Addr方法获得该端口
+	func ListenTCP(net string, laddr *TCPAddr) (*TCPListener, error)
+	// Addr返回l监听的的网络地址，一个*TCPAddr
+	func (l *TCPListener) Addr() Addr
+	// SetDeadline 设置监听器执行的期限，t为Time零值则会关闭期限限制
+	func (l *TCPListener) SetDeadline(t time.Time) error
+	// Accept 用于实现Listener接口的Accept方法；他会等待下一个呼叫，并返回一个该呼叫的Conn接口
+	func (l *TCPListener) Accept() (Conn, error)
+	// AcceptTCP 接收下一个呼叫，并返回一个新的*TCPConn
+	func (l *TCPListener) AcceptTCP() (*TCPConn, error)
+	// Close 停止监听TCP地址，已经接收的连接不受影响
+	func (l *TCPListener) Close() error
+	// File 方法返回下层的os.File的副本，并将该副本设置为阻塞模式
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c
+	func (l *TCPListener) File() (f *os.File, err error)
+
+	// TCPConn 代表一个TCP网络连接，实现了Conn接口
+	type TCPConn struct { ... }
+	// DialTCP 在网络协议net上连接本地地址laddr和远端地址raddr
+	// net必须是"tcp"、"tcp4"、"tcp6"；如果laddr不是nil，将使用它作为本地地址，否则自动选择一个本地地址
+	func DialTCP(net string, laddr, raddr *TCPAddr) (*TCPConn, error)
+	// LocalAddr 返回本地网络地址
+	func (c *TCPConn) LocalAddr() Addr
+	// RemoteAddr 返回远端网络地址
+	func (c *TCPConn) RemoteAddr() Addr
+	// SetReadBuffer 设置该连接的系统接收缓冲
+	func (c *TCPConn) SetReadBuffer(bytes int) error
+	// SetWriteBuffer 设置该连接的系统发送缓冲
+	func (c *TCPConn) SetWriteBuffer(bytes int) error
+	// SetDeadline 设置读写操作期限，实现了Conn接口的SetDeadline方法
+	func (c *TCPConn) SetDeadline(t time.Time) error
+	// SetReadDeadline 设置读操作期限，实现了Conn接口的SetReadDeadline方法
+	func (c *TCPConn) SetReadDeadline(t time.Time) error
+	// SetWriteDeadline 设置写操作期限，实现了Conn接口的SetWriteDeadline方法
+	func (c *TCPConn) SetWriteDeadline(t time.Time) error
+	// SetKeepAlive 设置操作系统是否应该在该连接中发送keepalive信息
+	func (c *TCPConn) SetKeepAlive(keepalive bool) error
+	// SetKeepAlivePeriod 设置keepalive的周期，超出会断开
+	func (c *TCPConn) SetKeepAlivePeriod(d time.Duration) error
+	// SetLinger 设定当连接中仍有数据等待发送或接受时的Close方法的行为
+	// 如果sec < 0 (默认)，Close方法立即返回，操作系统停止后台数据发送；如果 sec == 0，Close立刻返回，操作系统丢弃任何未发送或未接收的数据；
+	// 如果sec > 0，Close方法阻塞最多sec秒，等待数据发送或者接收，在一些操作系统中，在超时后，任何未发送的数据会被丢弃
+	func (c *TCPConn) SetLinger(sec int) error
+	// SetNoDelay 设定操作系统是否应该延迟数据包传递，以便发送更少的数据包(Nagle's算法)
+	// 默认为真，即数据应该在Write方法后立刻发送
+	func (c *TCPConn) SetNoDelay(noDelay bool) error
+	// Read 实现了Conn接口Read方法
+	func (c *TCPConn) Read(b []byte) (int, error)
+	// Write 实现了Conn接口Write方法
+	func (c *TCPConn) Write(b []byte) (int, error)
+	// ReadFrom 实现了io.ReaderFrom接口的ReadFrom方法
+	func (c *TCPConn) ReadFrom(r io.Reader) (int64, error)
+	// Close 关闭连接
+	func (c *TCPConn) Close() error
+	// CloseRead 关闭TCP连接的读取侧(以后不能读取)，应尽量使用Close方法
+	func (c *TCPConn) CloseRead() error
+	// CloseWrite 关闭TCP连接的写入侧(以后不能写入)，应尽量使用Close方法
+	func (c *TCPConn) CloseWrite() error
+	// File 方法设置下层的os.File为阻塞模式并返回其副本
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c
+	func (c *TCPConn) File() (f *os.File, err error)
+```
 
 ### 3. UDP/CS架构
 - UDP协议
