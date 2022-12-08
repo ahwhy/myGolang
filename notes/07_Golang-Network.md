@@ -391,7 +391,68 @@
 		- 写数据，需要指定remote的地址
 	- net.Close
 		- `func (c *UDPConn) Close() error`
+```golang
+	// UDPAddr 代表一个UDP终端地址
+	type UDPAddr struct {
+		IP   IP
+		Port int
+		Zone string // IPv6范围寻址域
+	}
+	// ResolveUDPAddr 将addr作为UDP地址解析并返回
+	// 参数addr格式为"host:port"或"[ipv6-host%zone]:port"，解析得到网络名和端口名；net必须是"udp"、"udp4"或"udp6"
+	func ResolveUDPAddr(net, addr string) (*UDPAddr, error)
+	// 返回地址的网络类型，"UDP"
+	func (a *UDPAddr) Network() string
+	func (a *UDPAddr) String() string
 
+	// UDPConn代表一个UDP网络连接，实现了Conn和PacketConn接口
+	type UDPConn struct { ... }
+	// DialUDP 在网络协议net上连接本地地址laddr和远端地址raddr
+	// net必须是"UDP"、"udp4"、"udp6"；如果laddr不是nil，将使用它作为本地地址，否则自动选择一个本地地址
+	func DialUDP(net string, laddr, raddr *UDPAddr) (*UDPConn, error)
+	// ListenUDP 创建一个接收目的地是本地地址laddr的UDP数据包的网络连接
+	// net必须是"udp"、"udp4"、"udp6"；如果laddr端口为0，函数将选择一个当前可用的端口，可以用Listener的Addr方法获得该端口
+	// 返回的*UDPConn的ReadFrom和WriteTo方法可以用来发送和接收UDP数据包(每个包都可获得来源地址或设置目标地址)
+	func ListenUDP(net string, laddr *UDPAddr) (*UDPConn, error)
+	// ListenMulticastUDP 接收目的地是ifi接口上的组地址gaddr的UDP数据包；它指定了使用的接口，如果ifi是nil，将使用默认接口
+	func ListenMulticastUDP(net string, ifi *Interface, gaddr *UDPAddr) (*UDPConn, error)
+	// LocalAddr 返回本地网络地址
+	func (c *UDPConn) LocalAddr() Addr
+	// RemoteAddr 返回远端网络地址
+	func (c *UDPConn) RemoteAddr() Addr
+	// SetReadBuffer 设置该连接的系统接收缓冲
+	func (c *UDPConn) SetReadBuffer(bytes int) error
+	// SetWriteBuffer 设置该连接的系统发送缓冲
+	func (c *UDPConn) SetWriteBuffer(bytes int) error
+	// SetDeadline 设置读写操作期限，实现了Conn接口的SetDeadline方法
+	func (c *UDPConn) SetDeadline(t time.Time) error
+	// SetReadDeadline 设置读操作期限，实现了Conn接口的SetReadDeadline方法
+	func (c *UDPConn) SetReadDeadline(t time.Time) error
+	// SetWriteDeadline 设置写操作期限，实现了Conn接口的SetWriteDeadline方法
+	func (c *UDPConn) SetWriteDeadline(t time.Time) error
+	// Read 实现了Conn接口Read方法
+	func (c *UDPConn) Read(b []byte) (int, error)
+	// ReadFrom 实现PacketConn接口ReadFrom方法
+	func (c *UDPConn) ReadFrom(b []byte) (int, Addr, error)
+	// ReadFromUDP 从c读取一个UDP数据包，将有效负载拷贝到b，返回拷贝字节数和数据包来源地址；ReadFromUDP方法会在超过一个固定的时间点之后超时，并返回一个错误
+	func (c *UDPConn) ReadFromUDP(b []byte) (n int, addr *UDPAddr, err error)
+	// ReadMsgUDP 从c读取一个数据包，将有效负载拷贝进b，相关的带外数据拷贝进oob，返回拷贝进b的字节数，拷贝进oob的字节数，数据包的flag，数据包来源地址和可能的错误
+	func (c *UDPConn) ReadMsgUDP(b, oob []byte) (n, oobn, flags int, addr *UDPAddr, err error)
+	// Write 实现了Conn接口Write方法
+	func (c *UDPConn) Write(b []byte) (int, error)
+	// WriteTo 实现PacketConn接口WriteTo方法
+	func (c *UDPConn) WriteTo(b []byte, addr Addr) (int, error)
+	// WriteToUDP 通过c向地址addr发送一个数据包，b为包的有效负载，返回写入的字节
+	// WriteToUDP方法会在超过一个固定的时间点之后超时，并返回一个错误；在面向数据包的连接上，写入超时是十分罕见的
+	func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (int, error)
+	// WriteMsgUDP通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数(包数据、带外数据)和可能的错误
+	func (c *UDPConn) WriteMsgUDP(b, oob []byte, addr *UDPAddr) (n, oobn int, err error)
+	// Close 关闭连接
+	func (c *UDPConn) Close() error
+	// File 方法设置下层的os.File为阻塞模式并返回其副本
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c
+	func (c *UDPConn) File() (f *os.File, err error)
+```
 ### 4. TLS协议
 - TLS的特性
 	- 很多应用层协议(http、ftp、smtp等)直接使用明文传输
