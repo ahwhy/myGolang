@@ -220,6 +220,7 @@
 ```
 
 - Go语言中的TCP编程接口
+	- net包提供了可移植的网络I/O接口，包括TCP/IP、UDP、域名解析和Unix域socket，大部分使用者只需要Dial、Listen和Accept函数提供的基本接口，以及相关的Conn和Listener接口
 	- net.ResolveTCPAddr
 		- `func ResolveTCPAddr(network, address string) (*TCPAddr, error)`
 		- net参数是"tcp4"、"tcp6"、"tcp"中的任意一个，分别表示TCP4(IPv4-only)，TCP6(IPv6-only)或者TCP(IPv4,、IPv6的任意一个)
@@ -318,7 +319,7 @@
 	// SetKeepAlivePeriod 设置keepalive的周期，超出会断开
 	func (c *TCPConn) SetKeepAlivePeriod(d time.Duration) error
 	// SetLinger 设定当连接中仍有数据等待发送或接受时的Close方法的行为
-	// 如果sec < 0 (默认)，Close方法立即返回，操作系统停止后台数据发送；如果 sec == 0，Close立刻返回，操作系统丢弃任何未发送或未接收的数据；
+	// 如果sec < 0	(默认)，Close方法立即返回，操作系统停止后台数据发送；如果 sec == 0，Close立刻返回，操作系统丢弃任何未发送或未接收的数据；
 	// 如果sec > 0，Close方法阻塞最多sec秒，等待数据发送或者接收，在一些操作系统中，在超时后，任何未发送的数据会被丢弃
 	func (c *TCPConn) SetLinger(sec int) error
 	// SetNoDelay 设定操作系统是否应该延迟数据包传递，以便发送更少的数据包(Nagle's算法)
@@ -361,6 +362,7 @@
 ```
 
 - Go语言中的UDP编程接口
+	- net包提供了可移植的网络I/O接口，包括TCP/IP、UDP、域名解析和Unix域socket，大部分使用者只需要Dial、Listen和Accept函数提供的基本接口，以及相关的Conn和Listener接口
 	- net.ResolveUDPAddr
 		- `func ResolveUDPAddr(network, address string) (*UDPAddr, error)`
 		- netwok指定为"udp", "udp4" (IPv4-only), "udp6" (IPv6-only)，解析成udp地址
@@ -453,6 +455,7 @@
 	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c
 	func (c *UDPConn) File() (f *os.File, err error)
 ```
+
 ### 4. TLS协议
 - TLS的特性
 	- 很多应用层协议(http、ftp、smtp等)直接使用明文传输
@@ -991,7 +994,7 @@
 			- Model 把Controller层重复的代码抽象出来
 				- 在Model层可以使用beego提供的ORM功能
 
-```go
+```golang
 	// 使用方法
 	$ go get github.com/astaxie/beego
 	$ go get github.com/beego/bee
@@ -1009,10 +1012,106 @@
 		c.Data["Website"] = "github.com/Orisun"
 		c.Data["Email"] = zhchya@gmail.com
 		//TplName是需要渲染的模板  .tpl经常被用来表示PHP模板
-		c.TplName = "index.tpl”
+		c.TplName = "index.tpl"
 		//Resquest和ResponseWriter都在beego.Controller.Ctx里
 		fmt.Println("remote addr", c.Ctx.Request.RemoteAddr)
 		//如果指定了response正文，就不会去渲染index.tpl了
 		c.Ctx.WriteString("Hi boy") 
 	}
-``
+```
+
+## 四、Golang的标准库 net包
+
+### 1. net
+- net
+	- net包提供了可移植的网络I/O接口，包括TCP/IP、UDP、域名解析和Unix域socket
+	- 虽然本包提供了对网络原语的访问，大部分使用者只需要Dial、Listen和Accept函数提供的基本接口；以及相关的Conn和Listener接口
+	- crypto/tls包提供了相同的接口和类似的Dial和Listen函数
+
+- net包中的其他函数
+```golang
+	// Const
+	const (
+		IPv4len = 4
+		IPv6len = 16
+	)
+
+	// Variables
+	var (
+		IPv4bcast     = IPv4(255, 255, 255, 255) // 广播地址
+		IPv4allsys    = IPv4(224, 0, 0, 1)       // 所有主机和路由器
+		IPv4allrouter = IPv4(224, 0, 0, 2)       // 所有路由器
+		IPv4zero      = IPv4(0, 0, 0, 0)         // 本地地址，只能作为源地址（曾用作广播地址）
+	)
+	// 常用的IPv4地址
+	var (
+		IPv6zero                   = IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		IPv6unspecified            = IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		IPv6loopback               = IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+		IPv6interfacelocalallnodes = IP{0xff, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}
+		IPv6linklocalallnodes      = IP{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}
+		IPv6linklocalallrouters    = IP{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}
+	)
+	// 常用的IPv6地址
+	var (
+		ErrWriteToConnected = errors.New("use of WriteTo with pre-connected connection")
+	)
+```
+
+- net/http
+	- http包提供了HTTP客户端和服务端的实现
+	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
+		- `http.Get("http://example.com/")`
+		- `http.Post("http://example.com/upload", "image/jpeg", &buf)`
+		- `http.PostForm("http://example.com/form", url.Values{"key": {"Value"}, "id": {"123"}})`
+		- `http.StatusOK`
+
+- net/http/cgi
+	- cgi包实现了CGI(Common Gateway Interface，公共网关协议)，参见RFC 3875
+	- 注意使用CGI意味着对每一个请求开始一个新的进程，这显然要比使用长期运行的服务程序要低效
+	- 本包主要是为了兼容现有的系统
+
+- net/http/cookiejar
+	- cookiejar包实现了保管在内存中的符合RFC 6265标准的http.CookieJar接口
+
+- net/http/fcgi
+	- fcgi包实现了FastCGI协议
+	- 目前只支持响应器的角色
+
+- net/http/httptest
+	- httptest包提供了HTTP测试的常用函数
+
+- net/http/httptrace
+	- httptrace包提供了跟踪HTTP客户端请求中的事件的机制
+
+- net/http/httputil
+	- httputil包提供了HTTP公用函数，是对net/http包的更常见函数的补充
+
+- net/http/pprof
+	- pprof包通过它的HTTP服务端提供pprof可视化工具期望格式的运行时剖面文件数据服务
+	- 本包一般只需导入获取其注册HTTP处理器的副作用。处理器的路径以/debug/pprof/开始
+		- http://127.0.0.1:8080/debug/pprof/goroutine?debug=1
+		- `func bytes.TrimSpace(s []byte) []byte` 去除首尾空格
+		- `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
+		- `func bytes.Join(s [][]byte, sep []byte) []byte`
+
+- net/smtp
+	- smtp包实现了简单邮件传输协议(SMTP)
+
+- net/mail
+	- mail包实现了邮件的解析
+
+- net/rpc/jsonrpc
+	- rpc包提供了通过网络或其他I/O连接对一个对象的导出方法的访问
+
+- net/rpc/jsonrpc
+	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包。
+
+- net/smtp
+	- smtp包实现了简单邮件传输协议(SMTP)
+
+- net/textproto
+	- textproto实现了对基于文本的请求/回复协议的一般性支持，包括HTTP、NNTP和SMTP
+
+- net/url
+	- url包解析URL并实现了查询的逸码
