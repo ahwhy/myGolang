@@ -1062,16 +1062,16 @@
 ```golang
 	// ParseError 代表一个格式错误的字符串，Type为期望的格式
 	type ParseError struct {
-	Type string
-	Text string
+		Type string
+		Text string
 	}
 	func (e *ParseError) Error() string
 
 	// Error 代表一个网络错误
 	type Error interface {
-	error
-	Timeout() bool   // 错误是否为超时？
-	Temporary() bool // 错误是否是临时的？
+		error
+		Timeout() bool   // 错误是否为超时？
+		Temporary() bool // 错误是否是临时的？
 	}
 	// UnknownNetworkError
 	type UnknownNetworkError string
@@ -1085,39 +1085,39 @@
 	func (e InvalidAddrError) Timeout() bool
 	// DNSConfigError 代表读取主机DNS配置时出现的错误
 	type DNSConfigError struct {
-	Err error
+		Err error
 	}
 	func (e *DNSConfigError) Error() string
 	func (e *DNSConfigError) Temporary() bool
 	func (e *DNSConfigError) Timeout() bool
 	// DNSError 代表DNS查询的错误
 	type DNSError struct {
-	Err       string // 错误的描述
-	Name      string // 查询的名称
-	Server    string // 使用的服务器
-	IsTimeout bool
+		Err       string // 错误的描述
+		Name      string // 查询的名称
+		Server    string // 使用的服务器
+		IsTimeout bool
 	}
 	func (e *DNSError) Error() string
 	func (e *DNSError) Temporary() bool
 	func (e *DNSError) Timeout() bool
 	// AddrError
 	type AddrError struct {
-	Err  string
-	Addr string
+		Err  string
+		Addr string
 	}
 	func (e *AddrError) Error() string
 	func (e *AddrError) Temporary() bool
 	func (e *AddrError) Timeout() bool
 	// OpError是经常被net包的函数返回的错误类型；它描述了该错误的操作、网络类型和网络地址
 	type OpError struct {
-	// Op是出现错误的操作，如"read"或"write"
-	Op  string
-	// Net是错误所在的网络类型，如"tcp"或"udp6"
-	Net string
-	// Addr是出现错误的网络地址
-	Addr Addr
-	// Err是操作中出现的错误
-	Err error
+		// Op是出现错误的操作，如"read"或"write"
+		Op  string
+		// Net是错误所在的网络类型，如"tcp"或"udp6"
+		Net string
+		// Addr是出现错误的网络地址
+		Addr Addr
+		// Err是操作中出现的错误
+		Err error
 	}
 	func (e *OpError) Error() string
 	func (e *OpError) Temporary() bool
