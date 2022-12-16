@@ -1138,6 +1138,20 @@
 	func (a HardwareAddr) String() string
 ```
 
+- net.flag
+```golang
+	const (
+		FlagUp           Flags = 1 << iota // 接口在活动状态
+		FlagBroadcast                      // 接口支持广播
+		FlagLoopback                       // 接口是环回的
+		FlagPointToPoint                   // 接口是点对点的
+		FlagMulticast                      // 接口支持组播
+	)
+
+	type Flags uint
+	func (f Flags) String() string
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
