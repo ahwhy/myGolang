@@ -7,7 +7,7 @@
 	                                     内核空间                               用户空间
 			1).网络请求 ->        2).copy(I/O模型、DMA)->        3).copy(MMAP) ->       4-1).处理请求
 	client                   网卡                         内核缓冲区            web服务进程    |
-			7).返回数据 <-               6).copy <-                6).copy <-          4-2).构建Respense
+			7).返回数据 <-               6).copy <-                5).copy <-          4-2).构建Respense
 ```
 
 - 网络请求过程
@@ -108,7 +108,7 @@
 		- 建立连接 三次握手
 			- 第一次握手: TCP首部SYN=1，初始化一个序号=J；SYN报文段不能携带数据
 			- 第二次握手: TCP首部SYN=1，ACK=1，确认号=J+1，初始化一个序号=K；此报文同样不携带数据
-			- 第三次握手: SYN=1，ACK=1，序号=J+1，确认号=K+1；此次一般会携带真正需要传输的数据
+			- 第三次握手: ACK=1，序号=J+1，确认号=K+1；此次一般会携带真正需要传输的数据
 			- 确认号: 即希望下次对方发过来的序号值
 			- SYN Flood 攻击始终不进行第三次握手，属于DDOS攻击的一种
 		- 断开连接 四次挥手
@@ -119,9 +119,9 @@
 			- 第四次挥手: ACK=1，序号=N+1
 			- 从TIME_WAIT进入CLOSED需要经过2个MSL(Maxinum Segment Lifetime)，RFC793建议MSL=2分钟
 	- TCP连接状态
-		- 客户端独有的: SYN_SENT 、FIN_WAIT1 、FIN_WAIT2 、CLOSING 、TIME_WAIT
-		- 服务器独有的: LISTEN、SYN_RCVD 、CLOSE_WAIT、LAST_ACK
-		- 共有的: CLOSED、ESTABLISHED
+		- 客户端独有的: SYN_SENT、CLOSING
+		- 服务器独有的: LISTEN、SYN_RCVD、CLOSE_WAIT
+		- 共有的: CLOSED、ESTABLISHED、FIN_WAIT1、FIN_WAIT2、LAST_ACK、TIME_WAIT
 		- 描述
 			- CLOSED: 起始点，tcp连接 超时或关闭时进入此状态
 			- LISTEN: 服务端等待连接时的状态，调用Socket、bind、listen函数就能进入此状态，称为被动打开
@@ -1028,7 +1028,7 @@
 	- 虽然本包提供了对网络原语的访问，大部分使用者只需要Dial、Listen和Accept函数提供的基本接口；以及相关的Conn和Listener接口
 	- crypto/tls包提供了相同的接口和类似的Dial和Listen函数
 
-- net包中的其他函数
+- net.Const
 ```golang
 	// Const
 	const (
@@ -1185,7 +1185,7 @@
 	- rpc包提供了通过网络或其他I/O连接对一个对象的导出方法的访问
 
 - net/rpc/jsonrpc
-	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包。
+	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包
 
 - net/smtp
 	- smtp包实现了简单邮件传输协议(SMTP)
