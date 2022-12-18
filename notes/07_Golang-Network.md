@@ -1152,6 +1152,31 @@
 	func (f Flags) String() string
 ```
 
+- net.Interface
+```golang
+	// Interface类型代表一个网络接口(系统与网络的一个接点)，包含接口索引到名字的映射，也包含接口的设备信息
+	type Interface struct {
+		Index        int          // 索引，>=1的整数
+		MTU          int          // 最大传输单元
+		Name         string       // 接口名，例如"en0"、"lo0"、"eth0.100"
+		HardwareAddr HardwareAddr // 硬件地址，IEEE MAC-48、EUI-48或EUI-64格式
+		Flags        Flags        // 接口的属性，例如FlagUp、FlagLoopback、FlagMulticast
+	}
+	// InterfaceByIndex 返回指定索引的网络接口
+	func InterfaceByIndex(index int) (*Interface, error)
+	// InterfaceByName 返回指定名字的网络接口
+	func InterfaceByName(name string) (*Interface, error)
+	// Addrs 返回网络接口ifi的一或多个接口地址
+	func (ifi *Interface) Addrs() ([]Addr, error)
+	// MulticastAddrs 返回网络接口ifi加入的多播组地址
+	func (ifi *Interface) MulticastAddrs() ([]Addr, error)
+
+	// Interfaces 返回该系统的网络接口列表
+	func Interfaces() ([]Interface, error)
+	// InterfaceAddrs返回该系统的网络接口的地址列表
+	func InterfaceAddrs() ([]Addr, error)
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
