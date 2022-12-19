@@ -1154,6 +1154,12 @@
 
 - net.Interface
 ```golang
+	// Addr 代表一个网络终端地址
+	type Addr interface {
+		Network() string // 网络名
+		String() string  // 字符串格式的地址
+	}
+
 	// Interface类型代表一个网络接口(系统与网络的一个接点)，包含接口索引到名字的映射，也包含接口的设备信息
 	type Interface struct {
 		Index        int          // 索引，>=1的整数
@@ -1186,40 +1192,70 @@
 	// IPv4 返回包含一个IPv4地址a.b.c.d的IP地址(16字节格式)
 	func IPv4(a, b, c, d byte) IP
 
-	// ParseIP将s解析为IP地址，并返回该地址
+	// ParseIP 将s解析为IP地址，并返回该地址
 	// 如果s不是合法的IP地址文本表示，ParseIP会返回nil
 	// 字符串可以是小数点分隔的IPv4格式(如"74.125.19.99")或IPv6格式(如"2001:4860:0:2001::68")格式
 	func ParseIP(s string) IP
+	// 如果ip是全局单播地址，则返回真
 	func (ip IP) IsGlobalUnicast() bool
-	// 如果ip是全局单播地址，则返回真。
+	// 如果ip是链路本地单播地址，则返回真
 	func (ip IP) IsLinkLocalUnicast() bool
-	// 如果ip是链路本地单播地址，则返回真。
+	// 如果ip是接口本地组播地址，则返回真
 	func (ip IP) IsInterfaceLocalMulticast() bool
-	// 如果ip是接口本地组播地址，则返回真。
+	// 如果ip是链路本地组播地址，则返回真
 	func (ip IP) IsLinkLocalMulticast() bool
-	// 如果ip是链路本地组播地址，则返回真。
+	// 如果ip是组播地址，则返回真
 	func (ip IP) IsMulticast() bool
-	// 如果ip是组播地址，则返回真。
+	// 如果ip是环回地址，则返回真
 	func (ip IP) IsLoopback() bool
-	// 如果ip是环回地址，则返回真。
+	// 如果ip是未指定地址，则返回真
 	func (ip IP) IsUnspecified() bool
-	// 如果ip是未指定地址，则返回真。
+	// 函数返回IP地址ip的默认子网掩码。只有IPv4有默认子网掩码；如果ip不是合法的IPv4地址，会返回nil
 	func (ip IP) DefaultMask() IPMask
-	// 函数返回IP地址ip的默认子网掩码。只有IPv4有默认子网掩码；如果ip不是合法的IPv4地址，会返回nil。
+	// 如果ip和x代表同一个IP地址，Equal会返回真；代表同一地址的IPv4地址和IPv6地址也被认为是相等的
 	func (ip IP) Equal(x IP) bool
-	// 如果ip和x代表同一个IP地址，Equal会返回真。代表同一地址的IPv4地址和IPv6地址也被认为是相等的。
+	// To16将 一个IP地址转换为16字节表示。如果ip不是一个IP地址（长度错误），To16会返回nil
 	func (ip IP) To16() IP
-	// To16将一个IP地址转换为16字节表示。如果ip不是一个IP地址（长度错误），To16会返回nil。
+	// To4 将一个IPv4地址转换为4字节表示。如果ip不是IPv4地址，To4会返回nil
 	func (ip IP) To4() IP
-	To4将一个IPv4地址转换为4字节表示。如果ip不是IPv4地址，To4会返回nil。
+	// Mask 方法认为mask为ip的子网掩码，返回ip的网络地址部分的ip（主机地址部分都置0）
 	func (ip IP) Mask(mask IPMask) IP
-	// Mask方法认为mask为ip的子网掩码，返回ip的网络地址部分的ip。（主机地址部分都置0）
+	// String 返回IP地址ip的字符串表示
+	// 如果ip是IPv4地址，返回值的格式为点分隔的，如"74.125.19.99"；否则表示为IPv6格式，如"2001:4860:0:2001::68"
 	func (ip IP) String() string
-	// String返回IP地址ip的字符串表示。如果ip是IPv4地址，返回值的格式为点分隔的，如"74.125.19.99"；否则表示为IPv6格式，如"2001:4860:0:2001::68"。
+	// MarshalText 实现了encoding.TextMarshaler接口，返回值和String方法一样
 	func (ip IP) MarshalText() ([]byte, error)
-	// MarshalText实现了encoding.TextMarshaler接口，返回值和String方法一样。
+	// UnmarshalText 实现了encoding.TextUnmarshaler接口；IP地址字符串应该是ParseIP函数可以接受的格式
 	func (ip *IP) UnmarshalText(text []byte) error
-	// UnmarshalText实现了encoding.TextUnmarshaler接口。IP地址字符串应该是ParseIP函数可以接受的格式
+
+	// IPMask 代表一个IP地址的掩码
+	type IPMask []byte
+	// IPv4Mask 返回一个4字节格式的IPv4掩码a.b.c.d
+	func IPv4Mask(a, b, c, d byte) IPMask
+	// CIDRMask 返回一个IPMask类型值，该返回值总共有bits个字位，其中前ones个字位都是1，其余字位都是0
+	func CIDRMask(ones, bits int) IPMask
+	// Size 返回m的前导的1字位数和总字位数；如果m不是规范的子网掩码（字位：/^1+0+$/），将返会(0, 0)
+	func (m IPMask) Size() (ones, bits int)
+	// String 返回m的十六进制格式，没有标点
+	func (m IPMask) String() string
+
+	// IPNet 表示一个IP网络
+	type IPNet struct {
+		IP   IP     // 网络地址
+		Mask IPMask // 子网掩码
+	}
+	// ParseCIDR将s作为一个CIDR（无类型域间路由）的IP地址和掩码字符串，如"192.168.100.1/24"或"2001:DB8::/48"，解析并返回IP地址和IP网络
+	func ParseCIDR(s string) (IP, *IPNet, error)
+	// Contains 报告该网络是否包含地址ip
+	func (n *IPNet) Contains(ip IP) bool
+	// Network 返回网络类型名："ip+net"，注意该类型名是不合法的
+	func (n *IPNet) Network() string
+	// String 返回n的CIDR表示，如"192.168.100.1/24"或"2001:DB8::/48"
+	func (n *IPNet) String() string
+```
+
+- net.Conn
+```golang
 ```
 
 - net/http
