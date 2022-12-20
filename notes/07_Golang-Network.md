@@ -1256,6 +1256,101 @@
 
 - net.Conn
 ```golang
+	// Conn接口代表通用的面向流的网络连接；多个线程可能会同时调用同一个Conn的方法
+	type Conn interface {
+		// Read从连接中读取数据
+		// Read方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		Read(b []byte) (n int, err error)
+		// Write从连接中写入数据
+		// Write方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		Write(b []byte) (n int, err error)
+		// Close方法关闭该连接
+		// 并会导致任何阻塞中的Read或Write方法不再阻塞并返回错误
+		Close() error
+		// 返回本地网络地址
+		LocalAddr() Addr
+		// 返回远端网络地址
+		RemoteAddr() Addr
+		// 设定该连接的读写deadline，等价于同时调用SetReadDeadline和SetWriteDeadline
+		// deadline是一个绝对时间，超过该时间后I/O操作就会直接因超时失败返回而不会阻塞
+		// deadline对之后的所有I/O操作都起效，而不仅仅是下一次的读或写操作
+		// 参数t为零值表示不设置期限
+		SetDeadline(t time.Time) error
+		// 设定该连接的读操作deadline，参数t为零值表示不设置期限
+		SetReadDeadline(t time.Time) error
+		// 设定该连接的写操作deadline，参数t为零值表示不设置期限
+		// 即使写入超时，返回值n也可能>0，说明成功写入了部分数据
+		SetWriteDeadline(t time.Time) error
+	}
+
+	// 在网络network上连接地址address，并返回一个Conn接口
+	// 可用的网络类型有："tcp"、"tcp4"、"tcp6"、"udp"、"udp4"、"udp6"、"ip"、"ip4"、"ip6"、"unix"、"unixgram"、"unixpacket" 
+	// 对TCP和UDP网络，地址格式是host:port或[host]:port，参见函数JoinHostPort和SplitHostPort
+	func Dial(network, address string) (Conn, error)
+	// DialTimeout 类似Dial但采用了超时；timeout参数如果必要可包含名称解析
+	func DialTimeout(network, address string, timeout time.Duration) (Conn, error)
+
+	// Pipe创建一个内存中的同步、全双工网络连接
+	// 连接的两端都实现了Conn接口；一端的读取对应另一端的写入，直接将数据在两端之间作拷贝；没有内部缓冲
+	func Pipe() (Conn, Conn)
+
+	// PacketConn接口代表通用的面向数据包的网络连接；多个线程可能会同时调用同一个Conn的方法
+	type PacketConn interface {
+		// ReadFrom方法从连接读取一个数据包，并将有效信息写入b
+		// ReadFrom方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		// 返回写入的字节数和该数据包的来源地址
+		ReadFrom(b []byte) (n int, addr Addr, err error)
+		// WriteTo方法将有效数据b写入一个数据包发送给addr
+		// WriteTo方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		// 在面向数据包的连接中，写入超时非常罕见
+		WriteTo(b []byte, addr Addr) (n int, err error)
+		// Close方法关闭该连接
+		// 会导致任何阻塞中的ReadFrom或WriteTo方法不再阻塞并返回错误
+		Close() error
+		// 返回本地网络地址
+		LocalAddr() Addr
+		// 设定该连接的读写deadline
+		SetDeadline(t time.Time) error
+		// 设定该连接的读操作deadline，参数t为零值表示不设置期限
+		// 如果时间到达deadline，读操作就会直接因超时失败返回而不会阻塞
+		SetReadDeadline(t time.Time) error
+		// 设定该连接的写操作deadline，参数t为零值表示不设置期限
+		// 如果时间到达deadline，写操作就会直接因超时失败返回而不会阻塞
+		// 即使写入超时，返回值n也可能>0，说明成功写入了部分数据
+		SetWriteDeadline(t time.Time) error
+	}
+
+	// ListenPacket函数监听本地网络地址laddr
+	// 网络类型net必须是面向数据包的网络类型："ip"、"ip4"、"ip6"、"udp"、"udp4"、"udp6"、或"unixgram"；laddr的格式参见Dial函数
+	func ListenPacket(net, laddr string) (PacketConn, error)
+
+	// Dialer类型包含与某个地址建立连接时的参数
+	// 每一个字段的零值都等价于没有该字段；因此调用Dialer零值的Dial方法等价于调用Dial函数
+	type Dialer struct {
+		// Timeout是dial操作等待连接建立的最大时长，默认值代表没有超时。
+		// 如果Deadline字段也被设置了，dial操作也可能更早失败。
+		// 不管有没有设置超时，操作系统都可能强制执行它的超时设置。
+		// 例如，TCP（系统）超时一般在3分钟左右。
+		Timeout time.Duration
+		// Deadline是一个具体的时间点期限，超过该期限后，dial操作就会失败。
+		// 如果Timeout字段也被设置了，dial操作也可能更早失败。
+		// 零值表示没有期限，即遵守操作系统的超时设置。
+		Deadline time.Time
+		// LocalAddr是dial一个地址时使用的本地地址。
+		// 该地址必须是与dial的网络相容的类型。
+		// 如果为nil，将会自动选择一个本地地址。
+		LocalAddr Addr
+		// DualStack允许单次dial操作在网络类型为"tcp"，
+		// 且目的地是一个主机名的DNS记录具有多个地址时，
+		// 尝试建立多个IPv4和IPv6连接，并返回第一个建立的连接。
+		DualStack bool
+		// KeepAlive指定一个活动的网络连接的生命周期；如果为0，会禁止keep-alive。
+		// 不支持keep-alive的网络连接会忽略本字段。
+		KeepAlive time.Duration
+	}
+
+	// Dial在指定的网络上连接指定的地址，参见Dial函数获取网络和地址参数的描述
+	func (d *Dialer) Dial(network, address string) (Conn, error)
 ```
 
 - net/http
