@@ -1124,20 +1124,6 @@
 	func (e *OpError) Timeout() bool
 ```
 
-- net.Addr
-```golang
-	// SplitHostPort 将格式为"host:port"、"[host]:port"或"[ipv6-host%zone]:port"的网络地址分割为host或ipv6-host%zone和port两个部分
-	func SplitHostPort(hostport string) (host, port string, err error)
-	// JoinHostPort 将host和port合并为一个网络地址。一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
-	func JoinHostPort(host, port string) string
-
-	// HardwareAddr 类型代表一个硬件地址(MAC地址)
-	type HardwareAddr []byte
-	// ParseMAC 解析一个IEEE 802 MAC-48、EUI-48或EUI-64硬件地址
-	func ParseMAC(s string) (hw HardwareAddr, err error)
-	func (a HardwareAddr) String() string
-```
-
 - net.flag
 ```golang
 	const (
@@ -1252,6 +1238,53 @@
 	func (n *IPNet) Network() string
 	// String 返回n的CIDR表示，如"192.168.100.1/24"或"2001:DB8::/48"
 	func (n *IPNet) String() string
+```
+
+- net.Addr
+```golang
+	// SplitHostPort 将格式为"host:port"、"[host]:port"或"[ipv6-host%zone]:port"的网络地址分割为host或ipv6-host%zone和port两个部分
+	func SplitHostPort(hostport string) (host, port string, err error)
+	// JoinHostPort 将host和port合并为一个网络地址。一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
+	func JoinHostPort(host, port string) string
+
+	// HardwareAddr 类型代表一个硬件地址(MAC地址)
+	type HardwareAddr []byte
+	// ParseMAC 解析一个IEEE 802 MAC-48、EUI-48或EUI-64硬件地址
+	func ParseMAC(s string) (hw HardwareAddr, err error)
+	func (a HardwareAddr) String() string
+
+	// Addr 代表一个网络终端地址
+	type Addr interface {
+		Network() string // 网络名
+		String() string  // 字符串格式的地址
+	}
+
+	// IPAddr 代表一个IP终端的地址
+	type IPAddr struct {
+		IP   IP
+		Zone string // IPv6范围寻址域
+	}
+	// ResolveIPAddr 将addr作为一个格式为"host"或"ipv6-host%zone"的IP地址来解析
+	// 函数会在参数net指定的网络类型上解析，net必须是"ip"、"ip4"或"ip6"
+	func ResolveIPAddr(net, addr string) (*IPAddr, error)
+	// Network 返回地址的网络类型："ip"
+	func (a *IPAddr) Network() string
+	func (a *IPAddr) String() string
+
+	// TCPAddr 见上Tcp
+
+	// UDPAddr 见上Udp
+
+	// UnixAddr 代表一个Unix域socket终端地址
+	type UnixAddr struct {
+		Name string
+		Net  string
+	} 
+	// ResolveUnixAddr 将addr作为Unix域socket地址解析，参数net指定网络类型："unix"、"unixgram"或"unixpacket"
+	func ResolveUnixAddr(net, addr string) (*UnixAddr, error)
+	// Network 返回地址的网络类型，"unix"，"unixgram"或"unixpacket"
+	func (a *UnixAddr) Network() string
+	func (a *UnixAddr) String() string
 ```
 
 - net.Conn
