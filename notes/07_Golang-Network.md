@@ -1124,6 +1124,20 @@
 	func (e *OpError) Timeout() bool
 ```
 
+- net.Addr
+```golang
+	// SplitHostPort 将格式为"host:port"、"[host]:port"或"[ipv6-host%zone]:port"的网络地址分割为host或ipv6-host%zone和port两个部分
+	func SplitHostPort(hostport string) (host, port string, err error)
+	// JoinHostPort 将host和port合并为一个网络地址。一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
+	func JoinHostPort(host, port string) string
+
+	// HardwareAddr 类型代表一个硬件地址(MAC地址)
+	type HardwareAddr []byte
+	// ParseMAC 解析一个IEEE 802 MAC-48、EUI-48或EUI-64硬件地址
+	func ParseMAC(s string) (hw HardwareAddr, err error)
+	func (a HardwareAddr) String() string
+```
+
 - net.flag
 ```golang
 	const (
@@ -1285,6 +1299,22 @@
 	// Network 返回地址的网络类型，"unix"，"unixgram"或"unixpacket"
 	func (a *UnixAddr) Network() string
 	func (a *UnixAddr) String() string
+```
+
+- net.Listener 
+```golang
+	// Listener 是一个用于面向流的网络协议的公用的网络监听器接口；多个线程可能会同时调用一个Listener的方法
+		type Listener interface {
+		// Addr返回该接口的网络地址
+		Addr() Addr
+		// Accept等待并返回下一个连接到该接口的连接
+		Accept() (c Conn, err error)
+		// Close关闭该接口，并使任何阻塞的Accept操作都会不再阻塞并返回错误
+		Close() error
+	}
+	// 返回在一个本地网络地址laddr上监听的Listener
+	// 网络类型参数net必须是面向流的网络："tcp"、"tcp4"、"tcp6"、"unix"或"unixpacket"；参见Dial函数获取laddr的语法
+	func Listen(net, laddr string) (Listener, error)
 ```
 
 - net.Conn
