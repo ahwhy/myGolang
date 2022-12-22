@@ -1414,6 +1414,56 @@
 
 	// Dial在指定的网络上连接指定的地址，参见Dial函数获取网络和地址参数的描述
 	func (d *Dialer) Dial(network, address string) (Conn, error)
+
+	// IPConn 类型代表IP网络连接，实现了Conn和PacketConn接口
+	type IPConn struct { ... }
+	// DialIP 在网络协议netProto上连接本地地址laddr和远端地址raddr，netProto必须是"ip"、"ip4"或"ip6"后跟冒号和协议名或协议号
+	func DialIP(netProto string, laddr, raddr *IPAddr) (*IPConn, error)
+	// ListenIP 创建一个接收目的地是本地地址laddr的IP数据包的网络连接，返回的*IPConn的ReadFrom和WriteTo方法可以用来发送和接收IP数据包（每个包都可获取来源址或者设置目标地址）
+	func ListenIP(netProto string, laddr *IPAddr) (*IPConn, error)
+	// LocalAddr 返回本地网络地址
+	func (c *IPConn) LocalAddr() Addr
+	// RemoteAddr 返回远端网络地址
+	func (c *IPConn) RemoteAddr() Addr
+	// SetReadBuffer 设置该连接的系统接收缓冲
+	func (c *IPConn) SetReadBuffer(bytes int) error
+	// SetWriteBuffer 设置该连接的系统发送缓冲
+	func (c *IPConn) SetWriteBuffer(bytes int) error
+	// SetDeadline 设置读写操作绝对期限，实现了Conn接口的SetDeadline方法
+	func (c *IPConn) SetDeadline(t time.Time) error
+	// SetReadDeadline 设置读操作绝对期限，实现了Conn接口的SetReadDeadline方法
+	func (c *IPConn) SetReadDeadline(t time.Time) error
+	// SetWriteDeadline 设置写操作绝对期限，实现了Conn接口的SetWriteDeadline方法
+	func (c *IPConn) SetWriteDeadline(t time.Time) error
+	// Read实现Conn接口Read方法
+	func (c *IPConn) Read(b []byte) (int, error)
+	// ReadFrom实现PacketConn接口ReadFrom方法
+	// 注意本方法有bug，应避免使用
+	func (c *IPConn) ReadFrom(b []byte) (int, Addr, error)
+	// ReadFromIP 从c读取一个IP数据包，将有效负载拷贝到b，返回拷贝字节数和数据包来源地址
+	// ReadFromIP 方法会在超过一个固定的时间点之后超时，并返回一个错误；注意本方法有bug，应避免使用
+	func (c *IPConn) ReadFromIP(b []byte) (int, *IPAddr, error)
+	// ReadMsgIP 从c读取一个数据包，将有效负载拷贝进b，相关的带外数据拷贝进oob，返回拷贝进b的字节数，拷贝进oob的字节数，数据包的flag，数据包来源地址和可能的错误
+	func (c *IPConn) ReadMsgIP(b, oob []byte) (n, oobn, flags int, addr *IPAddr, err error)
+	// Write 实现Conn接口Write方法
+	func (c *IPConn) Write(b []byte) (int, error)
+	// WriteTo 实现PacketConn接口WriteTo方法
+	func (c *IPConn) WriteTo(b []byte, addr Addr) (int, error)
+	// WriteToIP 通过c向地址addr发送一个数据包，b为包的有效负载，返回写入的字节
+	// WriteToIP 方法会在超过一个固定的时间点之后超时，并返回一个错误；在面向数据包的连接上，写入超时是十分罕见的
+	func (c *IPConn) WriteToIP(b []byte, addr *IPAddr) (int, error)
+	// WriteMsgIP 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数（包数据、带外数据）和可能的错误
+	func (c *IPConn) WriteMsgIP(b, oob []byte, addr *IPAddr) (n, oobn int, err error)
+	// Close 关闭连接
+	func (c *IPConn) Close() error
+	// File 方法设置下层的os.File为阻塞模式并返回其副本
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会（也可能不会）得到期望的效果
+	func (c *IPConn) File() (f *os.File, err error)
+
+	// TCPConn 见上Tcp
+
+	// UDPConn 见上Udp
+
 ```
 
 - net/http
