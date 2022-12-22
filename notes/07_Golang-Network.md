@@ -1464,6 +1464,55 @@
 
 	// UDPConn 见上Udp
 
+	// UnixConn 代表一个Unix域socket终端地址UnixConn代表Unix域socket连接，实现了Conn和PacketConn接口
+	type UnixConn struct { ... }
+	// DialUnix 在网络协议net上连接本地地址laddr和远端地址raddr
+	// net必须是"unix"、"unixgram"、"unixpacket"，如果laddr不是nil将使用它作为本地地址，否则自动选择一个本地地址
+	func DialUnix(net string, laddr, raddr *UnixAddr) (*UnixConn, error)
+	// ListenUnixgram接收目的地是本地地址laddr的Unix datagram网络连接
+	// net必须是"unixgram"，返回的*UnixConn的ReadFrom和WriteTo方法可以用来发送和接收数据包（每个包都可获取来源址或者设置目标地址）
+	func ListenUnixgram(net string, laddr *UnixAddr) (*UnixConn, error)
+	// LocalAddr 返回本地网络地址
+	func (c *UnixConn) LocalAddr() Addr
+	// RemoteAddr 返回远端网络地址
+	func (c *UnixConn) RemoteAddr() Addr
+	// SetReadBuffer 设置该连接的系统接收缓冲
+	func (c *UnixConn) SetReadBuffer(bytes int) error
+	// SetWriteBuffer 设置该连接的系统发送缓冲
+	func (c *UnixConn) SetWriteBuffer(bytes int) error
+	// SetDeadline 设置读写操作绝对期限，实现了Conn接口的SetDeadline方法
+	func (c *UnixConn) SetDeadline(t time.Time) error
+	// SetReadDeadline 设置读操作绝对期限，实现了Conn接口的SetReadDeadline方法
+	func (c *UnixConn) SetReadDeadline(t time.Time) error
+	// SetWriteDeadline 设置写操作绝对期限，实现了Conn接口的SetWriteDeadline方法
+	func (c *UnixConn) SetWriteDeadline(t time.Time) error
+	// Read实现Conn接口Read方法
+	func (c *UnixConn) Read(b []byte) (int, error)
+	// ReadFrom实现PacketConn接口ReadFrom方法
+	func (c *UnixConn) ReadFrom(b []byte) (int, Addr, error)
+	// ReadFromUnix 从c读取一个UDP数据包，将有效负载拷贝到b，返回拷贝字节数和数据包来源地址
+	// ReadFromUnix 方法会在超过一个固定的时间点之后超时，并返回一个错误；
+	func (c *UnixConn) ReadFromUnix(b []byte) (n int, addr *UnixAddr, err error)
+	// ReadMsgUnix 从c读取一个数据包，将有效负载拷贝进b，相关的带外数据拷贝进oob，返回拷贝进b的字节数，拷贝进oob的字节数，数据包的flag，数据包来源地址和可能的错误
+	func (c *UnixConn) ReadMsgUnix(b, oob []byte) (n, oobn, flags int, addr *UnixAddr, err error)
+	// Write 实现Conn接口Write方法
+	func (c *UnixConn) Write(b []byte) (int, error)
+	// WriteTo 实现PacketConn接口WriteTo方法
+	func (c *UnixConn) WriteTo(b []byte, addr Addr) (int, error)
+	// WriteToUnix 通过c向地址addr发送一个数据包，b为包的有效负载，返回写入的字节
+	// WriteToUnix 方法会在超过一个固定的时间点之后超时，并返回一个错误；在面向数据包的连接上，写入超时是十分罕见的
+	func (c *UnixConn) WriteToUnix(b []byte, addr *UnixAddr) (n int, err error)
+	// WriteMsgUnix 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数（包数据、带外数据）和可能的错误
+	func (c *UnixConn) WriteMsgUnix(b, oob []byte, addr *UnixAddr) (n, oobn int, err error)
+	// Close 关闭连接
+	func (c *UnixConn) Close() error
+	// CloseRead关闭TCP连接的读取侧（以后不能读取），应尽量使用Close方法
+	func (c *UnixConn) CloseRead() errorv
+	// CloseWrite关闭TCP连接的写入侧（以后不能写入），应尽量使用Close方法
+	func (c *UnixConn) CloseWrite() error
+	// File 方法设置下层的os.File为阻塞模式并返回其副本
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会（也可能不会）得到期望的效果
+	func (c *UnixConn) File() (f *os.File, err error)
 ```
 
 - net/http
