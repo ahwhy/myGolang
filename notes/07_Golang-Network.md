@@ -1315,6 +1315,27 @@
 	// 返回在一个本地网络地址laddr上监听的Listener
 	// 网络类型参数net必须是面向流的网络："tcp"、"tcp4"、"tcp6"、"unix"或"unixpacket"；参见Dial函数获取laddr的语法
 	func Listen(net, laddr string) (Listener, error)
+
+	// TCPListener 见上Tcp
+
+	// UnixListener代表一个Unix域scoket的监听者；使用者应尽量使用Listener接口而不是假设(网络连接为)Unix域scoket
+	type UnixListener struct { ... }
+	// ListenUnix 在Unix域scoket地址laddr上声明并返回一个*UnixListener，net参数必须是"unix"或"unixpacket"
+	func ListenUnix(net string, laddr *UnixAddr) (*UnixListener, error)
+	// Addr 返回l的监听的Unix域socket地址
+	func (l *UnixListener) Addr() Addr
+	// 设置监听器执行的期限，t为Time零值则会关闭期限限制
+	func (l *UnixListener) SetDeadline(t time.Time) (err error)
+	// Accept 用于实现Listener接口的Accept方法；他会等待下一个呼叫，并返回一个该呼叫的Conn接口
+	func (l *UnixListener) Accept() (c Conn, err error)
+	// AcceptUnix 接收下一个呼叫，并返回一个新的*UnixConn
+	func (l *UnixListener) AcceptUnix() (*UnixConn, error)
+	// Close 停止监听Unix域socket地址，已经接收的连接不受影响
+	func (l *UnixListener) Close() error
+	// File 方法返回下层的os.File的副本，并将该副本设置为阻塞模式
+	// 使用者有责任在用完后关闭f。关闭c不影响f，关闭f也不影响c
+	// 返回的os.File类型文件描述符和原本的网络连接是不同的
+	func (l *UnixListener) File() (f *os.File, err error)
 ```
 
 - net.Conn
