@@ -1124,20 +1124,6 @@
 	func (e *OpError) Timeout() bool
 ```
 
-- net.Addr
-```golang
-	// SplitHostPort 将格式为"host:port"、"[host]:port"或"[ipv6-host%zone]:port"的网络地址分割为host或ipv6-host%zone和port两个部分
-	func SplitHostPort(hostport string) (host, port string, err error)
-	// JoinHostPort 将host和port合并为一个网络地址。一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
-	func JoinHostPort(host, port string) string
-
-	// HardwareAddr 类型代表一个硬件地址(MAC地址)
-	type HardwareAddr []byte
-	// ParseMAC 解析一个IEEE 802 MAC-48、EUI-48或EUI-64硬件地址
-	func ParseMAC(s string) (hw HardwareAddr, err error)
-	func (a HardwareAddr) String() string
-```
-
 - net.flag
 ```golang
 	const (
@@ -1154,12 +1140,6 @@
 
 - net.Interface
 ```golang
-	// Addr 代表一个网络终端地址
-	type Addr interface {
-		Network() string // 网络名
-		String() string  // 字符串格式的地址
-	}
-
 	// Interface类型代表一个网络接口(系统与网络的一个接点)，包含接口索引到名字的映射，也包含接口的设备信息
 	type Interface struct {
 		Index        int          // 索引，>=1的整数
@@ -1293,7 +1273,7 @@
 	type UnixAddr struct {
 		Name string
 		Net  string
-	} 
+	}	
 	// ResolveUnixAddr 将addr作为Unix域socket地址解析，参数net指定网络类型："unix"、"unixgram"或"unixpacket"
 	func ResolveUnixAddr(net, addr string) (*UnixAddr, error)
 	// Network 返回地址的网络类型，"unix"，"unixgram"或"unixpacket"
@@ -1304,7 +1284,7 @@
 - net.Listener 
 ```golang
 	// Listener 是一个用于面向流的网络协议的公用的网络监听器接口；多个线程可能会同时调用一个Listener的方法
-		type Listener interface {
+	type Listener interface {
 		// Addr返回该接口的网络地址
 		Addr() Addr
 		// Accept等待并返回下一个连接到该接口的连接
@@ -1312,6 +1292,7 @@
 		// Close关闭该接口，并使任何阻塞的Accept操作都会不再阻塞并返回错误
 		Close() error
 	}
+
 	// 返回在一个本地网络地址laddr上监听的Listener
 	// 网络类型参数net必须是面向流的网络："tcp"、"tcp4"、"tcp6"、"unix"或"unixpacket"；参见Dial函数获取laddr的语法
 	func Listen(net, laddr string) (Listener, error)
@@ -1366,7 +1347,6 @@
 		// 即使写入超时，返回值n也可能>0，说明成功写入了部分数据
 		SetWriteDeadline(t time.Time) error
 	}
-
 	// 在网络network上连接地址address，并返回一个Conn接口
 	// 可用的网络类型有："tcp"、"tcp4"、"tcp6"、"udp"、"udp4"、"udp6"、"ip"、"ip4"、"ip6"、"unix"、"unixgram"、"unixpacket" 
 	// 对TCP和UDP网络，地址格式是host:port或[host]:port，参见函数JoinHostPort和SplitHostPort
@@ -1374,21 +1354,48 @@
 	// DialTimeout 类似Dial但采用了超时；timeout参数如果必要可包含名称解析
 	func DialTimeout(network, address string, timeout time.Duration) (Conn, error)
 
-	// Pipe创建一个内存中的同步、全双工网络连接
+	// Pipe 创建一个内存中的同步、全双工网络连接
 	// 连接的两端都实现了Conn接口；一端的读取对应另一端的写入，直接将数据在两端之间作拷贝；没有内部缓冲
 	func Pipe() (Conn, Conn)
 
-	// PacketConn接口代表通用的面向数据包的网络连接；多个线程可能会同时调用同一个Conn的方法
+	// Dialer 类型包含与某个地址建立连接时的参数
+	// 每一个字段的零值都等价于没有该字段；因此调用Dialer零值的Dial方法等价于调用Dial函数
+	type Dialer struct {
+		// Timeout 是dial操作等待连接建立的最大时长，默认值代表没有超时
+		// 如果Deadline字段也被设置了，dial操作也可能更早失败
+		// 不管有没有设置超时，操作系统都可能强制执行它的超时设置
+		// 例如，TCP（系统）超时一般在3分钟左右
+		Timeout time.Duration
+		// Deadline 是一个具体的时间点期限，超过该期限后，dial操作就会失败
+		// 如果Timeout字段也被设置了，dial操作也可能更早失败
+		// 零值表示没有期限，即遵守操作系统的超时设置
+		Deadline time.Time
+		// LocalAddr 是dial一个地址时使用的本地地址
+		// 该地址必须是与dial的网络相容的类型
+		// 如果为nil，将会自动选择一个本地地址
+		LocalAddr Addr
+		// DualStack 允许单次dial操作在网络类型为"tcp"，
+		// 且目的地是一个主机名的DNS记录具有多个地址时，
+		// 尝试建立多个IPv4和IPv6连接，并返回第一个建立的连接
+		DualStack bool
+		// KeepAlive 指定一个活动的网络连接的生命周期；如果为0，会禁止keep-alive
+		// 不支持keep-alive的网络连接会忽略本字段
+		KeepAlive time.Duration
+	}
+	// Dial在指定的网络上连接指定的地址，参见Dial函数获取网络和地址参数的描述
+	func (d *Dialer) Dial(network, address string) (Conn, error)
+
+	// PacketConn 接口代表通用的面向数据包的网络连接；多个线程可能会同时调用同一个Conn的方法
 	type PacketConn interface {
-		// ReadFrom方法从连接读取一个数据包，并将有效信息写入b
-		// ReadFrom方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		// ReadFrom 方法从连接读取一个数据包，并将有效信息写入b
+		// ReadFrom 方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
 		// 返回写入的字节数和该数据包的来源地址
 		ReadFrom(b []byte) (n int, addr Addr, err error)
-		// WriteTo方法将有效数据b写入一个数据包发送给addr
-		// WriteTo方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
+		// WriteTo 方法将有效数据b写入一个数据包发送给addr
+		// WriteTo 方法可能会在超过某个固定时间限制后超时返回错误，该错误的Timeout()方法返回真
 		// 在面向数据包的连接中，写入超时非常罕见
 		WriteTo(b []byte, addr Addr) (n int, err error)
-		// Close方法关闭该连接
+		// Close 方法关闭该连接
 		// 会导致任何阻塞中的ReadFrom或WriteTo方法不再阻塞并返回错误
 		Close() error
 		// 返回本地网络地址
@@ -1403,38 +1410,9 @@
 		// 即使写入超时，返回值n也可能>0，说明成功写入了部分数据
 		SetWriteDeadline(t time.Time) error
 	}
-
 	// ListenPacket函数监听本地网络地址laddr
 	// 网络类型net必须是面向数据包的网络类型："ip"、"ip4"、"ip6"、"udp"、"udp4"、"udp6"、或"unixgram"；laddr的格式参见Dial函数
 	func ListenPacket(net, laddr string) (PacketConn, error)
-
-	// Dialer类型包含与某个地址建立连接时的参数
-	// 每一个字段的零值都等价于没有该字段；因此调用Dialer零值的Dial方法等价于调用Dial函数
-	type Dialer struct {
-		// Timeout是dial操作等待连接建立的最大时长，默认值代表没有超时。
-		// 如果Deadline字段也被设置了，dial操作也可能更早失败。
-		// 不管有没有设置超时，操作系统都可能强制执行它的超时设置。
-		// 例如，TCP（系统）超时一般在3分钟左右。
-		Timeout time.Duration
-		// Deadline是一个具体的时间点期限，超过该期限后，dial操作就会失败。
-		// 如果Timeout字段也被设置了，dial操作也可能更早失败。
-		// 零值表示没有期限，即遵守操作系统的超时设置。
-		Deadline time.Time
-		// LocalAddr是dial一个地址时使用的本地地址。
-		// 该地址必须是与dial的网络相容的类型。
-		// 如果为nil，将会自动选择一个本地地址。
-		LocalAddr Addr
-		// DualStack允许单次dial操作在网络类型为"tcp"，
-		// 且目的地是一个主机名的DNS记录具有多个地址时，
-		// 尝试建立多个IPv4和IPv6连接，并返回第一个建立的连接。
-		DualStack bool
-		// KeepAlive指定一个活动的网络连接的生命周期；如果为0，会禁止keep-alive。
-		// 不支持keep-alive的网络连接会忽略本字段。
-		KeepAlive time.Duration
-	}
-
-	// Dial在指定的网络上连接指定的地址，参见Dial函数获取网络和地址参数的描述
-	func (d *Dialer) Dial(network, address string) (Conn, error)
 
 	// IPConn 类型代表IP网络连接，实现了Conn和PacketConn接口
 	type IPConn struct { ... }
@@ -1536,6 +1514,21 @@
 	func (c *UnixConn) File() (f *os.File, err error)
 ```
 
+- net.Conn
+```golang
+	// FileListener 返回一个下层为文件f的网络监听器的拷贝
+	// 调用者有责任在使用结束后改变l。关闭l不会影响f；关闭f也不会影响l；本函数与各种实现了Listener接口的类型的File方法是对应的
+	func FileListener(f *os.File) (l Listener, err error)
+
+	// FileConn 返回一个下层为文件f的网络连接的拷贝
+	// 调用者有责任在结束程序前关闭f；关闭c不会影响f，关闭f也不会影响c；本函数与各种实现了Conn接口的类型的File方法是对应的
+	func FileConn(f *os.File) (c Conn, err error)
+
+	// FilePacketConn函数返回一个下层为文件f的数据包网络连接的拷贝
+	// 调用者有责任在结束程序前关闭f；关闭c不会影响f，关闭f也不会影响c；本函数与各种实现了PacketConn接口的类型的File方法是对应的
+	func FilePacketConn(f *os.File) (c PacketConn, err error)
+```
+
 - net.DNS
 ```golang
 	// MX 代表一条DNS MX记录（邮件交换记录），根据收信人的地址后缀来定位邮件服务器
@@ -1579,6 +1572,7 @@
 	func LookupTXT(name string) (txt []string, err error)
 ```
 
+### 2. net/http
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
@@ -1616,20 +1610,19 @@
 		- `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
 		- `func bytes.Join(s [][]byte, sep []byte) []byte`
 
+### 3. net/mail
 - net/smtp
 	- smtp包实现了简单邮件传输协议(SMTP)
 
 - net/mail
 	- mail包实现了邮件的解析
 
+### 3. net/rpc
 - net/rpc/jsonrpc
 	- rpc包提供了通过网络或其他I/O连接对一个对象的导出方法的访问
 
 - net/rpc/jsonrpc
 	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包
-
-- net/smtp
-	- smtp包实现了简单邮件传输协议(SMTP)
 
 - net/textproto
 	- textproto实现了对基于文本的请求/回复协议的一般性支持，包括HTTP、NNTP和SMTP
