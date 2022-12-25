@@ -1536,6 +1536,49 @@
 	func (c *UnixConn) File() (f *os.File, err error)
 ```
 
+- net.DNS
+```golang
+	// MX 代表一条DNS MX记录（邮件交换记录），根据收信人的地址后缀来定位邮件服务器
+	type MX struct {
+		Host string
+		Pref uint16
+	}
+
+	// NS 代表一条DNS NS记录（域名服务器记录），指定该域名由哪个DNS服务器来进行解析
+	type NS struct {
+		Host string
+	}
+
+	// SRV 代表一条DNS SRV记录（资源记录），记录某个服务由哪台计算机提供
+	type SRV struct {
+		Target   string
+		Port     uint16
+		Priority uint16
+		Weight   uint16
+	}
+
+	// LookupPort 函数查询指定网络和服务的（默认）端口
+	func LookupPort(network, service string) (port int, err error)
+	// LookupCNAME 函数查询name的规范DNS名（但该域名未必可以访问）
+	// 如果调用者不关心规范名可以直接调用LookupHost或者LookupIP；这两个函数都会在查询时考虑到规范名
+	func LookupCNAME(name string) (cname string, err error)
+	// LookupHost 函数查询主机的网络地址序列
+	func LookupHost(host string) (addrs []string, err error)
+	// LookupIP 函数查询主机的ipv4和ipv6地址序列
+	func LookupIP(host string) (addrs []IP, err error)
+	// LookupAddr 查询某个地址，返回映射到该地址的主机名序列，本函数和LookupHost不互为反函数
+	func LookupAddr(addr string) (name []string, err error)
+	// LookupMX 函数返回指定主机的按Pref字段排好序的DNS MX记录
+	func LookupMX(name string) (mx []*MX, err error)
+	// LookupNS 函数返回指定主机的DNS NS记录
+	func LookupNS(name string) (ns []*NS, err error)
+	// LookupSRV 函数尝试执行指定服务、协议、主机的SRV查询
+	// 协议proto为"tcp" 或"udp"。返回的记录按Priority字段排序，同一优先度按Weight字段随机排序
+	func LookupSRV(service, proto, name string) (cname string, addrs []*SRV, err error)
+	// LookupTXT函数返回指定主机的DNS TXT记录
+	func LookupTXT(name string) (txt []string, err error)
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
