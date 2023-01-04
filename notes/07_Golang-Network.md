@@ -703,7 +703,6 @@
 			- http协议并没有对url和请求正文做长度限制，但在实际中浏览器对url的长度限制到比请求正文要小很多
 				- 所以post可以提交的数据比get要大得多
 			- get比post更容易受到攻击(源于get的参数直接暴露在url里)
-
 ```xml
 	// url
 	https://baijiahao.baidu.com/s?id=1603848351636567407&wfr=spider&for=pc
@@ -771,15 +770,15 @@
 	</html>
 ```
 
-### 3. Https
+### 4. Https
 - Https
 	- http:  (应用层)HTTP -> TCP -> IP
 	- https: (应用层)HTTP -> SSL/TCP -> TCP -> IP
 		- HTTP + 加密 + 认证 + 完整性保护 = HTTPS(HTTP Secure)
 
-### 4. Http-Response
-- Go语言中的标准库 `net/http`
-```go
+### 5. Go语言中的HTTP编程接口
+- server/client
+```golang
 	// http-server
 	// 把返回的内容写入http.ResponseWriter
 	func HelloHandler(w http.ResponseWriter, r *http.Request) {
@@ -803,7 +802,7 @@
 	}
 ```
 
-### 5. http-router
+### 6. http-router
 - Go语言中的第三方库 `github.com/julienschmidt/httprouter`
 	- `go get -u github.com/julienschmidt/httprouter`
 	- Router实现了`http.Handler`接口
@@ -812,7 +811,7 @@
 	- 支持ServeFiles访问静态文件
 	- 可以自定义捕获panic的方法
 
-### 6. 关于请求校验的常见问题
+### 7. 关于请求校验的常见问题
 - XSS
 	- 跨站脚本攻击(Cross-site scripting，XSS)是一种安全漏洞，即通过注入脚本获取敏感信息
 		- 攻击者可以利用这种漏洞在网站上注入恶意的客户端代码
@@ -878,7 +877,7 @@
 	Email string `validate:"my_email"`
 ```
 
-### 7. http中间件
+### 8. http中间件
 - 中间件的作用
 	- 将业务代码和非业务代码解耦
 	- 非业务代码: 限流、超时控制、打日志等等
@@ -898,7 +897,7 @@
 	}
 ```
 
-### 8. Go语言中的Http框架
+### 9. Go语言中的Http框架
 - 自定义Web框架
 	- 框架的作用
 		- 节省封装的开发时间，统一各团队的编码风格，节省沟通和排查问题的时间
@@ -1575,7 +1574,7 @@
 ### 2. net/http
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
-	- Get、Head、Post和PostForm函数发出HTTP/ HTTPS请求
+	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
 		- `http.Get("http://example.com/")`
 		- `http.Post("http://example.com/upload", "image/jpeg", &buf)`
 		- `http.PostForm("http://example.com/form", url.Values{"key": {"Value"}, "id": {"123"}})`
