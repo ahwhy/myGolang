@@ -1692,6 +1692,48 @@
 	const TimeFormat = "Mon, 02 Jan 2006 15:04:05 GMT"
 ```
 
+- http.variables&&error
+```golang
+	// DefaultClient 是用于包函数Get、Head和Post的默认Client
+	var DefaultClient = &Client{}
+	// DefaultServeMux 是用于Serve的默认ServeMux
+	var DefaultServeMux = NewServeMux()
+
+	// HTTP请求的解析错误
+	var (
+		ErrHeaderTooLong        = &ProtocolError{"header too long"}
+		ErrShortBody            = &ProtocolError{"entity body too short"}
+		ErrNotSupported         = &ProtocolError{"feature not supported"}
+		ErrUnexpectedTrailer    = &ProtocolError{"trailer header without chunked transfer encoding"}
+		ErrMissingContentLength = &ProtocolError{"missing ContentLength in HEAD response"}
+		ErrNotMultipart         = &ProtocolError{"request Content-Type isn't multipart/form-data"}
+		ErrMissingBoundary      = &ProtocolError{"no multipart boundary param in Content-Type"}
+	)
+	// 会被HTTP服务端返回的错误
+	var (
+		ErrWriteAfterFlush = errors.New("Conn.Write called after Flush")
+		ErrBodyNotAllowed  = errors.New("http: request method or response status code does not allow body")
+		ErrHijacked        = errors.New("Conn has been hijacked")
+		ErrContentLength   = errors.New("Conn.Write wrote more than the declared Content-Length")
+	)
+	// 在Resquest或Response的Body字段已经关闭后，试图从中读取时，就会返回ErrBodyReadAfterClose
+	// 这个错误一般发生在：HTTP处理器中调用完ResponseWriter 接口的WriteHeader或Write后从请求中读取数据的时候
+	var ErrBodyReadAfterClose = errors.New("http: invalid Read on closed Body")
+	// 在处理器超时以后调用ResponseWriter接口的Write方法，就会返回ErrHandlerTimeout
+	var ErrHandlerTimeout = errors.New("http: Handler timeout")
+	var ErrLineTooLong = errors.New("header line too long")
+	// 当请求中没有提供给FormFile函数的文件字段名，或者该字段名不是文件字段时，该函数就会返回ErrMissingFile
+	var ErrMissingFile = errors.New("http: no such file")
+	var ErrNoCookie = errors.New("http: named cookie not present")
+	var ErrNoLocation = errors.New("http: no Location header in response")
+
+	// HTTP请求解析错误
+	type ProtocolError struct {
+		ErrorString string
+	}
+	func (err *ProtocolError) Error() string
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
