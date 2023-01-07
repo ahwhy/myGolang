@@ -1753,6 +1753,32 @@
 	func StatusText(code int) string
 ```
 
+- http.ConnState
+```golang
+	const (
+		// StateNew代表一个新的连接，将要立刻发送请求。
+		// 连接从这个状态开始，然后转变为StateAlive或StateClosed。
+		StateNew ConnState = iota
+		// StateActive代表一个已经读取了请求数据1到多个字节的连接。
+		// 用于StateAlive的Server.ConnState回调函数在将连接交付给处理器之前被触发，
+		// 等到请求被处理完后，Server.ConnState回调函数再次被触发。
+		// 在请求被处理后，连接状态改变为StateClosed、StateHijacked或StateIdle。
+		StateActive
+		// StateIdle代表一个已经处理完了请求、处在闲置状态、等待新请求的连接。
+		// 连接状态可以从StateIdle改变为StateActive或StateClosed。
+		StateIdle
+		// 代表一个被劫持的连接。这是一个终止状态，不会转变为StateClosed。
+		StateHijacked
+		// StateClosed代表一个关闭的连接。
+		// 这是一个终止状态。被劫持的连接不会转变为StateClosed。
+		StateClosed
+	)
+
+	// ConnState 代表一个客户端到服务端的连接的状态；本类型用于可选的Server.ConnState回调函数
+	type ConnState int
+	func (c ConnState) String() string
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
