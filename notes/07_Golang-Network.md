@@ -1734,6 +1734,25 @@
 	func (err *ProtocolError) Error() string
 ```
 
+- http.func
+```golang
+	// CanonicalHeaderKey 返回头域（表示为Header类型）的键s的规范化格式
+	// 范化过程中让单词首字母和'-'后的第一个字母大写，其余字母小写；例如，"accept-encoding"规范化为"Accept-Encoding"
+	func CanonicalHeaderKey(s string) string
+
+	// DetectContentType 实现了http://mimesniff.spec.whatwg.org/描述的算法，用于确定数据的Content-Type
+	// 函数总是返回一个合法的MIME类型；如果它不能确定数据的类型，将返回"application/octet-stream"；它最多检查数据的前512字节
+	func DetectContentType(data []byte) string
+
+	// ParseHTTPVersion 解析HTTP版本字符串。如"HTTP/1.0"返回(1, 0, true)
+	func ParseHTTPVersion(vers string) (major, minor int, ok bool)
+	// ParseTime 用3种格式TimeFormat, time.RFC850和time.ANSIC尝试解析一个时间头的值（如Date: header）
+	func ParseTime(text string) (t time.Time, err error)
+
+	// StatusText 返回HTTP状态码code对应的文本，如220对应"OK"。如果code是未知的状态码，会返回""
+	func StatusText(code int) string
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
