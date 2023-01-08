@@ -1963,6 +1963,109 @@
 	func (r *Request) MultipartReader() (*multipart.Reader, error)
 ```
 
+- http.Response
+```golang
+	// Response 代表一个HTTP请求的回复
+	type Response struct {
+		Status     string // 例如"200 OK"
+		StatusCode int    // 例如200
+		Proto      string // 例如"HTTP/1.0"
+		ProtoMajor int    // 例如1
+		ProtoMinor int    // 例如0
+		// Header保管头域的键值对。
+		// 如果回复中有多个头的键相同，Header中保存为该键对应用逗号分隔串联起来的这些头的值
+		// （参见RFC 2616 Section 4.2）
+		// 被本结构体中的其他字段复制保管的头（如ContentLength）会从Header中删掉。
+		//
+		// Header中的键都是规范化的，参见CanonicalHeaderKey函数
+		Header Header
+		// Body代表回复的主体。
+		// Client类型和Transport类型会保证Body字段总是非nil的，即使回复没有主体或主体长度为0。
+		// 关闭主体是调用者的责任。
+		// 如果服务端采用"chunked"传输编码发送的回复，Body字段会自动进行解码。
+		Body io.ReadCloser
+		// ContentLength记录相关内容的长度。
+		// 其值为-1表示长度未知（采用chunked传输编码）
+		// 除非对应的Request.Method是"HEAD"，其值>=0表示可以从Body读取的字节数
+		ContentLength int64
+		// TransferEncoding按从最外到最里的顺序列出传输编码，空切片表示"identity"编码。
+		TransferEncoding []string
+		// Close记录头域是否指定应在读取完主体后关闭连接。（即Connection头）
+		// 该值是给客户端的建议，Response.Write方法的ReadResponse函数都不会关闭连接。
+		Close bool
+		// Trailer字段保存和头域相同格式的trailer键值对，和Header字段相同类型
+		Trailer Header
+		// Request是用来获取此回复的请求
+		// Request的Body字段是nil（因为已经被用掉了）
+		// 这个字段是被Client类型发出请求并获得回复后填充的
+		Request *Request
+		// TLS包含接收到该回复的TLS连接的信息。 对未加密的回复，本字段为nil。
+		// 返回的指针是被（同一TLS连接接收到的）回复共享的，不应被修改。
+		TLS *tls.ConnectionState
+	}
+
+	// ReadResponse从r读取并返回一个HTTP 回复
+	// req参数是可选的，指定该回复对应的请求（即是对该请求的回复）；如果是nil，将假设请求是GET请求
+	// 客户端必须在结束resp.Body的读取后关闭它；读取完毕并关闭后，客户端可以检查resp.Trailer字段获取回复的trailer的键值对（本函数主要用在客户端从下层获取回复）
+	func ReadResponse(r *bufio.Reader, req *Request) (*Response, error)
+	// ProtoAtLeast 报告该回复使用的HTTP协议版本至少是major.minor
+	func (r *Response) ProtoAtLeast(major, minor int) bool
+	// Cookies 解析并返回该回复中的Set-Cookie头设置的cookie
+	func (r *Response) Cookies() []*Cookie
+	// Location 返回该回复的Location头设置的URL。相对地址的重定向会相对于该回复对应的请求来确定绝对地址。如果回复中没有Location头，会返回nil, ErrNoLocation
+	func (r *Response) Location() (*url.URL, error)
+	// Write 以有线格式将回复写入w（用于将回复写入下层TCPConn等）
+	// // 本方法会考虑如下字段：
+	// // StatusCode
+	// // ProtoMajor
+	// // ProtoMinor
+	// // Request.Method
+	// // TransferEncoding
+	// // Trailer
+	// // Body
+	// // ContentLength
+	// // Header（不规范的键名和它对应的值会导致不可预知的行为）
+	// // Body字段在发送完回复后会被关闭
+	func (r *Response) Write(w io.Writer) error
+
+	// ResponseWriter 接口被HTTP处理器用于构造HTTP回复
+	type ResponseWriter interface {
+		// Header返回一个Header类型值，该值会被WriteHeader方法发送。
+		// 在调用WriteHeader或Write方法后再改变该对象是没有意义的。
+		Header() Header
+		// WriteHeader该方法发送HTTP回复的头域和状态码。
+		// 如果没有被显式调用，第一次调用Write时会触发隐式调用WriteHeader(http.StatusOK)
+		// WriterHeader的显式调用主要用于发送错误码。
+		WriteHeader(int)
+		// Write向连接中写入作为HTTP的一部分回复的数据。
+		// 如果被调用时还未调用WriteHeader，本方法会先调用WriteHeader(http.StatusOK)
+		// 如果Header中没有"Content-Type"键，
+		// 本方法会使用包函数DetectContentType检查数据的前512字节，将返回值作为该键的值。
+		Write([]byte) (int, error)
+	}
+
+	// HTTP处理器ResponseWriter接口参数的下层如果实现了Flusher接口，可以让HTTP处理器将缓冲中的数据发送到客户端
+	// 注意：即使ResponseWriter接口的下层支持Flush方法，如果客户端是通过HTTP代理连接的，缓冲中的数据也可能直到回复完毕才被传输到客户端
+	type Flusher interface {
+		// Flush将缓冲中的所有数据发送到客户端
+		Flush()
+	}
+
+	// HTTP处理器ResponseWriter接口参数的下层如果实现了CloseNotifier接口，可以让用户检测下层的连接是否停止；如果客户端在回复准备好之前关闭了连接，该机制可以用于取消服务端耗时较长的操作
+	type CloseNotifier interface {
+		// CloseNotify返回一个通道，该通道会在客户端连接丢失时接收到唯一的值
+		CloseNotify() <-chan bool
+	}
+
+	// HTTP处理器ResponseWriter接口参数的下层如果实现了Hijacker接口，可以让HTTP处理器接管该连接
+	type Hijacker interface {
+		// Hijack让调用者接管连接，返回连接和关联到该连接的一个缓冲读写器
+		// 调用本方法后，HTTP服务端将不再对连接进行任何操作，调用者有责任管理、关闭返回的连接
+		Hijack() (net.Conn, *bufio.ReadWriter, error)
+	}
+
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
