@@ -1779,6 +1779,41 @@
 	func (c ConnState) String() string
 ```
 
+- http.Cookie
+```golang
+	// Cookie 代表一个出现在HTTP回复的头域中Set-Cookie头的值里或者HTTP请求的头域中Cookie头的值里的HTTP cookie
+	type Cookie struct {
+		Name       string
+		Value      string
+		Path       string
+		Domain     string
+		Expires    time.Time
+		RawExpires string
+		// MaxAge=0表示未设置Max-Age属性
+		// MaxAge<0表示立刻删除该cookie，等价于"Max-Age: 0"
+		// MaxAge>0表示存在Max-Age属性，单位是秒
+		MaxAge   int
+		Secure   bool
+		HttpOnly bool
+		Raw      string
+		Unparsed []string // 未解析的“属性-值”对的原始文本
+	}
+	// String 返回该cookie的序列化结果
+	// 如果只设置了Name和Value字段，序列化结果可用于HTTP请求的Cookie头或者HTTP回复的Set-Cookie头；如果设置了其他字段，序列化结果只能用于HTTP回复的Set-Cookie头
+	func (c *Cookie) String() string
+
+	// CookieJar管理cookie的存储和在HTTP请求中的使用；CookieJar的实现必须能安全的被多个go程同时使用
+	// net/http/cookiejar包提供了一个CookieJar的实现
+	type CookieJar interface {
+		// SetCookies管理从u的回复中收到的cookie
+		// 根据其策略和实现，它可以选择是否存储cookie
+		SetCookies(u *url.URL, cookies []*Cookie)
+		// Cookies返回发送请求到u时应使用的cookie
+		// 本方法有责任遵守RFC 6265规定的标准cookie限制
+		Cookies(u *url.URL) []*Cookie
+	}
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
