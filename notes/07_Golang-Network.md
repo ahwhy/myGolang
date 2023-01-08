@@ -2066,6 +2066,64 @@
 
 ```
 
+
+- http.Transport
+```golang
+	// Transport类型实现了RoundTripper接口，支持http、https和http/https代理
+	// Transport类型可以缓存连接以在未来重用
+	type Transport struct {
+		// Proxy指定一个对给定请求返回代理的函数。
+		// 如果该函数返回了非nil的错误值，请求的执行就会中断并返回该错误。
+		// 如果Proxy为nil或返回nil的*URL置，将不使用代理。
+		Proxy func(*Request) (*url.URL, error)
+		// Dial指定创建TCP连接的拨号函数；如果Dial为nil，会使用net.Dial。
+		Dial func(network, addr string) (net.Conn, error)
+		// TLSClientConfig指定用于tls.Client的TLS配置信息。
+		// 如果该字段为nil，会使用默认的配置信息。
+		TLSClientConfig *tls.Config
+		// TLSHandshakeTimeout指定等待TLS握手完成的最长时间。零值表示不设置超时。
+		TLSHandshakeTimeout time.Duration
+		// 如果DisableKeepAlives为真，会禁止不同HTTP请求之间TCP连接的重用。
+		DisableKeepAlives bool
+		// 如果DisableCompression为真，会禁止Transport在请求中没有Accept-Encoding头时，
+		// 主动添加"Accept-Encoding: gzip"头，以获取压缩数据。
+		// 如果Transport自己请求gzip并得到了压缩后的回复，它会主动解压缩回复的主体。
+		// 但如果用户显式的请求gzip压缩数据，Transport是不会主动解压缩的。
+		DisableCompression bool
+		// 如果MaxIdleConnsPerHost!=0，会控制每个主机下的最大闲置连接。
+		// 如果MaxIdleConnsPerHost==0，会使用DefaultMaxIdleConnsPerHost。
+		MaxIdleConnsPerHost int
+		// ResponseHeaderTimeout指定在发送完请求（包括其可能的主体）之后，
+		// 等待接收服务端的回复的头域的最大时间。零值表示不设置超时。
+		// 该时间不包括获取回复主体的时间。
+		ResponseHeaderTimeout time.Duration
+		// ...
+	}
+
+	// DefaultTransport 是被包变量DefaultClient使用的默认RoundTripper接口
+	// 它会根据需要创建网络连接，并缓存以便在之后的请求中重用这些连接；它使用环境变量$HTTP_PROXY和$NO_PROXY（或$http_proxy和$no_proxy）指定的HTTP代理
+	var DefaultTransport RoundTripper = &Transport{
+		Proxy: ProxyFromEnvironment,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	// RegisterProtocol 注册一个新的名为scheme的协议
+	// t会将使用scheme协议的请求转交给rt；rt有责任模拟HTTP请求的语义
+	// RegisterProtocol可以被其他包用于提供"ftp"或"file"等协议的实现
+	func (t *Transport) RegisterProtocol(scheme string, rt RoundTripper)
+	// RoundTrip 方法实现了RoundTripper接口
+	// 高层次的HTTP客户端支持（如管理cookie和重定向）请参见Get、Post等函数和Client类型
+	func (t *Transport) RoundTrip(req *Request) (resp *Response, err error)
+	// CloseIdleConnections 关闭所有之前的请求建立但目前处于闲置状态的连接，本方法不会中断正在使用的连接
+	func (t *Transport) CloseIdleConnections()
+	// CancelRequest 通过关闭请求所在的连接取消一个执行中的请求
+	func (t *Transport) CancelRequest(req *Request)
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
