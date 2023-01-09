@@ -2248,6 +2248,40 @@
 	func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
 ```
 
+- http.ServeMux
+```golang
+	// ServeMux类型 是HTTP请求的多路转接器；它会将每一个接收的请求的URL与一个注册模式的列表进行匹配，并调用和URL最匹配的模式的处理器
+	// 模式是固定的、由根开始的路径，如"/favicon.ico"，或由根开始的子树，如"/images/"（注意结尾的斜杠）；较长的模式优先于较短的模式，因此如果模式"/images/"和"/images/thumbnails/"都注册了处理器，后一个处理器会用于路径以"/images/thumbnails/"开始的请求，前一个处理器会接收到其余的路径在"/images/"子树下的请求
+	// 注意，因为以斜杠结尾的模式代表一个由根开始的子树，模式"/"会匹配所有的未被其他注册的模式匹配的路径，而不仅仅是路径"/"
+	// 模式也能（可选地）以主机名开始，表示只匹配该主机上的路径；指定主机的模式优先于一般的模式，因此一个注册了两个模式"/codesearch"和"codesearch.google.com/"的处理器不会接管目标为"http://www.google.com/"的请求
+	// ServeMux还会注意到请求的URL路径的无害化，将任何路径中包含"."或".."元素的请求重定向到等价的没有这两种元素的URL。（参见path.Clean函数）
+	type ServeMux struct { ... }
+
+	// NewServeMux 创建并返回一个新的*ServeMux
+	// For example
+	// // mux := http.NewServeMux()
+	// // mux.Handle("/api/", apiHandler{})
+	// // mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+	// //     // The "/" pattern matches everything, so we need to check
+	// //     // that we're at the root here.
+	// //     if req.URL.Path != "/" {
+	// //         http.NotFound(w, req)
+	// //         return
+	// //     }
+	// //     fmt.Fprintf(w, "Welcome to the home page!")
+	// // })
+	func NewServeMux() *ServeMux
+	// Handle 注册HTTP处理器handler和对应的模式pattern；如果该模式已经注册有一个处理器，Handle会panic
+	func (mux *ServeMux) Handle(pattern string, handler Handler)
+	// HandleFunc 注册一个处理器函数handler和对应的模式pattern
+	func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+	// Handler根据r.Method、r.Host和r.URL.Path等数据，返回将用于处理该请求的HTTP处理器；它总是返回一个非nil的处理器；如果路径不是它的规范格式，将返回内建的用于重定向到等价的规范路径的处理器
+	// Handler也会返回匹配该请求的的已注册模式；在内建重定向处理器的情况下，pattern会在重定向后进行匹配。如果没有已注册模式可以应用于该请求，本方法将返回一个内建的"404 page not found"处理器和一个空字符串模式
+	func (mux *ServeMux) Handler(r *Request) (h Handler, pattern string)
+	// ServeHTTP 将请求派遣到与请求的URL最匹配的模式对应的处理器
+	func (mux *ServeMux) ServeHTTP(w ResponseWriter, r *Request)
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
