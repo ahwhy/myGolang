@@ -2066,7 +2066,6 @@
 
 ```
 
-
 - http.Transport
 ```golang
 	// Transport类型实现了RoundTripper接口，支持http、https和http/https代理
@@ -2122,6 +2121,103 @@
 	func (t *Transport) CloseIdleConnections()
 	// CancelRequest 通过关闭请求所在的连接取消一个执行中的请求
 	func (t *Transport) CancelRequest(req *Request)
+```
+
+
+- http.Client
+```golang
+	// Client类型 代表HTTP客户端；它的零值（DefaultClient）是一个可用的使用DefaultTransport的客户端
+	// Client的Transport字段一般会含有内部状态（缓存TCP连接），因此Client类型值应尽量被重用而不是每次需要都创建新的；Client类型值可以安全的被多个go程同时使用。
+	// Client类型的层次比RoundTripper接口（如Transport）高，还会管理HTTP的cookie和重定向等细节
+	type Client struct {
+		// Transport指定执行独立、单次HTTP请求的机制。
+		// 如果Transport为nil，则使用DefaultTransport。
+		Transport RoundTripper
+		// CheckRedirect指定处理重定向的策略。
+		// 如果CheckRedirect不为nil，客户端会在执行重定向之前调用本函数字段。
+		// 参数req和via是将要执行的请求和已经执行的请求（切片，越新的请求越靠后）。
+		// 如果CheckRedirect返回一个错误，本类型的Get方法不会发送请求req，
+		// 而是返回之前得到的最后一个回复和该错误。（包装进url.Error类型里）
+		//
+		// 如果CheckRedirect为nil，会采用默认策略：连续10此请求后停止。
+		CheckRedirect func(req *Request, via []*Request) error
+		// Jar指定cookie管理器。
+		// 如果Jar为nil，请求中不会发送cookie，回复中的cookie会被忽略。
+		Jar CookieJar
+		// Timeout指定本类型的值执行请求的时间限制。
+		// 该超时限制包括连接时间、重定向和读取回复主体的时间。
+		// 计时器会在Head、Get、Post或Do方法返回后继续运作并在超时后中断回复主体的读取。
+		//
+		// Timeout为零值表示不设置超时。
+		//
+		// Client实例的Transport字段必须支持CancelRequest方法，
+		// 否则Client会在试图用Head、Get、Post或Do方法执行请求时返回错误。
+		// 本类型的Transport字段默认值（DefaultTransport）支持CancelRequest方法。
+		Timeout time.Duration
+	}
+
+	// Do 方法发送请求，返回HTTP回复；它会遵守客户端c设置的策略（如重定向、cookie、认证）
+	// 如果客户端的策略（如重定向）返回错误或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误
+	// 如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它；如果返回值resp的主体未关闭，c下层的RoundTripper接口（一般为Transport类型）可能无法重用resp主体下层保持的TCP连接去执行之后的请求
+	// 请求的主体，如果非nil，会在执行后被c.Transport关闭，即使出现错误
+	// 一般应使用Get、Post或PostForm方法代替Do方法
+	func (c *Client) Do(req *Request) (resp *Response, err error)
+
+	// Head 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Head会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	func (c *Client) Head(url string) (resp *Response, err error)
+	// Get 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Get会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	// 如果c.CheckRedirect执行失败或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误；如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	func (c *Client) Get(url string) (resp *Response, err error)
+	// Post向指定的URL发出一个POST请求
+	// bodyType为POST数据的类型，body为POST数据，作为请求的主体；如果参数body实现了io.Closer接口，它会在发送请求后被关闭；调用者有责任在读取完返回值resp的主体后关闭它
+	func (c *Client) Post(url string, bodyType string, body io.Reader) (resp *Response, err error)
+	// PostForm 向指定的URL发出一个POST请求，url.Values类型的data会被编码为请求的主体
+	// POST数据的类型一般会设为"application/x-www-form-urlencoded"。如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	func (c *Client) PostForm(url string, data url.Values) (resp *Response, err error)
+```
+
+- http.Server
+```golang
+	// Server类型定义了运行HTTP服务端的参数；Server的零值是合法的配置
+	type Server struct {
+	    Addr           string        // 监听的TCP地址，如果为空字符串会使用":http"
+	    Handler        Handler       // 调用的处理器，如为nil会调用http.DefaultServeMux
+	    ReadTimeout    time.Duration // 请求的读取操作在超时前的最大持续时间
+	    WriteTimeout   time.Duration // 回复的写入操作在超时前的最大持续时间
+	    MaxHeaderBytes int           // 请求的头域最大长度，如为0则用DefaultMaxHeaderBytes
+	    TLSConfig      *tls.Config   // 可选的TLS配置，用于ListenAndServeTLS方法
+	    // TLSNextProto（可选地）指定一个函数来在一个NPN型协议升级出现时接管TLS连接的所有权。
+	    // 映射的键为商谈的协议名；映射的值为函数，该函数的Handler参数应处理HTTP请求，
+	    // 并且初始化Handler.ServeHTTP的*Request参数的TLS和RemoteAddr字段（如果未设置）。
+	    // 连接在函数返回时会自动关闭。
+	    TLSNextProto map[string]func(*Server, *tls.Conn, Handler)
+	    // ConnState字段指定一个可选的回调函数，该函数会在一个与客户端的连接改变状态时被调用。
+	    // 参见ConnState类型和相关常数获取细节。
+	    ConnState func(net.Conn, ConnState)
+	    // ErrorLog指定一个可选的日志记录器，用于记录接收连接时的错误和处理器不正常的行为。
+	    // 如果本字段为nil，日志会通过log包的标准日志记录器写入os.Stderr。
+	    ErrorLog *log.Logger
+	    // 内含隐藏或非导出字段
+	}
+
+	// SetKeepAlivesEnabled 控制是否允许HTTP闲置连接重用（keep-alive）功能；
+	// 默认该功能总是被启用的，只有资源非常紧张的环境或者服务端在关闭进程中时，才应该关闭该功能
+	func (s *Server) SetKeepAlivesEnabled(v bool)
+	// Serve 会接手监听器l收到的每一个连接，并为每一个连接创建一个新的服务go程；该go程会读取请求，然后调用srv.Handler回复请求
+	func (srv *Server) Serve(l net.Listener) error
+	// ListenAndServe 监听srv.Addr指定的TCP地址，并且会调用Serve方法接收到的连接；如果srv.Addr为空字符串，会使用":http"
+	func (srv *Server) ListenAndServe() error
+	// ListenAndServeTLS监听srv.Addr确定的TCP地址，并且会调用Serve方法处理接收到的连接
+	// 必须提供证书文件和对应的私钥文件；如果证书是由权威机构签发的，certFile参数必须是顺序串联的服务端证书和CA证书；如果srv.Addr为空字符串，会使用":https"
+	func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error
 ```
 
 - net/http
