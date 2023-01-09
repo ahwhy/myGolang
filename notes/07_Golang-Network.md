@@ -2220,6 +2220,34 @@
 	func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error
 ```
 
+- http.Handler
+```golang
+	// 实现了Handler接口的对象可以注册到HTTP服务端，为特定的路径及其子树提供服务
+	// ServeHTTP应该将回复的头域和数据写入ResponseWriter接口然后返回；返回标志着该请求已经结束，HTTP服务端可以转移向该连接上的下一个请求
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+
+	// NotFoundHandler 返回一个简单的请求处理器，该处理器会对每个请求都回复"404 page not found"
+	func NotFoundHandler() Handler
+	// RedirectHandler 返回一个请求处理器，该处理器会对每个请求都使用状态码code重定向到网址url
+	func RedirectHandler(url string, code int) Handler
+	// TimeoutHandler 返回一个采用指定时间限制的请求处理器
+	// 返回的Handler会调用h.ServeHTTP去处理每个请求，但如果某一次调用耗时超过了时间限制，该处理器会回复请求状态码503 Service Unavailable，并将msg作为回复的主体（如果msg为空字符串，将发送一个合理的默认信息）；在超时后，h对它的ResponseWriter接口参数的写入操作会返回ErrHandlerTimeout
+	func TimeoutHandler(h Handler, dt time.Duration, msg string) Handler
+	// StripPrefix 返回一个处理器，该处理器会将请求的URL.Path字段中给定前缀prefix去除后再交由h处理。StripPrefix会向URL.Path字段中没有给定前缀的请求回复404 page not found
+	// For example
+	// // To serve a directory on disk (/tmp) under an alternate URL
+	// // path (/tmpfiles/), use StripPrefix to modify the request
+	// // URL's path before the FileServer seest:
+	// http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
+	func StripPrefix(prefix string, h Handler) Handler
+	// HandlerFunc type是一个适配器，通过类型转换让我们可以将普通的函数作为HTTP处理器使用，如果f是一个具有适当签名的函数，HandlerFunc(f)通过调用f实现了Handler接口
+	type HandlerFunc func(ResponseWriter, *Request)
+	// ServeHTTP 方法会调用f(w, r)
+	func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
