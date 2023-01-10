@@ -2282,6 +2282,48 @@
 	func (mux *ServeMux) ServeHTTP(w ResponseWriter, r *Request)
 ```
 
+- http.File
+```golang
+	// File 是被FileSystem接口的Open方法返回的接口类型，可以被FileServer等函数用于文件访问服务；该接口的方法的行为应该和*os.File类型的同名方法相同
+	type File interface {
+		io.Closer
+		io.Reader
+		Readdir(count int) ([]os.FileInfo, error)
+		Seek(offset int64, whence int) (int64, error)
+		Stat() (os.FileInfo, error)
+	}
+
+	// FileSystem 接口实现了对一系列命名文件的访问，文件路径的分隔符为'/'，不管主机操作系统的惯例如何
+	type FileSystem interface {
+		Open(name string) (File, error)
+	}
+
+	// Dir 使用限制到指定目录树的本地文件系统实现了http.FileSystem接口
+	// 空Dir被视为"."，即代表当前目录
+	type Dir string
+	func (d Dir) Open(name string) (File, error)
+
+	// NewFileTransport 返回一个RoundTripper接口，使用FileSystem接口fs提供文件访问服务；返回的RoundTripper接口会忽略接收的请求的URL主机及其他绝大多数属性
+	// NewFileTransport函数的典型使用情况是给Transport类型的值注册"file"协议，如下所示：
+	// // t := &http.Transport{}
+	// // t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	// // c := &http.Client{Transport: t}
+	// // res, err := c.Get("file:///etc/passwd")
+	// // ...
+	func NewFileTransport(fs FileSystem) RoundTripper
+
+	// FileServer 返回一个使用FileSystem接口root提供文件访问服务的HTTP处理器
+	// 要使用操作系统的FileSystem接口实现，可使用http.Dir：
+	// // http.Handle("/", http.FileServer(http.Dir("/tmp")))
+	// // // Simple static webserver:
+	// // log.Fatal(http.ListenAndServe(":8080", http.FileServer(http.Dir("/usr/share/doc"))))
+	// // // To serve a directory on disk (/tmp) under an alternate URL
+	// // // path (/tmpfiles/), use StripPrefix to modify the request
+	// // // URL's path before the FileServer sees it:
+	// // http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
+	func FileServer(root FileSystem) Handler
+```
+
 - net/http
 	- http包提供了HTTP客户端和服务端的实现
 	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
