@@ -2324,21 +2324,44 @@
 	func FileServer(root FileSystem) Handler
 ```
 
-- net/http
-	- http包提供了HTTP客户端和服务端的实现
-	- Get、Head、Post和PostForm函数发出HTTP/HTTPS请求
-		- `http.Get("http://example.com/")`
-		- `http.Post("http://example.com/upload", "image/jpeg", &buf)`
-		- `http.PostForm("http://example.com/form", url.Values{"key": {"Value"}, "id": {"123"}})`
-		- `http.StatusOK`
+### 3. net/http包的其他类型
+- net/http/cookiejar
+	- cookiejar包实现了保管在内存中的符合RFC 6265标准的http.CookieJar接口
+```golang
+	// PublicSuffixList 提供域名的公共后缀，例如：
+	// - "example.com"的公共后缀是"com"
+	// - "foo1.foo2.foo3.co.uk"的公共后缀是"co.uk"
+	// - "bar.pvt.k12.ma.us"的公共后缀是"pvt.k12.ma.us"
+	// PublicSuffixList接口的实现必须是并发安全的；一个总是返回""的实现是合法的，也可以通过测试；但却是不安全的：它允许HTTP服务端跨域名设置cookie
+	// 推荐实现：code.google.com/p/go.net/publicsuffix
+	type PublicSuffixList interface {
+		// 返回域名的公共后缀。
+		// TODO：域名的格式化应该由调用者还是接口方法负责还没有确定。
+		PublicSuffix(domain string) string
+		// 返回公共后缀列表的来源的说明，该说明一般应该包含时间戳和版本号。
+		String() string
+	}
+
+	// Options是创建新Jar是的选项
+	type Options struct {
+		// PublicSuffixList是公共后缀列表，用于决定HTTP服务端是否能给某域名设置cookie
+		// nil值合法的，也可以通过测试；但却是不安全的：它允许HTTP服务端跨域名设置cookie
+		PublicSuffixList PublicSuffixList
+	}
+	// Jar类型实现了net/http包的http.CookieJar接口
+	type Jar struct { ... }
+	// 返回一个新的Jar，nil指针等价于Options零值的指针
+	func New(o *Options) (*Jar, error)
+	// 实现CookieJar接口的Cookies方法，如果URL协议不是HTTP/HTTPS会返回空切片
+	func (j *Jar) Cookies(u *url.URL) (cookies []*http.Cookie)
+	// 实现CookieJar接口的SetCookies方法，如果URL协议不是HTTP/HTTPS则不会有实际操作
+	func (j *Jar) SetCookies(u *url.URL, cookies []*http.Cookie)
+```
 
 - net/http/cgi
 	- cgi包实现了CGI(Common Gateway Interface，公共网关协议)，参见RFC 3875
 	- 注意使用CGI意味着对每一个请求开始一个新的进程，这显然要比使用长期运行的服务程序要低效
 	- 本包主要是为了兼容现有的系统
-
-- net/http/cookiejar
-	- cookiejar包实现了保管在内存中的符合RFC 6265标准的http.CookieJar接口
 
 - net/http/fcgi
 	- fcgi包实现了FastCGI协议
