@@ -200,7 +200,7 @@
 							- 但并不是说服务器端就没有TIME_WAIT状态套接字。
 						- 该类场景最终建议
 							- `net.ipv4.tcp_tw_recycle = 0` 关掉快速回收
-							- `net.ipv4.tcp_tw_reuse = 1`   开启tw状态的端口复用（客户端角色）
+							- `net.ipv4.tcp_tw_reuse = 1`   开启tw状态的端口复用(客户端角色)
 							- `net.ipv4.tcp_timestamps = 1` 复用需要timestamp校验为1 
 							- `net.ipv4.tcp_max_tw_buckets = 30000` 放大bucket
 							- `net.ipv4.ip_local_port_range = 15000 65000` 放大本地端口范围
@@ -510,7 +510,7 @@
 	server {
 		listen       443;
 		server_name  july.go.edu;                     // 填写自己的域名
-		ssl_certificate "/path/to/server.crt";        // 填写刚生成的TLS证书（包含公钥）
+		ssl_certificate "/path/to/server.crt";        // 填写刚生成的TLS证书(包含公钥)
 		ssl_certificate_key "/path/to/server.key";    // 填写刚生成的TLS证书私钥
 	}
 ```
@@ -1103,7 +1103,7 @@
 		IPv4bcast     = IPv4(255, 255, 255, 255) // 广播地址
 		IPv4allsys    = IPv4(224, 0, 0, 1)       // 所有主机和路由器
 		IPv4allrouter = IPv4(224, 0, 0, 2)       // 所有路由器
-		IPv4zero      = IPv4(0, 0, 0, 0)         // 本地地址，只能作为源地址（曾用作广播地址）
+		IPv4zero      = IPv4(0, 0, 0, 0)         // 本地地址，只能作为源地址(曾用作广播地址)
 	)
 	// 常用的IPv4地址
 	var (
@@ -1256,11 +1256,11 @@
 	func (ip IP) DefaultMask() IPMask
 	// 如果ip和x代表同一个IP地址，Equal会返回真；代表同一地址的IPv4地址和IPv6地址也被认为是相等的
 	func (ip IP) Equal(x IP) bool
-	// To16将 一个IP地址转换为16字节表示。如果ip不是一个IP地址（长度错误），To16会返回nil
+	// To16将 一个IP地址转换为16字节表示。如果ip不是一个IP地址(长度错误)，To16会返回nil
 	func (ip IP) To16() IP
 	// To4 将一个IPv4地址转换为4字节表示。如果ip不是IPv4地址，To4会返回nil
 	func (ip IP) To4() IP
-	// Mask 方法认为mask为ip的子网掩码，返回ip的网络地址部分的ip（主机地址部分都置0）
+	// Mask 方法认为mask为ip的子网掩码，返回ip的网络地址部分的ip(主机地址部分都置0)
 	func (ip IP) Mask(mask IPMask) IP
 	// String 返回IP地址ip的字符串表示
 	// 如果ip是IPv4地址，返回值的格式为点分隔的，如"74.125.19.99"；否则表示为IPv6格式，如"2001:4860:0:2001::68"
@@ -1276,7 +1276,7 @@
 	func IPv4Mask(a, b, c, d byte) IPMask
 	// CIDRMask 返回一个IPMask类型值，该返回值总共有bits个字位，其中前ones个字位都是1，其余字位都是0
 	func CIDRMask(ones, bits int) IPMask
-	// Size 返回m的前导的1字位数和总字位数；如果m不是规范的子网掩码（字位：/^1+0+$/），将返会(0, 0)
+	// Size 返回m的前导的1字位数和总字位数；如果m不是规范的子网掩码(字位：/^1+0+$/)，将返会(0, 0)
 	func (m IPMask) Size() (ones, bits int)
 	// String 返回m的十六进制格式，没有标点
 	func (m IPMask) String() string
@@ -1286,7 +1286,7 @@
 		IP   IP     // 网络地址
 		Mask IPMask // 子网掩码
 	}
-	// ParseCIDR将s作为一个CIDR（无类型域间路由）的IP地址和掩码字符串，如"192.168.100.1/24"或"2001:DB8::/48"，解析并返回IP地址和IP网络
+	// ParseCIDR将s作为一个CIDR(无类型域间路由)的IP地址和掩码字符串，如"192.168.100.1/24"或"2001:DB8::/48"，解析并返回IP地址和IP网络
 	func ParseCIDR(s string) (IP, *IPNet, error)
 	// Contains 报告该网络是否包含地址ip
 	func (n *IPNet) Contains(ip IP) bool
@@ -1426,7 +1426,7 @@
 		// Timeout 是dial操作等待连接建立的最大时长，默认值代表没有超时
 		// 如果Deadline字段也被设置了，dial操作也可能更早失败
 		// 不管有没有设置超时，操作系统都可能强制执行它的超时设置
-		// 例如，TCP（系统）超时一般在3分钟左右
+		// 例如，TCP(系统)超时一般在3分钟左右
 		Timeout time.Duration
 		// Deadline 是一个具体的时间点期限，超过该期限后，dial操作就会失败
 		// 如果Timeout字段也被设置了，dial操作也可能更早失败
@@ -1480,7 +1480,7 @@
 	type IPConn struct { ... }
 	// DialIP 在网络协议netProto上连接本地地址laddr和远端地址raddr，netProto必须是"ip"、"ip4"或"ip6"后跟冒号和协议名或协议号
 	func DialIP(netProto string, laddr, raddr *IPAddr) (*IPConn, error)
-	// ListenIP 创建一个接收目的地是本地地址laddr的IP数据包的网络连接，返回的*IPConn的ReadFrom和WriteTo方法可以用来发送和接收IP数据包（每个包都可获取来源址或者设置目标地址）
+	// ListenIP 创建一个接收目的地是本地地址laddr的IP数据包的网络连接，返回的*IPConn的ReadFrom和WriteTo方法可以用来发送和接收IP数据包(每个包都可获取来源址或者设置目标地址)
 	func ListenIP(netProto string, laddr *IPAddr) (*IPConn, error)
 	// LocalAddr 返回本地网络地址
 	func (c *IPConn) LocalAddr() Addr
@@ -1513,12 +1513,12 @@
 	// WriteToIP 通过c向地址addr发送一个数据包，b为包的有效负载，返回写入的字节
 	// WriteToIP 方法会在超过一个固定的时间点之后超时，并返回一个错误；在面向数据包的连接上，写入超时是十分罕见的
 	func (c *IPConn) WriteToIP(b []byte, addr *IPAddr) (int, error)
-	// WriteMsgIP 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数（包数据、带外数据）和可能的错误
+	// WriteMsgIP 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数(包数据、带外数据)和可能的错误
 	func (c *IPConn) WriteMsgIP(b, oob []byte, addr *IPAddr) (n, oobn int, err error)
 	// Close 关闭连接
 	func (c *IPConn) Close() error
 	// File 方法设置下层的os.File为阻塞模式并返回其副本
-	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会（也可能不会）得到期望的效果
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会(也可能不会)得到期望的效果
 	func (c *IPConn) File() (f *os.File, err error)
 
 	// TCPConn 见上Tcp
@@ -1531,7 +1531,7 @@
 	// net必须是"unix"、"unixgram"、"unixpacket"，如果laddr不是nil将使用它作为本地地址，否则自动选择一个本地地址
 	func DialUnix(net string, laddr, raddr *UnixAddr) (*UnixConn, error)
 	// ListenUnixgram接收目的地是本地地址laddr的Unix datagram网络连接
-	// net必须是"unixgram"，返回的*UnixConn的ReadFrom和WriteTo方法可以用来发送和接收数据包（每个包都可获取来源址或者设置目标地址）
+	// net必须是"unixgram"，返回的*UnixConn的ReadFrom和WriteTo方法可以用来发送和接收数据包(每个包都可获取来源址或者设置目标地址)
 	func ListenUnixgram(net string, laddr *UnixAddr) (*UnixConn, error)
 	// LocalAddr 返回本地网络地址
 	func (c *UnixConn) LocalAddr() Addr
@@ -1563,16 +1563,16 @@
 	// WriteToUnix 通过c向地址addr发送一个数据包，b为包的有效负载，返回写入的字节
 	// WriteToUnix 方法会在超过一个固定的时间点之后超时，并返回一个错误；在面向数据包的连接上，写入超时是十分罕见的
 	func (c *UnixConn) WriteToUnix(b []byte, addr *UnixAddr) (n int, err error)
-	// WriteMsgUnix 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数（包数据、带外数据）和可能的错误
+	// WriteMsgUnix 通过c向地址addr发送一个数据包，b和oob分别为包有效负载和对应的带外数据，返回写入的字节数(包数据、带外数据)和可能的错误
 	func (c *UnixConn) WriteMsgUnix(b, oob []byte, addr *UnixAddr) (n, oobn int, err error)
 	// Close 关闭连接
 	func (c *UnixConn) Close() error
-	// CloseRead关闭TCP连接的读取侧（以后不能读取），应尽量使用Close方法
+	// CloseRead关闭TCP连接的读取侧(以后不能读取)，应尽量使用Close方法
 	func (c *UnixConn) CloseRead() errorv
-	// CloseWrite关闭TCP连接的写入侧（以后不能写入），应尽量使用Close方法
+	// CloseWrite关闭TCP连接的写入侧(以后不能写入)，应尽量使用Close方法
 	func (c *UnixConn) CloseWrite() error
 	// File 方法设置下层的os.File为阻塞模式并返回其副本
-	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会（也可能不会）得到期望的效果
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会(也可能不会)得到期望的效果
 	func (c *UnixConn) File() (f *os.File, err error)
 ```
 
@@ -1593,18 +1593,18 @@
 
 - net.DNS
 ```golang
-	// MX 代表一条DNS MX记录（邮件交换记录），根据收信人的地址后缀来定位邮件服务器
+	// MX 代表一条DNS MX记录(邮件交换记录)，根据收信人的地址后缀来定位邮件服务器
 	type MX struct {
 		Host string
 		Pref uint16
 	}
 
-	// NS 代表一条DNS NS记录（域名服务器记录），指定该域名由哪个DNS服务器来进行解析
+	// NS 代表一条DNS NS记录(域名服务器记录)，指定该域名由哪个DNS服务器来进行解析
 	type NS struct {
 		Host string
 	}
 
-	// SRV 代表一条DNS SRV记录（资源记录），记录某个服务由哪台计算机提供
+	// SRV 代表一条DNS SRV记录(资源记录)，记录某个服务由哪台计算机提供
 	type SRV struct {
 		Target   string
 		Port     uint16
@@ -1612,9 +1612,9 @@
 		Weight   uint16
 	}
 
-	// LookupPort 函数查询指定网络和服务的（默认）端口
+	// LookupPort 函数查询指定网络和服务的(默认)端口
 	func LookupPort(network, service string) (port int, err error)
-	// LookupCNAME 函数查询name的规范DNS名（但该域名未必可以访问）
+	// LookupCNAME 函数查询name的规范DNS名(但该域名未必可以访问)
 	// 如果调用者不关心规范名可以直接调用LookupHost或者LookupIP；这两个函数都会在查询时考虑到规范名
 	func LookupCNAME(name string) (cname string, err error)
 	// LookupHost 函数查询主机的网络地址序列
@@ -1734,25 +1734,6 @@
 	func (err *ProtocolError) Error() string
 ```
 
-- http.func
-```golang
-	// CanonicalHeaderKey 返回头域（表示为Header类型）的键s的规范化格式
-	// 范化过程中让单词首字母和'-'后的第一个字母大写，其余字母小写；例如，"accept-encoding"规范化为"Accept-Encoding"
-	func CanonicalHeaderKey(s string) string
-
-	// DetectContentType 实现了http://mimesniff.spec.whatwg.org/描述的算法，用于确定数据的Content-Type
-	// 函数总是返回一个合法的MIME类型；如果它不能确定数据的类型，将返回"application/octet-stream"；它最多检查数据的前512字节
-	func DetectContentType(data []byte) string
-
-	// ParseHTTPVersion 解析HTTP版本字符串。如"HTTP/1.0"返回(1, 0, true)
-	func ParseHTTPVersion(vers string) (major, minor int, ok bool)
-	// ParseTime 用3种格式TimeFormat, time.RFC850和time.ANSIC尝试解析一个时间头的值（如Date: header）
-	func ParseTime(text string) (t time.Time, err error)
-
-	// StatusText 返回HTTP状态码code对应的文本，如220对应"OK"。如果code是未知的状态码，会返回""
-	func StatusText(code int) string
-```
-
 - http.ConnState
 ```golang
 	const (
@@ -1777,6 +1758,27 @@
 	// ConnState 代表一个客户端到服务端的连接的状态；本类型用于可选的Server.ConnState回调函数
 	type ConnState int
 	func (c ConnState) String() string
+```
+
+- http.Header
+```golang
+	// Header 代表HTTP头域的键值对
+	type Header map[string][]string
+
+	// Get 返回键对应的第一个值，如果键不存在会返回""
+	// 如要获取该键对应的值切片，请直接用规范格式的键访问map
+	func (h Header) Get(key string) string
+	// Set 添加键值对到h，如键已存在则会用只有新值一个元素的切片取代旧值切片
+	func (h Header) Set(key, value string)
+	// Add 添加键值对到h，如键已存在则会将新的值附加到旧值切片后面
+	func (h Header) Add(key, value string)
+	// Del删除键值对
+	func (h Header) Del(key string)
+	// Write以有线格式将头域写入w
+	func (h Header) Write(w io.Writer) error
+	// WriteSubset 以有线格式将头域写入w
+	// 当exclude不为nil时，如果h的键值对的键在exclude中存在且其对应值为真，该键值对就不会被写入w
+	func (h Header) WriteSubset(w io.Writer, exclude map[string]bool) error
 ```
 
 - http.Cookie
@@ -1819,22 +1821,22 @@
 	// Request 类型代表一个服务端接受到的或者客户端发送出去的HTTP请求
 	// Request各字段的意义和用途在服务端和客户端是不同的；除了字段本身上方文档，还可参见Request.Write方法和RoundTripper接口的文档
 	type Request struct {
-		// Method指定HTTP方法（GET、POST、PUT等）。对客户端，""代表GET。
+		// Method指定HTTP方法(GET、POST、PUT等)。对客户端，""代表GET。
 		Method string
 		// URL在服务端表示被请求的URI，在客户端表示要访问的URL。
 		//
-		// 在服务端，URL字段是解析请求行的URI（保存在RequestURI字段）得到的，
+		// 在服务端，URL字段是解析请求行的URI(保存在RequestURI字段)得到的，
 		// 对大多数请求来说，除了Path和RawQuery之外的字段都是空字符串。
-		// （参见RFC 2616, Section 5.1.2）
+		// (参见RFC 2616, Section 5.1.2)
 		//
 		// 在客户端，URL的Host字段指定了要连接的服务器，
-		// 而Request的Host字段（可选地）指定要发送的HTTP请求的Host头的值。
+		// 而Request的Host字段(可选地)指定要发送的HTTP请求的Host头的值。
 		URL *url.URL
 		// 接收到的请求的协议版本。本包生产的Request总是使用HTTP/1.1
 		Proto      string // "HTTP/1.0"
 		ProtoMajor int    // 1
 		ProtoMinor int    // 0
-		// Header字段用来表示HTTP请求的头域。如果头域（多行键值对格式）为：
+		// Header字段用来表示HTTP请求的头域。如果头域(多行键值对格式)为：
 		//	accept-encoding: gzip, deflate
 		//	Accept-Language: en-us
 		//	Connection: keep-alive
@@ -1844,7 +1846,7 @@
 		//		"Accept-Language": {"en-us"},
 		//		"Connection": {"keep-alive"},
 		//	}
-		// HTTP规定头域的键名（头名）是大小写敏感的，请求的解析器通过规范化头域的键名来实现这点。
+		// HTTP规定头域的键名(头名)是大小写敏感的，请求的解析器通过规范化头域的键名来实现这点。
 		// 在客户端的请求，可能会被自动添加或重写Header中的特定的头，参见Request.Write方法。
 		Header Header
 		// Body是请求的主体。
@@ -1868,7 +1870,7 @@
 		// 根据RFC 2616，该值可以是Host头的值，或者URL自身提供的主机名。
 		// Host的格式可以是"host:port"。
 		//
-		// 在客户端，请求的Host字段（可选地）用来重写请求的Host头。
+		// 在客户端，请求的Host字段(可选地)用来重写请求的Host头。
 		// 如过该字段为""，Request.Write方法会使用URL字段的Host。
 		Host string
 		// Form是解析好的表单数据，包括URL字段的query参数和POST或PUT的表单数据。
@@ -1884,12 +1886,12 @@
 		// Trailer指定了会在请求主体之后发送的额外的头域。
 		//
 		// 在服务端，Trailer字段必须初始化为只有trailer键，所有键都对应nil值。
-		// （客户端会声明哪些trailer会发送）
+		// (客户端会声明哪些trailer会发送)
 		// 在处理器从Body读取时，不能使用本字段。
 		// 在从Body的读取返回EOF后，Trailer字段会被更新完毕并包含非nil的值。
-		// （如果客户端发送了这些键值对），此时才可以访问本字段。
+		// (如果客户端发送了这些键值对)，此时才可以访问本字段。
 		//
-		// 在客户端，Trail必须初始化为一个包含将要发送的键值对的映射。（值可以是nil或其终值）
+		// 在客户端，Trail必须初始化为一个包含将要发送的键值对的映射。(值可以是nil或其终值)
 		// ContentLength字段必须是0或-1，以启用"chunked"传输编码发送请求。
 		// 在开始发送请求后，Trailer可以在读取请求主体期间被修改，
 		// 一旦请求主体返回EOF，调用者就不可再修改Trailer。
@@ -1902,7 +1904,7 @@
 		// 客户端会忽略请求中的RemoteAddr字段。
 		RemoteAddr string
 		// RequestURI是被客户端发送到服务端的请求的请求行中未修改的请求URI
-		// （参见RFC 2616, Section 5.1）
+		// (参见RFC 2616, Section 5.1)
 		// 一般应使用URI字段，在客户端设置请求的本字段会导致错误。
 		RequestURI string
 		// TLS字段允许HTTP服务器和其他软件记录接收到该请求的TLS连接的信息
@@ -1915,19 +1917,19 @@
 	// NewRequest 使用指定的方法、网址和可选的主题创建并返回一个新的*Request
 	// 如果body参数实现了io.Closer接口，Request返回值的Body 字段会被设置为body，并会被Client类型的Do、Post和PostFOrm方法以及Transport.RoundTrip方法关闭
 	func NewRequest(method, urlStr string, body io.Reader) (*Request, error)
-	// ReadRequest 从b读取并解析出一个HTTP请求（本函数主要用在服务端从下层获取请求）
+	// ReadRequest 从b读取并解析出一个HTTP请求(本函数主要用在服务端从下层获取请求)
 	func ReadRequest(b *bufio.Reader) (req *Request, err error)
 	// ProtoAtLeast 报告该请求使用的HTTP协议版本至少是major.minor
 	func (r *Request) ProtoAtLeast(major, minor int) bool
-	// UserAgent 返回请求中的客户端用户代理信息（请求的User-Agent头）
+	// UserAgent 返回请求中的客户端用户代理信息(请求的User-Agent头)
 	func (r *Request) UserAgent() string
-	// Referer 返回请求中的访问来路信息（请求的Referer头）
+	// Referer 返回请求中的访问来路信息(请求的Referer头)
 	func (r *Request) Referer() string
-	// AddCookie 向请求中添加一个cookie，按照RFC 6265 section 5.4的规定，AddCookie不会添加超过一个Cookie头字段，这表示所有的cookie都写在同一行，用分号分隔（cookie内部用逗号分隔属性）
+	// AddCookie 向请求中添加一个cookie，按照RFC 6265 section 5.4的规定，AddCookie不会添加超过一个Cookie头字段，这表示所有的cookie都写在同一行，用分号分隔(cookie内部用逗号分隔属性)
 	func (r *Request) AddCookie(c *Cookie)
 	// SetBasicAuth 使用提供的用户名和密码，采用HTTP基本认证，设置请求的Authorization头，HTTP基本认证会明码传送用户名和密码
 	func (r *Request) SetBasicAuth(username, password string)
-	// Write 方法以有线格式将HTTP/1.1请求写入w（用于将请求写入下层TCPConn等）
+	// Write 方法以有线格式将HTTP/1.1请求写入w(用于将请求写入下层TCPConn等)
 	// // 本方法会考虑请求的如下字段：
 	// // Host
 	// // URL
@@ -1945,7 +1947,7 @@
 	// Cookie 返回请求中名为name的cookie，如果未找到该cookie会返回nil, ErrNoCookie
 	func (r *Request) Cookie(name string) (*Cookie, error)
 	// ParseForm 解析URL中的查询字符串，并将解析结果更新到r.Form字段
-	// 对于POST或PUT请求，ParseForm还会将body当作表单解析，并将结果既更新到r.PostForm也更新到r.Form；解析结果中，POST或PUT请求主体要优先于URL查询字符串（同名变量，主体的值在查询字符串的值前面）
+	// 对于POST或PUT请求，ParseForm还会将body当作表单解析，并将结果既更新到r.PostForm也更新到r.Form；解析结果中，POST或PUT请求主体要优先于URL查询字符串(同名变量，主体的值在查询字符串的值前面)
 	// 如果请求的主体的大小没有被MaxBytesReader函数设定限制，其大小默认限制为开头10MB
 	// ParseMultipartForm会自动调用ParseForm；重复调用本方法是无意义的
 	func (r *Request) ParseForm() error
@@ -1974,8 +1976,8 @@
 		ProtoMinor int    // 例如0
 		// Header保管头域的键值对。
 		// 如果回复中有多个头的键相同，Header中保存为该键对应用逗号分隔串联起来的这些头的值
-		// （参见RFC 2616 Section 4.2）
-		// 被本结构体中的其他字段复制保管的头（如ContentLength）会从Header中删掉。
+		// (参见RFC 2616 Section 4.2)
+		// 被本结构体中的其他字段复制保管的头(如ContentLength)会从Header中删掉。
 		//
 		// Header中的键都是规范化的，参见CanonicalHeaderKey函数
 		Header Header
@@ -1985,28 +1987,28 @@
 		// 如果服务端采用"chunked"传输编码发送的回复，Body字段会自动进行解码。
 		Body io.ReadCloser
 		// ContentLength记录相关内容的长度。
-		// 其值为-1表示长度未知（采用chunked传输编码）
+		// 其值为-1表示长度未知(采用chunked传输编码)
 		// 除非对应的Request.Method是"HEAD"，其值>=0表示可以从Body读取的字节数
 		ContentLength int64
 		// TransferEncoding按从最外到最里的顺序列出传输编码，空切片表示"identity"编码。
 		TransferEncoding []string
-		// Close记录头域是否指定应在读取完主体后关闭连接。（即Connection头）
+		// Close记录头域是否指定应在读取完主体后关闭连接。(即Connection头)
 		// 该值是给客户端的建议，Response.Write方法的ReadResponse函数都不会关闭连接。
 		Close bool
 		// Trailer字段保存和头域相同格式的trailer键值对，和Header字段相同类型
 		Trailer Header
 		// Request是用来获取此回复的请求
-		// Request的Body字段是nil（因为已经被用掉了）
+		// Request的Body字段是nil(因为已经被用掉了)
 		// 这个字段是被Client类型发出请求并获得回复后填充的
 		Request *Request
 		// TLS包含接收到该回复的TLS连接的信息。 对未加密的回复，本字段为nil。
-		// 返回的指针是被（同一TLS连接接收到的）回复共享的，不应被修改。
+		// 返回的指针是被(同一TLS连接接收到的)回复共享的，不应被修改。
 		TLS *tls.ConnectionState
 	}
 
 	// ReadResponse从r读取并返回一个HTTP 回复
-	// req参数是可选的，指定该回复对应的请求（即是对该请求的回复）；如果是nil，将假设请求是GET请求
-	// 客户端必须在结束resp.Body的读取后关闭它；读取完毕并关闭后，客户端可以检查resp.Trailer字段获取回复的trailer的键值对（本函数主要用在客户端从下层获取回复）
+	// req参数是可选的，指定该回复对应的请求(即是对该请求的回复)；如果是nil，将假设请求是GET请求
+	// 客户端必须在结束resp.Body的读取后关闭它；读取完毕并关闭后，客户端可以检查resp.Trailer字段获取回复的trailer的键值对(本函数主要用在客户端从下层获取回复)
 	func ReadResponse(r *bufio.Reader, req *Request) (*Response, error)
 	// ProtoAtLeast 报告该回复使用的HTTP协议版本至少是major.minor
 	func (r *Response) ProtoAtLeast(major, minor int) bool
@@ -2014,7 +2016,7 @@
 	func (r *Response) Cookies() []*Cookie
 	// Location 返回该回复的Location头设置的URL。相对地址的重定向会相对于该回复对应的请求来确定绝对地址。如果回复中没有Location头，会返回nil, ErrNoLocation
 	func (r *Response) Location() (*url.URL, error)
-	// Write 以有线格式将回复写入w（用于将回复写入下层TCPConn等）
+	// Write 以有线格式将回复写入w(用于将回复写入下层TCPConn等)
 	// // 本方法会考虑如下字段：
 	// // StatusCode
 	// // ProtoMajor
@@ -2024,7 +2026,7 @@
 	// // Trailer
 	// // Body
 	// // ContentLength
-	// // Header（不规范的键名和它对应的值会导致不可预知的行为）
+	// // Header(不规范的键名和它对应的值会导致不可预知的行为)
 	// // Body字段在发送完回复后会被关闭
 	func (r *Response) Write(w io.Writer) error
 
@@ -2064,6 +2066,27 @@
 		Hijack() (net.Conn, *bufio.ReadWriter, error)
 	}
 
+	// SetCookie 在w的头域中添加Set-Cookie头，该HTTP头的值为cookie
+	func SetCookie(w ResponseWriter, cookie *Cookie)
+	// Redirect 回复请求一个重定向地址urlStr和状态码code，该重定向地址可以是相对于请求r的相对地址
+	func Redirect(w ResponseWriter, r *Request, urlStr string, code int)
+	// NotFound回复请求404状态码(not found：目标未发现)
+	func NotFound(w ResponseWriter, r *Request)
+	// Error 使用指定的错误信息和状态码回复请求，将数据写入w；错误信息必须是明文
+	func Error(w ResponseWriter, error string, code int)
+	// ServeContent 使用提供的ReadSeeker的内容回复请求；
+	// ServeContent比起io.Copy函数的主要优点，是可以处理范围类请求(只要一部分内容)、设置MIME类型，处理If-Modified-Since请求
+	// 如果未设定回复的Content-Type头，本函数首先会尝试从name的文件扩展名推断数据类型；如果失败，会用读取content的第1块数据并提供给DetectContentType推断类型；之后会设置Content-Type头。参数name不会用于别的地方，甚至于它可以是空字符串，也永远不会发送到回复里
+	// 如果modtime不是Time零值，函数会在回复的头域里设置Last-Modified头；如果请求的头域包含If-Modified-Since头，本函数会使用modtime参数来确定是否应该发送内容；如果调用者设置了w的ETag头，ServeContent会使用它处理包含If-Range头和If-None-Match头的请求。
+	// 参数content的Seek方法必须有效：函数使用Seek来确定它的大小
+	// 注意：本包File接口和*os.File类型都实现了io.ReadSeeker接口
+	func ServeContent(w ResponseWriter, req *Request, name string, modtime time.Time, content io.ReadSeeker)
+	// ServeFile 回复请求name指定的文件或者目录的内容
+	func ServeFile(w ResponseWriter, r *Request, name string)
+	// MaxBytesReader 类似io.LimitReader，但它是用来限制接收到的请求的Body的大小的
+	// 不同于io.LimitReader，本函数返回一个ReadCloser，返回值的Read方法在读取的数据超过大小限制时会返回非EOF错误，其Close方法会关闭下层的io.ReadCloser接口r
+	// MaxBytesReader 预防客户端因为意外或者蓄意发送的“大”请求，以避免尺寸过大的请求浪费服务端资源
+	func MaxBytesReader(w ResponseWriter, r io.ReadCloser, n int64) io.ReadCloser
 ```
 
 - http.Transport
@@ -2092,7 +2115,7 @@
 		// 如果MaxIdleConnsPerHost!=0，会控制每个主机下的最大闲置连接。
 		// 如果MaxIdleConnsPerHost==0，会使用DefaultMaxIdleConnsPerHost。
 		MaxIdleConnsPerHost int
-		// ResponseHeaderTimeout指定在发送完请求（包括其可能的主体）之后，
+		// ResponseHeaderTimeout指定在发送完请求(包括其可能的主体)之后，
 		// 等待接收服务端的回复的头域的最大时间。零值表示不设置超时。
 		// 该时间不包括获取回复主体的时间。
 		ResponseHeaderTimeout time.Duration
@@ -2100,7 +2123,7 @@
 	}
 
 	// DefaultTransport 是被包变量DefaultClient使用的默认RoundTripper接口
-	// 它会根据需要创建网络连接，并缓存以便在之后的请求中重用这些连接；它使用环境变量$HTTP_PROXY和$NO_PROXY（或$http_proxy和$no_proxy）指定的HTTP代理
+	// 它会根据需要创建网络连接，并缓存以便在之后的请求中重用这些连接；它使用环境变量$HTTP_PROXY和$NO_PROXY(或$http_proxy和$no_proxy)指定的HTTP代理
 	var DefaultTransport RoundTripper = &Transport{
 		Proxy: ProxyFromEnvironment,
 		Dial: (&net.Dialer{
@@ -2115,29 +2138,34 @@
 	// RegisterProtocol可以被其他包用于提供"ftp"或"file"等协议的实现
 	func (t *Transport) RegisterProtocol(scheme string, rt RoundTripper)
 	// RoundTrip 方法实现了RoundTripper接口
-	// 高层次的HTTP客户端支持（如管理cookie和重定向）请参见Get、Post等函数和Client类型
+	// 高层次的HTTP客户端支持(如管理cookie和重定向)请参见Get、Post等函数和Client类型
 	func (t *Transport) RoundTrip(req *Request) (resp *Response, err error)
 	// CloseIdleConnections 关闭所有之前的请求建立但目前处于闲置状态的连接，本方法不会中断正在使用的连接
 	func (t *Transport) CloseIdleConnections()
 	// CancelRequest 通过关闭请求所在的连接取消一个执行中的请求
 	func (t *Transport) CancelRequest(req *Request)
-```
 
+	// ProxyURL 返回一个代理函数(用于Transport类型)，该函数总是返回同一个URL
+	func ProxyURL(fixedURL *url.URL) func(*Request) (*url.URL, error)
+	// ProxyFromEnvironment f使用环境变量$HTTP_PROXY和$NO_PROXY(或$http_proxy和$no_proxy)的配置返回用于req的代理
+	// 如果代理环境不合法将返回错误；如果环境未设定代理或者给定的request不应使用代理时，将返回(nil, nil)；如果req.URL.Host字段是"localhost"(可以有端口号，也可以没有)，也会返回(nil, nil)
+	func ProxyFromEnvironment(req *Request) (*url.URL, error)
+```
 
 - http.Client
 ```golang
-	// Client类型 代表HTTP客户端；它的零值（DefaultClient）是一个可用的使用DefaultTransport的客户端
-	// Client的Transport字段一般会含有内部状态（缓存TCP连接），因此Client类型值应尽量被重用而不是每次需要都创建新的；Client类型值可以安全的被多个go程同时使用。
-	// Client类型的层次比RoundTripper接口（如Transport）高，还会管理HTTP的cookie和重定向等细节
+	// Client类型 代表HTTP客户端；它的零值(DefaultClient)是一个可用的使用DefaultTransport的客户端
+	// Client的Transport字段一般会含有内部状态(缓存TCP连接)，因此Client类型值应尽量被重用而不是每次需要都创建新的；Client类型值可以安全的被多个go程同时使用。
+	// Client类型的层次比RoundTripper接口(如Transport)高，还会管理HTTP的cookie和重定向等细节
 	type Client struct {
 		// Transport指定执行独立、单次HTTP请求的机制。
 		// 如果Transport为nil，则使用DefaultTransport。
 		Transport RoundTripper
 		// CheckRedirect指定处理重定向的策略。
 		// 如果CheckRedirect不为nil，客户端会在执行重定向之前调用本函数字段。
-		// 参数req和via是将要执行的请求和已经执行的请求（切片，越新的请求越靠后）。
+		// 参数req和via是将要执行的请求和已经执行的请求(切片，越新的请求越靠后)。
 		// 如果CheckRedirect返回一个错误，本类型的Get方法不会发送请求req，
-		// 而是返回之前得到的最后一个回复和该错误。（包装进url.Error类型里）
+		// 而是返回之前得到的最后一个回复和该错误。(包装进url.Error类型里)
 		//
 		// 如果CheckRedirect为nil，会采用默认策略：连续10此请求后停止。
 		CheckRedirect func(req *Request, via []*Request) error
@@ -2152,13 +2180,13 @@
 		//
 		// Client实例的Transport字段必须支持CancelRequest方法，
 		// 否则Client会在试图用Head、Get、Post或Do方法执行请求时返回错误。
-		// 本类型的Transport字段默认值（DefaultTransport）支持CancelRequest方法。
+		// 本类型的Transport字段默认值(DefaultTransport)支持CancelRequest方法。
 		Timeout time.Duration
 	}
 
-	// Do 方法发送请求，返回HTTP回复；它会遵守客户端c设置的策略（如重定向、cookie、认证）
-	// 如果客户端的策略（如重定向）返回错误或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误
-	// 如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它；如果返回值resp的主体未关闭，c下层的RoundTripper接口（一般为Transport类型）可能无法重用resp主体下层保持的TCP连接去执行之后的请求
+	// Do 方法发送请求，返回HTTP回复；它会遵守客户端c设置的策略(如重定向、cookie、认证)
+	// 如果客户端的策略(如重定向)返回错误或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误
+	// 如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它；如果返回值resp的主体未关闭，c下层的RoundTripper接口(一般为Transport类型)可能无法重用resp主体下层保持的TCP连接去执行之后的请求
 	// 请求的主体，如果非nil，会在执行后被c.Transport关闭，即使出现错误
 	// 一般应使用Get、Post或PostForm方法代替Do方法
 	func (c *Client) Do(req *Request) (resp *Response, err error)
@@ -2182,33 +2210,69 @@
 	// PostForm 向指定的URL发出一个POST请求，url.Values类型的data会被编码为请求的主体
 	// POST数据的类型一般会设为"application/x-www-form-urlencoded"。如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
 	func (c *Client) PostForm(url string, data url.Values) (resp *Response, err error)
+
+	// Head 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Head会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	// Head是对包变量DefaultClient的Head方法的包装
+	func Head(url string) (resp *Response, err error)
+	// Get 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Get会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	// 如果c.CheckRedirect执行失败或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误；如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	// Get是对包变量DefaultClient的Get方法的包装
+	// For example
+	// // res, err := http.Get("http://www.google.com/robots.txt")
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	// // robots, err := ioutil.ReadAll(res.Body)
+	// // res.Body.Close()
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	// // fmt.Printf("%s", robots)
+	func Get(url string) (resp *Response, err error)
+	// Post 向指定的URL发出一个POST请求
+	// bodyType为POST数据的类型，body为POST数据，作为请求的主体；如果参数body实现了io.Closer接口，它会在发送请求后被关闭；调用者有责任在读取完返回值resp的主体后关闭它
+	// Post是对包变量DefaultClient的Post方法的包装
+	func Post(url string, bodyType string, body io.Reader) (resp *Response, err error)
+	// PostForm 向指定的URL发出一个POST请求，url.Values类型的data会被编码为请求的主体
+	// 如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	// PostForm是对包变量DefaultClient的PostForm方法的包装
+	func PostForm(url string, data url.Values) (resp *Response, err error)
+
 ```
 
 - http.Server
 ```golang
 	// Server类型定义了运行HTTP服务端的参数；Server的零值是合法的配置
 	type Server struct {
-	    Addr           string        // 监听的TCP地址，如果为空字符串会使用":http"
-	    Handler        Handler       // 调用的处理器，如为nil会调用http.DefaultServeMux
-	    ReadTimeout    time.Duration // 请求的读取操作在超时前的最大持续时间
-	    WriteTimeout   time.Duration // 回复的写入操作在超时前的最大持续时间
-	    MaxHeaderBytes int           // 请求的头域最大长度，如为0则用DefaultMaxHeaderBytes
-	    TLSConfig      *tls.Config   // 可选的TLS配置，用于ListenAndServeTLS方法
-	    // TLSNextProto（可选地）指定一个函数来在一个NPN型协议升级出现时接管TLS连接的所有权。
-	    // 映射的键为商谈的协议名；映射的值为函数，该函数的Handler参数应处理HTTP请求，
-	    // 并且初始化Handler.ServeHTTP的*Request参数的TLS和RemoteAddr字段（如果未设置）。
-	    // 连接在函数返回时会自动关闭。
-	    TLSNextProto map[string]func(*Server, *tls.Conn, Handler)
-	    // ConnState字段指定一个可选的回调函数，该函数会在一个与客户端的连接改变状态时被调用。
-	    // 参见ConnState类型和相关常数获取细节。
-	    ConnState func(net.Conn, ConnState)
-	    // ErrorLog指定一个可选的日志记录器，用于记录接收连接时的错误和处理器不正常的行为。
-	    // 如果本字段为nil，日志会通过log包的标准日志记录器写入os.Stderr。
-	    ErrorLog *log.Logger
-	    // 内含隐藏或非导出字段
+		Addr           string        // 监听的TCP地址，如果为空字符串会使用":http"
+		Handler        Handler       // 调用的处理器，如为nil会调用http.DefaultServeMux
+		ReadTimeout    time.Duration // 请求的读取操作在超时前的最大持续时间
+		WriteTimeout   time.Duration // 回复的写入操作在超时前的最大持续时间
+		MaxHeaderBytes int           // 请求的头域最大长度，如为0则用DefaultMaxHeaderBytes
+		TLSConfig      *tls.Config   // 可选的TLS配置，用于ListenAndServeTLS方法
+		// TLSNextProto(可选地)指定一个函数来在一个NPN型协议升级出现时接管TLS连接的所有权。
+		// 映射的键为商谈的协议名；映射的值为函数，该函数的Handler参数应处理HTTP请求，
+		// 并且初始化Handler.ServeHTTP的*Request参数的TLS和RemoteAddr字段(如果未设置)。
+		// 连接在函数返回时会自动关闭。
+		TLSNextProto map[string]func(*Server, *tls.Conn, Handler)
+		// ConnState字段指定一个可选的回调函数，该函数会在一个与客户端的连接改变状态时被调用。
+		// 参见ConnState类型和相关常数获取细节。
+		ConnState func(net.Conn, ConnState)
+		// ErrorLog指定一个可选的日志记录器，用于记录接收连接时的错误和处理器不正常的行为。
+		// 如果本字段为nil，日志会通过log包的标准日志记录器写入os.Stderr。
+		ErrorLog *log.Logger
+		// ...
 	}
 
-	// SetKeepAlivesEnabled 控制是否允许HTTP闲置连接重用（keep-alive）功能；
+	// SetKeepAlivesEnabled 控制是否允许HTTP闲置连接重用(keep-alive)功能；
 	// 默认该功能总是被启用的，只有资源非常紧张的环境或者服务端在关闭进程中时，才应该关闭该功能
 	func (s *Server) SetKeepAlivesEnabled(v bool)
 	// Serve 会接手监听器l收到的每一个连接，并为每一个连接创建一个新的服务go程；该go程会读取请求，然后调用srv.Handler回复请求
@@ -2218,6 +2282,39 @@
 	// ListenAndServeTLS监听srv.Addr确定的TCP地址，并且会调用Serve方法处理接收到的连接
 	// 必须提供证书文件和对应的私钥文件；如果证书是由权威机构签发的，certFile参数必须是顺序串联的服务端证书和CA证书；如果srv.Addr为空字符串，会使用":https"
 	func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error
+
+	// Serve 会接手监听器l收到的每一个连接，并为每一个连接创建一个新的服务go程
+	// 该go程会读取请求，然后调用handler回复请求；handler参数一般会设为nil，此时会使用DefaultServeMux
+	func Serve(l net.Listener, handler Handler) error
+	// ListenAndServe监听TCP地址addr，并且会使用handler参数调用Serve函数处理接收到的连接
+	// handler参数一般会设为nil，此时会使用DefaultServeMux
+	// For example
+	// // // hello world, the web server
+	// // func HelloServer(w http.ResponseWriter, req *http.Request) {
+	// // 	io.WriteString(w, "hello, world!\n")
+	// // }
+	// // http.HandleFunc("/hello", HelloServer)
+	// // err := http.ListenAndServe(":12345", nil)
+	// // if err != nil {
+	// // 	log.Fatal("ListenAndServe: ", err)
+	// // }
+	// // 
+	func ListenAndServe(addr string, handler Handler) error
+	// ListenAndServeTLS 和ListenAndServe 的行为基本一致，除了它期望HTTPS连接之外
+	// 此外，必须提供证书文件和对应的私钥文件；如果证书是由权威机构签发的，certFile参数必须是顺序串联的服务端证书和CA证书；如果srv.Addr为空字符串，会使用":https"
+	// 使用crypto/tls包的generate_cert.go文件来生成cert.pem和key.pem两个文件
+	// For example
+	// // func handler(w http.ResponseWriter, req *http.Request) {
+	// // 	w.Header().Set("Content-Type", "text/plain")
+	// // 	w.Write([]byte("This is an example server.\n"))
+	// // }
+	// // http.HandleFunc("/", handler)
+	// // log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
+	// // err := http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	func ListenAndServeTLS(addr string, certFile string, keyFile string, handler Handler) error
 ```
 
 - http.Handler
@@ -2227,13 +2324,12 @@
 	type Handler interface {
 		ServeHTTP(ResponseWriter, *Request)
 	}
-
 	// NotFoundHandler 返回一个简单的请求处理器，该处理器会对每个请求都回复"404 page not found"
 	func NotFoundHandler() Handler
 	// RedirectHandler 返回一个请求处理器，该处理器会对每个请求都使用状态码code重定向到网址url
 	func RedirectHandler(url string, code int) Handler
 	// TimeoutHandler 返回一个采用指定时间限制的请求处理器
-	// 返回的Handler会调用h.ServeHTTP去处理每个请求，但如果某一次调用耗时超过了时间限制，该处理器会回复请求状态码503 Service Unavailable，并将msg作为回复的主体（如果msg为空字符串，将发送一个合理的默认信息）；在超时后，h对它的ResponseWriter接口参数的写入操作会返回ErrHandlerTimeout
+	// 返回的Handler会调用h.ServeHTTP去处理每个请求，但如果某一次调用耗时超过了时间限制，该处理器会回复请求状态码503 Service Unavailable，并将msg作为回复的主体(如果msg为空字符串，将发送一个合理的默认信息)；在超时后，h对它的ResponseWriter接口参数的写入操作会返回ErrHandlerTimeout
 	func TimeoutHandler(h Handler, dt time.Duration, msg string) Handler
 	// StripPrefix 返回一个处理器，该处理器会将请求的URL.Path字段中给定前缀prefix去除后再交由h处理。StripPrefix会向URL.Path字段中没有给定前缀的请求回复404 page not found
 	// For example
@@ -2242,19 +2338,26 @@
 	// // URL's path before the FileServer seest:
 	// http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
 	func StripPrefix(prefix string, h Handler) Handler
+
 	// HandlerFunc type是一个适配器，通过类型转换让我们可以将普通的函数作为HTTP处理器使用，如果f是一个具有适当签名的函数，HandlerFunc(f)通过调用f实现了Handler接口
 	type HandlerFunc func(ResponseWriter, *Request)
 	// ServeHTTP 方法会调用f(w, r)
 	func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
+
+	// Handle 注册HTTP处理器handler和对应的模式pattern(注册到DefaultServeMux)
+	// 如果该模式已经注册有一个处理器，Handle会panic；ServeMux的文档解释了模式的匹配机制、
+	func Handle(pattern string, handler Handler)
+	// HandleFunc注册一个处理器函数handler和对应的模式pattern(注册到DefaultServeMux)；ServeMux的文档解释了模式的匹配机制
+	func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
 ```
 
 - http.ServeMux
 ```golang
 	// ServeMux类型 是HTTP请求的多路转接器；它会将每一个接收的请求的URL与一个注册模式的列表进行匹配，并调用和URL最匹配的模式的处理器
-	// 模式是固定的、由根开始的路径，如"/favicon.ico"，或由根开始的子树，如"/images/"（注意结尾的斜杠）；较长的模式优先于较短的模式，因此如果模式"/images/"和"/images/thumbnails/"都注册了处理器，后一个处理器会用于路径以"/images/thumbnails/"开始的请求，前一个处理器会接收到其余的路径在"/images/"子树下的请求
+	// 模式是固定的、由根开始的路径，如"/favicon.ico"，或由根开始的子树，如"/images/"(注意结尾的斜杠)；较长的模式优先于较短的模式，因此如果模式"/images/"和"/images/thumbnails/"都注册了处理器，后一个处理器会用于路径以"/images/thumbnails/"开始的请求，前一个处理器会接收到其余的路径在"/images/"子树下的请求
 	// 注意，因为以斜杠结尾的模式代表一个由根开始的子树，模式"/"会匹配所有的未被其他注册的模式匹配的路径，而不仅仅是路径"/"
-	// 模式也能（可选地）以主机名开始，表示只匹配该主机上的路径；指定主机的模式优先于一般的模式，因此一个注册了两个模式"/codesearch"和"codesearch.google.com/"的处理器不会接管目标为"http://www.google.com/"的请求
-	// ServeMux还会注意到请求的URL路径的无害化，将任何路径中包含"."或".."元素的请求重定向到等价的没有这两种元素的URL。（参见path.Clean函数）
+	// 模式也能(可选地)以主机名开始，表示只匹配该主机上的路径；指定主机的模式优先于一般的模式，因此一个注册了两个模式"/codesearch"和"codesearch.google.com/"的处理器不会接管目标为"http://www.google.com/"的请求
+	// ServeMux还会注意到请求的URL路径的无害化，将任何路径中包含"."或".."元素的请求重定向到等价的没有这两种元素的URL。(参见path.Clean函数)
 	type ServeMux struct { ... }
 
 	// NewServeMux 创建并返回一个新的*ServeMux
@@ -2275,7 +2378,7 @@
 	func (mux *ServeMux) Handle(pattern string, handler Handler)
 	// HandleFunc 注册一个处理器函数handler和对应的模式pattern
 	func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request))
-	// Handler根据r.Method、r.Host和r.URL.Path等数据，返回将用于处理该请求的HTTP处理器；它总是返回一个非nil的处理器；如果路径不是它的规范格式，将返回内建的用于重定向到等价的规范路径的处理器
+	// Handler 根据r.Method、r.Host和r.URL.Path等数据，返回将用于处理该请求的HTTP处理器；它总是返回一个非nil的处理器；如果路径不是它的规范格式，将返回内建的用于重定向到等价的规范路径的处理器
 	// Handler也会返回匹配该请求的的已注册模式；在内建重定向处理器的情况下，pattern会在重定向后进行匹配。如果没有已注册模式可以应用于该请求，本方法将返回一个内建的"404 page not found"处理器和一个空字符串模式
 	func (mux *ServeMux) Handler(r *Request) (h Handler, pattern string)
 	// ServeHTTP 将请求派遣到与请求的URL最匹配的模式对应的处理器
@@ -2384,22 +2487,32 @@
 		- `func bytes.Replace(s []byte, old []byte, new []byte, n int) []byte` 替换字符
 		- `func bytes.Join(s [][]byte, sep []byte) []byte`
 
-### 3. net/mail
+### 4. net/mail
 - net/smtp
 	- smtp包实现了简单邮件传输协议(SMTP)
 
 - net/mail
-	- mail包实现了邮件的解析
+	- mail包实现了邮件的解析，大部分都遵守RFC 5322规定的语法
+		- 旧格式地址和嵌入远端信息的地址不会被解析
+		- 组地址不会被解析
+		- 不支持全部的间隔符(CFWS语法元素)，如分属两行的地址
 
-### 3. net/rpc
+### 5. net/rpc
 - net/rpc/jsonrpc
 	- rpc包提供了通过网络或其他I/O连接对一个对象的导出方法的访问
 
 - net/rpc/jsonrpc
 	- jsonrpc包实现了JSON-RPC的ClientCodec和ServerCodec接口，可用于rpc包
 
+### 6. net/other
 - net/textproto
 	- textproto实现了对基于文本的请求/回复协议的一般性支持，包括HTTP、NNTP和SMTP
+	- 本包提供
+		- 错误，代表服务端回复的错误码
+		- Pipeline，以管理客户端中的管道化的请求/回复
+		- Reader，读取数值回复码行，键值对形式的头域，一个作为后续行先导的空行，以及以只有一个"."的一行为结尾的整个文本块
+		- Writer，写入点编码的文本
+		- Conn，对Reader、Writer和Pipline的易用的包装，用于单个网络连接
 
 - net/url
 	- url包解析URL并实现了查询的逸码
