@@ -2427,6 +2427,127 @@
 	func FileServer(root FileSystem) Handler
 ```
 
+- http.Func
+```golang
+	// CanonicalHeaderKey 返回头域(表示为Header类型)的键s的规范化格式
+	// 范化过程中让单词首字母和'-'后的第一个字母大写，其余字母小写；例如，"accept-encoding"规范化为"Accept-Encoding"
+	func CanonicalHeaderKey(s string) string
+
+	// DetectContentType 实现了http://mimesniff.spec.whatwg.org/描述的算法，用于确定数据的Content-Type
+	// 函数总是返回一个合法的MIME类型；如果它不能确定数据的类型，将返回"application/octet-stream"；它最多检查数据的前512字节
+	func DetectContentType(data []byte) string
+
+	// ParseHTTPVersion 解析HTTP版本字符串。如"HTTP/1.0"返回(1, 0, true)
+	func ParseHTTPVersion(vers string) (major, minor int, ok bool)
+	// ParseTime 用3种格式TimeFormat, time.RFC850和time.ANSIC尝试解析一个时间头的值(如Date: header)
+	func ParseTime(text string) (t time.Time, err error)
+
+	// StatusText 返回HTTP状态码code对应的文本，如220对应"OK"。如果code是未知的状态码，会返回""
+	func StatusText(code int) string
+
+	// ProxyURL 返回一个代理函数(用于Transport类型)，该函数总是返回同一个URL
+	func ProxyURL(fixedURL *url.URL) func(*Request) (*url.URL, error)
+	// ProxyFromEnvironment使用环境变量$HTTP_PROXY和$NO_PROXY(或$http_proxy和$no_proxy)的配置返回用于req的代理
+	// 如果代理环境不合法将返回错误；如果环境未设定代理或者给定的request不应使用代理时，将返回(nil, nil)；如果req.URL.Host字段是"localhost"(可以有端口号，也可以没有)，也会返回(nil, nil)
+	func ProxyFromEnvironment(req *Request) (*url.URL, error)
+
+	// SetCookie 在w的头域中添加Set-Cookie头，该HTTP头的值为cookie
+	func SetCookie(w ResponseWriter, cookie *Cookie)
+	// Redirect 回复请求一个重定向地址urlStr和状态码code，该重定向地址可以是相对于请求r的相对地址
+	func Redirect(w ResponseWriter, r *Request, urlStr string, code int)
+	// NotFound回复请求404状态码(not found：目标未发现)
+	func NotFound(w ResponseWriter, r *Request)
+	// Error 使用指定的错误信息和状态码回复请求，将数据写入w；错误信息必须是明文
+	func Error(w ResponseWriter, error string, code int)
+	// ServeContent 使用提供的ReadSeeker的内容回复请求；
+	// ServeContent比起io.Copy函数的主要优点，是可以处理范围类请求(只要一部分内容)、设置MIME类型，处理If-Modified-Since请求
+	// 如果未设定回复的Content-Type头，本函数首先会尝试从name的文件扩展名推断数据类型；如果失败，会用读取content的第1块数据并提供给DetectContentType推断类型；之后会设置Content-Type头。参数name不会用于别的地方，甚至于它可以是空字符串，也永远不会发送到回复里
+	// 如果modtime不是Time零值，函数会在回复的头域里设置Last-Modified头；如果请求的头域包含If-Modified-Since头，本函数会使用modtime参数来确定是否应该发送内容；如果调用者设置了w的ETag头，ServeContent会使用它处理包含If-Range头和If-None-Match头的请求。
+	// 参数content的Seek方法必须有效：函数使用Seek来确定它的大小
+	// 注意：本包File接口和*os.File类型都实现了io.ReadSeeker接口
+	func ServeContent(w ResponseWriter, req *Request, name string, modtime time.Time, content io.ReadSeeker)
+	// ServeFile 回复请求name指定的文件或者目录的内容
+	func ServeFile(w ResponseWriter, r *Request, name string)
+	// MaxBytesReader 类似io.LimitReader，但它是用来限制接收到的请求的Body的大小的
+	// 不同于io.LimitReader，本函数返回一个ReadCloser，返回值的Read方法在读取的数据超过大小限制时会返回非EOF错误，其Close方法会关闭下层的io.ReadCloser接口r
+	// MaxBytesReader 预防客户端因为意外或者蓄意发送的“大”请求，以避免尺寸过大的请求浪费服务端资源
+	func MaxBytesReader(w ResponseWriter, r io.ReadCloser, n int64) io.ReadCloser
+
+	// Head 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Head会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	// Head是对包变量DefaultClient的Head方法的包装
+	func Head(url string) (resp *Response, err error)
+	// Get 向指定的URL发出一个HEAD请求，如果回应的状态码如下，Get会在调用c.CheckRedirect后执行重定向：
+	// // 301 (Moved Permanently)
+	// // 302 (Found)
+	// // 303 (See Other)
+	// // 307 (Temporary Redirect)
+	// 如果c.CheckRedirect执行失败或存在HTTP协议错误时，本方法将返回该错误；如果回应的状态码不是2xx，本方法并不会返回错误；如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	// Get是对包变量DefaultClient的Get方法的包装
+	// For example
+	// // res, err := http.Get("http://www.google.com/robots.txt")
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	// // robots, err := ioutil.ReadAll(res.Body)
+	// // res.Body.Close()
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	// // fmt.Printf("%s", robots)
+	func Get(url string) (resp *Response, err error)
+	// Post 向指定的URL发出一个POST请求
+	// bodyType为POST数据的类型，body为POST数据，作为请求的主体；如果参数body实现了io.Closer接口，它会在发送请求后被关闭；调用者有责任在读取完返回值resp的主体后关闭它
+	// Post是对包变量DefaultClient的Post方法的包装
+	func Post(url string, bodyType string, body io.Reader) (resp *Response, err error)
+	// PostForm 向指定的URL发出一个POST请求，url.Values类型的data会被编码为请求的主体
+	// 如果返回值err为nil，resp.Body总是非nil的，调用者应该在读取完resp.Body后关闭它
+	// PostForm是对包变量DefaultClient的PostForm方法的包装
+	func PostForm(url string, data url.Values) (resp *Response, err error)
+
+	// Handle 注册HTTP处理器handler和对应的模式pattern(注册到DefaultServeMux)
+	// 如果该模式已经注册有一个处理器，Handle会panic；ServeMux的文档解释了模式的匹配机制、
+	func Handle(pattern string, handler Handler)
+	// HandleFunc注册一个处理器函数handler和对应的模式pattern(注册到DefaultServeMux)；ServeMux的文档解释了模式的匹配机制
+	func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+
+	// Serve 会接手监听器l收到的每一个连接，并为每一个连接创建一个新的服务go程
+	// 该go程会读取请求，然后调用handler回复请求；handler参数一般会设为nil，此时会使用DefaultServeMux
+	func Serve(l net.Listener, handler Handler) error
+	// ListenAndServe监听TCP地址addr，并且会使用handler参数调用Serve函数处理接收到的连接
+	// handler参数一般会设为nil，此时会使用DefaultServeMux
+	// For example
+	// // // hello world, the web server
+	// // func HelloServer(w http.ResponseWriter, req *http.Request) {
+	// // 	io.WriteString(w, "hello, world!\n")
+	// // }
+	// // http.HandleFunc("/hello", HelloServer)
+	// // err := http.ListenAndServe(":12345", nil)
+	// // if err != nil {
+	// // 	log.Fatal("ListenAndServe: ", err)
+	// // }
+	// // 
+	func ListenAndServe(addr string, handler Handler) error
+	// ListenAndServeTLS 和ListenAndServe 的行为基本一致，除了它期望HTTPS连接之外
+	// 此外，必须提供证书文件和对应的私钥文件；如果证书是由权威机构签发的，certFile参数必须是顺序串联的服务端证书和CA证书；如果srv.Addr为空字符串，会使用":https"
+	// 使用crypto/tls包的generate_cert.go文件来生成cert.pem和key.pem两个文件
+	// For example
+	// // func handler(w http.ResponseWriter, req *http.Request) {
+	// // 	w.Header().Set("Content-Type", "text/plain")
+	// // 	w.Write([]byte("This is an example server.\n"))
+	// // }
+	// // http.HandleFunc("/", handler)
+	// // log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
+	// // err := http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	func ListenAndServeTLS(addr string, certFile string, keyFile string, handler Handler) error
+```
+
 ### 3. net/http包的其他类型
 - net/http/cookiejar
 	- cookiejar包实现了保管在内存中的符合RFC 6265标准的http.CookieJar接口
