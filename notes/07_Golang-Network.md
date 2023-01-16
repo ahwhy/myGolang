@@ -197,7 +197,7 @@
 							- 注意，重用的是TIME_WAIT套接字占用的端口号，而不是TIME_WAIT套接字的内存等
 							- 这个参数对客户端有意义，在主动发起连接的时候会在调用的inet_hash_connect()中会检查是否可以重用TIME_WAIT状态的套接字
 							- 如果在服务器段设置这个参数的话，则没有什么作用，因为服务器端ESTABLISHED状态的套接字和监听套接字的本地IP、端口号是相同的，没有重用的概念
-							- 但并不是说服务器端就没有TIME_WAIT状态套接字。
+							- 但并不是说服务器端就没有TIME_WAIT状态套接字
 						- 该类场景最终建议
 							- `net.ipv4.tcp_tw_recycle = 0` 关掉快速回收
 							- `net.ipv4.tcp_tw_reuse = 1`   开启tw状态的端口复用(客户端角色)
@@ -1252,13 +1252,14 @@
 	func (ip IP) IsLoopback() bool
 	// 如果ip是未指定地址，则返回真
 	func (ip IP) IsUnspecified() bool
-	// 函数返回IP地址ip的默认子网掩码。只有IPv4有默认子网掩码；如果ip不是合法的IPv4地址，会返回nil
+	// DefaultMask 返回IP地址ip的默认子网掩码
+	// 只有IPv4有默认子网掩码；如果ip不是合法的IPv4地址，会返回nil
 	func (ip IP) DefaultMask() IPMask
 	// 如果ip和x代表同一个IP地址，Equal会返回真；代表同一地址的IPv4地址和IPv6地址也被认为是相等的
 	func (ip IP) Equal(x IP) bool
-	// To16将 一个IP地址转换为16字节表示。如果ip不是一个IP地址(长度错误)，To16会返回nil
+	// To16 将一个IP地址转换为16字节表示；如果ip不是一个IP地址(长度错误)，To16会返回nil
 	func (ip IP) To16() IP
-	// To4 将一个IPv4地址转换为4字节表示。如果ip不是IPv4地址，To4会返回nil
+	// To4 将一个IPv4地址转换为4字节表示；如果ip不是IPv4地址，To4会返回nil
 	func (ip IP) To4() IP
 	// Mask 方法认为mask为ip的子网掩码，返回ip的网络地址部分的ip(主机地址部分都置0)
 	func (ip IP) Mask(mask IPMask) IP
@@ -1300,7 +1301,7 @@
 ```golang
 	// SplitHostPort 将格式为"host:port"、"[host]:port"或"[ipv6-host%zone]:port"的网络地址分割为host或ipv6-host%zone和port两个部分
 	func SplitHostPort(hostport string) (host, port string, err error)
-	// JoinHostPort 将host和port合并为一个网络地址。一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
+	// JoinHostPort 将host和port合并为一个网络地址；一般格式为"host:port"；如果host含有冒号或百分号，格式为"[host]:port"
 	func JoinHostPort(host, port string) string
 
 	// HardwareAddr 类型代表一个硬件地址(MAC地址)
@@ -1376,7 +1377,7 @@
 	// Close 停止监听Unix域socket地址，已经接收的连接不受影响
 	func (l *UnixListener) Close() error
 	// File 方法返回下层的os.File的副本，并将该副本设置为阻塞模式
-	// 使用者有责任在用完后关闭f。关闭c不影响f，关闭f也不影响c
+	// 使用者有责任在用完后关闭f；关闭c不影响f，关闭f也不影响c
 	// 返回的os.File类型文件描述符和原本的网络连接是不同的
 	func (l *UnixListener) File() (f *os.File, err error)
 ```
@@ -1518,7 +1519,7 @@
 	// Close 关闭连接
 	func (c *IPConn) Close() error
 	// File 方法设置下层的os.File为阻塞模式并返回其副本
-	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会(也可能不会)得到期望的效果
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的
 	func (c *IPConn) File() (f *os.File, err error)
 
 	// TCPConn 见上Tcp
@@ -1572,14 +1573,14 @@
 	// CloseWrite关闭TCP连接的写入侧(以后不能写入)，应尽量使用Close方法
 	func (c *UnixConn) CloseWrite() error
 	// File 方法设置下层的os.File为阻塞模式并返回其副本
-	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的。试图使用该副本修改本体的属性可能会(也可能不会)得到期望的效果
+	// 使用者有责任在用完后关闭f，关闭c不影响f，关闭f也不影响c；返回的os.File类型文件描述符和原本的网络连接是不同的
 	func (c *UnixConn) File() (f *os.File, err error)
 ```
 
 - net.Conn
 ```golang
 	// FileListener 返回一个下层为文件f的网络监听器的拷贝
-	// 调用者有责任在使用结束后改变l。关闭l不会影响f；关闭f也不会影响l；本函数与各种实现了Listener接口的类型的File方法是对应的
+	// 调用者有责任在使用结束后改变l，关闭l不会影响f；关闭f也不会影响l；本函数与各种实现了Listener接口的类型的File方法是对应的
 	func FileListener(f *os.File) (l Listener, err error)
 
 	// FileConn 返回一个下层为文件f的网络连接的拷贝
@@ -1628,7 +1629,7 @@
 	// LookupNS 函数返回指定主机的DNS NS记录
 	func LookupNS(name string) (ns []*NS, err error)
 	// LookupSRV 函数尝试执行指定服务、协议、主机的SRV查询
-	// 协议proto为"tcp" 或"udp"。返回的记录按Priority字段排序，同一优先度按Weight字段随机排序
+	// 协议proto为"tcp" 或"udp"；返回的记录按Priority字段排序，同一优先度按Weight字段随机排序
 	func LookupSRV(service, proto, name string) (cname string, addrs []*SRV, err error)
 	// LookupTXT函数返回指定主机的DNS TXT记录
 	func LookupTXT(name string) (txt []string, err error)
@@ -1737,21 +1738,21 @@
 - http.ConnState
 ```golang
 	const (
-		// StateNew代表一个新的连接，将要立刻发送请求。
-		// 连接从这个状态开始，然后转变为StateAlive或StateClosed。
+		// StateNew代表一个新的连接，将要立刻发送请求
+		// 连接从这个状态开始，然后转变为StateAlive或StateClosed
 		StateNew ConnState = iota
-		// StateActive代表一个已经读取了请求数据1到多个字节的连接。
+		// StateActive代表一个已经读取了请求数据1到多个字节的连接
 		// 用于StateAlive的Server.ConnState回调函数在将连接交付给处理器之前被触发，
-		// 等到请求被处理完后，Server.ConnState回调函数再次被触发。
-		// 在请求被处理后，连接状态改变为StateClosed、StateHijacked或StateIdle。
+		// 等到请求被处理完后，Server.ConnState回调函数再次被触发
+		// 在请求被处理后，连接状态改变为StateClosed、StateHijacked或StateIdle
 		StateActive
-		// StateIdle代表一个已经处理完了请求、处在闲置状态、等待新请求的连接。
-		// 连接状态可以从StateIdle改变为StateActive或StateClosed。
+		// StateIdle代表一个已经处理完了请求、处在闲置状态、等待新请求的连接
+		// 连接状态可以从StateIdle改变为StateActive或StateClosed
 		StateIdle
-		// 代表一个被劫持的连接。这是一个终止状态，不会转变为StateClosed。
+		// 代表一个被劫持的连接；这是一个终止状态，不会转变为StateClosed
 		StateHijacked
-		// StateClosed代表一个关闭的连接。
-		// 这是一个终止状态。被劫持的连接不会转变为StateClosed。
+		// StateClosed代表一个关闭的连接
+		// 这是一个终止状态；被劫持的连接不会转变为StateClosed
 		StateClosed
 	)
 
@@ -1821,22 +1822,22 @@
 	// Request 类型代表一个服务端接受到的或者客户端发送出去的HTTP请求
 	// Request各字段的意义和用途在服务端和客户端是不同的；除了字段本身上方文档，还可参见Request.Write方法和RoundTripper接口的文档
 	type Request struct {
-		// Method指定HTTP方法(GET、POST、PUT等)。对客户端，""代表GET。
+		// Method指定HTTP方法(GET、POST、PUT等)；对客户端，""代表GET
 		Method string
-		// URL在服务端表示被请求的URI，在客户端表示要访问的URL。
+		// URL在服务端表示被请求的URI，在客户端表示要访问的URL
 		//
 		// 在服务端，URL字段是解析请求行的URI(保存在RequestURI字段)得到的，
-		// 对大多数请求来说，除了Path和RawQuery之外的字段都是空字符串。
+		// 对大多数请求来说，除了Path和RawQuery之外的字段都是空字符串
 		// (参见RFC 2616, Section 5.1.2)
 		//
 		// 在客户端，URL的Host字段指定了要连接的服务器，
-		// 而Request的Host字段(可选地)指定要发送的HTTP请求的Host头的值。
+		// 而Request的Host字段(可选地)指定要发送的HTTP请求的Host头的值
 		URL *url.URL
-		// 接收到的请求的协议版本。本包生产的Request总是使用HTTP/1.1
+		// 接收到的请求的协议版本；本包生产的Request总是使用HTTP/1.1
 		Proto      string // "HTTP/1.0"
 		ProtoMajor int    // 1
 		ProtoMinor int    // 0
-		// Header字段用来表示HTTP请求的头域。如果头域(多行键值对格式)为：
+		// Header字段用来表示HTTP请求的头域；如果头域(多行键值对格式)为：
 		//	accept-encoding: gzip, deflate
 		//	Accept-Language: en-us
 		//	Connection: keep-alive
@@ -1846,38 +1847,38 @@
 		//		"Accept-Language": {"en-us"},
 		//		"Connection": {"keep-alive"},
 		//	}
-		// HTTP规定头域的键名(头名)是大小写敏感的，请求的解析器通过规范化头域的键名来实现这点。
-		// 在客户端的请求，可能会被自动添加或重写Header中的特定的头，参见Request.Write方法。
+		// HTTP规定头域的键名(头名)是大小写敏感的，请求的解析器通过规范化头域的键名来实现这点
+		// 在客户端的请求，可能会被自动添加或重写Header中的特定的头，参见Request.Write方法
 		Header Header
-		// Body是请求的主体。
+		// Body是请求的主体
 		//
-		// 在客户端，如果Body是nil表示该请求没有主体买入GET请求。
-		// Client的Transport字段会负责调用Body的Close方法。
+		// 在客户端，如果Body是nil表示该请求没有主体买入GET请求
+		// Client的Transport字段会负责调用Body的Close方法
 		//
-		// 在服务端，Body字段总是非nil的；但在没有主体时，读取Body会立刻返回EOF。
-		// Server会关闭请求的主体，ServeHTTP处理器不需要关闭Body字段。
+		// 在服务端，Body字段总是非nil的；但在没有主体时，读取Body会立刻返回EOF
+		// Server会关闭请求的主体，ServeHTTP处理器不需要关闭Body字段
 		Body io.ReadCloser
-		// ContentLength记录相关内容的长度。
-		// 如果为-1，表示长度未知，如果>=0，表示可以从Body字段读取ContentLength字节数据。
-		// 在客户端，如果Body非nil而该字段为0，表示不知道Body的长度。
+		// ContentLength记录相关内容的长度
+		// 如果为-1，表示长度未知，如果>=0，表示可以从Body字段读取ContentLength字节数据
+		// 在客户端，如果Body非nil而该字段为0，表示不知道Body的长度
 		ContentLength int64
-		// TransferEncoding按从最外到最里的顺序列出传输编码，空切片表示"identity"编码。
-		// 本字段一般会被忽略。当发送或接受请求时，会自动添加或移除"chunked"传输编码。
+		// TransferEncoding按从最外到最里的顺序列出传输编码，空切片表示"identity"编码
+		// 本字段一般会被忽略；当发送或接受请求时，会自动添加或移除"chunked"传输编码
 		TransferEncoding []string
-		// Close在服务端指定是否在回复请求后关闭连接，在客户端指定是否在发送请求后关闭连接。
+		// Close在服务端指定是否在回复请求后关闭连接，在客户端指定是否在发送请求后关闭连接
 		Close bool
-		// 在服务端，Host指定URL会在其上寻找资源的主机。
-		// 根据RFC 2616，该值可以是Host头的值，或者URL自身提供的主机名。
-		// Host的格式可以是"host:port"。
+		// 在服务端，Host指定URL会在其上寻找资源的主机
+		// 根据RFC 2616，该值可以是Host头的值，或者URL自身提供的主机名
+		// Host的格式可以是"host:port"
 		//
-		// 在客户端，请求的Host字段(可选地)用来重写请求的Host头。
-		// 如过该字段为""，Request.Write方法会使用URL字段的Host。
+		// 在客户端，请求的Host字段(可选地)用来重写请求的Host头
+		// 如过该字段为""，Request.Write方法会使用URL字段的Host
 		Host string
-		// Form是解析好的表单数据，包括URL字段的query参数和POST或PUT的表单数据。
-		// 本字段只有在调用ParseForm后才有效。在客户端，会忽略请求中的本字段而使用Body替代。
+		// Form是解析好的表单数据，包括URL字段的query参数和POST或PUT的表单数据
+		// 本字段只有在调用ParseForm后才有效；在客户端，会忽略请求中的本字段而使用Body替代
 		Form url.Values
-		// PostForm是解析好的POST或PUT的表单数据。
-		// 本字段只有在调用ParseForm后才有效。在客户端，会忽略请求中的本字段而使用Body替代。
+		// PostForm是解析好的POST或PUT的表单数据
+		// 本字段只有在调用ParseForm后才有效；在客户端，会忽略请求中的本字段而使用Body替代
 		PostForm url.Values
 		// MultipartForm是解析好的多部件表单，包括上传的文件。
 		// 本字段只有在调用ParseMultipartForm后才有效。
