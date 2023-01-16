@@ -31,6 +31,8 @@
   * [Golang-Runtime](./notes/31_Golang-Runtime.md)
   * [Golang-Strconv](./notes/32_Golang-Strconv.md)
   * [Golang-Sync](./notes/33_Golang-Sync.md)
+  * [Golang-Text](./notes/34_Golang-Text.md)
+  * [Golang-Unsafe](./notes/35_Golang-Unsafe.md)
   * [Golang-Other](./notes/40_Golang-Other.md)
 
 ## Others
