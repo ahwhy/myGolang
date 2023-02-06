@@ -2099,6 +2099,9 @@
 		// 如果该函数返回了非nil的错误值，请求的执行就会中断并返回该错误。
 		// 如果Proxy为nil或返回nil的*URL置，将不使用代理。
 		Proxy func(*Request) (*url.URL, error)
+		// DialContext 指定用于创建未加密TCP连接的拨号功能；如果DialContext为nil(并且下面不推荐使用的Dial也为nil)，则传输使用package net进行拨号
+		// DialContext与RoundTrip调用同时运行；当先前的连接在后来的DialContext完成之前变得空闲时，发起拨号的往返呼叫可能会使用先前拨打的连接而结束
+		DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 		// Dial指定创建TCP连接的拨号函数；如果Dial为nil，会使用net.Dial。
 		Dial func(network, addr string) (net.Conn, error)
 		// TLSClientConfig指定用于tls.Client的TLS配置信息。
