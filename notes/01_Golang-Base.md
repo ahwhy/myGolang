@@ -405,7 +405,6 @@
 		i++
 	}
 	fmt.Println(sum)
-	}
 ```
 
 
