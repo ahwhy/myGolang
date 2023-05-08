@@ -6,6 +6,8 @@ import (
 
 	"github.com/ahwhy/myGolang/k8s/admin"
 	"github.com/ahwhy/myGolang/k8s/config"
+	"github.com/ahwhy/myGolang/k8s/event"
+	"github.com/ahwhy/myGolang/k8s/network"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 
@@ -106,4 +108,14 @@ func (c *Client) Admin() *admin.Client {
 // 应用配置
 func (c *Client) Config() *config.Client {
 	return config.NewConfig(c.client)
+}
+
+// 应用事件
+func (c *Client) Event() *event.Client {
+	return event.NewEvent(c.client)
+}
+
+// 应用网络
+func (c *Client) Network() *network.Client {
+	return network.NewNetwork(c.client)
 }
