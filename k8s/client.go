@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/ahwhy/myGolang/k8s/admin"
+	"github.com/ahwhy/myGolang/k8s/config"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 
@@ -100,4 +101,9 @@ func (c *Client) CurrentCluster() *clientcmdapi.Cluster {
 // 集群管理
 func (c *Client) Admin() *admin.Client {
 	return admin.NewAdmin(c.client)
+}
+
+// 应用配置
+func (c *Client) Config() *config.Client {
+	return config.NewConfig(c.client)
 }

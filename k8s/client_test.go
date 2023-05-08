@@ -31,19 +31,6 @@ func TestGetter(t *testing.T) {
 	fmt.Printf("%v\n", client.CurrentCluster())
 }
 
-func TestListConfigMap(t *testing.T) {
-	should := assert.New(t)
-	client, err := k8s.NewClient(kubeConfig)
-	should.NoError(err)
-
-	ctx := context.Background()
-	oper := k8s.NewListConfigMapRequest(system)
-	v, err := client.ListConfigMap(ctx, oper)
-	should.NoError(err)
-	fmt.Printf("%v\n", v.Items)
-	fmt.Printf("%v\n", v.ListMeta)
-}
-
 func TestListCronJob(t *testing.T) {
 	should := assert.New(t)
 	client, err := k8s.NewClient(kubeConfig)
