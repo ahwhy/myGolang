@@ -963,13 +963,13 @@
 
 ## 十、常用公共库 
 
-### 1. log
+### 1. Log
 - `github.com/sirupsen/logrus` logrus库 完全兼容标准log库，被广泛使用
 - `github.com/uber-go/zap` 快速、结构化、分级的日志库
 - `github.com/rs/zerolog` zerolog包提供了一个快速简单的日志记录器，专门用于JSON输出
 - `github.com/rifflock/lfshook` 为logrus库设计的钩子
 
-### 2. db
+### 2. Db
 - SQLBuilder
 	- `github.com/parkingwang/go-sqlbuilder` 创建SQL语句
 	- `github.com/didi/gendr` 辅助操作数据库
@@ -982,17 +982,42 @@
 - MongoDB
 	- `go.mongodb.org/mongo-driver`
 
+- Redis
+	- `github.com/go-redis/redis`
+
+- Cache
+	- `github.com/bluele/gcache` Supports expirable Cache, LFU, LRU and ARC.
+
 ### 3. 爬虫
-- github.com/andeya/pholcus
+- `github.com/andeya/pholcus`
 	- 一款纯 Go 语言编写的支持分布式的高并发爬虫软件
 
-### 1. gopkg.in/yaml.v2
-```go
-	yaml.Unmarshal()
-```
+### 4. Web
+- 框架
+	- `github.com/gin-gonic/gin`
 
-### 2. github.com/gin-gonic/gin
-- http客户端
+- Restful
+	- `github.com/emicklei/go-restful/v3`
+	- `github.com/go-openapi/spec` Marshal and unmarshal Swagger API
+
+- WebSocket
+	- `github.com/gorilla/websocket`
+
+- Httprouter
+	- `github.com/julienschmidt/httprouter`
+
+### 5. kubernetes
+- `k8s.io/client-go`
+	- `k8s.io/client-go/rest`
+	- `k8s.io/client-go/kubernetes`
+	- `k8s.io/client-go/tools/clientcmd`
+	- `k8s.io/client-go/tools/clientcmd/api`
+	- `k8s.io/apimachinery/pkg/apis/meta/v1`
+
+### 6. Marshal && UNMarshal
+- `gopkg.in/yaml.v2`
+
+
 
 ### 3. github.com/go-playground/validator
 - 校验参数
@@ -1018,12 +1043,6 @@
 ### 10. github.com/stretchr/testify/assert
 - 测试
 
-### 11. github.com/gorilla/websocket
-- WebSocket
-
-### 12. github.com/julienschmidt/httprouter
-- Httprouter
-
 ### 13.github.com/distribution/distribution
 - Registry
 
@@ -1032,10 +1051,6 @@
 
 ### 15.github.com/pkg/errors
 - Errors
-
-### 16.k8s.io/client-go
-- k8s.io/client-go/rest
-- k8s.io/client-go/tools/clientcmd
 
 ### 18. github.com/jedib0t/go-pretty
 - 美化表格、列表、进度条、文本等控制台输出

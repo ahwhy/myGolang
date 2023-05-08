@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"github.com/infraboard/mcube/logger"
+	"github.com/infraboard/mcube/logger/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -35,6 +37,7 @@ func NewClient(kubeConfigYaml string) (*Client, error) {
 		kubeconf: kubeConf,
 		restconf: restConf,
 		client:   client,
+		log:      zap.L().Named("provider.k8s"),
 	}, nil
 }
 
@@ -42,6 +45,7 @@ type Client struct {
 	kubeconf *clientcmdapi.Config
 	restconf *rest.Config
 	client   *kubernetes.Clientset
+	log      logger.Logger
 }
 
 func (c *Client) ServerVersion() (string, error) {
