@@ -1,14 +1,33 @@
 package k8s
 
 import (
+	"os"
+	"path/filepath"
+
+	"github.com/ahwhy/myGolang/k8s/admin"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
+
+func NewClientFromFile(kubeConfPath string) (*Client, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	kc, err := os.ReadFile(filepath.Join(wd, kubeConfPath))
+	if err != nil {
+		return nil, err
+	}
+
+	return NewClient(string(kc))
+}
 
 func NewClient(kubeConfigYaml string) (*Client, error) {
 	// 加载配置
@@ -57,6 +76,10 @@ func (c *Client) ServerVersion() (string, error) {
 	return si.String(), nil
 }
 
+func (c *Client) ServerResources() ([]*metav1.APIResourceList, error) {
+	return c.client.ServerPreferredResources()
+}
+
 func (c *Client) GetContexts() map[string]*clientcmdapi.Context {
 	return c.kubeconf.Contexts
 }
@@ -74,14 +97,7 @@ func (c *Client) CurrentCluster() *clientcmdapi.Cluster {
 	return c.kubeconf.Clusters[ctx.Cluster]
 }
 
-type GetRequest struct {
-	Namespace string
-	Name      string
-	Opts      metav1.GetOptions
-}
-
-type DeleteRequest struct {
-	Namespace string
-	Name      string
-	Opts      metav1.DeleteOptions
+// 集群管理
+func (c *Client) Admin() *admin.Client {
+	return admin.NewAdmin(c.client)
 }

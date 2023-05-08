@@ -29,14 +29,6 @@ func TestGetter(t *testing.T) {
 	fmt.Printf("%v\n", v)
 	fmt.Printf("%v\n", client.CurrentContext())
 	fmt.Printf("%v\n", client.CurrentCluster())
-
-	ctx := context.Background()
-	node, err := client.ListNode(ctx)
-	should.NoError(err)
-	ns, err := client.ListNamespace(ctx)
-	should.NoError(err)
-	fmt.Printf("%v\n", node)
-	fmt.Printf("%v\n", ns)
 }
 
 func TestListConfigMap(t *testing.T) {

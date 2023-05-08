@@ -66,17 +66,17 @@
 	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
 	- [git中tag与release的创建以及两者的区别](https://www.jianshu.com/p/79ecf4fe5079)
 ```shell
-	// 推送到远程
-	// or push an existing repository from the command line
+	# 推送到远程
+	# or push an existing repository from the command line
 	git remote add origin https://github.com/ahwhy/myGolang.git
 	git branch -M main
 	git push -u origin main
 
-	// 上传tag
+	# 上传tag
 	git log --oneline
-	// 创建lightweight类型的tag
+	# 创建lightweight类型的tag
 	git tag v0.0.2-lw
-	// 创建annotated类型的tag
+	# 创建annotated类型的tag
 	git tag -a v0.0.2 -m "updata"
 	git push origin --tags
 	git push -u origin --tags v0.0.2
@@ -1012,7 +1012,10 @@
 	- `k8s.io/client-go/kubernetes`
 	- `k8s.io/client-go/tools/clientcmd`
 	- `k8s.io/client-go/tools/clientcmd/api`
+
+- Api
 	- `k8s.io/apimachinery/pkg/apis/meta/v1`
+	- `k8s.io/api/autoscaling/v1`
 
 ### 6. Marshal && UNMarshal
 - `gopkg.in/yaml.v2`
