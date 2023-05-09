@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/historys/week08/cloudstation/store/provider/aliyun"
+	"github.com/ahwhy/myGolang/cloudstation/store/provider/aliyun"
 	"github.com/schollz/progressbar/v3"
 	"github.com/stretchr/testify/assert"
 )
