@@ -25,6 +25,7 @@ func TestServerResources(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
+
 	for i := range rs {
 		t.Log(rs[i].GroupVersion, rs[i].APIVersion)
 		for _, r := range rs[i].APIResources {
@@ -36,7 +37,7 @@ func TestServerResources(t *testing.T) {
 func init() {
 	zap.DevelopmentSetup()
 
-	kubeConf := tools.MustReadContentFile("kube_config.yml")
+	kubeConf := tools.MustReadContentFile("./kubeConfig.yaml")
 	c, err := k8s.NewClient(kubeConf)
 	if err != nil {
 		panic(err)

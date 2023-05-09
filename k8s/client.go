@@ -9,6 +9,7 @@ import (
 	"github.com/ahwhy/myGolang/k8s/event"
 	"github.com/ahwhy/myGolang/k8s/network"
 	"github.com/ahwhy/myGolang/k8s/storage"
+	"github.com/ahwhy/myGolang/k8s/workload"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 
@@ -124,4 +125,9 @@ func (c *Client) Network() *network.Client {
 // 应用存储
 func (c *Client) Storage() *storage.Client {
 	return storage.NewStorage(c.client)
+}
+
+// 应用负载
+func (c *Client) WorkLoad() *workload.Client {
+	return workload.NewWorkload(c.client, c.restconf)
 }

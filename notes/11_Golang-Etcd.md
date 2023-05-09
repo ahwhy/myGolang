@@ -53,6 +53,7 @@
 	- 基于Redis，setnx
 	- 基于ZooKeeper，paxios算法保证
 	- 基于etcd，raft算法保证
+	- [Raft算法详解](https://zhuanlan.zhihu.com/p/32052223?utm_medium=social)
 
 ### 2. Etcd搭建
 ```shell
@@ -501,7 +502,7 @@
 	* https://cloud.tencent.com/developer/article/1458456
 	* https://github.com/etcd-io/etcd/blob/master/etcdctl/ctlv3/command/elect_command.go
 	*/
-	
+
 	func campaign(c *clientv3.Client, election string, prop string) error {
 		// NewSession函数中创建了一个lease，默认是60s TTL，并会调用KeepAlive，永久为这个lease自动续约(2/3生命周期的时候执行续约操作)
 		s, err := concurrency.NewSession(c)
@@ -574,7 +575,7 @@
 				}
 			}
 		}
-		
+
 		// 一直阻塞，直到确认自己的create revision为当前path中最小，从而确认自己当选为leader
 		_, err = waitDeletes(ctx, client, e.keyPrefix, e.leaderRev-1)
 		if err != nil {
@@ -588,7 +589,7 @@
 			return err
 		}
 		e.hdr = resp.Header
-	
+
 		return nil
 	}
 ```
@@ -602,7 +603,7 @@
 		- 历史版本越多，存储空间越大，性能越差，直到etcd到达空间配额限制的时候，etcd的写入将会被禁止变为只读，影响线上服务，因此这些历史版本需要进行压缩
 		- 数据压缩并不是清理现有数据，只是对给定版本之前的历史版本进行清理，清理后数据的历史版本将不能访问，但不会影响现有最新数据的访问
 		- `etcdctl compaction 5`
-		
+
 - 参考文档
 	- [etcd 问题、调优、监控](https://www.kubernetes.org.cn/7569.html)
 	- [etcdv3.4 官网启动参数](https://etcd.io/docs/v3.4/op-guide/configuration/)

@@ -1010,6 +1010,7 @@
 - `k8s.io/client-go`
 	- `k8s.io/client-go/rest`
 	- `k8s.io/client-go/kubernetes`
+	- `k8s.io/client-go/kubernetes/typed/apps/v1`
 	- `k8s.io/client-go/kubernetes/typed/core/v1`
 	- `k8s.io/client-go/kubernetes/typed/batch/v1`
 	- `k8s.io/client-go/kubernetes/typed/networking/v1`
@@ -1020,6 +1021,9 @@
 	- `k8s.io/apimachinery/pkg/apis/meta/v1`
 	- `k8s.io/api/autoscaling/v1`
 	- `k8s.io/api/networking/v1`
+
+- Etcd
+	- `go.etcd.io/etcd/client/v3`
 
 ### 6. Marshal && UNMarshal
 - `gopkg.in/yaml.v2`
