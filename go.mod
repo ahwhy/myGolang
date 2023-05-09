@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/aliyun/aliyun-oss-go-sdk v1.9.8
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/didi/gendry v1.7.0
 	github.com/ethereum/go-ethereum v1.10.8
 	github.com/gin-gonic/gin v1.7.4
