@@ -1016,6 +1016,7 @@
 	- `k8s.io/client-go/kubernetes/typed/networking/v1`
 	- `k8s.io/client-go/tools/clientcmd`
 	- `k8s.io/client-go/tools/clientcmd/api`
+	- [kubernetes client-go功能介绍](https://www.cnblogs.com/haiyux/p/17162339.html)
 
 - Api
 	- `k8s.io/apimachinery/pkg/apis/meta/v1`
@@ -1024,6 +1025,7 @@
 
 - Etcd
 	- `go.etcd.io/etcd/client/v3`
+	- `go.etcd.io/etcd/client/v3/concurrency` 选举
 
 ### 6. Marshal && UNMarshal
 - `gopkg.in/yaml.v2`

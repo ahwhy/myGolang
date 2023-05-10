@@ -189,6 +189,7 @@
 - 定义
 	- go语言中可以通过 chan 来定义管道
 	- 通过操作符 `<-` 对管道进行读取和写入操作，通过管道维护协程状态
+	- [channel 原理](https://www.cnblogs.com/haiyux/p/15161495.html)
 
 - 本质
 	- 一个 mutex 锁加上一个环状缓存、一个发送方队列和一个接收方队列
@@ -198,36 +199,70 @@
 	- 发送过程包含三个步骤
 		- 持有锁
 		- 入队，拷贝要发送的数据
-			- 找到是否有正在阻塞的接收方，是则直接发送
-			- 找到是否有空余的缓存，是则存入
-			- 阻塞直到被唤醒
-		- 释放锁
+			- 确定写入；尝试从recvq等待队列中等待goroutine，然后将元素直接写入goroutine（找到是否有正在阻塞的接收方，是则直接发送）
+			- 如果recvq为Empty，则确定缓冲区是否可用。如果可用，从当前goroutine复制数据到缓冲区（找到是否有空余的缓存，是则存入）
+			- 如果缓冲区已满，则要写入的元素将保存在当前正在执行的goroutine的结构中，并且当前goroutine将在sendq中排队并从运行时挂起（阻塞直到被唤醒）
+		- 写入完成释放锁
 	- 接收过程包含三个步骤
-		- 上锁
-		- 从缓存中出队，拷贝要接收的数据
+		- 上锁，先获取channel全局锁
+		- 从缓存中出队，拷贝要接收的数据，尝试从sendq等待队列中获取等待的goroutine
 			- 如果 Channel 已被关闭，且 Channel 没有数据，立刻返回
-			- 如果存在正在阻塞的发送方，说明缓存已满，从缓存队头取一个数据，再复始一个阻塞的发送方
-			- 否则，检查缓存，如果缓存中仍有数据，则从缓存中读取，读取过程会将队列中的数据拷贝一份到接收方的执行栈中
-			- 没有能接收的数据，阻塞当前的接收方 Goroutine
-		- 解锁
+			- 如有等待的goroutine，没有缓冲区，取出goroutine并读取数据，然后唤醒这个goroutine
+			- 如有等待的goroutine，且有缓冲区（此时缓冲区已满），从缓冲区队首取出数据，再从sendq取出一个goroutine，将goroutine中的数据存入buf队尾
+			- 如没有等待的goroutine，且缓冲区有数据，直接读取缓冲区数据
+			- 如没有等待的goroutine，且没有缓冲区或缓冲区为空，将当前的goroutine加入recvq排队，进入睡眠，等待被写goroutine唤醒
+		- 结束读取，释放锁
 ```go
 	// src/runtime/chan.go
 	type hchan struct {
-		qcount   uint           // 队列中的所有数据数
-		dataqsiz uint           // 环形队列的大小
-		buf      unsafe.Pointer // 指向大小为 dataqsiz 的数组
-		elemsize uint16         // 元素大小
-		closed   uint32         // 是否关闭
-		elemtype *_type         // 元素类型
-		sendx    uint           // 发送索引
-		recvx    uint           // 接收索引
-		recvq    waitq          // recv 等待列表，即( <-ch )
-		sendq    waitq          // send 等待列表，即( ch<- )
-		lock mutex
+		qcount   uint           // 当前队列中剩余元素个数
+		dataqsiz uint           // 环形队列长度，即缓冲区的大小，即make（chan T，N），N
+		buf      unsafe.Pointer // 环形队列指针
+		elemsize uint16         // 每个元素的大小
+		closed   uint32         // 表示当前通道是否处于关闭状态；创建通道后，该字段设置为0，即通道打开; 通过调用close将其设置为1，通道关闭
+		elemtype *_type         // 元素类型，用于数据传递过程中的赋值；
+		sendx    uint           // 等待读消息的goroutine队列，sendx 表示最后一次插入的元素
+		recvx    uint           // 等待写消息的goroutine队列，recvx 表示最后一次取走元素的位置
+		recvq    waitq          // recv 等待列表，即( <-ch )，接收方队列
+		sendq    waitq          // send 等待列表，即( ch<- )，发送方队列
+		lock mutex              // 互斥锁，为每个读写操作锁定通道，发送和接收必须是互斥操作
 	}
 	type waitq struct {         // 等待队列 sudog 双向队列
-		first *sudog
+		first *sudog            // 代表goroutine
 		last  *sudog
+	}
+```
+
+- 创建通道后的缓冲通道结构
+```
+	// ch := make(chan int, 3)
+	hchan struct {
+		qcount uint : 0 
+		dataqsiz uint : 3 
+		buf unsafe.Pointer : 0xc00007e0e0 
+		elemsize uint16 : 8 
+		closed uint32 : 0 
+		elemtype *runtime._type : &{
+			size:8 
+			ptrdata:0 
+			hash:4149441018 
+			tflag:7 
+			align:8 
+			fieldalign:8 
+			kind:130 
+			alg:0x55cdf0 
+			gcdata:0x4d61b4 
+			str:1055 
+			ptrToThis:45152
+			}
+		sendx uint : 0 
+		recvx uint : 0 
+		recvq runtime.waitq : 
+			{first:<nil> last:<nil>}
+		sendq runtime.waitq : 
+			{first:<nil> last:<nil>}
+		lock runtime.mutex : 
+			{key:0}
 	}
 ```
 
