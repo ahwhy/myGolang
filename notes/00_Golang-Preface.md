@@ -8,6 +8,14 @@ Go 语言是由谷歌的开发工程师(罗伯特·格瑞史莫、罗勃·派克
 
 - [历史上的Go版本](https://golang.google.cn/doc/devel/release.html)
 
+- go1.20 (released 2023-02-01)
+
+- go1.19 (released 2022-08-02)
+
+- go1.18 (released 2022-03-15)
+
+- go1.17 (released 2021-08-16)
+
 - go1.16 (released 2021/02/16)
 	- runtime/metrics
 	- GO111MODULE的默认值为on, 可以把GO111MODULE设置回auto

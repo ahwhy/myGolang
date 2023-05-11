@@ -539,7 +539,7 @@
 		v := v.(string)
 		log.Printf("[找到了][%s=%d]", key, value)
 		return true
-	})
+	}))
 	m.LoadOrstore(k,v)   // 若没有key，则添加
 	m.LoadAndDelete("key")  // 加载并删除
 ```
