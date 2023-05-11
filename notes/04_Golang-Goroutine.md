@@ -288,7 +288,7 @@
 					- 如果阻塞发生在main协程里，并且没有其他子协程可以执行，那就可以确定"(希望)永远等不来"，就会自已把自己杀掉，再报一个fatal error: deadlock出来
 					- 如果阻塞发生在子协程里，就不会发生死锁，因为至少main协程是一个值得等待的"希望"，会一直等下去
 		- `make(chan type, len)` 使用 len参数创建指定缓冲区长度的管道
-			- 带缓冲管道(buffered channel )
+			- 带缓冲管道(buffered channel)特点
 				- 会创建一个环形缓冲队列，队列满时send操作会阻塞或fatal error
 				- buffered channel有两个属性: 容量(capacity)和长度(length)
 					- capacity: 表示bufffered channel最多可以缓冲多少个数据
