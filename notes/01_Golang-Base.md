@@ -684,6 +684,29 @@
 		- 稀疏型数据结构，牺牲空间换取时间
 		- 相对而言的数组，完整型数据结构
 	- map删除数据时存在延迟，所以最好不作为内存存储
+```go
+// A header for a Go map.
+type hmap struct {
+    // 元素个数，调用 len(map) 时，直接返回此值
+    count     int
+    flags     uint8
+    // buckets 的对数 log_2
+    B         uint8
+    // overflow 的 bucket 近似数
+    noverflow uint16
+    // 计算 key 的哈希的时候会传入哈希函数
+    hash0     uint32
+    // 指向 buckets 数组，大小为 2^B
+    // 如果元素个数为0，就为 nil
+    buckets    unsafe.Pointer
+    // 扩容的时候，buckets 长度会是 oldbuckets 的两倍
+    oldbuckets unsafe.Pointer
+    // 指示扩容进度，小于此地址的 buckets 迁移完成
+    nevacuate  uintptr
+    extra *mapextra // optional fields
+}
+```
+
 
 - Go语言中只要是可比较的类型都可以作为 key，除开 slice，map，functions 这几种类型，其他类型都是 OK 的 
 	- 具体包括: 布尔值、数字、字符串、指针、通道、接口类型、结构体、只包含上述类型的数组
