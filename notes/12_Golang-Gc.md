@@ -144,6 +144,11 @@
 	- go 的主要应用领域不是 cpu 敏感型，在高 IO 的领域有很好的性能
 	- go 要避免跟 jvm 和 .net 这样给高吞吐的 gc 正面竞争，才能发挥出 go 超短 stw 的优势
 
+### 7、参考资料
+- [Golang GC 垃圾回收机制详解](https://blog.csdn.net/u010649766/article/details/80582153)
+- [图解Golang的GC算法](https://studygolang.com/articles/18850?fr=sidebar)
+- [golang 垃圾回收 gc 详解](https://blog.csdn.net/jarvan5/article/details/122970491)
+
 
 ## 三、Golang中的逃逸分析
 
@@ -208,7 +213,25 @@
 	- 逃逸分析在编译阶段完成
 
 
-## 四、参考资料
-- [Golang GC 垃圾回收机制详解](https://blog.csdn.net/u010649766/article/details/80582153)
-- [图解Golang的GC算法](https://studygolang.com/articles/18850?fr=sidebar)
-- [golang 垃圾回收 gc 详解](https://blog.csdn.net/jarvan5/article/details/122970491)
+## 四、Golang中的内存泄漏
+
+### 1、内存泄漏
+
+- 内存泄漏，指程序运行过程中，内存因为某些原因无法释放或没有释放，让内存资源造成了浪费
+	- 如果泄漏的内存越堆越多，就会占用程序正常运行的内存，比较轻的影响是程序开始运行越来越缓慢；
+	- 严重的话，可能导致大量泄漏的内存堆积，最终导致程序没有内存可以运行，最终导致 OOM (Out Of Memory，即内存溢出)
+
+- 造成内存泄露的场景
+	- [浅谈Golang内存泄漏](https://cloud.tencent.com/developer/article/2134737)
+	- slice造成内存泄漏
+		- 在slice1基础上，通过[1:3]切分出slice2；当 slice1 GC之后，底层数组其它没有被引用的位置 会产生泄露
+		- 解决方法，使用 append 或者 copy
+	- time.Ticker造成内存泄漏
+		- 定时器未调用stop，导致发生内存泄漏
+	- goroutine阻塞，造成内存泄漏
+		- 向满的channel发送消息
+		- 从空的channel接收消息
+		- 当channel没有初始化的时候就会处于nil状态，向nil的channel发送或接收
+		- 解决方法
+			- 发生泄漏前，发送者和接收者的数量需要一致、channel需要初始化
+			- 发生泄漏后，采用 `go tool pprof` 分析内存的占用和变化
