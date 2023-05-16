@@ -223,6 +223,8 @@
 
 - 造成内存泄露的场景
 	- [浅谈Golang内存泄漏](https://cloud.tencent.com/developer/article/2134737)
+	- [以kubelet为例使用go tool pprof分析服务性能](https://blog.csdn.net/buppt/article/details/127505818)
+	- [strace的简单用法](https://blog.csdn.net/mijichui2153/article/details/85229307)
 	- slice造成内存泄漏
 		- 在slice1基础上，通过[1:3]切分出slice2；当 slice1 GC之后，底层数组其它没有被引用的位置 会产生泄露
 		- 解决方法，使用 append 或者 copy
