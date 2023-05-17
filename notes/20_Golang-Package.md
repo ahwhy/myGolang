@@ -1027,10 +1027,13 @@
 	- `go.etcd.io/etcd/client/v3`
 	- `go.etcd.io/etcd/client/v3/concurrency` 选举
 
-### 6. Marshal && UNMarshal
+### 6.promethous
+- `github.com/prometheus/client_golang`
+
+- `github.com/prometheus/commo`
+
+### 7. Marshal && UNMarshal
 - `gopkg.in/yaml.v2`
-
-
 
 ### 3. github.com/go-playground/validator
 - 校验参数
