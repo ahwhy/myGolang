@@ -1,0 +1,16 @@
+#Group                            #Count  #Version                 #Type  #Model          #TPS     #Diff Total
+rocket_to_kafka                   8       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        0
+group_01                          4       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      12       5
+group_con_storage_txx_detail      4       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        0
+group_con_storage_cxx_distance    4       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        9
+group_con_dxxxxx_not_signin       2       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        0
+xxxxxxxx_to_kafka                 8       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      16       14
+xxxEvent_to_kafka                 8       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      1        1
+g_con_xxxxx_ch_fwd_808            2       V3_2_3                   PUSH   CLUSTERING      1        3213
+group_con_xxx_cfg_relation        1       V3_2_3                   PUSH   CLUSTERING      0        0
+xxxxxx_detail_v2_chart_consume    1       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      124      18
+group_topic_xxx_vxxeo_path        8       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      7        5
+group_con_storage_xxx_trouble     4       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      7        5
+group_terminal_current_data       2       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      525      29
+group_tpms_xxxxxxx                4       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        0
+group_sxxxxx_senior               2       V3_2_6_SNAPSHOT          PUSH   CLUSTERING      0        0

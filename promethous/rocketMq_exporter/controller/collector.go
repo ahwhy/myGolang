@@ -1,6 +1,10 @@
 package collector
 
 import (
+	"bufio"
+	"io"
+	"os"
+
 	"github.com/ahwhy/myGolang/promethous/rocketMq_exporter/conf"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -49,5 +53,22 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
+	f, err := os.Open(c.Conf.FileConfig.Path)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(f)
+	for {
+		a, _, err := r.ReadLine()
+		if err == io.EOF {
+			break
+		}
 
+		m := ParseLine(string(a))
+		if m.Group != "#Group" {
+			ch <- prometheus.MustNewConstMetric(c.count, prometheus.GaugeValue, m.IntCount(), m.Group, m.Version, m.Type, m.Model)
+			ch <- prometheus.MustNewConstMetric(c.tps, prometheus.GaugeValue, m.IntTPS(), m.Group, m.Version, m.Type, m.Model)
+			ch <- prometheus.MustNewConstMetric(c.diff, prometheus.GaugeValue, m.IntDiffTotal(), m.Group, m.Version, m.Type, m.Model)
+		}
+	}
 }
