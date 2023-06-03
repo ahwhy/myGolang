@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ahwhy/myGolang/promethous/script_exportor/controller"
+	"github.com/ahwhy/myGolang/prometheus/script_exportor/controller"
 	"github.com/infraboard/mcube/logger/zap"
 )
 

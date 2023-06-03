@@ -1,7 +1,7 @@
 package collector_test
 
 import (
-	"github.com/ahwhy/myGolang/promethous/rocketMq_exporter/conf"
+	"github.com/ahwhy/myGolang/prometheus/rocketMq_exporter/conf"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

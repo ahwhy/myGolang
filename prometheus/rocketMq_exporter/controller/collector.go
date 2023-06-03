@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ahwhy/myGolang/promethous/rocketMq_exporter/conf"
+	"github.com/ahwhy/myGolang/prometheus/rocketMq_exporter/conf"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

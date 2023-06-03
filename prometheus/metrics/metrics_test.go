@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahwhy/myGolang/promethous/metrics"
+	"github.com/ahwhy/myGolang/prometheus/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

@@ -137,7 +137,6 @@
 	$ docker exec -it -e "ETCDCTL_API=3" etcd  etcdctl get  /registry/configs/default/cmdb -w json
 	C:/Program Files/Git/registry/configs/default/cmdb
 	{"header":{"cluster_id":14841639068965178418,"member_id":10276657743932975437,"revision":47,"raft_term":2},"kvs":[{"key":"L3JlZ2lzdHJ5L2NvbmZpZ3MvZGVmYXVsdC9jbWRi","create_revision":37,"mod_revision":47,"version":11,"value":"Y21kYiBjb25maWcgb2JqZWN0djk="}],"count":1}
-
 ```
 
 - 读取数据
