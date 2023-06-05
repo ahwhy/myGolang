@@ -8,7 +8,7 @@ func NewDefaultConfig() *Config {
 			Template: CMD_TEMP,
 		},
 		FileConfig: &fileConfig{
-			Path: "modules/rocketmq/sample/data.txt",
+			Path: "data/sample.txt",
 		},
 	}
 }

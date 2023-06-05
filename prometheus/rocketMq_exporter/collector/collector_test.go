@@ -8,6 +8,7 @@ import (
 	"github.com/ahwhy/myGolang/prometheus/rocketMq_exporter/collector"
 	"github.com/ahwhy/myGolang/prometheus/rocketMq_exporter/conf"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/expfmt"
 )
 
 var (
