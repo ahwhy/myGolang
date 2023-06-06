@@ -106,7 +106,7 @@
 	time.Now().Unix()
 	time.Now().Year()   // Month() Day()  Hour()  Minute()  Second()
 	time.Now().Format("2006-01-02 15:04:05")
-	time.Parse("2006-01-02 15:04:05", "2022-08-08 09:36:58")        // 返回转换后的时间格式和一个判断信息（err)
+	time.Parse("2006-01-02 15:04:05", "2022-08-08 09:36:58")        // 返回转换后的时间格式和一个判断信息(err)
 	time.Sleep(1 * time.Second)
 	time.Now().Add(30 * time.Second)
 	time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
@@ -145,7 +145,7 @@
 - math/rand
 	- rand包实现了伪随机数生成器
 	- 伪随机数，用确定性的算法计算出来自[0,1]均匀分布的随机数序列。并不真正的随机，但具有类似于随机数的统计特征，如均匀性、独立性等
-	- 在计算伪随机数时，若使用的初值（种子）不变，那么伪随机数的数序也不变
+	- 在计算伪随机数时，若使用的初值(种子)不变，那么伪随机数的数序也不变
 	- 伪随机数可以用计算机大量生成，在模拟研究中为了提高模拟效率，一般采用伪随机数代替真正的随机数
 	- 模拟中使用的一般是循环周期极长并能通过随机数检验的伪随机数，以保证计算结果的随机性
 ```go
@@ -374,7 +374,7 @@
 
 	// 将src的数据解码后存入dst，最多写DecodedLen(len(src))字节数据到dst，并返回写入的字节数
 	// 如果src包含非法字符，将返回成功写入的字符数和CorruptInputError
-	// 换行符（\r、\n）会被忽略。
+	// 换行符(\r、\n)会被忽略。
 	func (enc *Encoding) Decode(dst, src []byte) (n int, err error)
 
 	// 返回base64编码的字符串s代表的数据
@@ -414,7 +414,7 @@
 	// Field int `json:"myName"`
 	// // 字段在json里的键为"myName"且如果字段为空值将在对象中省略掉
 	// Field int `json:"myName,omitempty"`
-	// // 字段在json里的键为"Field"（默认值），但如果字段为空值会跳过；注意前导的逗号
+	// // 字段在json里的键为"Field"(默认值)，但如果字段为空值会跳过；注意前导的逗号
 	// Field int `json:",omitempty"
 	// // "string"选项标记一个字段在编码json时应编码为字符串；它只适用于字符串、浮点数、整数类型的字段
 	// Int64String int64 `json:",string"`
@@ -474,7 +474,7 @@
 	- `strings.Replace` 返回将s中前n个不重叠old子串都替换为new的新字符串，如果n<0会替换所有old子串
 	- `strings.Map` 将s的每一个unicode码值r都替换为mapping(r)，返回这些新码值组成的字符串拷贝
 	- `strings.Trim` 返回将s前后端所有cutset包含的utf-8码值都去掉的字符串
-	- `strings.Fields` 返回将字符串按照空白（unicode.IsSpace确定，可以是一到多个连续的空白字符）分割的多个字符串
+	- `strings.Fields` 返回将字符串按照空白(unicode.IsSpace确定，可以是一到多个连续的空白字符)分割的多个字符串
 	- `strings.SplitN` 用去掉s中出现的sep的方式进行分割，会分割到结尾，并返回生成的所有片段组成的切片
 	- `strings.Join` 将一系列字符串连接为一个字符串，之间用sep来分隔
 	- `strings.NewReader` NewReader创建一个从s读取数据的Reader
@@ -809,7 +809,7 @@
 ### 28. regexp
 - regexp
 	- regexp包实现了正则表达式搜索
-	- 正则表达式采用RE2语法（除了\c、\C），和Perl、Python等语言的正则基本一致
+	- 正则表达式采用RE2语法(除了\c、\C)，和Perl、Python等语言的正则基本一致
 	- 参见 [Syntax](http://code.google.com/p/re2/wiki/Syntax)z
 
 - regexp/syntax
@@ -1007,6 +1007,23 @@
 	- `github.com/julienschmidt/httprouter`
 
 ### 5. kubernetes
+- 源码仓库
+	- Kubernetes `https://github.com/kubernetes/kubernetes`
+	- 容器网络接口(CNI)使网络服务提供商能够定义从IPAM到真实数据包的路由
+	- 容器存储接口(CSI)使存储服务提供商能够满足集群内的工作负载存储请求；常用于ceph、vSAN和EBS等技术的实施
+		- CSI `https://kubernetes-csi.github.io/docs/introduction.html`
+	- 容器运行时接口(CRI)支持各种运行时，包括Docker、containerd和CRI-O
+		- 它还使得一些不那么常见的运行时得到推广，如firecracker(它利用KVM来提供一个最小的虚拟机)
+		- CRI `https://github.com/kubernetes/cri-api`
+	- 服务网格接口(SMI)是Kubernetes生态系统中较新的接口之一；它希望在定义流量策略、服务发现和服务管理时保证一致性
+	- 云服务商接口(Could Provider Interface，CPI)使VMware、AWS、Azure等云服务商能够为其云服务与Kubernetes集群进行整合
+		- CPI(整合云服务商接口) `https://github.com/kubernetes/cloud-provider`
+	- 开放容器倡议(OCI)对镜像格式进行了标准化，确保由一个工具构建的容器镜像在符合要求的情况下可以在任何符合OCI的容器运行时运行
+		- CRI-O `https://github.com/cri-o/cri-o`
+	- Ingress-nginx `https://kubernetes.github.io/ingress-nginx`
+	- Containerd`https://containerd.io`
+	- Project Contour `https://projectcontour.io`
+
 - `k8s.io/client-go`
 	- `k8s.io/client-go/rest`
 	- `k8s.io/client-go/kubernetes`
