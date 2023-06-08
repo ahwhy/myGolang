@@ -20,9 +20,13 @@ func init() {
 
 func TestScirptCollector(t *testing.T) {
 	b := bytes.NewBuffer([]byte{})
-	if err := sc.Exec("test.sh", "-f", b); err != nil {
+	if err := sc.Exec("shell_test.sh", "success", b); err != nil {
 		t.Fatal(err)
 	}
 
+	if err := sc.Exec("python_test.py", "success", b); err != nil {
+		t.Fatal(err)
+	}
+	
 	t.Log(b.String())
 }
