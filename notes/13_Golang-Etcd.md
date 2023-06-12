@@ -609,3 +609,5 @@
 	- [etcdv3.4 CHANGELOG-3.4](https://github.com/etcd-io/etcd/blob/main/CHANGELOG-3.4.md)
 	- [ETCD-内部原理](https://www.cnblogs.com/seattle-xyt/p/10366131.html)
 	- [etcd 服务配置 TLS 证书认证](https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/security.md)
+	- [etcd：从应用场景到实现原理的全方位解读](https://www.infoq.cn/article/etcd-interpretation-application-scenario-implement-principle/)
+	- [etcd-operator](https://github.com/coreos/etcd-operator )

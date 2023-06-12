@@ -1007,7 +1007,7 @@
 	- `github.com/julienschmidt/httprouter`
 
 ### 5. kubernetes
-- 源码仓库
+- Kubernetes以及衍生应用
 	- Kubernetes `https://github.com/kubernetes/kubernetes`
 	- 容器网络接口(CNI)使网络服务提供商能够定义从IPAM到真实数据包的路由
 	- 容器存储接口(CSI)使存储服务提供商能够满足集群内的工作负载存储请求；常用于ceph、vSAN和EBS等技术的实施
@@ -1023,6 +1023,18 @@
 	- Ingress-nginx `https://kubernetes.github.io/ingress-nginx`
 	- Containerd`https://containerd.io`
 	- Project Contour `https://projectcontour.io`
+	- Cluster API `https://cluster-api.sigs.k8s.io`
+	- KubeFed `https:// github.com/kubernetes-sigs/kubefed` 用于集群联邦部署
+	- Prometheus `https://prometheus.io`
+	- kube-vip `https://kube-vip.io` 用于集群缺乏负载均衡器的集成
+	- metallb `https://metallb.universe.tf` 同上
+	- Equinix Metal`https://metal.equinix.com`云服务商提供的裸机选项
+	- Rander `https://ranchermanager.docs.rancher.com/zh/v2.6/getting-started/overview`
+
+- 基础设施管理工具
+	- 允许声明计算和网络基础设施的理想状态，然后应用该状态
+	- Terraform `https://www.terraform.io`
+	- CloudFormation for AWS `https://aws.amazon.com/cloudformation`
 
 - `k8s.io/client-go`
 	- `k8s.io/client-go/rest`
