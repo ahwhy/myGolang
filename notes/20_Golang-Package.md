@@ -1015,6 +1015,15 @@
 	- 容器运行时接口(CRI)支持各种运行时，包括Docker、containerd和CRI-O
 		- 它还使得一些不那么常见的运行时得到推广，如firecracker(它利用KVM来提供一个最小的虚拟机)
 		- CRI `https://github.com/kubernetes/cri-api`
+		- docker
+		- containerd
+		- CRI-O 一个专门为Kubernetes设计的容器运行时，CRI-O容器运行时的主要使用者之一是Red Hat的OpenShift平台
+		- Kata Containers 
+			- 一个开源的、专门的运行时，使用轻量级的虚拟机而不是容器来运行工作负载
+			- 实现了containerd运行时API，特别是v2 containerd-shim API `https://oreil.ly/DxGyZ`
+			- 一个常见用例是运行多租户的Kubernetes集群，这些集群将运行不受信任的代码。百度云`https://oreil.ly/btDL9`和华为云`https:// oreil.ly/Mzarh`等云供应商在其云基础设施中就使用了Kata Containers
+			- 支持不同的管理程序来运行工作负载，包括QEMU `https://www.qemu.org`、NEMU `https://github.com/intel/nemu`和AWS Firecracker `https://firecracker-mic-rovm.github.io`
+		- Virtual Kubelet `https://github.com/virtual-kubelet/virtual-kubelet` 一个开源项目，其行为类似于kubelet
 	- 服务网格接口(SMI)是Kubernetes生态系统中较新的接口之一；它希望在定义流量策略、服务发现和服务管理时保证一致性
 	- 云服务商接口(Could Provider Interface，CPI)使VMware、AWS、Azure等云服务商能够为其云服务与Kubernetes集群进行整合
 		- CPI(整合云服务商接口) `https://github.com/kubernetes/cloud-provider`
@@ -1030,6 +1039,7 @@
 	- metallb `https://metallb.universe.tf` 同上
 	- Equinix Metal`https://metal.equinix.com`云服务商提供的裸机选项
 	- Rander `https://ranchermanager.docs.rancher.com/zh/v2.6/getting-started/overview`
+	- Kubernetes测试网格 `https://k8s-testgrid.appspot.com`
 
 - 基础设施管理工具
 	- 允许声明计算和网络基础设施的理想状态，然后应用该状态
