@@ -1010,6 +1010,29 @@
 - Kubernetes以及衍生应用
 	- Kubernetes `https://github.com/kubernetes/kubernetes`
 	- 容器网络接口(CNI)使网络服务提供商能够定义从IPAM到真实数据包的路由
+		- CNI `https://github.com/containernetworking/cni`
+			- IPAM 集群的IP池管理工具
+			- Kube-Router `https://www.kube-router.io`
+		- Cilium 利用扩展的Berkeley包过滤器
+			- 相对于Calico是一个较新的CNI插件
+			- eBPF `https://ebpf.io`
+			- 搭配eXpress Data Path(XDP)
+			- hubble `https://github.com/cilium/hubble` 利用Cilium的eBPF程序，为操作员提供用户界面和CLI
+		- Calico `https://www.projectcalico.org`
+			- 解决BGP对等受阻，将BGP作为引入路由反射器 `https://tools.ietf.org/html/rfc4456`
+		- flannel `https://github.com/coreos/flannel`
+		- Multus 本身是一个CNI插件，也可以使用其他多种CNI插件
+			- 在这种模式下，Multus成为与Kubernetes互动的CNI插件
+			- Multus配置了一个默认的网络，这个网络通常是用来促进Pod到Pod通信的
+		- Antrea `https://antrea.io/docs`
+			- 数据面 `https://www.openvswitch.org`\
+		- Weave `https://www.weave.works/oss/net`
+			- 覆盖网络，提供许多机制来路由流量
+			- 例如使用OVS模块的快速数据路径选项，将数据包处理保留在内核中
+		- AWS VPC CNI `https://github.com/aws/amazon-vpc-cni-k8s`
+		- 流量加密
+			- Antrea支持在使用GRE隧道时用IPsec进行加密
+			- Calico能够通过接入节点的WireGuard `https://www.wireguard.com` 安装来加密流量
 	- 容器存储接口(CSI)使存储服务提供商能够满足集群内的工作负载存储请求；常用于ceph、vSAN和EBS等技术的实施
 		- CSI `https://kubernetes-csi.github.io/docs/introduction.html`
 		- Ceph `https://ceph.io`
