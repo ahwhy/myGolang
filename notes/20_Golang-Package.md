@@ -1054,6 +1054,11 @@
 		- CPI(整合云服务商接口) `https://github.com/kubernetes/cloud-provider`
 	- 开放容器倡议(OCI)对镜像格式进行了标准化，确保由一个工具构建的容器镜像在符合要求的情况下可以在任何符合OCI的容器运行时运行
 		- CRI-O `https://github.com/cri-o/cri-o`
+	- Device Plugin 
+		- `https://github.com/NVIDIA/k8s-device-plugin`
+		- `https://github.com/intel/intel-device-plugins-for-kubernetes`
+		- `https://github.com/intel/sriov-network-device-plugin`
+		- `https://github.com/hustcat/k8s-rdma-device-plugin`
 	- Ingress-nginx `https://kubernetes.github.io/ingress-nginx`
 	- Containerd`https://containerd.io`
 	- Project Contour `https://projectcontour.io`
