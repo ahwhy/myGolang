@@ -1041,7 +1041,7 @@
 		- 它还使得一些不那么常见的运行时得到推广，如firecracker(它利用KVM来提供一个最小的虚拟机)
 		- CRI `https://github.com/kubernetes/cri-api`
 		- docker
-		- containerd
+		- Containerd`https://containerd.io`
 		- CRI-O 一个专门为Kubernetes设计的容器运行时，CRI-O容器运行时的主要使用者之一是Red Hat的OpenShift平台
 		- Kata Containers 
 			- 一个开源的、专门的运行时，使用轻量级的虚拟机而不是容器来运行工作负载
@@ -1059,9 +1059,11 @@
 		- `https://github.com/intel/intel-device-plugins-for-kubernetes`
 		- `https://github.com/intel/sriov-network-device-plugin`
 		- `https://github.com/hustcat/k8s-rdma-device-plugin`
-	- Ingress-nginx `https://kubernetes.github.io/ingress-nginx`
-	- Containerd`https://containerd.io`
-	- Project Contour `https://projectcontour.io`
+	- Ingress-Controller
+		- nginx `https://kubernetes.github.io/ingress-nginx`
+		- Contour `https://github.com/projectcontour/contour` `https://projectcontour.io`
+		- HAProxy `https://github.com/haproxy/haproxy`
+		- Traefik `https://github.com/traefik/traefik`
 	- Cluster API `https://cluster-api.sigs.k8s.io`
 	- KubeFed `https:// github.com/kubernetes-sigs/kubefed` 用于集群联邦部署
 	- Prometheus `https://prometheus.io`
