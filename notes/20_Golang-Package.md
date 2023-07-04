@@ -1009,6 +1009,8 @@
 ### 5. kubernetes
 - Kubernetes以及衍生应用
 	- Kubernetes `https://github.com/kubernetes/kubernetes`
+	- 组件
+		- kube-aggregator `https://github.com/kubernetes-sigs/apiserver-builder-alpha/blob/master/docs/concepts/aggregation.md` kube-apiserver扩展功能，一个根据 URL 选择具体的 API 后端的代理服务器 
 	- 容器网络接口(CNI)使网络服务提供商能够定义从IPAM到真实数据包的路由
 		- CNI `https://github.com/containernetworking/cni`
 			- IPAM 集群的IP池管理工具
@@ -1048,6 +1050,7 @@
 			- 实现了containerd运行时API，特别是v2 containerd-shim API `https://oreil.ly/DxGyZ`
 			- 一个常见用例是运行多租户的Kubernetes集群，这些集群将运行不受信任的代码。百度云`https://oreil.ly/btDL9`和华为云`https://oreil.ly/Mzarh`等云供应商在其云基础设施中就使用了Kata Containers
 			- 支持不同的管理程序来运行工作负载，包括QEMU `https://www.qemu.org`、NEMU `https://github.com/intel/nemu`和AWS Firecracker `https://firecracker-mic-rovm.github.io`
+		- gVisor 
 		- Virtual Kubelet `https://github.com/virtual-kubelet/virtual-kubelet` 一个开源项目，其行为类似于kubelet
 	- 服务网格接口(SMI)是Kubernetes生态系统中较新的接口之一；它希望在定义流量策略、服务发现和服务管理时保证一致性
 	- 云服务商接口(Could Provider Interface，CPI)使VMware、AWS、Azure等云服务商能够为其云服务与Kubernetes集群进行整合
@@ -1066,17 +1069,21 @@
 		- Traefik `https://github.com/traefik/traefik`
 	- Cluster API `https://cluster-api.sigs.k8s.io`
 	- KubeFed `https:// github.com/kubernetes-sigs/kubefed` 用于集群联邦部署
-	- Prometheus `https://prometheus.io`
 	- kube-vip `https://kube-vip.io` 用于集群缺乏负载均衡器的集成
 	- metallb `https://metallb.universe.tf` 同上
 	- Equinix Metal`https://metal.equinix.com`云服务商提供的裸机选项
 	- Kubernetes测试网格 `https://k8s-testgrid.appspot.com`
+	- external-dns `https://github.com/kubernetes-sigs/external-dns` 将平台与DNS服务商集成
 
 - 基础设施管理工具
 	- 允许声明计算和网络基础设施的理想状态，然后应用该状态
 	- Terraform `https://www.terraform.io`
 	- CloudFormation for AWS `https://aws.amazon.com/cloudformation`
 	- Rander `https://ranchermanager.docs.rancher.com/zh/v2.6/getting-started/overview`
+
+- Prometheus
+	- Prometheus `https://prometheus.io`
+	- Node Exporter `https://github.com/prometheus/node_exporter`
 
 - `k8s.io/client-go`
 	- `k8s.io/client-go/rest`

@@ -377,24 +377,22 @@
 	syntax = "proto3";
 	
 	package hello;
-	option go_package="gitee.com/infraboard/go-course/day21/pbrpc/service";
-	
+	option go_package="github.com/ahwhy/myGolang/rpc/grpc/service";
+
 	// The HelloService service definition.
 	service HelloService {
 		rpc Hello (Request) returns (Response);
 	}
-	
+
 	message Request {
 		string value = 1;
 	}
-	
+
 	message Response {
 		string value = 1;
 	}
-	
-	// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
-	//  --go-grpc_out=./grpc/service --go-grpc_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" \
-	//  grpc/service/service.proto
+
+	// protoc -I=. --go_out=./grpc --go_opt=module="github.com/ahwhy/myGolang/rpc/grpc" --go-grpc_out=./grpc --go-grpc_opt=module="github.com/ahwhy/myGolang/rpc/grpc" grpc/service/service.proto
 ```
 
 - gRPC服务端
@@ -471,7 +469,7 @@
 		// 关键字stream指定启用流特性，参数部分是接收客户端参数的流，返回值是返回给客户端的流
 		rpc Channel (stream Request) returns (stream Response) {}
 	}
-	// $ protoc -I=. --go_out=./grpc/service --go_opt=module="gitee.com/infraboard/go-course/day21/grpc/service" --go-grpc_out=./grpc/service --go-grraboard/go-course/day21/grpc/service" grpc/service/service.proto
+	// protoc -I=. --go_out=./grpc --go_opt=module="github.com/ahwhy/myGolang/rpc/grpc" --go-grpc_out=./grpc --go-grpc_opt=module="github.com/ahwhy/myGolang/rpc/grpc" grpc/service/service.proto
 
 	// gRPC服务端
 	func (p *HelloService) Channel(stream service.HelloService_ChannelServer) error {
