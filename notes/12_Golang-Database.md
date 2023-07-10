@@ -215,6 +215,14 @@ DROP INDEX [ indexName ] ON mytable;
 	// 以tester登录
 	`mysql -utester -p'123456' -h121.40.150.39 -P9528`
 
+	// 查看主从状态 
+	SHOW SLAVE STATUS\G 
+	SHOW MASTER STATUS\G
+	// 查看从库线程状态
+	SHOW PROCESSLIST;
+	// 查看二进制日志
+	SHOW BINARY LOGS;
+
 	// 创建database
 	`create database test;`
 	
@@ -223,11 +231,11 @@ DROP INDEX [ indexName ] ON mytable;
 	show tables;
 
 	// 创建表
-	create table if not exists student(
+	create table if not exists school.student(
 	id int not null auto_increment comment '主键自增id',
-	name char(4) not null comment '姓名',
+	name char(64) not null comment '姓名',
 	province char(6) not null comment '省',
-	city char(10) not null comment '城市',
+	city char(64) not null comment '城市',
 	addr varchar(100) default '' comment '地址',
 	score float not null default 0 comment '考试成绩',
 	enrollment date not null comment '入学时间',
@@ -273,10 +281,10 @@ DROP INDEX [ indexName ] ON mytable;
 
 	// 新增记录
 	// 必须给`not null`且无 default值的列赋值
-	insert into student (name,province,city,enrollment) values
-	('张三','北京','北京','2021-03-05'),
-	('李四','河南','郑州','2021-04-25'),
-	('小丽','四川','成都','2021-03-10');
+	insert into school.student (name,province,city,addr,score,enrollment) values
+	('张三','北京','北京','北京','149','2021-03-05'),
+	('李四','河南','郑州','郑州','139','2021-04-25'),
+	('小丽','四川','成都','成都','129','2021-03-10');
 
 	// 查询记录
 	select id,name from student where id>0;
