@@ -1074,12 +1074,14 @@
 	- Equinix Metal`https://metal.equinix.com`云服务商提供的裸机选项
 	- Kubernetes测试网格 `https://k8s-testgrid.appspot.com`
 	- external-dns `https://github.com/kubernetes-sigs/external-dns` 将平台与DNS服务商集成
+	- mac版虚拟kubernetes `github.com/kubernetes-sigs/kind/releases`
 
 - 基础设施管理工具
 	- 允许声明计算和网络基础设施的理想状态，然后应用该状态
 	- Terraform `https://www.terraform.io`
 	- CloudFormation for AWS `https://aws.amazon.com/cloudformation`
 	- Rander `https://ranchermanager.docs.rancher.com/zh/v2.6/getting-started/overview`
+	- Flatcar Container Linux `https://www.flatcar-linux.org` 为容器设计的Linux发行版
 
 - Prometheus
 	- Prometheus `https://prometheus.io`

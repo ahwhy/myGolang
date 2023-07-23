@@ -137,6 +137,7 @@
 			- CLOSING: 两边同时发送关闭请求，由FIN_WAIT1进入此状态，收到FIN请求，同时响应一个ACK
 			- TIME_WAIT
 				- [记一次time_wait & close_wait的讨论总结](https://developer.aliyun.com/article/745776)
+				- [time_wait遇到ts回绕时的问题 - 三次握手收到syn没有回复syn,ack直接回复ack的场景](https://developer.aliyun.com/article/1262180)
 				- FIN_WAIT2到此状态: 双方不同时发送FIN的情况下，主动关闭的一方在完成自己的请求后，收到对方的FIN后的状态
 				- CLOSING到此状态: 双方同时发起关闭，都发送了FIN，同时接受FIN并发送ACK后的状态
 				- FIN_WAIT2到此状态: 对方发来的FIN的ACK同时到达后的状态，与上一条的区别是本身发送的FIN回应的ACK先于对方的FIN到达，而上一条是FIN先到达
