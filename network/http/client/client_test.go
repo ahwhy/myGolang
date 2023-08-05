@@ -14,6 +14,10 @@ func TestSimplePost(t *testing.T) {
 	client.SimplePost()
 }
 
+func TestSimpleTrucked(t *testing.T) {
+	client.SimpleTrucked()
+}
+
 func TestPostForm(t *testing.T) {
 	client.PostForm()
 }

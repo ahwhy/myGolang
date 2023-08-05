@@ -1,8 +1,10 @@
 package client
 
 import (
+	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -54,6 +56,31 @@ func SimplePost() {
 		io.Copy(os.Stdout, resp.Body) // 两个io数据流的拷贝
 		os.Stdout.WriteString("\n")
 		fmt.Printf("\n==========\n")
+	}
+}
+
+// SimpleTrucked 接收http trunked数据
+func SimpleTrucked() {
+	resp, err := http.Get("http://127.0.0.1:5656/trunked")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println(resp.TransferEncoding)
+
+	reader := bufio.NewReader(resp.Body)
+	for {
+		line, err := reader.ReadString('\n')
+		if len(line) > 0 {
+			fmt.Println(line)
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

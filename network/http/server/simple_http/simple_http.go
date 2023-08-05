@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 // http协议具体内容
@@ -34,8 +35,20 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("\n==========\n")
 }
 
+// TrunkedHandler 模拟http trunked过程
+func TrunkedHandler(w http.ResponseWriter, r *http.Request) {
+	flusher := w.(http.Flusher)
+	// 两段消息，会自动触发 http trunked
+	for i := 0; i < 2; i++ {
+		fmt.Fprint(w, "This is Trunked\n")
+		flusher.Flush()
+		<-time.Tick(1 * time.Second)
+	}
+}
+
 func main() {
-	http.HandleFunc("/", HelloHandler)                        // 路由，请求要目录时去执行HelloHandler
+	http.HandleFunc("/", HelloHandler) // 路由，请求要目录时去执行HelloHandler
+	http.HandleFunc("/trunked", TrunkedHandler)
 	if err := http.ListenAndServe(":5656", nil); err != nil { // ListenAndServe如果不发生error会一直阻塞；为每一个请求单独创建一个协程去处理
 		panic(err)
 	}
