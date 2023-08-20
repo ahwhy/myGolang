@@ -1067,6 +1067,15 @@
 		- Contour `https://github.com/projectcontour/contour` `https://projectcontour.io`
 		- HAProxy `https://github.com/haproxy/haproxy`
 		- Traefik `https://github.com/traefik/traefik`
+	- Secret 管理
+		- 从物理层开始防御
+			- 一个典型的例子是谷歌，它有多份白皮书`https://cloud.google.com/security/overview/whitepaper`
+			- 在YouTube上还有一个视频 `https://oreil.ly/dtHUx`，描述其数据中心的安全方法。其中包括金属探测器、路障，以及进入数据中心的多层安全检查
+		- Cyberark提供了一个证书供应商和动态访问供应商 DAP，其 提供了多种企业机制
+		- Vault 是 HashiCorp 的一个开源项目
+			- Vault已经找到了几种在云原生空间中整合的方法，围绕着在Spring等框架和Kubernetes本身中提供一流的集成
+			- 一种新兴的模式是在Kubernetes中运行Vault，并使Vault能够使用TokenReview API来验证针对Kubernetes API服务器的请求
+			- Vault提供的几种认证方法 `https://www.vaultproject.io/docs/auth`
 	- Cluster API `https://cluster-api.sigs.k8s.io`
 	- KubeFed `https:// github.com/kubernetes-sigs/kubefed` 用于集群联邦部署
 	- kube-vip `https://kube-vip.io` 用于集群缺乏负载均衡器的集成
