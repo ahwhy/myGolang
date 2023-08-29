@@ -6,31 +6,31 @@
 
 client-go项目 是与 kube-apiserver 通信的 clients 的具体实现，其中包含很多相关工具包，例如 `kubernetes`包 就包含与 Kubernetes API 通信的各种 ClientSet，而 `tools/cache`包 则包含很多强大的编写控制器相关的组件。
 
-所以接下来我们以自定义控制器的底层实现原理为线索，来分析client-go中相关模块的源码实现。
+所以接下来我们以自定义控制器的底层实现原理为线索，来分析 client-go 中相关模块的源码实现。
 
-如图所示，我们在编写自定义控制器的过程中大致依赖于如下组件，其中圆形的是自定义控制器中需要编码的部分，其他椭圆和圆角矩形的是client-go提供的一些"工具"。
+如图所示，在编写自定义控制器的过程中大致依赖于如下组件，其中圆形的是自定义控制器中需要编码的部分，其他椭圆和圆角矩形的是 client-go 提供的一些"工具"。
 
 ![编写自定义控制器依赖的组件](./images/编写自定义控制器依赖的组件.jpg)
 
-- client-go的源码入口在Kubernetes项目的 `staging/src/k8s.io/client-go` 中，先整体查看上面涉及的相关模块，然后逐个深入分析其实现。
-  + Reflector：Reflector 从apiserver监听(watch)特定类型的资源，拿到变更通知后，将其丢到 DeltaFIFO队列 中。
-  + Informer：Informer 从 DeltaFIFO 中弹出(pop)相应对象，然后通过 Indexer 将对象和索引丢到 本地cache中，再触发相应的事件处理函数(Resource Event Handlers)。
-  + Indexer：Indexer 主要提供一个对象根据一定条件检索的能力，典型的实现是通过 namespace/name 来构造key，通过 Thread Safe Store 来存储对象。
-  + WorkQueue：WorkQueue 一般使用的是延时队列实现，在Resource Event Handlers中会完成将对象的key放入WorkQueue的过程，然后在自己的逻辑代码里从WorkQueue中消费这些key。
-  + ClientSet：ClientSet 提供的是资源的CURD能力，与apiserver交互。
-  + Resource Event Handlers：一般在 Resource Event Handlers 中添加一些简单的过滤功能，判断哪些对象需要加到WorkQueue中进一步处理，对于需要加到WorkQueue中的对象，就提取其key，然后入队。
-  + Worker：Worker指的是我们自己的业务代码处理过程，在这里可以直接收到WorkQueue中的任务，可以通过Indexer从本地缓存检索对象，通过ClientSet实现对象的增、删、改、查逻辑。
+- client-go 的源码入口在 Kubernetes 项目的 `staging/src/k8s.io/client-go` 中，先整体查看上面涉及的相关模块，然后逐个深入分析其实现。
+  + `Reflector` 从 apiserver 监听(watch)特定类型的资源，拿到变更通知后，将其丢到 DeltaFIFO 队列中
+  + `Informer` 从 DeltaFIFO 中弹出(pop)相应对象，然后通过 Indexer 将对象和索引丢到本地 cache 中，再触发相应的事件处理函数(Resource Event Handlers)
+  + `Indexer` 主要提供一个对象根据一定条件检索的能力，典型的实现是通过 namespace/name 来构造 key，通过 Thread Safe Store 来存储对象
+  + `WorkQueue` 一般使用的是延时队列实现，在 Resource Event Handlers 中会完成将对象的 key 放入 WorkQueue 的过程，然后在自己的逻辑代码里从 WorkQueue 中消费这些 key
+  + `ClientSet` 提供的是资源的 CURD 能力，与 apiserver 交互
+  + `Resource Event Handlers` 一般在 Resource Event Handlers 中添加一些简单的过滤功能，判断哪些对象需要加到 WorkQueue 中进一步处理，对于需要加到 WorkQueue 中的对象，就提取其 key，然后入队
+  + `Worker` 指的是我们自己的业务代码处理过程，在这里可以直接收到 WorkQueue 中的任务，可以通过 Indexer 从本地缓存检索对象，通过 ClientSet 实现对象的增、删、改、查逻辑
 
 
 ## 二、Client-go Indexer 与 ThreadSafeStore
 
-Indexer主要为对象提供根据一定条件进行检索的能力，典型的实现是通过namespace/name来构造key，通过ThreadSafeStore来存储对象。换言之，Indexer主要依赖于ThreadSafeStore实现，是client-go提供的一种缓存机制，通过检索本地缓存可以有效降低apiserver的压力。
+`Indexer` 主要为对象提供根据一定条件进行检索的能力，典型的实现是通过 namespace/name 来构造 key，通过 `ThreadSafeStore` 来存储对象。换言之，`Indexer` 主要依赖于 `ThreadSafeStore` 实现，是 client-go 提供的一种缓存机制，通过检索本地缓存可以有效降低 apiserver 的压力。
 
 ### 1. Indexer 接口和 cache 的实现
 
 - `Indexer` 接口主要是在 `Store` 接口的基础上拓展了对象的检索功能
 	- 代码在 `k8s.io/client-go/tools/cache` 包下
-	- Indexer接口定义在index.go中
+	- `Indexer` 接口定义在 index.go 中
 ```golang
 	// Indexer extends Store with multiple indices and restricts each
 	// accumulator to simply hold the current object (and be empty after Delete).
@@ -82,7 +82,7 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 - `Indexer` 的默认实现是 `cache`，定义在 store.go中
 	- 这里涉及两个类型 `keyFunc` 与 `ThreadSafeStore`
 	- 从 `Indexer` 的方法的实现来看
-		- 这里的逻辑就是调用 `keyFunc()`方法获取key，然后调用 `cacheStorage.Xxx()` 方法完成对应的增删改查过程
+		- 这里的逻辑就是调用 `keyFunc()` 方法获取 key，然后调用 `cacheStorage.Xxx()` 方法完成对应的增删改查过程
 ```golang
 	// `*cache` implements Indexer in terms of a ThreadSafeStore and an associated KeyFunc.
 	type cache struct {
@@ -219,9 +219,9 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 	}
 ```
 
-- `KeyFunc` 类型是这样定义的 `type KeyFunc func(obj interface{}) (string, error)`，即 给一个对象返回一个字符串类型的key
+- `KeyFunc` 类型是这样定义的 `type KeyFunc func(obj interface{}) (string, error)`，即 给一个对象返回一个字符串类型的 key
 	- `KeyFunc` 的一个默认实现如下 `MetaNamespaceKeyFunc`
-	- 可以看到一般情况下返回值是 `<namespace>/<name>`，如果namespace为空，则直接返回name。
+	- 可以看到一般情况下返回值是 `<namespace>/<name>`，如果 namespace 为空，则直接返回 name
 ```golang
 	// ExplicitKey can be passed to MetaNamespaceKeyFunc if you have the key for
 	// the object but not the object itself.
@@ -322,11 +322,20 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 	// Indexers maps a name to an IndexFunc
 	type Indexers map[string]IndexFunc
 
-	// Indices maps a name to an Index
-	type Indices map[string]Index
-
 	// IndexFunc knows how to compute the set of indexed values for an object.
 	type IndexFunc func(obj interface{}) ([]string, error)
+
+	// MetaNamespaceIndexFunc is a default index function that indexes based on an object's namespace
+	func MetaNamespaceIndexFunc(obj interface{}) ([]string, error) {
+		meta, err := meta.Accessor(obj)
+		if err != nil {
+			return []string{""}, fmt.Errorf("object has no meta: %v", err)
+		}
+		return []string{meta.GetNamespace()}, nil
+	}
+
+	// Indices maps a name to an Index
+	type Indices map[string]Index
 
 	// Index maps the indexed value to a set of keys in the store that match on that value
 	type Index map[string]sets.String
@@ -345,13 +354,13 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 
 ![理解IndexFunc、Indexers和Indices几个对象](./images/理解IndexFunc、Indexers和Indices几个对象.jpg)
 
-`Indexers` 中保存的是 `Index` 函数map，一个典型的实现是字符串namespace作为key，`IndexFunc` 类型的实现 `MetaNamespaceIndexFunc` 函数作为value，也就是通过namespace来检索时，借助 `Indexers` 可以拿到对应的计算 `Index` 的函数，接着调用这个函数把对象传进去，就可以计算出这个对象对应的key，就是具体的namespace值，比如default、kube-system这种格式的字符串。
+`Indexers` 中保存的是 `Index` 函数 map，一个典型的实现是字符串 namespace 作为 key，`IndexFunc` 类型的实现 `MetaNamespaceIndexFunc` 函数作为 value，也就是通过 namespace 来检索时，借助 `Indexers` 可以拿到对应的计算 `Index` 的函数，接着调用这个函数把对象传进去，就可以计算出这个对象对应的 key，就是具体的 namespace 值，比如 default、kube-system 这种格式的字符串。
 
-然后在 `Indices` 中保存的也是一个map，key是上面计算出来的default这种格式的namespace值，value是一个set，而set表示的是这个default namespace下的一些具体pod的 `<namespace>/<name>` 这类格式字符串。最后拿着这个key，就可以在items中检索到对应的对象。
+然后在 `Indices` 中保存的也是一个 map，key 是上面计算出来的 default 这种格式的 namespace 值，value 是一个 set，而 set 表示的是这个default namespace 下的一些具体 pod 的 `<namespace>/<name>` 这类格式字符串。最后拿着这个 key，就可以在 items 中检索到对应的对象。
 
-**b. Add()、Update()等方法的实现**
+**b. Add()、Update() 等方法的实现**
 
-- threadSafeMap如何实现添加元素
+- `threadSafeMap` 如何实现添加元素
 	- `Add()`、`Update()`、`Delete()` 方法
 	- 更复杂的逻辑在 `updateIndices()` 方法
 ```golang
@@ -384,7 +393,7 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 	// - for update you must provide both the oldObj and the newObj
 	// - for delete you must provide only the oldObj
 	// updateIndices must be called from a function that already has a lock on the cache
-	// 创建、更新、删除的入口都是这个方法，差异点在于 create 场景下的参数只传递 newObj，delete 场景下的参数需要传递 oldObj 和 newObj，而 delete 场景下的参数只传递 oldObj
+	// 创建、更新、删除的入口都是这个方法，差异点在于 create 场景下的参数只传递 newObj，update 场景下的参数需要传递 oldObj 和 newObj，而 delete 场景下的参数只传递 oldObj
 	func (i *storeIndex) updateIndices(oldObj interface{}, newObj interface{}, key string) {
 		var oldIndexValues, indexValues []string
 		var err error
@@ -519,8 +528,8 @@ Indexer主要为对象提供根据一定条件进行检索的能力，典型的�
 
 **b. ByIndex()方法**
 
-- `ByIndex()` 方法的实现，直接传递 `indexedValue` ，就不需要通过obj去计算key了
-	- 例如 `indexName==namespace&indexValue==default` 就是直接检索default下的资源对象
+- `ByIndex()` 方法的实现，直接传递 `indexedValue` ，就不需要通过 obj 去计算 key 了
+	- 例如 `indexName==namespace&indexValue==default` 就是直接检索 default 下的资源对象
 ```golang
 	// ByIndex returns a list of the items whose indexed values in the given index include the given indexed value
 	func (c *threadSafeMap) ByIndex(indexName, indexedValue string) ([]interface{}, error) {
