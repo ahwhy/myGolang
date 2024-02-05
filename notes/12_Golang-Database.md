@@ -319,6 +319,50 @@ DROP INDEX [ indexName ] ON mytable;
 	drop table student;
 ```
 
+- SQL语句格式
+```sql
+	-- # 使用WHERE进行过滤
+	SELECT [column / *] FROM tablename WHERE Boolean statement
+
+	-- # 判断相等性
+	SELECT * FROM tablename WHERE rating = "A" 
+
+	-- # 判断不相等性
+	SELECT * FROM tablename WHERE rating != "A" 
+
+	-- # 使用LIKE查找相似的项
+	SELECT * FROM tablename WHERE column LIKE '%string'
+	-- 语　　句           选　　取                         不　选　取
+	-- LIKE "red%"      red rover red reddish           Red Light red credo
+	-- LIKE "%red"      Light red red                   red rover reddish credo
+	-- LIKE "%red%"     red rover red reddish credo     Red
+
+	-- # 使用NOT LIKE查找相似的项
+	SELECT * FROM tablename WHERE column NOT LIKE '%pattern%'
+
+	-- # 带大于和小于的查询
+	SELECT * FROM tablename WHERE column > value
+
+
+	-- # 用ORDER BY排序
+	SELECT * FROM tablename ORDER BY column
+
+	-- # 用ORDER BY排序，并用DESC逆序
+	SELECT * FROM tablename ORDER BY column DESC
+
+
+	-- # 用DISTINCT获取唯一的项
+	SELECT DISTINCT column FROM tablename
+
+
+	-- # 用UPDATE修改记录
+	UPDATE tablename SET column="some value" WHERE colume="some value"
+
+	-- # 用DELETE删除记录
+	DELETE FROM tablename WHERE colume="some value"
+```
+
+
 ### 2. MySQL初始配置
 - 注意事项
 	- 注意存储引擎的选择(InnoDB)
