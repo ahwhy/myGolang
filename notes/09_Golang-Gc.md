@@ -237,3 +237,158 @@
 		- 解决方法
 			- 发生泄漏前，发送者和接收者的数量需要一致、channel需要初始化
 			- 发生泄漏后，采用 `go tool pprof` 分析内存的占用和变化
+
+- 案例：使用`go tool pprof`分析kubelet服务性能
+	- CPU高，查看 profile、goroutine
+	- Memory高，查看 heap、goroutine
+	- 怀疑流程卡主，查看 profile、goroutine
+		- 先确保没有 D 状态进程/线程
+		- 随手执行下 `df > /dev/null`，查看 `echo $?`
+		- 随手检查下 runtime
+			- docker `docker ps -aq | xargs -n1 timeout 5 docker inspect > /dev/null`
+			- containerd `crictl -r /var/run/containerd/containerd.sock ps -aq | xargs -n1 crictl -r /var/run/containerd/containerd.sock inspect > /dev/null`
+```shell
+# 通过 kubectl proxy 代理出 api，一般都是 8001 端口
+$ kubectl proxy --address='0.0.0.0' --accept-hosts='^*$'
+
+# 捞下 profile
+$ curl 127.0.0.1:8001/api/v1/nodes/{nodename}/proxy/debug/pprof/profile -oprofile.bin
+
+# 捞下 goroutine 信息
+$ curl 127.0.0.1:8001/api/v1/nodes/{nodename}/proxy/debug/pprof/goroutine -ogoroutine.bin
+
+# 捞下 heap 信息
+$ curl 127.0.0.1:8001/api/v1/nodes/{nodename}/proxy/debug/pprof/heap -oheap.bin
+
+# 分析pprof
+# 上面命令直接使用： go tool pprof + api地址也可以查看
+$ go tool pprof profile.bin
+File: kubelet
+Build ID: f822c0d1dfe86d6162b91cc75032946f93ace0a1
+Type: cpu
+Time: Apr 11, 2024 at 3:06pm (CST)
+Duration: 30.12s, Total samples = 199.70s (663.04%)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 156.52s, 78.38% of 199.70s total
+Dropped 881 nodes (cum <= 1s)
+Showing top 10 nodes out of 108
+      flat  flat%   sum%        cum   cum%
+   112.36s 56.26% 56.26%    112.97s 56.57%  syscall.Syscall
+     8.17s  4.09% 60.36%     11.73s  5.87%  strings.Fields
+     6.71s  3.36% 63.72%     14.20s  7.11%  runtime.scanobject
+     6.11s  3.06% 66.78%      6.11s  3.06%  runtime.futex
+     5.11s  2.56% 69.33%      5.11s  2.56%  memeqbody
+     4.58s  2.29% 71.63%      4.61s  2.31%  path/filepath.(*lazybuf).append (inline)
+     3.86s  1.93% 73.56%      9.93s  4.97%  path/filepath.Clean
+     3.85s  1.93% 75.49%      3.85s  1.93%  runtime.memclrNoHeapPointers
+     3.43s  1.72% 77.21%      4.16s  2.08%  runtime.findObject
+     2.34s  1.17% 78.38%      2.34s  1.17%  runtime.memmove
+(pprof) list syscall.Syscall
+Total: 199.70s
+ROUTINE ======================== syscall.Syscall in /usr/local/go/src/syscall/asm_linux_amd64.s
+   112.36s    112.97s (flat, cum) 56.57% of Total
+         .          .     13:
+         .          .     14:// func rawVforkSyscall(trap, a1, a2 uintptr) (r1, err uintptr)
+         .          .     15:TEXT ·rawVforkSyscall(SB),NOSPLIT|NOFRAME,$0-40
+         .          .     16:	MOVQ	a1+8(FP), DI
+         .          .     17:	MOVQ	a2+16(FP), SI
+         .      350ms     18:	MOVQ	$0, DX
+         .          .     19:	MOVQ	$0, R10
+         .          .     20:	MOVQ	$0, R8
+         .          .     21:	MOVQ	$0, R9
+         .          .     22:	MOVQ	trap+0(FP), AX	// syscall entry
+      40ms       40ms     23:	POPQ	R12 // preserve return address
+   112.27s    112.27s     24:	SYSCALL
+         .          .     25:	PUSHQ	R12
+         .          .     26:	CMPQ	AX, $0xfffffffffffff001
+         .          .     27:	JLS	ok2
+         .          .     28:	MOVQ	$-1, r1+24(FP)
+         .          .     29:	NEGQ	AX
+         .          .     30:	MOVQ	AX, err+32(FP)
+         .          .     31:	RET
+         .          .     32:ok2:
+      30ms       30ms     33:	MOVQ	AX, r1+24(FP)
+      20ms       20ms     34:	MOVQ	$0, err+32(FP)
+         .          .     35:	RET
+         .      260ms     36:
+         .          .     37:// func rawSyscallNoError(trap, a1, a2, a3 uintptr) (r1, r2 uintptr)
+         .          .     38:TEXT ·rawSyscallNoError(SB),NOSPLIT,$0-48
+         .          .     39:	MOVQ	a1+8(FP), DI
+         .          .     40:	MOVQ	a2+16(FP), SI
+         .          .     41:	MOVQ	a3+24(FP), DX
+ROUTINE ======================== syscall.Syscall6 in /usr/local/go/src/syscall/asm_linux_amd64.s
+     590ms      640ms (flat, cum)  0.32% of Total
+         .          .     36:
+         .          .     37:// func rawSyscallNoError(trap, a1, a2, a3 uintptr) (r1, r2 uintptr)
+         .          .     38:TEXT ·rawSyscallNoError(SB),NOSPLIT,$0-48
+         .          .     39:	MOVQ	a1+8(FP), DI
+         .          .     40:	MOVQ	a2+16(FP), SI
+         .       50ms     41:	MOVQ	a3+24(FP), DX
+         .          .     42:	MOVQ	trap+0(FP), AX	// syscall entry
+         .          .     43:	SYSCALL
+         .          .     44:	MOVQ	AX, r1+32(FP)
+         .          .     45:	MOVQ	DX, r2+40(FP)
+         .          .     46:	RET
+         .          .     47:
+         .          .     48:// func gettimeofday(tv *Timeval) (err uintptr)
+         .          .     49:TEXT ·gettimeofday(SB),NOSPLIT,$0-16
+     590ms      590ms     50:	MOVQ	tv+0(FP), DI
+         .          .     51:	MOVQ	$0, SI
+         .          .     52:	MOVQ	runtime·vdsoGettimeofdaySym(SB), AX
+         .          .     53:	TESTQ   AX, AX
+         .          .     54:	JZ fallback
+         .          .     55:	CALL	AX
+(pprof)
+
+$ go tool pprof goroutine.bin
+File: kubelet
+Build ID: f822c0d1dfe86d6162b91cc75032946f93ace0a1
+Type: goroutine
+Time: Apr 11, 2024 at 2:59pm (CST)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 979, 99.39% of 985 total
+Dropped 143 nodes (cum <= 4)
+Showing top 10 nodes out of 136
+      flat  flat%   sum%        cum   cum%
+       954 96.85% 96.85%        954 96.85%  runtime.gopark
+        25  2.54% 99.39%         25  2.54%  syscall.Syscall
+         0     0% 99.39%          7  0.71%  bufio.(*Reader).Peek
+         0     0% 99.39%         28  2.84%  bufio.(*Reader).Read
+         0     0% 99.39%          8  0.81%  bufio.(*Reader).fill
+         0     0% 99.39%         28  2.84%  bytes.(*Buffer).ReadFrom
+         0     0% 99.39%          5  0.51%  crypto/tls.(*Conn).Read
+         0     0% 99.39%          5  0.51%  crypto/tls.(*Conn).readFromUntil
+         0     0% 99.39%          5  0.51%  crypto/tls.(*Conn).readRecord (inline)
+         0     0% 99.39%          5  0.51%  crypto/tls.(*Conn).readRecordOrCCS
+(pprof) list runtime.gopark
+Total: 985
+ROUTINE ======================== runtime.gopark in /usr/local/go/src/runtime/proc.go
+       954        954 (flat, cum) 96.85% of Total
+         .          .    301:		if forcegc.idle.Load() {
+         .          .    302:			throw("forcegc: phase error")
+         .          .    303:		}
+         .          .    304:		forcegc.idle.Store(true)
+         .          .    305:		goparkunlock(&forcegc.lock, waitReasonForceGCIdle, traceEvGoBlock, 1)
+       954        954    306:		// this goroutine is explicitly resumed by sysmon
+         .          .    307:		if debug.gctrace > 0 {
+         .          .    308:			println("GC forced")
+         .          .    309:		}
+         .          .    310:		// Time-triggered, fully concurrent.
+         .          .    311:		gcStart(gcTrigger{kind: gcTriggerTime, now: nanotime()})
+ROUTINE ======================== runtime.goparkunlock in /usr/local/go/src/runtime/proc.go
+         0        123 (flat, cum) 12.49% of Total
+         .          .    307:		if debug.gctrace > 0 {
+         .          .    308:			println("GC forced")
+         .          .    309:		}
+         .          .    310:		// Time-triggered, fully concurrent.
+         .          .    311:		gcStart(gcTrigger{kind: gcTriggerTime, now: nanotime()})
+         .        123    312:	}
+         .          .    313:}
+         .          .    314:
+         .          .    315://go:nosplit
+         .          .    316:
+         .          .    317:// Gosched yields the processor, allowing other goroutines to run. It does not
+(pprof)
+```
