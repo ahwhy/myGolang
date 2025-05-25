@@ -55,16 +55,19 @@
 	$ go install -v github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest
 ```
 
-## 九、创建git，发布到github
-- 项目目录下 `go mod init github.com/ahwhy/myGolang`
-- `git init`
+## 九、创建git，发布到GitHub
+- [git 下载地址](https://git-scm.com/downloads)
+- 项目目录下，初始化 go 项目 `go mod init github.com/ahwhy/myGolang`
+- 初始化 git 仓库 `git init`
 - 添加 .gitignore 文件去掉一些和代码无关的文件/文件夹
+- `git config --global user.email "ahwhya@outlook.com"`
 - `git add . && git commit -m "Record me learning golang" --author "ahwhya <ahwhya@outlook.com>"`
 - github上新建一个仓库
 - 推送到远程
 - 上传tag
 	- 通过tag可以返回到项目的特定状态下，可以将tag看作是在大量commit中设定的书签
 	- [git中tag与release的创建以及两者的区别](https://www.jianshu.com/p/79ecf4fe5079)
+- [回滚到某一次 commit](https://blog.csdn.net/ppzzgg666/article/details/145404369)
 ```shell
 	# 推送到远程
 	# or push an existing repository from the command line
@@ -80,6 +83,13 @@
 	git tag -a v0.0.2 -m "updata"
 	git push origin --tags
 	git push -u origin --tags v0.0.2
+
+	# 软重置(保留工作目录中的更改)
+	git reset --soft {commit}
+	# 硬重置(删除工作目录中的更改)
+	git reset --hard {commit}
+	# 强制推送到远程仓库
+	git push --force
 ```
 
 ## 十、常用内建库与函数  
