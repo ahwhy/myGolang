@@ -138,6 +138,7 @@
 - 一个字符串是一个不可改变的字节序列
 	- 字符串可以包含任意的数据，包括byte值0，但是通常是用来包含人类可读的文本
 	- 文本字符串通常被解释为采用UTF8编码的Unicode码点(rune)序列
+	- 字符串在内存中使用utf-8，而 rune 输出是 unicode
 
 - 内置的len函数可以返回一个字符串中的字节数目(不是rune字符数目)
 	- 索引操作s[i]返回第i个字节的字节值，i必须满足0 ≤ i< len(s)条件约束
@@ -292,6 +293,35 @@
 		}
 		fallthrough // 此时switch会执行case3和case4，但是如果满足if条件，则只执行case3
 	case var6 :
+		...
+	default:
+		...
+	}
+
+	switch /* 这没有东西 bool true */ { 
+	case a > 100: // case bool
+		...
+	case a < 0:
+		...
+	default:
+		...
+	}
+
+	switch a := 50; /* 这没有东西 bool true */ { 
+	case a > 100: // case bool
+		...
+	case a < 0:
+		...
+	default:
+		...
+	}
+
+	switch a := 50; a {  // 待比较的是 a
+	case 100: // case bool
+		...
+	case 60, 50, 40, 30:
+		...
+	case 0:
 		...
 	default:
 		...

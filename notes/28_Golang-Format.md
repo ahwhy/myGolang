@@ -43,6 +43,11 @@
 	%U : Unicode 字符, Unicode格式: 123，等同于 "U+007B"    // %#U 带字符的 Unicode 码点
 	%q : 该值对应的双引号括起来的go语法字符串字面值，必要时会采用安全的转义表示
 ```
+```golang
+	var a int64 = 50
+	// string 2, int32 50, float32 50.000000
+	fmt.Printf("%T %[1]v, %T %[2]v, %T %[3]v", string(a), rune(a), float32(a))
+```
 
 - 浮点型
 ```
