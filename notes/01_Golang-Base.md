@@ -399,6 +399,21 @@
 		fmt.Println()
 	}
 
+	// 间隔更均匀
+	var width int // 零值
+	for i := 1; i < 10; i++ {
+		for j := 1; j <= i; j++ {
+			if j == 1 {
+				width = 2
+			} else {
+				width = 3
+			}
+			// fmt.Printf("%d*%d=%-[4]*[3]d", j, i, i*j, width)
+			fmt.Printf("%d*%d=%-[3]*d", j, i, width, i*j)
+		}
+		fmt.Println()
+	}
+
 	// 倒三角
 	for i := 1; i < 10; i++ {
 		for j := 1; j < i; j++ {
@@ -435,6 +450,39 @@
 		i++
 	}
 	fmt.Println(sum)
+```
+
+- 随机生成 100 以内的 20 个非 0 正整数，打印出来。对生成的数值，第单数个（不是索引）累加求和，第偶数个累乘求积。
+```golang
+	limiter := 20
+	var (
+		sum            = 0
+		product uint64 = 1
+	)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < limiter; i++ {
+		v := r.Intn(99) + 1 // [0, 99) + 1 ---> [0, 99]
+		fmt.Println(i, v)
+		if i&1 == 0 { // i %2 == 0 
+			sum += v
+		} else {
+			product *= uint64(v) // v:int, product:uint64
+		}
+	}
+	fmt.Println(sum, product)
+```
+
+- 斐波那契数列: 0，1，1，2，3，5，8，13，21，34，55，89... 数列从第3项开，每一项都等于前两项之和。
+```golang
+	a, b := 1, 1
+	fmt.Println(a, b)
+	for {
+		a, b = b, a + b
+		if b > 100 {
+			break
+		}
+		fmt.Println(b)
+	}
 ```
 
 
