@@ -660,11 +660,52 @@
 
 - 增加元素 
 	- 使用append函数对切片增加一个或多个元素并返回修改后切片，当长度在容量范围内时只增加长度，容量和底层数组不变。
-	- 当长度超过容量范围则会创建一个新的底层数组并对容量进行智能运算(元素数量<1024时，约按原容量1倍增加，>1024时约按原容量0.25倍增加)
+	- 当长度超过容量范围则会创建一个新的底层数组并对容量进行智能运算
+		- 老版本: Cap<1024 时，容量变成之前2倍；Cap>=1024时，容量变成之前1.25倍
+		- 1.18版本后: 阈值`threshold`变成了256，Cap<256 时，容量变成之前2倍；Cap>=256时，参考`newcap += (newcap + 3*threshold) >> 2`，为`newcap = newcap + (newcap + 3*threshold) / 4 = newcap + newcap / 4 + 192 `，即1.25倍后再加192
+	- 切片频繁扩容成本非常高，所以尽量早估算出使用的大小，可以用`make`函数初始化足够容量的切片。
 ```go
+	// 通过 append 添加元素
 	append(slice, 1, 2, ...,n)  
-	// 移除元素 
+	// 通过 append 移除元素 
 	append(slince[:n-1], slince[n+1]...)
+
+	// slice 扩容逻辑
+	// https://go.dev/src/runtime/slice.go
+	// nextslicecap computes the next appropriate slice length.
+	func nextslicecap(newLen, oldCap int) int {
+		newcap := oldCap
+		doublecap := newcap + newcap
+		if newLen > doublecap {
+			return newLen
+		}
+
+		const threshold = 256
+		if oldCap < threshold {
+			return doublecap
+		}
+		for {
+			// Transition from growing 2x for small slices
+			// to growing 1.25x for large slices. This formula
+			// gives a smooth-ish transition between the two.
+			newcap += (newcap + 3*threshold) >> 2
+
+			// We need to check `newcap >= newLen` and whether `newcap` overflowed.
+			// newLen is guaranteed to be larger than zero, hence
+			// when newcap overflows then `uint(newcap) > uint(newLen)`.
+			// This allows to check for both with the same comparison.
+			if uint(newcap) >= uint(newLen) {
+				break
+			}
+		}
+
+		// Set newcap to the requested cap when
+		// the newcap calculation overflowed.
+		if newcap <= 0 {
+			return newLen
+		}
+		return newcap
+	}	
 ```
 
 - 复制切片
@@ -1630,7 +1671,8 @@ type hmap struct {
 			- 内存消耗是一致的
 	- 类型
 		- 值类型的都是深拷贝 `int、float、bool、array、struct`
-		- 引用类型都是浅拷贝 `slice、map、function`
+		- 引用类型都是浅拷贝 `slice、channel、map、function`
+	- Go 语言中全都是值传递，整型、数值这样的类型的值是完全复制，`slice`、`map`、`channel`、`interface`、`function`这样的应用类型也是值拷贝，只不过他们复制的是标头值。
 
 - new和make对比
 	- new 开辟一个类型对应的内存空间，返回一个内存空间的地址；且只能分配地址，一般用于基础类型的初始化；
