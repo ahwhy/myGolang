@@ -164,12 +164,15 @@
 
 - `+` 操作符将两个字符串链接构造一个新字符串
 
-- byte 和 rune
-	- string 中每个元素叫"字符"，字符有两种
-		- byte: 1个字节，代表 ASCLL码 的一个字符
-		- rune: 4个字节，代表一个 UTF-8字符，一个汉字可用一个 rune 表示
-	- string 底层是byte数组，string的长度就是该byte数组的长度，UTF-8 编码下一个汉字占 3个byte，即一个汉字占3个长度
-	- string 可以转换为 []byte 或 []rune 类型
+- `byte` 和 `rune`
+	- string 中每个元素叫 "字符"，字符有两种
+		- byte: 兼容 ASCLL 码的字符，是 byte 类型，即 uint8 的别名，占用 1 个字节
+		- rune: 汉字等字符，unicode，是 rune 类型，即 int32 的别名，占用 4 个字节
+	- string 底层是 byte 数组，string 的长度就是该 byte 数组的长度，UTF-8 编码下一个汉字占 3 个 byte，即一个汉字占 3 个长度
+		- UTF-8 为目前互联网上使用最广泛的一种 Unicode 的编码方式，最大特点就是可变长
+		- 用`len()`可以查询 string 长度
+		- golang 中 len 只看字节数，其他语言 len 是看字符数
+	- string 可以转换为 `[]byte` 或 `[]rune` 类型x
 
 - 强制类型转换
 	- byte  和 int 可以相互转换

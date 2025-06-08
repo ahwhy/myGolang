@@ -47,19 +47,60 @@
 - `+` 操作符将两个字符串链接构造一个新字符串
 
 - `byte` 和 `rune`
-	- string 中每个元素叫"字符"，字符有两种
-		- byte 1个字节，代表 ASCLL码 的一个字符
-		- rune 4个字节，代表一个 UTF-8字符，一个汉字可用一个 rune 表示
-	- string 底层是byte数组，string的长度就是该byte数组的长度，UTF-8 编码下一个汉字占 3个byte，即一个汉字占3个长度
+	- string 中每个元素叫 "字符"，字符有两种
+		- byte: 兼容 ASCLL 码的字符，是 byte 类型，即 uint8 的别名，占用 1 个字节
+		- rune: 汉字等字符，unicode，是 rune 类型，即 int32 的别名，占用 4 个字节
+	- string 底层是 byte 数组，string 的长度就是该 byte 数组的长度，UTF-8 编码下一个汉字占 3 个 byte，即一个汉字占 3 个长度
+		- UTF-8 为目前互联网上使用最广泛的一种 Unicode 的编码方式，最大特点就是可变长
+		- 用`len()`可以查询 string 长度
+		- golang 中 len 只看字节数，其他语言 len 是看字符数
 	- string 可以转换为 `[]byte` 或 `[]rune` 类型
-	- '0' 则表示0的字节
+```golang
+	// rune 类型字面量 rune int32
+	// 单引号定义，使用的是 Unicode 码点(整数)
+	// 只能放一个字符，多了报错：more than one character in rune literal
+	// 没有长度，不是容器，所以不能用 len
+	// 报错：invalid argument: s1 (variable of type rune) for len
+	s1 := 'a'         // rune 4bytes 
+	var s2 byte = 'a' // 1bytes
+	s3 := '0'         // 表示 0 的字节
+	s4 := '测'        // rune 4bytes unicode 
+
+	// 字符串字面量 string
+	// 线性数据结构，可以索引
+	// UTF-8 编码的字节序列，不可变
+	// 双引号定义
+	s5 := "abc"          // 3 len，3 bytes，616263(ASCLL)
+	s6 := "测试"          // 6 len，6 bytes，UTF-8
+	fmt.Println(s5, s6)  // 3 6
+	
+	// string 有序字节序列
+	t1 := []byte(s5)                                   // []byte(x) 强制类型转换; []byte{x} byte切片字面量的定义
+	fmt.Println(t1, len(t1), cap(t1), &t1[0], &t1[1])  // [97 98 99] 3 8 0xc0000a6018 0xc0000a6019 偏移量offset 1byte
+	t2 := []rune(s5)
+	fmt.Println(t2, len(t2), cap(t2), &t2[0], &t2[1])  // [97 98 99] 3 4 0xc0000a6040 0xc0000a6044 偏移量offset 4byte
+
+	t3 := []byte(s6)                                   // UTF-8 编码的字节序列
+	fmt.Println(t3, len(t3))                           // [230 181 139 232 175 149] 6
+	t4 := []rune(s6)                                   // 强制转换为 rune，即 [rune rune] Unicode; UTF-8序列 --> Unicode序列 [27979 35797]
+	fmt.Println(t4, len(t4))                           // [27979 35797] 2 
+
+	fmt.Println(s5[0], s5[1], s5[2])                   // []byte，其中一个byte uint8  输出结果:  97 98 99
+	fmt.Println(string([]byte{0x61, '\x62', 0x63}))    // byte sequence --> UTF-8 string sequence  输出结果: abc
+
+	fmt.Println(s6[0], s6[1], s6[2])                   // []byte，其中一个byte uint8  输出结果:  230 181 139
+	fmt.Println(string(27979), string(35797))          // string(Unicode码)  输出结果: 测 试
+	fmt.Println(string([]rune{27979, 35797}))          // Unicode序列 --> UTF-8序列 string  输出结果: 测试
+	fmt.Println([]byte{230 181 139 232 175 149})       // 输出结果: 测试
+``` 
 
 - 强制类型转换
 	- `byte`  和 `int` 可以相互转换
-	- `float` 和 `int` 可以相互转换，小数位会丢失
+	- `float` 和 `int` 可以相互转换，小数位会丢失(float到int会丢失精度)
 	- `boot`  和 `int` 不可以相互转换
 	- 不同长度的 `int` 和 `float` 之间可以相互转换
 	- `string` 可以转换为 `[]byte` 或 `[]rune` 类型，`byte` 或 `rune` 类型可以转换为 `string`
+	- `boot` 和 `int` 不能相互转换
 	- 低精度向高精度转换没有问题，高精度向低精度转换会丢失位数
 	- 无符号向有符号转换，最高位是无符号
 
@@ -82,17 +123,33 @@
 	- ASCII (American Standard Code for Information Interchange)
 	- 美国信息交换标准代码是基于拉丁字母的一套电脑编码系统，主要用于显示现代英语和其他西欧语言，即英文和数字
 	- [Go语言字符串的字节长度和字符个数](https://blog.csdn.net/qq_39397165/article/details/116178566)
+	- 常见特殊字符
+
+	|序号|转义字符|十进制数|说明|
+	|:------:|:------:|:------:|:------:|
+	|1|\x00|0|null字符，表中第一项，C语言中的字符串结束符|
+	|2|\x09 \t|9|tab字符|
+	|3|\x0d\x0a \r\n|13 10|回车和换行|
+	|4|\x30~\x39|48～57|字符0～9|
+	|5|\x31|49|字符1|
+	|6|\x41|65|字符A|
+	|7|\x61|97|字符a|
 
 - Unicode 
-	- 称为Unicode字符集或者万国码, 就是将全球所有语言的字符通过编码
+	- 一个字符集标准，它为全球所有语言的字符分配唯一的数字(称为 码点，Code Point)
+		- 'A' 对应码点 U+0041
+		- '汉' 对应码点 U+6C49
+		- `104 -> h`，`101 ->e` (数字 -> 字符 的映射机制，兼容ASCII编码)，即利用一个数字即可表示一个字符
 	- 所有语言都统一到一套编码，本质就是一张大的码表
-	- 比如 `104 -> h`，`101 ->e` (数字 -> 字符 的映射机制，兼容ASCII编码)，即利用一个数字即可表示一个字符
+	- Unicode 本身不涉及编码方式，它只是定义了字符与码点的映射关系
 
 - UTF-8
-	- 目前互联网上使用最广泛的一种Unicode编码方式，最大特点就是可变长
-	- 可以使用多个字节表示一个字符，根据字符的不同变换长度
+	- UTF-8 是 Unicode 的一种 编码方式(Encoding)，它定义了如何将 Unicode 码点转换为二进制字节序列
+	- 目前互联网上使用最广泛的一种 Unicode 编码方式，特点就是兼容 ASCII 以及可变长
+	- 向后兼容 ASCII(ASCII 字符在 UTF-8 中仍用单字节表示)
 	- UTF-8编码中，一个英文为一个字节，一个中文为三个字节
 		- UTF-8使用变长字节编码，来表示这些Unicode码
+		- 可以使用多个字节表示一个字符，根据字符的不同变换长度，一个 Unicode 码点在 UTF-8 中可能占用 1~4 个字节。
 		- 编码规则如下
 			- 如果只有一个字节则其最高二进制位为0
 			- 如果是多字节，其第一个字节从最高位开始，连续的二进制位值为1的个数决定了其编码的位数，其余各字节均以10开头
@@ -105,8 +162,9 @@
 					|5字节|111110xx|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|
 					|6字节|1111110x|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|10xxxxxx|
 				- ascii码 本来就是7个bit表示，所以完全兼容
+			- 例如：'A'(U+0041)在 UTF-8 中占 1 字节；'汉'(U+6C49)占 3 字节
 	- Go语言
-		- Go语言里的字符串的内部实现使用UTF8编码. 默认rune类型
+		- 在 Golang 中，字符串以 UTF-8 编码存储，但处理 Unicode 字符时需使用 rune 类型和 utf8 包
 		- `uint8`(byte类型 ASCII) -> 0~127
 		- `int32`(rune类型 UTF-8) -> 128~0x10ffff;  
 		- Ascll使用下标遍历，Unicode使用`for range`遍历
@@ -125,7 +183,7 @@
 		- 如果 a 小于 b ，返回 -1 ，反之返回 1
 		- 不推荐使用这个函数，直接使用 == != > < >= <= 等一系列运算符更加直观
 	- EqualFold 函数
-		- 判断两个utf-8编码字符串（将unicode大写、小写、标题三种格式字符视为相同）是否相同
+		- 判断两个utf-8编码字符串(将unicode大写、小写、标题三种格式字符视为相同)是否相同
 ```go
 	func Compare(a, b string) int       // Compare
 	func EqualFold(s, t string) bool    // EqualFold
@@ -275,6 +333,13 @@
 	- 拼接性能较高
 		- `strings.Builder`
 		- `bytes.Buffer`
+```golang
+	var builder strings.Builder // 构建器
+	builder.Write([]byte(s1))
+	builder.WriteByte('-')
+	builder.WriteString(s2)
+	s3 := builder.String()
+```
 
 - 子串Count
 	- 返回count个s串联的字符串
@@ -312,8 +377,8 @@
 
 - Go语言的字符串可以包含任意字节，字符底层是一个只读的`byte`数组
 
-- Go语言中字符串可以进行循环，使用下表循环获取的 ASCII字符，使用`for range`循环获取的 Unicode字符
+- Go语言中字符串可以进行循环，使用下表循环获取的 ASCII字符，使用`for range`循环获取的 Unicode字符 或使用 `utf8.DecodeRuneInString`
 
 - Go语言中提供了`rune`类型用来区分字符值和整数值，一个值代表的就是一个 Unicode字符
 
-- Go语言中获取字符串的字节长度使用`len()`函数，获取字符串的字符个数使用`utf8.RuneCountInString`函数或者转换为rune切片求其长度，这两种方法都可以达到预期结果。
+- Go语言中获取字符串的字节长度使用`len()`函数，获取字符串的字符个数使用`utf8.RuneCountInString`函数或者转换为 `[]rune` 切片求其长度，这两种方法都可以达到预期结果。
