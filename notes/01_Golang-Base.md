@@ -807,28 +807,41 @@
 		- 相对而言的数组，完整型数据结构
 	- map删除数据时存在延迟，所以最好不作为内存存储
 ```go
-// A header for a Go map.
-type hmap struct {
-    // 元素个数，调用 len(map) 时，直接返回此值
-    count     int
-    flags     uint8
-    // buckets 的对数 log_2
-    B         uint8
-    // overflow 的 bucket 近似数
-    noverflow uint16
-    // 计算 key 的哈希的时候会传入哈希函数
-    hash0     uint32
-    // 指向 buckets 数组，大小为 2^B
-    // 如果元素个数为0，就为 nil
-    buckets    unsafe.Pointer
-    // 扩容的时候，buckets 长度会是 oldbuckets 的两倍
-    oldbuckets unsafe.Pointer
-    // 指示扩容进度，小于此地址的 buckets 迁移完成
-    nevacuate  uintptr
-    extra *mapextra // optional fields
-}
+	// map 源码
+	// A header for a Go map.
+	type hmap struct {
+		// 元素个数，调用 len(map) 时，直接返回此值
+		count     int
+		flags     uint8
+		// buckets 的对数 log_2
+		B         uint8
+		// overflow 的 bucket 近似数
+		noverflow uint16
+		// 计算 key 的哈希的时候会传入哈希函数
+		hash0     uint32
+		// 指向 buckets 数组，大小为 2^B
+		// 如果元素个数为0，就为 nil
+		buckets    unsafe.Pointer
+		// 扩容的时候，buckets 长度会是 oldbuckets 的两倍
+		oldbuckets unsafe.Pointer
+		// 指示扩容进度，小于此地址的 buckets 迁移完成
+		nevacuate  uintptr
+		extra *mapextra // optional fields
+	}
+
+	// map 声明
+	// 指针、切片、map、channel、函数、接口 引用类型的零值就是 nil
+	var m1 map[init]string  // 零值不可用，m1 为 nil 
 ```
 
+- 零值与nil
+
+	|类型|零值|是否等于 nil|说明|
+	|:------:|:------:|:------:|:------:|
+	|数值、布尔、字符串|0、false、""|否|基本类型的零值不是 nil|
+	|指针、切片、map、channel、函数、接口|是|new返回指针|引用类型的零值是 nil|
+	|结构体|字段零值组成的实例|否|非指针结构体的零值不是 nil|
+	|接口（特殊情况）|(nil, 0)|是|动态类型和值都为零值时等于 nil，否则不等于 nil|
 
 - Go语言中只要是可比较的类型都可以作为 key，除开 slice，map，functions 这几种类型，其他类型都是 OK 的 
 	- 具体包括: 布尔值、数字、字符串、指针、通道、接口类型、结构体、只包含上述类型的数组
