@@ -488,6 +488,37 @@
 	}
 ```
 
+- 打印如下图形
+```
+                1
+              2 1
+            3 2 1
+          4 3 2 1
+        5 4 3 2 1
+      6 5 4 3 2 1
+    7 6 5 4 3 2 1
+  8 7 6 5 4 3 2 1
+9 8 7 6 5 4 3 2 1
+```
+```golang
+	last := ""
+	for i := n; i >= 1; i-- {
+		if i == 1 {
+			last += fmt.Sprint(i)
+		} else {
+			last += fmt.Sprintf("%d ",i)
+		}
+	}
+		
+	width := len(last)  // max index = width - 1 
+	for i := width - 1; i >= 0; i-- {
+		if last[i] == 32 {
+			fmt.Printf("%*s\n", width, last[i+1:]) // 同 fmt.Printf("%[1]*[2]s\n", width, last[i+1:])
+		}
+	}
+	fmt.Println(last)
+```
+
 
 ## 五、复合数据类型
 
