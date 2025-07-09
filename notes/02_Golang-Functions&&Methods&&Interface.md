@@ -688,3 +688,47 @@
 		}
 	}
 ```	
+
+## 九、Golong的泛型 Generics
+
+- 泛型 Generics
+	- 需要 [golang 1.18+](https://go.dev/blog/go1.18)
+	- 通过 类型参数啊(type parameters)和 类型约束(constraints)实现，允许开发者编写可复用、类型安全的通用代码
+	- [Tutorial: Getting started with generics](https://go.dev/doc/tutorial/generics)
+```golang
+	// T 就是可以变的标识符，指代某一种未来给出的类型，类型形参
+	// T 有限制，函数标识符后面用[]
+	// int|string 对 类型形参 的约束，称为类型約束
+	// [T int | string | float64, E int] 类型参数列表
+	// add 就是泛型函数
+	// add(4，5）等价于 add[int](4，5)，而 [int] 可以用后面实际的实参推断，可以省略
+	// int 就是类型形参对应输入的类型实参
+	// add[int] 是类型参数的实例化
+	// 
+	func add[T int | string | float32 | float64](x, y T) T {
+		return x + y
+	}
+
+	// any没有类型限制
+	// type any = interface{}
+	func add[T any](x, y T) T  
+	// 需要对 x, y 进行断言 ---> switch x.(type) 
+
+	// 泛型 和 接口
+	type Runner interface {
+		run()
+	}
+
+	// var m = make(map[string]int)
+	// value 类型可以是 int string float64，可以用 any，接收一个数据赋值给接口，通过类型断言判断类型
+	type MyMap[K int | string, V Runner] map[K]V
+
+	// 类型新定义
+	type MyStr string
+
+	func (s Mystr) run()
+
+	// 泛型类型实例化
+	var d = MyMap[int, MyStr]{}
+	d[100] = "100"
+ ```
